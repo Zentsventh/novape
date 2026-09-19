@@ -11,7 +11,7 @@ class Envio extends Model
     protected $table = 'envio';
     public $timestamps = false;
 
-    protected $fillable = ['pedido_id', 'direccion_id', 'estado', 'tracking'];
+    protected $fillable = ['pedido_id', 'direccion_id', 'estado', 'proveedor', 'rate_id', 'tracking', 'transaction_id', 'label_url'];
 
     public function pedido(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {

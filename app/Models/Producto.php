@@ -26,6 +26,7 @@ class Producto extends Model
         'marca_id',
         'proveedor_id',
         'activo',
+        'tipo_afectacion_igv',
         'garantias',
         'sku_base'
     ];

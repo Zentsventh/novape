@@ -184,18 +184,36 @@ class CheckoutService
         });
     }
 
-    public function processSuccessfulPayment(string $codigoPedido, float $montoPagado): bool
+    public function processSuccessfulPayment(string $codigoPedido, float $montoPagado, ?string $paymentIntentId = null): bool
     {
-        return DB::transaction(function () use ($codigoPedido, $montoPagado) {
+        return DB::transaction(function () use ($codigoPedido, $montoPagado, $paymentIntentId) {
             $pedido = Pedido::with('items')->where('codigo', $codigoPedido)->lockForUpdate()->first();
 
             if ($pedido && $pedido->estado === 'Pendiente') {
                 if (abs($montoPagado - $pedido->total) > 0.01) {
                     Log::warning("Webhook Stripe: Monto pagado ($montoPagado) no coincide con total del pedido {$pedido->codigo} ({$pedido->total}).");
+                    
+                    \App\Models\TransaccionPago::create([
+                        'pedido_id' => $pedido->id,
+                        'payment_intent_id' => $paymentIntentId,
+                        'pasarela' => 'stripe',
+                        'monto' => $montoPagado,
+                        'estado' => 'fallido',
+                        'error_message' => 'Monto inválido'
+                    ]);
+
                     throw new \Exception('Monto inválido');
                 }
 
                 $pedido->update(['estado' => 'Pagado']);
+
+                \App\Models\TransaccionPago::create([
+                    'pedido_id' => $pedido->id,
+                    'payment_intent_id' => $paymentIntentId,
+                    'pasarela' => 'stripe',
+                    'monto' => $montoPagado,
+                    'estado' => 'exitoso'
+                ]);
 
                 if ($pedido->cupon_id) {
                     Cupon::where('id', $pedido->cupon_id)->increment('usos_actuales');
@@ -240,12 +258,9 @@ class CheckoutService
                     }
                 }
 
-                try {
-                    $sunatService = new SunatService();
-                    $sunatService->emitirComprobante($pedido);
-                } catch (\Exception $e) {
-                    Log::error("Error emitiendo comprobante SUNAT para pedido {$pedido->codigo}: ".$e->getMessage());
-                }
+                DB::afterCommit(function () use ($pedido) {
+                    \App\Jobs\ProcessSunatInvoiceJob::dispatch($pedido);
+                });
 
                 return true;
             }

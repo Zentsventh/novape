@@ -111,15 +111,7 @@ class StripePaymentController extends Controller
 
             if ($event->type == 'payment_intent.succeeded') {
                 $paymentIntent = $event->data->object;
-                $codigoPedido = $paymentIntent->metadata->codigo_pedido ?? null;
-                $montoSoles = $paymentIntent->amount / 100;
-
-                if ($codigoPedido) {
-                    $changed = $this->checkoutService->processSuccessfulPayment($codigoPedido, $montoSoles);
-                    if ($changed) {
-                        $this->checkoutService->finalizeSuccessAction($codigoPedido, $paymentIntent->metadata->email ?? null);
-                    }
-                }
+                \App\Jobs\ProcessStripeWebhookJob::dispatch($paymentIntent->toArray());
             }
 
             return response('Webhook Handled', 200);

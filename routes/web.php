@@ -4,7 +4,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\InvoiceController;
-use App\Http\Controllers\InventarioController;
+use App\Http\Controllers\Admin\InventarioController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AnaliticasController;
 use App\Http\Controllers\PageController;
@@ -334,4 +334,31 @@ Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
         Route::put('/{id}', 'update')->name('admin.roles.update');
         Route::delete('/{id}', 'destroy')->name('admin.roles.destroy');
     });
+
+    // ==========================================
+    // OMNICHANNEL INBOX
+    // ==========================================
+    Route::get('/inbox', [\App\Http\Controllers\Admin\Omnichannel\InboxController::class, 'index'])->name('admin.inbox');
+
+    // API del Inbox (JSON, usadas por React via fetch)
+    Route::prefix('api/omnichannel')->group(function () {
+        Route::get('/conversations', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'conversations']);
+        Route::get('/conversations/{conversation}/messages', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'messages']);
+        Route::post('/conversations/{conversation}/messages', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'sendMessage']);
+        Route::post('/conversations/{conversation}/assign', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'assignAgent']);
+        Route::post('/conversations/{conversation}/unassign', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'unassignAgent']);
+        Route::post('/conversations/{conversation}/resolve', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'resolveConversation']);
+        Route::post('/conversations/{conversation}/notes', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'addInternalNote']);
+        Route::get('/conversations/{conversation}/contact-profile', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'contactProfile']);
+        Route::get('/canned-responses', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'cannedResponses']);
+    });
 });
+
+// ==========================================
+// WEBHOOKS OMNICHANNEL (Público — sin auth)
+// ==========================================
+Route::prefix('api/webhooks')->group(function () {
+    Route::get('/whatsapp', [\App\Http\Controllers\Api\Omnichannel\WhatsAppWebhookController::class, 'verify']);
+    Route::post('/whatsapp', [\App\Http\Controllers\Api\Omnichannel\WhatsAppWebhookController::class, 'handle']);
+});
+

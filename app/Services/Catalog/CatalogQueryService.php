@@ -50,18 +50,20 @@ class CatalogQueryService
                 ->map(fn($prod) => $this->formatProducto($prod));
         });
 
-        $now = now()->toDateTimeString();
-        $banners = DB::table('banners')
-            ->where('activo', 1)
-            ->where('posicion', 'hero')
-            ->where(function($q) use ($now) {
-                $q->whereNull('fecha_inicio')->orWhere('fecha_inicio', '<=', $now);
-            })
-            ->where(function($q) use ($now) {
-                $q->whereNull('fecha_fin')->orWhere('fecha_fin', '>=', $now);
-            })
-            ->orderBy('orden')
-            ->get();
+        $banners = Cache::remember('home_banners', 3600, function () {
+            $now = now()->toDateTimeString();
+            return DB::table('banners')
+                ->where('activo', 1)
+                ->where('posicion', 'hero')
+                ->where(function($q) use ($now) {
+                    $q->whereNull('fecha_inicio')->orWhere('fecha_inicio', '<=', $now);
+                })
+                ->where(function($q) use ($now) {
+                    $q->whereNull('fecha_fin')->orWhere('fecha_fin', '>=', $now);
+                })
+                ->orderBy('orden')
+                ->get();
+        });
 
         return [
             'categoriaProductos' => $categoriaProductos,
@@ -80,12 +82,14 @@ class CatalogQueryService
         $searchQuery = $filters['q'] ?? null;
         $sort = $filters['sort'] ?? 'relevancia';
 
-        $categorias = Categoria::whereNull('categoria_padre_id')
-            ->where(function ($q) {
-                $q->whereNotIn('slug', ['cyber-bombas', 'retiro-inmediato'])->orWhereNull('slug');
-            })
-            ->with('subcategorias')
-            ->get();
+        $categorias = Cache::remember('catalog_categorias_base', 3600, function () {
+            return Categoria::whereNull('categoria_padre_id')
+                ->where(function ($q) {
+                    $q->whereNotIn('slug', ['cyber-bombas', 'retiro-inmediato'])->orWhereNull('slug');
+                })
+                ->with('subcategorias')
+                ->get();
+        });
 
         $query = Producto::where('activo', 1)->with(['marca', 'variantes', 'imagenes', 'categorias']);
 
