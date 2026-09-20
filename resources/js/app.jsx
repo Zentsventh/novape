@@ -6,6 +6,7 @@ import { ConfirmProvider } from '@/Contexts/ConfirmContext';
 import { DeviceProvider, useDeviceContext } from '@/Contexts/DeviceContext';
 import '../css/home/chatbot.css';
 import '../css/home/responsive.css';
+import './echo';
 
 /* Wrapper global que muestra el ChatBot en páginas públicas (no admin). */
 function GlobalLayout({ children, pageName = '', serverHints = {} }) {

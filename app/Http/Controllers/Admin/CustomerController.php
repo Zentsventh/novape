@@ -16,6 +16,10 @@ use App\Models\Rol;
 
 class CustomerController extends Controller
 {
+    public function apiProfile(int $id, \App\Services\GetCustomerProfileService $profileService): \Illuminate\Http\JsonResponse
+    {
+        return response()->json($profileService->execute($id));
+    }
     public function __construct(
         private readonly UserManagementService $userService
     ) {}
@@ -24,6 +28,21 @@ class CustomerController extends Controller
     {
         $filtros = $request->only('buscar');
         $clientes = $this->userService->getCustomers($filtros);
+
+        $clientes->getCollection()->transform(function ($customer) {
+            $orderCount = $customer->pedidos_count ?? 0;
+            $segmento = 'Activo';
+            $color = '#3b82f6';
+            if ($orderCount === 0) {
+                $segmento = 'Prospecto';
+                $color = '#64748b';
+            } elseif ($orderCount >= 5) {
+                $segmento = 'VIP';
+                $color = '#eab308';
+            }
+            $customer->segmento = ['nombre' => $segmento, 'color' => $color];
+            return $customer;
+        });
 
         return Inertia::render('Admin/Clientes/Index', [
             'clientes' => $clientes,
@@ -86,9 +105,17 @@ class CustomerController extends Controller
 
     public function show(int $id)
     {
-        $cliente = Usuario::with(['notas' => function ($q) {
-            $q->with('autor')->orderBy('created_at', 'desc');
-        }])->findOrFail($id);
+        $cliente = Usuario::with([
+            'notas' => function ($q) {
+                $q->with('autor')->orderBy('created_at', 'desc');
+            },
+            'crmDeals' => function ($q) {
+                $q->with('stage')->orderBy('created_at', 'desc');
+            },
+            'omnichannelContacts.conversations' => function ($q) {
+                $q->orderBy('last_message_at', 'desc');
+            }
+        ])->findOrFail($id);
 
         $pedidos = $cliente->pedidos()->orderBy('id', 'desc')->limit(10)->get();
         $cliente->setRelation('pedidos', $pedidos);

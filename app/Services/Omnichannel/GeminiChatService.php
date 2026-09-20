@@ -10,17 +10,24 @@ use Illuminate\Support\Facades\Log;
 class GeminiChatService
 {
     protected string $apiKey;
-    protected string $baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/';
+    protected string $baseUrl;
 
     public function __construct()
     {
-        $this->apiKey = config('omnichannel.gemini.api_key');
+        $this->apiKey = config('omnichannel.gemini.api_key', '');
+        $this->baseUrl = config('omnichannel.gemini.base_url', 'https://generativelanguage.googleapis.com/v1beta/models/');
     }
 
     /**
      * Genera una respuesta con Gemini Flash, incluyendo function calling para transferencia a humano.
+     *
+     * SIEMPRE retorna un array con claves: type, data, tokens, duration_ms
+     *  - type: 'text' | 'functionCall' | 'error'
+     *  - data: string (texto) | array (function call data) | string (mensaje de error)
+     *  - tokens: int
+     *  - duration_ms: int
      */
-    public function generateResponse(string $systemPrompt, array $history, string $newMessage, float $temperature = 0.7): array|string
+    public function generateResponse(string $systemPrompt, array $history, string $newMessage, float $temperature = 0.7): array
     {
         $contents = [];
 
@@ -53,12 +60,13 @@ class GeminiChatService
             'generationConfig' => ['temperature' => $temperature],
         ];
 
-        $url = $this->baseUrl . 'gemini-flash-latest:generateContent?key=' . $this->apiKey;
+        $model = config('omnichannel.gemini.model', 'gemini-flash-latest');
+        $url = $this->baseUrl . $model . ':generateContent?key=' . $this->apiKey;
 
         try {
             $startTime = microtime(true);
-            $response = Http::post($url, $payload);
-            $durationMs = round((microtime(true) - $startTime) * 1000);
+            $response = Http::timeout(30)->post($url, $payload);
+            $durationMs = (int) round((microtime(true) - $startTime) * 1000);
 
             if ($response->successful()) {
                 $data = $response->json();
@@ -85,10 +93,20 @@ class GeminiChatService
             }
 
             Log::error('Gemini API Error', ['status' => $response->status(), 'body' => $response->body()]);
-            return "Lo siento, en este momento estoy teniendo problemas. Por favor intenta más tarde.";
+            return [
+                'type' => 'error',
+                'data' => 'Lo siento, en este momento estoy teniendo problemas. Por favor intenta más tarde.',
+                'tokens' => 0,
+                'duration_ms' => $durationMs,
+            ];
         } catch (\Exception $e) {
             Log::error('Gemini API Exception', ['message' => $e->getMessage()]);
-            return "Lo siento, el asistente no está disponible en este momento.";
+            return [
+                'type' => 'error',
+                'data' => 'Lo siento, el asistente no está disponible en este momento.',
+                'tokens' => 0,
+                'duration_ms' => 0,
+            ];
         }
     }
 }

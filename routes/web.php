@@ -182,6 +182,34 @@ Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
         Route::get('/buscar', 'globalSearch')->name('admin.buscar');
     });
 
+    Route::controller(\App\Http\Controllers\Admin\CrmDashboardController::class)->prefix('crm')->group(function () {
+        Route::get('/dashboard', 'index')->name('admin.crm.dashboard');
+    });
+
+    Route::controller(\App\Http\Controllers\Admin\CrmTaskController::class)->prefix('crm')->group(function () {
+        Route::get('/tasks', 'index')->name('admin.crm.tasks');
+        Route::post('/tasks/{activity}/complete', 'complete')->name('admin.crm.tasks.complete');
+    });
+
+    Route::controller(\App\Http\Controllers\Admin\CrmPipelineController::class)->prefix('crm')->group(function () {
+        Route::get('/pipeline', 'index')->name('admin.crm.pipeline');
+        Route::put('/deals/{id}/move', 'moveDeal')->name('admin.crm.deals.move');
+        Route::get('/deals/{id}', 'show')->name('admin.crm.deals.show');
+        Route::post('/deals/{id}/activities', 'storeActivity')->name('admin.crm.deals.activities.store');
+        
+        // Cotizador Integrado
+        Route::post('/deals/{id}/products', 'addProduct')->name('admin.crm.deals.products.add');
+        Route::delete('/deals/{id}/products/{productId}', 'removeProduct')->name('admin.crm.deals.products.remove');
+        Route::get('/deals/{id}/quote', 'generateQuote')->name('admin.crm.deals.quote');
+    });
+
+    // Marketing Cloud
+    Route::controller(\App\Http\Controllers\Admin\MarketingCampaignController::class)->prefix('marketing')->group(function () {
+        Route::get('/campaigns', 'index')->name('admin.marketing.campaigns');
+    });
+
+    Route::post('/clientes/{id}/notas', [\App\Http\Controllers\Admin\CustomerController::class, 'storeNota'])->name('admin.clientes.notas.store');
+
     Route::controller(AlmacenController::class)->prefix('almacenes')->group(function () {
         Route::get('/', 'index')->name('admin.almacenes.index');
         Route::post('/', 'store')->name('admin.almacenes.store');
@@ -304,6 +332,7 @@ Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
         Route::get('/create', 'create')->name('admin.clientes.create')->middleware('permiso:editar_usuario');
         Route::post('/', 'store')->name('admin.clientes.store')->middleware('permiso:editar_usuario');
         Route::get('/{id}', 'show')->name('admin.clientes.show')->middleware('permiso:usuarios.gestionar');
+        Route::get('/{id}/api-profile', 'apiProfile')->name('admin.clientes.api_profile')->middleware('permiso:usuarios.gestionar');
         Route::get('/{id}/edit', 'edit')->name('admin.clientes.edit')->middleware('permiso:editar_usuario');
         Route::put('/{id}', 'update')->name('admin.clientes.update')->middleware('permiso:editar_usuario');
         Route::delete('/{id}', 'destroy')->name('admin.clientes.destroy')->middleware('permiso:editar_usuario');
@@ -338,19 +367,23 @@ Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
     // ==========================================
     // OMNICHANNEL INBOX
     // ==========================================
-    Route::get('/inbox', [\App\Http\Controllers\Admin\Omnichannel\InboxController::class, 'index'])->name('admin.inbox');
+    Route::middleware(['permiso:gestionar_omnichannel'])->group(function () {
+        Route::get('/inbox', [\App\Http\Controllers\Admin\Omnichannel\InboxController::class, 'index'])->name('admin.inbox');
 
-    // API del Inbox (JSON, usadas por React via fetch)
-    Route::prefix('api/omnichannel')->group(function () {
-        Route::get('/conversations', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'conversations']);
-        Route::get('/conversations/{conversation}/messages', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'messages']);
-        Route::post('/conversations/{conversation}/messages', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'sendMessage']);
-        Route::post('/conversations/{conversation}/assign', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'assignAgent']);
-        Route::post('/conversations/{conversation}/unassign', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'unassignAgent']);
-        Route::post('/conversations/{conversation}/resolve', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'resolveConversation']);
-        Route::post('/conversations/{conversation}/notes', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'addInternalNote']);
-        Route::get('/conversations/{conversation}/contact-profile', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'contactProfile']);
-        Route::get('/canned-responses', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'cannedResponses']);
+        // API del Inbox (JSON, usadas por React via fetch)
+        Route::prefix('api/omnichannel')->group(function () {
+            Route::get('/conversations', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'conversations']);
+            Route::get('/conversations/{conversation}/messages', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'messages']);
+            Route::post('/conversations/{conversation}/messages', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'sendMessage'])->middleware('throttle:30,1');
+            Route::post('/conversations/{conversation}/assign', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'assignAgent']);
+            Route::post('/conversations/{conversation}/unassign', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'unassignAgent']);
+            Route::post('/conversations/{conversation}/resolve', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'resolveConversation']);
+            Route::post('/conversations/{conversation}/reopen', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'reopenConversation']);
+            Route::post('/conversations/{conversation}/transfer-to-bot', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'transferToBot']);
+            Route::post('/conversations/{conversation}/notes', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'addInternalNote']);
+            Route::get('/conversations/{conversation}/contact-profile', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'contactProfile']);
+            Route::get('/canned-responses', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'cannedResponses']);
+        });
     });
 });
 

@@ -9,14 +9,20 @@ use App\Models\Omnichannel\OmnichannelConversation;
 use App\Models\Omnichannel\OmnichannelMessage;
 use App\Models\Omnichannel\CannedResponse;
 use App\Services\Omnichannel\WhatsAppService;
+use App\Services\Omnichannel\MessengerService;
+use App\Services\Omnichannel\InstagramService;
 use App\Events\Omnichannel\ConversationUpdated;
 use App\Events\Omnichannel\NewMessageReceived;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class ConversationApiController extends Controller
 {
+    /**
+     * Listar conversaciones con filtros de canal, estado y búsqueda.
+     */
     public function conversations(Request $request)
     {
         $query = OmnichannelConversation::with(['contact', 'assignedUser'])
@@ -24,20 +30,21 @@ class ConversationApiController extends Controller
             ->orderBy('updated_at', 'desc');
 
         // Filtro por canal
-        if ($request->has('channel') && $request->channel !== 'all') {
+        if ($request->filled('channel') && $request->channel !== 'all') {
             $query->where('channel', $request->channel);
         }
 
         // Filtro por estado
-        if ($request->has('status') && $request->status !== 'all') {
+        if ($request->filled('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
         }
 
-        // Búsqueda por nombre de contacto
-        if ($request->has('search') && $request->search) {
-            $query->whereHas('contact', function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('phone_number', 'like', '%' . $request->search . '%');
+        // Búsqueda por nombre de contacto o teléfono
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('contact', function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('phone_number', 'like', '%' . $search . '%');
             });
         }
 
@@ -65,6 +72,9 @@ class ConversationApiController extends Controller
         return response()->json($conversations);
     }
 
+    /**
+     * Listar mensajes de una conversación y marcar como leídos.
+     */
     public function messages(Request $request, OmnichannelConversation $conversation)
     {
         // Marcar como leídos
@@ -76,28 +86,23 @@ class ConversationApiController extends Controller
             ->paginate(100);
 
         $messages->getCollection()->transform(function ($msg) {
-            return [
-                'id' => $msg->id,
-                'direction' => $msg->direction,
-                'messageType' => $msg->message_type,
-                'content' => $msg->content,
-                'mediaUrl' => $msg->media_url,
-                'mediaMimeType' => $msg->media_mime_type,
-                'time' => $msg->created_at->format('H:i'),
-                'status' => $msg->status,
-                'isInternalNote' => (bool) $msg->is_internal_note,
-                'isAiGenerated' => (bool) $msg->is_ai_generated,
-            ];
+            return $this->formatMessage($msg);
         });
 
         return response()->json($messages);
     }
 
-    public function sendMessage(Request $request, OmnichannelConversation $conversation, WhatsAppService $whatsapp)
+    /**
+     * Enviar un mensaje al cliente por el canal correspondiente.
+     */
+    public function sendMessage(Request $request, OmnichannelConversation $conversation)
     {
-        $request->validate(['content' => 'required|string|max:4096']);
+        $request->validate([
+            'content' => 'required|string|max:4096',
+        ]);
         $content = $request->input('content');
 
+        // Crear el mensaje en BD
         $message = OmnichannelMessage::create([
             'conversation_id' => $conversation->id,
             'contact_id' => $conversation->contact_id,
@@ -109,49 +114,33 @@ class ConversationApiController extends Controller
             'status' => 'queued',
         ]);
 
+        // Actualizar la conversación
         $conversation->update([
-            'last_message_preview' => substr($content, 0, 50),
+            'last_message_preview' => mb_substr($content, 0, 50),
             'last_message_at' => now(),
             'message_count' => DB::raw('message_count + 1'),
         ]);
 
-        // Enviar por WhatsApp
-        if ($conversation->channel === 'whatsapp' && $conversation->contact->phone_number) {
-            try {
-                $response = $whatsapp->sendTextMessage($conversation->contact->phone_number, $content);
-                if (isset($response['data']['messages'][0]['id'])) {
-                    $message->update([
-                        'external_message_id' => $response['data']['messages'][0]['id'],
-                        'status' => 'sent',
-                    ]);
-                }
-            } catch (\Exception $e) {
-                Log::error('INBOX_SEND_ERROR', ['msg' => $e->getMessage()]);
-                $message->update(['status' => 'failed', 'error_message' => $e->getMessage()]);
-            }
-        }
+        // Enviar por el canal correspondiente
+        $this->dispatchToChannel($conversation, $message, $content);
 
         broadcast(new NewMessageReceived($message))->toOthers();
         broadcast(new ConversationUpdated($conversation->refresh()))->toOthers();
 
         return response()->json([
             'success' => true,
-            'message' => [
-                'id' => $message->id,
-                'direction' => 'outbound',
-                'messageType' => 'text',
-                'content' => $message->content,
-                'time' => $message->created_at->format('H:i'),
-                'status' => $message->status,
-                'isInternalNote' => false,
-                'isAiGenerated' => false,
-            ],
+            'message' => $this->formatMessage($message),
         ]);
     }
 
+    /**
+     * Asignar un agente humano a la conversación.
+     */
     public function assignAgent(Request $request, OmnichannelConversation $conversation)
     {
-        $request->validate(['user_id' => 'required|integer']);
+        $request->validate([
+            'user_id' => 'required|integer|exists:usuario,id',
+        ]);
 
         $conversation->update([
             'assigned_user_id' => $request->input('user_id'),
@@ -161,10 +150,27 @@ class ConversationApiController extends Controller
             'bot_paused_by' => $request->user()->id,
         ]);
 
+        // Registrar nota interna de asignación
+        $agentName = \App\Models\Usuario::find($request->input('user_id'))?->nombres ?? 'Agente';
+        OmnichannelMessage::create([
+            'conversation_id' => $conversation->id,
+            'contact_id' => $conversation->contact_id,
+            'user_id' => $request->user()->id,
+            'channel' => $conversation->channel,
+            'direction' => 'outbound',
+            'message_type' => 'text',
+            'content' => "Conversación asignada a {$agentName}",
+            'is_internal_note' => true,
+            'status' => 'sent',
+        ]);
+
         broadcast(new ConversationUpdated($conversation->load('assignedUser')))->toOthers();
         return response()->json(['success' => true]);
     }
 
+    /**
+     * Desasignar agente y devolver al bot.
+     */
     public function unassignAgent(Request $request, OmnichannelConversation $conversation)
     {
         $conversation->update([
@@ -179,6 +185,9 @@ class ConversationApiController extends Controller
         return response()->json(['success' => true]);
     }
 
+    /**
+     * Marcar conversación como resuelta.
+     */
     public function resolveConversation(Request $request, OmnichannelConversation $conversation)
     {
         $conversation->update([
@@ -191,6 +200,26 @@ class ConversationApiController extends Controller
         return response()->json(['success' => true]);
     }
 
+    /**
+     * Reabrir una conversación resuelta.
+     */
+    public function reopenConversation(Request $request, OmnichannelConversation $conversation)
+    {
+        $previousStatus = $conversation->assigned_user_id ? 'human_active' : 'bot_active';
+
+        $conversation->update([
+            'status' => $previousStatus,
+            'resolved_at' => null,
+            'resolved_by' => null,
+        ]);
+
+        broadcast(new ConversationUpdated($conversation))->toOthers();
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Añadir una nota interna a la conversación.
+     */
     public function addInternalNote(Request $request, OmnichannelConversation $conversation)
     {
         $request->validate(['content' => 'required|string|max:4096']);
@@ -211,24 +240,36 @@ class ConversationApiController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => [
-                'id' => $message->id,
-                'direction' => 'outbound',
-                'messageType' => 'text',
-                'content' => $message->content,
-                'time' => $message->created_at->format('H:i'),
-                'status' => 'sent',
-                'isInternalNote' => true,
-                'isAiGenerated' => false,
-            ],
+            'message' => $this->formatMessage($message),
         ]);
     }
 
-    public function cannedResponses()
+    /**
+     * Listar respuestas predefinidas activas.
+     */
+    public function cannedResponses(Request $request)
     {
-        return response()->json(CannedResponse::where('is_active', true)->get());
+        $query = CannedResponse::where('is_active', true);
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', '%' . $search . '%')
+                  ->orWhere('shortcut', 'like', '%' . $search . '%')
+                  ->orWhere('content', 'like', '%' . $search . '%');
+            });
+        }
+
+        if ($request->filled('category')) {
+            $query->where('category', $request->category);
+        }
+
+        return response()->json($query->orderBy('title')->get());
     }
 
+    /**
+     * Perfil del contacto vinculado a la conversación.
+     */
     public function contactProfile(OmnichannelConversation $conversation)
     {
         $contact = $conversation->contact;
@@ -241,6 +282,12 @@ class ConversationApiController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->first(['id', 'codigo', 'total', 'estado', 'created_at']);
         }
+
+        // Estadísticas de la conversación
+        $stats = [
+            'totalConversations' => OmnichannelConversation::where('contact_id', $contact->id)->count(),
+            'totalMessages' => OmnichannelMessage::where('contact_id', $contact->id)->count(),
+        ];
 
         return response()->json([
             'contact' => [
@@ -262,6 +309,140 @@ class ConversationApiController extends Controller
                 'estado' => $lastOrder->estado,
                 'fecha' => $lastOrder->created_at->format('d/m/Y'),
             ] : null,
+            'stats' => $stats,
         ]);
+    }
+
+    /**
+     * Transferir conversación a bot IA.
+     */
+    public function transferToBot(Request $request, OmnichannelConversation $conversation)
+    {
+        $conversation->update([
+            'status' => 'bot_active',
+            'assigned_user_id' => null,
+            'is_bot_paused' => false,
+            'bot_paused_at' => null,
+            'bot_paused_by' => null,
+        ]);
+
+        OmnichannelMessage::create([
+            'conversation_id' => $conversation->id,
+            'contact_id' => $conversation->contact_id,
+            'user_id' => $request->user()->id,
+            'channel' => $conversation->channel,
+            'direction' => 'outbound',
+            'message_type' => 'text',
+            'content' => 'Conversación transferida al asistente IA',
+            'is_internal_note' => true,
+            'status' => 'sent',
+        ]);
+
+        broadcast(new ConversationUpdated($conversation))->toOthers();
+        return response()->json(['success' => true]);
+    }
+
+    // ─── HELPERS PRIVADOS ──────────────────────────────────────
+
+    /**
+     * Formatear un mensaje para la respuesta JSON (camelCase normalizado).
+     */
+    private function formatMessage(OmnichannelMessage $msg): array
+    {
+        $today = Carbon::today();
+        $yesterday = Carbon::yesterday();
+        $createdDate = $msg->created_at->startOfDay();
+
+        if ($createdDate->equalTo($today)) {
+            $dateFormatted = 'Hoy';
+        } elseif ($createdDate->equalTo($yesterday)) {
+            $dateFormatted = 'Ayer';
+        } else {
+            $dateFormatted = $msg->created_at->format('d/m/Y');
+        }
+
+        return [
+            'id' => $msg->id,
+            'direction' => $msg->direction,
+            'messageType' => $msg->message_type,
+            'content' => $msg->content,
+            'mediaUrl' => $msg->media_url,
+            'mediaMimeType' => $msg->media_mime_type,
+            'time' => $msg->created_at->format('H:i'),
+            'date_formatted' => $dateFormatted,
+            'status' => $msg->status,
+            'isInternalNote' => (bool) $msg->is_internal_note,
+            'isAiGenerated' => (bool) $msg->is_ai_generated,
+        ];
+    }
+
+    /**
+     * Enviar el mensaje al canal correcto (WhatsApp, Messenger, Instagram).
+     */
+    private function dispatchToChannel(
+        OmnichannelConversation $conversation,
+        OmnichannelMessage $message,
+        string $content
+    ): void {
+        try {
+            $result = match ($conversation->channel) {
+                'whatsapp' => $this->sendViaWhatsApp($conversation, $content),
+                'messenger' => $this->sendViaMessenger($conversation, $content),
+                'instagram' => $this->sendViaInstagram($conversation, $content),
+                default => ['success' => false, 'data' => ['error' => 'Canal no soportado']],
+            };
+
+            if ($result['success'] && isset($result['data']['messages'][0]['id'])) {
+                $message->update([
+                    'external_message_id' => $result['data']['messages'][0]['id'],
+                    'status' => 'sent',
+                ]);
+            } elseif ($result['success']) {
+                $message->update(['status' => 'sent']);
+            } else {
+                $errorMsg = $result['data']['error'] ?? 'Error desconocido al enviar';
+                $message->update(['status' => 'failed', 'error_message' => $errorMsg]);
+                Log::error('INBOX_SEND_ERROR', [
+                    'channel' => $conversation->channel,
+                    'error' => $errorMsg,
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('INBOX_SEND_EXCEPTION', [
+                'channel' => $conversation->channel,
+                'error' => $e->getMessage(),
+            ]);
+            $message->update(['status' => 'failed', 'error_message' => $e->getMessage()]);
+        }
+    }
+
+    private function sendViaWhatsApp(OmnichannelConversation $conversation, string $content): array
+    {
+        $whatsapp = app(WhatsAppService::class);
+        $phone = $conversation->contact->phone_number ?? null;
+        if (!$phone) {
+            return ['success' => false, 'data' => ['error' => 'Sin número de teléfono']];
+        }
+        return $whatsapp->sendTextMessage($phone, $content);
+    }
+
+    private function sendViaMessenger(OmnichannelConversation $conversation, string $content): array
+    {
+        $messenger = app(MessengerService::class);
+        $recipientId = $conversation->contact->messenger_id ?? null;
+        if (!$recipientId) {
+            return ['success' => false, 'data' => ['error' => 'Sin ID de Messenger']];
+        }
+        return $messenger->sendTextMessage($recipientId, $content);
+    }
+
+    private function sendViaInstagram(OmnichannelConversation $conversation, string $content): array
+    {
+        $instagram = app(InstagramService::class);
+        $recipientId = $conversation->contact->instagram_id ?? null;
+        if (!$recipientId) {
+            return ['success' => false, 'data' => ['error' => 'Sin ID de Instagram']];
+        }
+        return $instagram->sendTextMessage($recipientId, $content);
     }
 }

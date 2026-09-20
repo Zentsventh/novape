@@ -51,9 +51,23 @@ class WhatsAppWebhookController extends Controller
 
     /**
      * Recepción de mensajes y eventos (POST).
+     * Verifica la firma X-Hub-Signature-256 de Meta cuando app_secret está configurado.
      */
     public function handle(Request $request)
     {
+        // Verificar firma de Meta (seguridad)
+        $appSecret = config('omnichannel.whatsapp.app_secret');
+        if ($appSecret) {
+            $signature = $request->header('X-Hub-Signature-256', '');
+            $expectedSignature = 'sha256=' . hash_hmac('sha256', $request->getContent(), $appSecret);
+            if (!hash_equals($expectedSignature, $signature)) {
+                Log::warning('OMNICHANNEL_WHATSAPP_INVALID_SIGNATURE', [
+                    'received' => $signature,
+                ]);
+                return response('Unauthorized', 401);
+            }
+        }
+
         $body = $request->all();
         Log::debug('OMNICHANNEL_WHATSAPP_WEBHOOK', ['body' => $body]);
 
@@ -64,138 +78,12 @@ class WhatsAppWebhookController extends Controller
         foreach ($body['entry'] ?? [] as $entry) {
             foreach ($entry['changes'] ?? [] as $change) {
                 $value = $change['value'] ?? [];
-                if (($change['field'] ?? '') !== 'messages') continue;
-
-                $phoneNumberId = $value['metadata']['phone_number_id'] ?? null;
-
-                if (isset($value['messages'])) {
-                    foreach ($value['messages'] as $message) {
-                        $this->processIncomingMessage($message, $value, $phoneNumberId);
-                    }
-                }
-
-                if (isset($value['statuses'])) {
-                    foreach ($value['statuses'] as $status) {
-                        $this->processStatusUpdate($status);
-                    }
-                }
+                
+                // Enviar TODO el payload al Job para que se procese asíncronamente
+                \App\Jobs\Omnichannel\ProcessIncomingWebhookJob::dispatch($change);
             }
         }
 
         return response('EVENT_RECEIVED', 200);
-    }
-
-    protected function processIncomingMessage(array $message, array $value, ?string $phoneNumberId): void
-    {
-        $from = $message['from'] ?? null;
-        $messageId = $message['id'] ?? null;
-        $type = $message['type'] ?? 'unknown';
-        $contactName = $value['contacts'][0]['profile']['name'] ?? 'Sin nombre';
-        $content = $this->extractContent($message, $type);
-
-        if ($messageId) {
-            $this->whatsapp->markAsRead($messageId);
-        }
-
-        // Descargar media
-        $mediaUrl = null;
-        $mediaMimeType = null;
-        $mediaFileSize = null;
-
-        if (in_array($type, ['image', 'audio', 'document', 'video', 'sticker'])) {
-            $mediaObject = $message[$type] ?? [];
-            $mediaId = $mediaObject['id'] ?? null;
-            $mediaMimeType = $mediaObject['mime_type'] ?? null;
-            $mediaFileSize = $mediaObject['file_size'] ?? null;
-
-            if ($mediaId) {
-                $accessToken = config('omnichannel.whatsapp.token');
-                $mediaUrl = $this->mediaService->downloadAndStoreMedia($mediaId, $accessToken, $mediaMimeType ?? 'application/octet-stream');
-            }
-        }
-
-        // Buscar o crear contacto
-        $contact = OmnichannelContact::firstOrCreate(
-            ['phone_number' => $from],
-            ['name' => $contactName, 'first_interaction_at' => now()]
-        );
-        $contact->update(['last_interaction_at' => now()]);
-
-        // Buscar o crear conversación
-        $conversation = OmnichannelConversation::firstOrCreate(
-            ['contact_id' => $contact->id, 'channel' => 'whatsapp'],
-            ['status' => 'bot_active', 'priority' => 'normal', 'message_count' => 0, 'unread_count' => 0]
-        );
-
-        // Guardar mensaje
-        $inboundMessage = OmnichannelMessage::create([
-            'conversation_id' => $conversation->id,
-            'contact_id' => $contact->id,
-            'channel' => 'whatsapp',
-            'direction' => 'inbound',
-            'message_type' => $type,
-            'content' => $content,
-            'media_url' => $mediaUrl,
-            'media_mime_type' => $mediaMimeType,
-            'media_file_size' => $mediaFileSize,
-            'external_message_id' => $messageId,
-            'status' => 'delivered',
-        ]);
-
-        $conversation->update([
-            'last_message_at' => now(),
-            'last_message_preview' => substr($content ?? '', 0, 50),
-            'unread_count' => DB::raw('unread_count + 1'),
-            'message_count' => DB::raw('message_count + 1'),
-        ]);
-        $conversation->refresh();
-
-        // Broadcast en tiempo real al panel
-        broadcast(new NewMessageReceived($inboundMessage))->toOthers();
-        broadcast(new ConversationUpdated($conversation))->toOthers();
-
-        // Respuesta automática del bot
-        if ($conversation->status === 'bot_active' && $from && $type === 'text') {
-            $settings = ChatbotConfig::first();
-            if ($settings && $settings->is_bot_active) {
-                \App\Jobs\Omnichannel\ProcessWhatsAppMessageJob::dispatch($inboundMessage->id);
-            }
-        }
-    }
-
-    protected function extractContent(array $message, string $type): ?string
-    {
-        return match ($type) {
-            'text' => $message['text']['body'] ?? null,
-            'image' => $message['image']['caption'] ?? '[Imagen]',
-            'video' => $message['video']['caption'] ?? '[Video]',
-            'audio' => '[Audio]',
-            'document' => $message['document']['filename'] ?? '[Documento]',
-            'sticker' => '[Sticker]',
-            'location' => sprintf('[Ubicación: %s, %s]', $message['location']['latitude'] ?? '?', $message['location']['longitude'] ?? '?'),
-            'contacts' => '[Contacto compartido]',
-            'reaction' => $message['reaction']['emoji'] ?? '[Reacción]',
-            'interactive' => $message['interactive']['button_reply']['title'] ?? $message['interactive']['list_reply']['title'] ?? '[Interactivo]',
-            'button' => $message['button']['text'] ?? '[Botón]',
-            default => "[Tipo no soportado: {$type}]",
-        };
-    }
-
-    protected function processStatusUpdate(array $status): void
-    {
-        $messageId = $status['id'] ?? null;
-        $statusValue = $status['status'] ?? null;
-
-        if ($messageId) {
-            $msg = OmnichannelMessage::where('external_message_id', $messageId)->first();
-            if ($msg) {
-                $msg->update(['status' => $statusValue]);
-                broadcast(new MessageStatusUpdated($msg))->toOthers();
-            }
-        }
-
-        if ($statusValue === 'failed') {
-            Log::error('OMNICHANNEL_WA_MESSAGE_FAILED', ['message_id' => $messageId, 'errors' => $status['errors'] ?? []]);
-        }
     }
 }

@@ -20,12 +20,14 @@ class Usuario extends Authenticatable
 
     protected $fillable = [
         'nombres', 'apellidos', 'tipo_documento', 'dni', 'email', 'telefono', 
-        'password_hash', 'estado', 'google_id', 'fecha_nacimiento', 'has_set_password'
+        'password_hash', 'estado', 'google_id', 'fecha_nacimiento', 'has_set_password',
+        'rfm_score', 'ltv', 'last_order_date', 'total_orders', 'segmento'
     ];
 
     protected $casts = [
         'has_set_password' => 'boolean',
         'fecha_nacimiento' => 'date',
+        'last_order_date' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
@@ -84,6 +86,16 @@ class Usuario extends Authenticatable
     public function listas(): HasMany
     {
         return $this->hasMany(UsuarioLista::class, 'usuario_id');
+    }
+
+    public function crmDeals(): HasMany
+    {
+        return $this->hasMany(CrmDeal::class, 'usuario_id');
+    }
+
+    public function omnichannelContacts(): HasMany
+    {
+        return $this->hasMany(\App\Models\Omnichannel\OmnichannelContact::class, 'usuario_id');
     }
 
     public function getNombreCompletoAttribute(): string

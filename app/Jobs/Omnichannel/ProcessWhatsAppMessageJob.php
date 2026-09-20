@@ -69,10 +69,12 @@ class ProcessWhatsAppMessageJob implements ShouldQueue
             $settings->ai_temperature ?? 0.7
         );
 
-        // Procesar la respuesta
-        if (is_string($response)) {
-            // Error string
-            $this->sendBotReply($conversation, $inboundMessage, $response, $whatsapp, 0, 0);
+        // Procesar la respuesta (siempre array con type, data, tokens, duration_ms)
+        $tokens = $response['tokens'] ?? 0;
+        $durationMs = (int) ($response['duration_ms'] ?? 0);
+
+        if ($response['type'] === 'error') {
+            $this->sendBotReply($conversation, $inboundMessage, $response['data'], $whatsapp, $tokens, $durationMs);
             return;
         }
 
@@ -86,7 +88,7 @@ class ProcessWhatsAppMessageJob implements ShouldQueue
             ]);
 
             $transferMessage = "🔄 Tu conversación ha sido transferida a un agente humano. Motivo: {$reason}. Un momento por favor.";
-            $this->sendBotReply($conversation, $inboundMessage, $transferMessage, $whatsapp, $response['tokens'] ?? 0, (int) ($response['duration_ms'] ?? 0));
+            $this->sendBotReply($conversation, $inboundMessage, $transferMessage, $whatsapp, $tokens, $durationMs);
 
             broadcast(new ConversationUpdated($conversation))->toOthers();
             return;
@@ -94,7 +96,7 @@ class ProcessWhatsAppMessageJob implements ShouldQueue
 
         // Respuesta de texto normal
         $botText = $response['data'] ?? 'Lo siento, no pude procesar tu mensaje.';
-        $this->sendBotReply($conversation, $inboundMessage, $botText, $whatsapp, $response['tokens'] ?? 0, (int) ($response['duration_ms'] ?? 0));
+        $this->sendBotReply($conversation, $inboundMessage, $botText, $whatsapp, $tokens, $durationMs);
     }
 
     private function sendBotReply(

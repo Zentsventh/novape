@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, usePage, router } from '@inertiajs/react';
-import { 
-    LayoutDashboard, MonitorSmartphone, ShoppingCart, Package, 
-    CreditCard, Wallet, Archive, Image, Users, Truck, 
-    UserCog, Shield, Star, Settings, LogOut, Menu, X, Bell, Eye
+import {
+    LayoutDashboard, MonitorSmartphone, ShoppingCart, Package,
+    CreditCard, Wallet, Archive, Image, Users, Truck,
+    UserCog, Shield, Star, Settings, LogOut, Menu, X, Bell, Eye, Grid, Briefcase, Mail
 } from 'lucide-react';
 import { useDeviceContext } from '@/Contexts/DeviceContext';
 import '../../css/admin/admin.css';
@@ -24,108 +24,55 @@ export default function AdminLayout({ children, logoUrl }) {
         return userPerms.includes(perm);
     };
 
-    const navItems = [
+    const navCategories = [
         {
-            href: '/admin',
-            label: 'Dashboard',
-            exact: true,
-            permission: 'ver_dashboard',
-            icon: <LayoutDashboard size={20} />,
+            title: 'Métricas',
+            items: [
+                { href: '/admin', label: 'Dashboard', exact: true, permission: 'ver_dashboard', icon: <LayoutDashboard size={20} /> },
+            ]
         },
         {
-            href: '/admin/pos',
-            label: 'POS',
-            permission: 'pos.vender',
-            icon: <MonitorSmartphone size={20} />,
+            title: 'Ventas y Atención',
+            items: [
+                { href: '/admin/crm/dashboard', label: 'CRM', permission: 'pos.vender', icon: <Users size={20} /> },
+                { href: '/admin/pos', label: 'POS', permission: 'pos.vender', icon: <MonitorSmartphone size={20} /> },
+                { href: '/admin/pedidos', label: 'Ventas', permission: 'pos.vender', icon: <ShoppingCart size={20} /> },
+            ]
         },
         {
-            href: '/admin/pedidos',
-            label: 'Ventas',
-            permission: 'pos.vender',
-            icon: <ShoppingCart size={20} />,
+            title: 'Catálogo y Logística',
+            items: [
+                { href: '/admin/inventario', label: 'Inventario', permission: 'inventario.gestionar', icon: <LayoutDashboard size={20} /> },
+                { href: '/admin/products', label: 'Productos', permission: 'inventario.gestionar', icon: <Package size={20} /> },
+                { href: '/admin/almacenes', label: 'Almacén', permission: 'inventario.gestionar', icon: <Archive size={20} /> },
+                { href: '/admin/zonas', label: 'Zonas Envío', permission: 'usuarios.gestionar', icon: <Truck size={20} /> },
+            ]
         },
         {
-            href: '/admin/inventario',
-            label: 'Inventario',
-            permission: 'inventario.gestionar',
-            icon: <LayoutDashboard size={20} />,
+            title: 'Administración',
+            items: [
+                { href: '/admin/compras', label: 'Compras', permission: 'inventario.gestionar', icon: <CreditCard size={20} /> },
+                { href: '/admin/proveedores', label: 'Proveedores', permission: 'inventario.gestionar', icon: <Truck size={20} /> },
+                { href: '/admin/gastos', label: 'Gastos', permission: 'reportes.ver', icon: <Wallet size={20} /> },
+                { href: '/admin/cupones', label: 'Cupones', permission: 'gestionar_cupones', icon: <Package size={20} /> },
+                { href: '/admin/banners', label: 'CMS Banners', permission: 'usuarios.gestionar', icon: <Image size={20} /> },
+            ]
         },
         {
-            href: '/admin/products',
-            label: 'Productos',
-            permission: 'inventario.gestionar',
-            icon: <Package size={20} />,
-        },
-        {
-            href: '/admin/compras',
-            label: 'Compras',
-            permission: 'inventario.gestionar',
-            icon: <CreditCard size={20} />,
-        },
-        {
-            href: '/admin/gastos',
-            label: 'Gastos',
-            permission: 'reportes.ver',
-            icon: <Wallet size={20} />,
-        },
-        {
-            href: '/admin/almacenes',
-            label: 'Almacén',
-            permission: 'inventario.gestionar',
-            icon: <Archive size={20} />,
-        },
-        {
-            href: '/admin/banners',
-            label: 'CMS Banners',
-            permission: 'usuarios.gestionar',
-            icon: <Image size={20} />,
-        },
-        {
-            href: '/admin/clientes',
-            label: 'Clientes',
-            permission: 'pos.vender',
-            icon: <Users size={20} />,
-        },
-        {
-            href: '/admin/proveedores',
-            label: 'Proveedores',
-            permission: 'inventario.gestionar',
-            icon: <Truck size={20} />,
-        },
-        {
-            href: '/admin/cupones',
-            label: 'Cupones',
-            permission: 'gestionar_cupones',
-            icon: <Package size={20} />,
-        },
-        {
-            href: '/admin/trabajadores',
-            label: 'Usuarios',
-            permission: 'usuarios.gestionar',
-            icon: <UserCog size={20} />,
-        },
-        {
-            href: '/admin/roles',
-            label: 'Roles y Permisos',
-            permission: 'usuarios.gestionar',
-            icon: <Shield size={20} />,
-        },
-        {
-            href: '/admin/zonas',
-            label: 'Zonas Envío',
-            permission: 'usuarios.gestionar',
-            icon: <Truck size={20} />,
-        },
-        {
-            href: '/admin/ajustes',
-            label: 'Configuración',
-            permission: 'usuarios.gestionar',
-            icon: <Settings size={20} />,
+            title: 'Sistema',
+            items: [
+                { href: '/admin/trabajadores', label: 'Usuarios', permission: 'usuarios.gestionar', icon: <UserCog size={20} /> },
+                { href: '/admin/roles', label: 'Roles y Permisos', permission: 'usuarios.gestionar', icon: <Shield size={20} /> },
+                { href: '/admin/ajustes', label: 'Configuración', permission: 'usuarios.gestionar', icon: <Settings size={20} /> }
+            ]
         }
     ];
 
-    // Filtrar los items de navegación según los permisos del usuario
-    const visibleNavItems = navItems.filter(item => hasPerm(item.permission));
+    // Filtrar los items de navegación según los permisos del usuario por categoría
+    const visibleCategories = navCategories.map(cat => ({
+        ...cat,
+        items: cat.items.filter(item => hasPerm(item.permission))
+    })).filter(cat => cat.items.length > 0);
 
     const isActive = (item) => {
         if (item.exact) return url === item.href;
@@ -135,6 +82,7 @@ export default function AdminLayout({ children, logoUrl }) {
     const [notificaciones, setNotificaciones] = useState([]);
     const [showNotifs, setShowNotifs] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [appLauncherOpen, setAppLauncherOpen] = useState(false);
 
     useEffect(() => {
         if (isMobile || isTablet) {
@@ -171,7 +119,7 @@ export default function AdminLayout({ children, logoUrl }) {
     return (
         <div className="admin-layout">
             {/* Sidebar */}
-            <aside 
+            <aside
                 className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}
                 style={(isMobile || isTablet) ? {
                     position: 'fixed',
@@ -191,19 +139,24 @@ export default function AdminLayout({ children, logoUrl }) {
                     </div>
                 </div>
                 <nav className="admin-nav">
-                    {visibleNavItems.map((item, i) => {
-                        return (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className={`admin-nav-link ${isActive(item) ? 'active' : ''}`}
-                                title={item.label}
-                            >
-                                {item.icon}
-                                <span className="admin-nav-label">{item.label}</span>
-                            </Link>
-                        );
-                    })}
+                    {visibleCategories.map((category, idx) => (
+                        <div key={idx} className="admin-nav-category" style={{ marginBottom: '15px' }}>
+                            <div style={{ padding: '0 20px', fontSize: '0.75rem', textTransform: 'uppercase', color: '#64748b', fontWeight: '700', marginBottom: '5px', marginTop: idx > 0 ? '10px' : '0' }}>
+                                {category.title}
+                            </div>
+                            {category.items.map(item => (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className={`admin-nav-link ${isActive(item) ? 'active' : ''}`}
+                                    title={item.label}
+                                >
+                                    {item.icon}
+                                    <span className="admin-nav-label">{item.label}</span>
+                                </Link>
+                            ))}
+                        </div>
+                    ))}
                 </nav>
 
                 {/* Sidebar Footer */}
@@ -221,8 +174,8 @@ export default function AdminLayout({ children, logoUrl }) {
 
             {/* Sidebar Overlay (Mobile) */}
             {sidebarOpen && (
-                <div 
-                    className="admin-sidebar-overlay" 
+                <div
+                    className="admin-sidebar-overlay"
                     onClick={() => setSidebarOpen(false)}
                     style={{
                         position: 'fixed',
@@ -239,10 +192,10 @@ export default function AdminLayout({ children, logoUrl }) {
             {/* Main Content */}
             <main className="admin-main">
                 {/* Topbar */}
-                <header 
-                    className="admin-topbar" 
-                    style={{ 
-                        background: 'var(--admin-bg-panel)', 
+                <header
+                    className="admin-topbar"
+                    style={{
+                        background: 'var(--admin-bg-panel)',
                         borderBottom: '1px solid var(--admin-border)',
                         ...((isMobile || isTablet) ? {
                             position: 'fixed',
@@ -254,15 +207,67 @@ export default function AdminLayout({ children, logoUrl }) {
                         } : {})
                     }}
                 >
-                    <div className="admin-topbar-left">
+                    <div className="admin-topbar-left" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                         <button onClick={() => setSidebarOpen(true)} className="admin-topbar-menu">
                             <Menu size={24} />
                         </button>
+
+                        {/* App Launcher */}
+                        <div style={{ position: 'relative' }}>
+                            <button 
+                                onClick={() => setAppLauncherOpen(!appLauncherOpen)}
+                                style={{ 
+                                    background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '8px', 
+                                    color: 'var(--admin-text-main)', cursor: 'pointer', padding: '8px', borderRadius: '8px'
+                                }}
+                                className="app-launcher-btn hover:bg-gray-100"
+                            >
+                                <Grid size={22} color="#3b82f6" />
+                                <span style={{ fontWeight: 600, fontSize: '15px' }}>Plataforma</span>
+                            </button>
+
+                            {appLauncherOpen && (
+                                <div style={{
+                                    position: 'absolute', top: '100%', left: 0, marginTop: '8px',
+                                    width: '340px', background: '#fff', borderRadius: '12px',
+                                    boxShadow: '0 10px 40px rgba(0,0,0,0.15)', border: '1px solid #e5e7eb',
+                                    zIndex: 1000, overflow: 'hidden'
+                                }}>
+                                    <div style={{ padding: '16px', borderBottom: '1px solid #f3f4f6', background: '#f8fafc' }}>
+                                        <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#111827' }}>App Launcher (Clouds)</h3>
+                                        <p style={{ margin: 0, fontSize: '12px', color: '#6b7280', marginTop: '2px' }}>Cambia entre las aplicaciones de Novape</p>
+                                    </div>
+                                    <div style={{ padding: '12px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                                        <Link href="/admin/crm/dashboard" onClick={() => setAppLauncherOpen(false)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px 8px', borderRadius: '8px', textDecoration: 'none', color: '#1f2937', transition: 'background 0.2s' }} className="hover:bg-blue-50">
+                                            <Briefcase size={28} color="#3b82f6" style={{ marginBottom: '8px' }} />
+                                            <span style={{ fontSize: '13px', fontWeight: 600 }}>Sales Cloud</span>
+                                        </Link>
+                                        <Link href="/admin/inbox" onClick={() => setAppLauncherOpen(false)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px 8px', borderRadius: '8px', textDecoration: 'none', color: '#1f2937', transition: 'background 0.2s' }} className="hover:bg-green-50">
+                                            <MonitorSmartphone size={28} color="#10b981" style={{ marginBottom: '8px' }} />
+                                            <span style={{ fontSize: '13px', fontWeight: 600 }}>Service Cloud</span>
+                                        </Link>
+                                        <Link href="/admin/pedidos" onClick={() => setAppLauncherOpen(false)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px 8px', borderRadius: '8px', textDecoration: 'none', color: '#1f2937', transition: 'background 0.2s' }} className="hover:bg-purple-50">
+                                            <ShoppingCart size={28} color="#8b5cf6" style={{ marginBottom: '8px' }} />
+                                            <span style={{ fontSize: '13px', fontWeight: 600 }}>Commerce</span>
+                                        </Link>
+                                        <Link href="/admin/marketing/campaigns" onClick={() => setAppLauncherOpen(false)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px 8px', borderRadius: '8px', textDecoration: 'none', color: '#1f2937', transition: 'background 0.2s' }} className="hover:bg-orange-50">
+                                            <Mail size={28} color="#f59e0b" style={{ marginBottom: '8px' }} />
+                                            <span style={{ fontSize: '13px', fontWeight: 600 }}>Marketing</span>
+                                        </Link>
+                                    </div>
+                                    <div style={{ padding: '12px', borderTop: '1px solid #f3f4f6', textAlign: 'center' }}>
+                                        <Link href="/admin" onClick={() => setAppLauncherOpen(false)} style={{ color: '#3b82f6', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>
+                                            Ver Dashboard Principal (Analytics) →
+                                        </Link>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                     <div className="admin-topbar-actions">
                         <div style={{ position: 'relative' }}>
-                            <button 
-                                className="admin-topbar-icon-btn" 
+                            <button
+                                className="admin-topbar-icon-btn"
                                 onClick={() => setShowNotifs(!showNotifs)}
                             >
                                 <Bell size={20} />
@@ -295,8 +300,8 @@ export default function AdminLayout({ children, logoUrl }) {
                                             </div>
                                         ) : (
                                             notificaciones.map(n => (
-                                                <div 
-                                                    key={n.id} 
+                                                <div
+                                                    key={n.id}
                                                     onClick={() => markAsRead(n.id, '/admin/pedidos/' + n.data.pedido_id)}
                                                     style={{ padding: '16px', borderBottom: '1px solid #f5f5f5', cursor: 'pointer', transition: 'background 0.2s', display: 'flex', gap: '12px', alignItems: 'flex-start' }}
                                                     onMouseOver={e => e.currentTarget.style.background = '#f9f9f9'}
@@ -322,7 +327,7 @@ export default function AdminLayout({ children, logoUrl }) {
                     </div>
                 </header>
 
-                <div 
+                <div
                     className="admin-content"
                     style={(isMobile || isTablet) ? {
                         marginTop: 'calc(var(--admin-topbar-height) + 16px)'
