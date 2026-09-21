@@ -1,0 +1,46 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class CrmCase extends Model
+{
+    use HasFactory, SoftDeletes;
+
+    protected $table = 'crm_cases';
+
+    protected $fillable = [
+        'titulo',
+        'descripcion',
+        'tipo',
+        'estado',
+        'prioridad',
+        'cliente_id',
+        'pedido_id',
+        'asignado_a',
+        'deal_id',
+    ];
+
+    public function cliente()
+    {
+        return $this->belongsTo(Usuario::class, 'cliente_id');
+    }
+
+    public function asignadoA()
+    {
+        return $this->belongsTo(Usuario::class, 'asignado_a');
+    }
+
+    public function pedido()
+    {
+        return $this->belongsTo(Pedido::class, 'pedido_id');
+    }
+
+    public function deal()
+    {
+        return $this->belongsTo(CrmDeal::class, 'deal_id');
+    }
+}

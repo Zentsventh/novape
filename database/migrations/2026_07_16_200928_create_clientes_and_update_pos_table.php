@@ -29,7 +29,11 @@ return new class extends Migration
         });
 
         // Use raw SQL to alter the enum safely
-        DB::statement("ALTER TABLE ventas_pos MODIFY COLUMN tipo_comprobante ENUM('ticket', 'boleta', 'factura') NOT NULL DEFAULT 'ticket'");
+        try {
+            DB::statement("ALTER TABLE ventas_pos MODIFY COLUMN tipo_comprobante ENUM('ticket', 'boleta', 'factura') NOT NULL DEFAULT 'ticket'");
+        } catch (\Exception $e) {
+            // Ignore in SQLite
+        }
     }
 
     /**
@@ -37,7 +41,11 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE ventas_pos MODIFY COLUMN tipo_comprobante ENUM('boleta', 'factura') NOT NULL DEFAULT 'boleta'");
+        try {
+            DB::statement("ALTER TABLE ventas_pos MODIFY COLUMN tipo_comprobante ENUM('boleta', 'factura') NOT NULL DEFAULT 'boleta'");
+        } catch (\Exception $e) {
+            // Ignore in SQLite
+        }
 
         Schema::table('ventas_pos', function (Blueprint $table) {
             $table->dropForeign(['cliente_id']);

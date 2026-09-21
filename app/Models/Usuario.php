@@ -7,21 +7,26 @@ namespace App\Models;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Collection;
+use Spatie\SchemalessAttributes\Casts\SchemalessAttributes;
+use Spatie\SchemalessAttributes\SchemalessAttributesTrait;
+use App\Models\CrmCompany;
 
 class Usuario extends Authenticatable
 {
-    use Notifiable, SoftDeletes;
+    use Notifiable, SoftDeletes, SchemalessAttributesTrait, HasFactory;
 
     protected $table = 'usuario';
 
     protected $fillable = [
         'nombres', 'apellidos', 'tipo_documento', 'dni', 'email', 'telefono', 
         'password_hash', 'estado', 'google_id', 'fecha_nacimiento', 'has_set_password',
-        'rfm_score', 'ltv', 'last_order_date', 'total_orders', 'segmento'
+        'rfm_score', 'ltv', 'last_order_date', 'total_orders', 'segmento', 'empresa_id'
     ];
 
     protected $casts = [
@@ -31,6 +36,7 @@ class Usuario extends Authenticatable
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
+        'custom_fields' => SchemalessAttributes::class,
     ];
 
     protected $hidden = [
@@ -88,6 +94,11 @@ class Usuario extends Authenticatable
         return $this->hasMany(UsuarioLista::class, 'usuario_id');
     }
 
+    public function carrito(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Carrito::class, 'usuario_id');
+    }
+
     public function crmDeals(): HasMany
     {
         return $this->hasMany(CrmDeal::class, 'usuario_id');
@@ -96,6 +107,11 @@ class Usuario extends Authenticatable
     public function omnichannelContacts(): HasMany
     {
         return $this->hasMany(\App\Models\Omnichannel\OmnichannelContact::class, 'usuario_id');
+    }
+
+    public function empresa(): BelongsTo
+    {
+        return $this->belongsTo(CrmCompany::class, 'empresa_id');
     }
 
     public function getNombreCompletoAttribute(): string

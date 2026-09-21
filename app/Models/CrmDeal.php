@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\SchemalessAttributes\Casts\SchemalessAttributes;
 
 class CrmDeal extends Model
 {
@@ -13,6 +16,7 @@ class CrmDeal extends Model
 
     protected $fillable = [
         'usuario_id',
+        'empresa_id',
         'stage_id',
         'titulo',
         'valor',
@@ -23,17 +27,38 @@ class CrmDeal extends Model
 
     protected $casts = [
         'fecha_cierre_esperada' => 'datetime',
-        'valor' => 'decimal:2'
+        'valor' => 'decimal:2',
+        'custom_fields' => SchemalessAttributes::class,
     ];
+
+    public function scopeWithCustomAttributes(): \Illuminate\Database\Eloquent\Builder
+    {
+        return $this->withSchemalessAttributes('custom_fields');
+    }
 
     public function cliente()
     {
         return $this->belongsTo(Usuario::class, 'usuario_id');
     }
 
+    public function empresa()
+    {
+        return $this->belongsTo(CrmCompany::class, 'empresa_id');
+    }
+
     public function stage()
     {
         return $this->belongsTo(CrmStage::class, 'stage_id');
+    }
+
+    public function notes()
+    {
+        return $this->morphMany(CrmNote::class, 'notable');
+    }
+
+    public function timelineEvents()
+    {
+        return $this->morphMany(CrmTimelineEvent::class, 'trackable');
     }
 
     public function activities()

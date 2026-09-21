@@ -25,7 +25,7 @@ class ConversationApiController extends Controller
      */
     public function conversations(Request $request)
     {
-        $query = OmnichannelConversation::with(['contact', 'assignedUser'])
+        $query = OmnichannelConversation::with(['contact.usuario', 'assignedUser'])
             ->orderBy('last_message_at', 'desc')
             ->orderBy('updated_at', 'desc');
 
@@ -51,11 +51,21 @@ class ConversationApiController extends Controller
         $conversations = $query->paginate(50);
 
         $conversations->getCollection()->transform(function ($conv) {
+            // Si el contacto tiene un usuario vinculado, usar su nombre real
+            $contactName = $conv->contact->name ?? 'Desconocido';
+            if ($conv->contact->usuario) {
+                $realName = trim(($conv->contact->usuario->nombres ?? '') . ' ' . ($conv->contact->usuario->apellidos ?? ''));
+                if ($realName) {
+                    $contactName = $realName;
+                }
+            }
+
             return [
                 'id' => $conv->id,
-                'contactName' => $conv->contact->name ?? 'Desconocido',
-                'initials' => strtoupper(mb_substr($conv->contact->name ?? '??', 0, 2)),
+                'contactName' => $contactName,
+                'initials' => strtoupper(mb_substr($contactName, 0, 2)),
                 'phone' => $conv->contact->phone_number ?? null,
+                'email' => $conv->contact->email ?? $conv->contact->usuario?->email ?? null,
                 'channel' => $conv->channel,
                 'lastMessagePreview' => $conv->last_message_preview,
                 'lastMessageTime' => $conv->last_message_at?->format('H:i'),
@@ -64,6 +74,7 @@ class ConversationApiController extends Controller
                 'priority' => $conv->priority,
                 'status' => $conv->status,
                 'isBotActive' => $conv->status === 'bot_active',
+                'isLinkedUser' => (bool) $conv->contact->usuario_id,
                 'assignedUserId' => $conv->assigned_user_id,
                 'agentName' => $conv->assignedUser?->nombres ?? null,
             ];
@@ -275,6 +286,20 @@ class ConversationApiController extends Controller
         $contact = $conversation->contact;
         $contact->load('usuario');
 
+        // Usar nombre real del usuario vinculado si existe
+        $displayName = $contact->name;
+        $displayEmail = $contact->email;
+        $displayPhone = $contact->phone_number;
+
+        if ($contact->usuario) {
+            $realName = trim(($contact->usuario->nombres ?? '') . ' ' . ($contact->usuario->apellidos ?? ''));
+            if ($realName) {
+                $displayName = $realName;
+            }
+            $displayEmail = $displayEmail ?: $contact->usuario->email;
+            $displayPhone = $displayPhone ?: $contact->usuario->telefono;
+        }
+
         // Buscar el último pedido del cliente si tiene un usuario vinculado
         $lastOrder = null;
         if ($contact->usuario_id) {
@@ -292,15 +317,16 @@ class ConversationApiController extends Controller
         return response()->json([
             'contact' => [
                 'id' => $contact->id,
-                'name' => $contact->name,
-                'phone' => $contact->phone_number,
-                'email' => $contact->email,
+                'name' => $displayName,
+                'phone' => $displayPhone,
+                'email' => $displayEmail,
                 'profilePicture' => $contact->profile_picture_url,
                 'notes' => $contact->notes,
                 'isBlocked' => $contact->is_blocked,
                 'firstInteraction' => $contact->first_interaction_at?->format('d/m/Y'),
                 'lastInteraction' => $contact->last_interaction_at?->format('d/m/Y H:i'),
                 'linkedUserId' => $contact->usuario_id,
+                'isRegisteredUser' => (bool) $contact->usuario_id,
             ],
             'lastOrder' => $lastOrder ? [
                 'id' => $lastOrder->id,
@@ -389,6 +415,7 @@ class ConversationApiController extends Controller
                 'whatsapp' => $this->sendViaWhatsApp($conversation, $content),
                 'messenger' => $this->sendViaMessenger($conversation, $content),
                 'instagram' => $this->sendViaInstagram($conversation, $content),
+                'web' => ['success' => true],
                 default => ['success' => false, 'data' => ['error' => 'Canal no soportado']],
             };
 

@@ -58,6 +58,9 @@ Route::controller(HomeController::class)->group(function () {
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::post('/chatbot/message', [ChatbotController::class, 'message'])->name('chatbot.message');
+Route::get('/chatbot/poll', [ChatbotController::class, 'pollMessages'])->name('chatbot.poll');
+Route::get('/chatbot/history', [ChatbotController::class, 'history'])->name('chatbot.history');
+Route::post('/chatbot/close', [ChatbotController::class, 'closeConversation'])->name('chatbot.close');
 
 Route::controller(PageController::class)->group(function () {
     Route::get('/nosotros', 'nosotros')->name('nosotros');
@@ -191,9 +194,36 @@ Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
         Route::post('/tasks/{activity}/complete', 'complete')->name('admin.crm.tasks.complete');
     });
 
+    Route::controller(\App\Http\Controllers\Admin\CrmSearchController::class)->prefix('crm')->group(function () {
+        Route::get('/search', 'search')->name('admin.crm.search');
+    });
+
+    Route::controller(\App\Http\Controllers\Admin\CrmCaseController::class)->prefix('crm')->group(function () {
+        Route::get('/cases', 'index')->name('admin.crm.cases');
+        Route::post('/cases', 'store')->name('admin.crm.cases.store');
+        Route::put('/cases/{crmCase}', 'update')->name('admin.crm.cases.update');
+        Route::delete('/cases/{crmCase}', 'destroy')->name('admin.crm.cases.destroy');
+    });
+
+    Route::controller(\App\Http\Controllers\Admin\CrmCalendarController::class)->prefix('crm')->group(function () {
+        Route::get('/calendar', 'index')->name('admin.crm.calendar');
+        Route::get('/calendar/events', 'events')->name('admin.crm.calendar.events');
+    });
+
+    Route::controller(\App\Http\Controllers\Admin\CrmExportController::class)->prefix('crm')->group(function () {
+        Route::get('/export', 'export')->name('admin.crm.export');
+    });
+
+    Route::controller(\App\Http\Controllers\Admin\CrmAutomationController::class)->prefix('crm/automations')->group(function () {
+        Route::get('/', 'index')->name('admin.crm.automations.index');
+        Route::post('/', 'store')->name('admin.crm.automations.store');
+        Route::delete('/{id}', 'destroy')->name('admin.crm.automations.destroy');
+    });
+
     Route::controller(\App\Http\Controllers\Admin\CrmPipelineController::class)->prefix('crm')->group(function () {
         Route::get('/pipeline', 'index')->name('admin.crm.pipeline');
-        Route::put('/deals/{id}/move', 'moveDeal')->name('admin.crm.deals.move');
+        Route::post('/deals', 'store')->name('admin.crm.deals.store');
+        Route::put('/deals/{id}/move', 'move')->name('admin.crm.deals.move');
         Route::get('/deals/{id}', 'show')->name('admin.crm.deals.show');
         Route::post('/deals/{id}/activities', 'storeActivity')->name('admin.crm.deals.activities.store');
         
@@ -201,6 +231,21 @@ Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
         Route::post('/deals/{id}/products', 'addProduct')->name('admin.crm.deals.products.add');
         Route::delete('/deals/{id}/products/{productId}', 'removeProduct')->name('admin.crm.deals.products.remove');
         Route::get('/deals/{id}/quote', 'generateQuote')->name('admin.crm.deals.quote');
+    });
+
+    Route::controller(\App\Http\Controllers\Admin\CrmCompanyController::class)->prefix('crm/companies')->group(function () {
+        Route::get('/', 'index')->name('admin.crm.companies.index');
+        Route::post('/', 'store')->name('admin.crm.companies.store');
+        Route::get('/{id}', 'show')->name('admin.crm.companies.show');
+        Route::put('/{id}', 'update')->name('admin.crm.companies.update');
+        Route::delete('/{id}', 'destroy')->name('admin.crm.companies.destroy');
+    });
+
+    Route::controller(\App\Http\Controllers\Admin\CrmSettingsController::class)->prefix('crm/settings')->group(function () {
+        Route::get('/objects', 'objects')->name('admin.crm.settings.objects');
+        Route::post('/objects/fields', 'storeField')->name('admin.crm.settings.fields.store');
+        Route::delete('/objects/fields/{id}', 'destroyField')->name('admin.crm.settings.fields.destroy');
+        Route::post('/evidence/{id}/resolve', 'resolveEvidence')->name('admin.crm.settings.evidence.resolve');
     });
 
     // Marketing Cloud

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
-import CrmLayout from '../../../Layouts/CrmLayout';
+import TwentyCrmLayout from '../../../Layouts/TwentyCrmLayout';
 import { CheckCircle, Circle, Clock, PhoneCall, Mail, FileText, Calendar, AlertCircle } from 'lucide-react';
 import Swal from 'sweetalert2';
 
-export default function Tasks({ tasks }) {
+export default function Tasks({ tasks = [] }) {
     const [loadingId, setLoadingId] = useState(null);
 
     const toggleTask = (activity) => {
@@ -109,7 +109,7 @@ export default function Tasks({ tasks }) {
     const completedTasks = tasks.filter(t => t.time_status === 'completed');
 
     return (
-        <CrmLayout title="Mis Tareas">
+        <TwentyCrmLayout title="Mis Tareas">
             <Head title="Mis Tareas" />
             
             <div style={{ maxWidth: '900px', margin: '0 auto', padding: '32px 24px' }}>
@@ -167,6 +167,6 @@ export default function Tasks({ tasks }) {
                 )}
 
             </div>
-        </CrmLayout>
+        </TwentyCrmLayout>
     );
 }

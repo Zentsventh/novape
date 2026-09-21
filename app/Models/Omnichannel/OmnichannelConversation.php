@@ -17,12 +17,14 @@ class OmnichannelConversation extends Model
         'subject', 'is_bot_paused', 'bot_paused_at', 'bot_paused_by',
         'auto_assigned', 'last_message_at', 'last_message_preview',
         'message_count', 'unread_count', 'resolved_at', 'resolved_by',
+        'closed_at', 'closed_by',
     ];
 
     protected $casts = [
         'bot_paused_at' => 'datetime',
         'last_message_at' => 'datetime',
         'resolved_at' => 'datetime',
+        'closed_at' => 'datetime',
         'is_bot_paused' => 'boolean',
         'auto_assigned' => 'boolean',
     ];

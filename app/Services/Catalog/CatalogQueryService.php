@@ -418,8 +418,8 @@ class CatalogQueryService
         $precio_anterior = null;
         $descuento = 0;
         
-        $isBombaCyber = $prod->categorias && $prod->categorias->contains('slug', 'cyber-bombas');
-        $isRetiro = $prod->categorias && $prod->categorias->contains('slug', 'retiro-inmediato');
+        $isBombaCyber = $prod->relationLoaded('categorias') && $prod->categorias->contains('slug', 'cyber-bombas');
+        $isRetiro = $prod->relationLoaded('categorias') && $prod->categorias->contains('slug', 'retiro-inmediato');
         
         if ($isBombaCyber || $isRetiro) {
             $descuento = 15 + ($prod->id % 45);
@@ -452,7 +452,7 @@ class CatalogQueryService
             'precio_anterior' => $precio_anterior,
             'descuento' => $descuento,
             'stock' => $stock,
-            'categorias' => $prod->categorias ? $prod->categorias->pluck('slug')->toArray() : [],
+            'categorias' => $prod->relationLoaded('categorias') && $prod->categorias ? $prod->categorias->pluck('slug')->toArray() : [],
             'retiro_tienda' => (bool) $prod->retiro_tienda,
             'envio_domicilio' => (bool) $prod->envio_domicilio,
         ];

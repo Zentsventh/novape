@@ -1,17 +1,21 @@
 import { useState, useEffect, useRef } from 'react';
 
 /* Botón flotante de chatbot inteligente conectado a Gemini */
-export default function ChatBot() {
+export default function ChatBot({ user }) {
     const [isOpen, setIsOpen] = useState(false);
     const [message, setMessage] = useState('');
     const [messages, setMessages] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [historyLoaded, setHistoryLoaded] = useState(false);
+    const [showEndConfirm, setShowEndConfirm] = useState(false);
     
     const wrapperRef = useRef(null);
     const posRef = useRef({ target: 0, current: 0, velocity: 0 });
     const rafRef = useRef(null);
     const delayRef = useRef(null);
     const messagesEndRef = useRef(null);
+
+    const authUser = user ?? null;
 
     // Auto-scroll al último mensaje
     const scrollToBottom = () => {
@@ -66,6 +70,90 @@ export default function ChatBot() {
         };
     }, []);
 
+    // Generar o recuperar sessionId (solo para visitantes no autenticados)
+    useEffect(() => {
+        if (!authUser && !localStorage.getItem('novabot_session')) {
+            localStorage.setItem('novabot_session', 'web_' + Math.random().toString(36).substr(2, 9));
+        }
+    }, [authUser]);
+
+    // Obtener el identificador de sesión apropiado
+    const getSessionId = () => {
+        if (authUser) {
+            // Para usuarios autenticados, usamos un session_id basado en su ID
+            // pero también mantenemos un session_id en localStorage para consistencia
+            let sessionId = localStorage.getItem('novabot_session');
+            if (!sessionId) {
+                sessionId = 'user_' + authUser.id + '_' + Math.random().toString(36).substr(2, 5);
+                localStorage.setItem('novabot_session', sessionId);
+            }
+            return sessionId;
+        }
+        return localStorage.getItem('novabot_session') || '';
+    };
+
+    // Cargar historial al abrir el chat (persistencia ante F5)
+    useEffect(() => {
+        if (isOpen && !historyLoaded) {
+            loadHistory();
+        }
+    }, [isOpen]);
+
+    const loadHistory = async () => {
+        try {
+            const sessionId = getSessionId();
+            const res = await fetch(`/chatbot/history?session_id=${sessionId}`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data.has_active_conversation && data.messages?.length > 0) {
+                    setMessages(data.messages.map(m => ({
+                        id: m.id,
+                        role: m.role,
+                        text: m.text,
+                        is_human: m.is_human,
+                        time: m.time,
+                    })));
+                }
+            }
+        } catch (e) {
+            console.error('Error loading chat history:', e);
+        } finally {
+            setHistoryLoaded(true);
+        }
+    };
+
+    // Polling para mensajes del agente
+    useEffect(() => {
+        let interval;
+        if (isOpen) {
+            interval = setInterval(async () => {
+                try {
+                    const sessionId = getSessionId();
+                    const lastMessageId = messages.reduce((max, m) => m.id && m.id > max ? m.id : max, 0);
+                    
+                    const res = await fetch(`/chatbot/poll?session_id=${sessionId}&last_message_id=${lastMessageId}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.messages && data.messages.length > 0) {
+                            setMessages(prev => {
+                                const newMessages = [...prev];
+                                data.messages.forEach(msg => {
+                                    if (!newMessages.find(m => m.id === msg.id)) {
+                                        newMessages.push(msg);
+                                    }
+                                });
+                                return newMessages;
+                            });
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error polling messages:', e);
+                }
+            }, 3000);
+        }
+        return () => clearInterval(interval);
+    }, [isOpen, messages]);
+
     // Enviar mensaje a Laravel / Gemini
     const sendMessage = async (text) => {
         if (!text.trim() || isLoading) return;
@@ -77,24 +165,65 @@ export default function ChatBot() {
 
         try {
             const token = document.head.querySelector('meta[name="csrf-token"]')?.content;
+            const sessionId = getSessionId();
             const res = await fetch('/chatbot/message', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': token 
                 },
-                body: JSON.stringify({ messages: newMessages })
+                body: JSON.stringify({ 
+                    messages: newMessages,
+                    session_id: sessionId
+                })
             });
             const data = await res.json();
-            if (data.success) {
-                setMessages(prev => [...prev, { role: 'bot', text: data.reply }]);
-            } else {
+            if (data.success && data.reply) {
+                // Solo añadir la respuesta del bot de gemini de inmediato si recibimos reply.
+                // (Si el bot estaba pausado, reply viene vacío y el polling recogerá lo que el agente mande).
+                if (!data.is_bot_paused) {
+                     setMessages(prev => [...prev, { role: 'bot', text: data.reply }]);
+                }
+            } else if (!data.success) {
                 setMessages(prev => [...prev, { role: 'bot', text: 'Lo siento, hubo un error al procesar tu solicitud.' }]);
             }
         } catch (e) {
             setMessages(prev => [...prev, { role: 'bot', text: 'Error de conexión. Intenta de nuevo más tarde.' }]);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    // Finalizar conversación (el visitante cierra el chat)
+    const handleEndConversation = async () => {
+        try {
+            const token = document.head.querySelector('meta[name="csrf-token"]')?.content;
+            const sessionId = getSessionId();
+            await fetch('/chatbot/close', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token
+                },
+                body: JSON.stringify({ session_id: sessionId })
+            });
+        } catch (e) {
+            console.error('Error closing conversation:', e);
+        }
+        
+        // Resetear estado del widget
+        setMessages([]);
+        setHistoryLoaded(false);
+        setShowEndConfirm(false);
+        setIsOpen(false);
+
+        // Generar nueva session_id para la próxima conversación (solo visitantes)
+        if (!authUser) {
+            localStorage.setItem('novabot_session', 'web_' + Math.random().toString(36).substr(2, 9));
+        } else {
+            // Para usuarios autenticados, renovar el session_id también
+            const newSession = 'user_' + authUser.id + '_' + Math.random().toString(36).substr(2, 5);
+            localStorage.setItem('novabot_session', newSession);
         }
     };
 
@@ -112,6 +241,14 @@ export default function ChatBot() {
                 <br />
             </span>
         ));
+    };
+
+    // Nombre a mostrar en el header para el visitante
+    const getVisitorName = () => {
+        if (authUser) {
+            return authUser.nombres || 'Cliente';
+        }
+        return null;
     };
 
     return (
@@ -167,12 +304,50 @@ export default function ChatBot() {
                                 </div>
                             </div>
                         </div>
-                        <button className="efe-chat-minimize" onClick={() => setIsOpen(false)}>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                                <polyline points="6 9 12 15 18 9" />
-                            </svg>
-                        </button>
+                        <div className="efe-chat-header-actions">
+                            {messages.length > 0 && (
+                                <button 
+                                    className="efe-chat-end-btn" 
+                                    onClick={() => setShowEndConfirm(true)}
+                                    title="Finalizar conversación"
+                                >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
+                                        <line x1="12" y1="2" x2="12" y2="12" />
+                                    </svg>
+                                </button>
+                            )}
+                            <button className="efe-chat-minimize" onClick={() => setIsOpen(false)}>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                                    <polyline points="6 9 12 15 18 9" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
+
+                    {/* Modal de confirmación para finalizar */}
+                    {showEndConfirm && (
+                        <div className="efe-chat-confirm-overlay">
+                            <div className="efe-chat-confirm-modal">
+                                <p>¿Deseas finalizar esta conversación?</p>
+                                <span className="efe-chat-confirm-hint">Se cerrará el chat actual. Podrás iniciar uno nuevo después.</span>
+                                <div className="efe-chat-confirm-actions">
+                                    <button 
+                                        className="efe-chat-confirm-cancel" 
+                                        onClick={() => setShowEndConfirm(false)}
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button 
+                                        className="efe-chat-confirm-end" 
+                                        onClick={handleEndConversation}
+                                    >
+                                        Finalizar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="efe-chat-body" style={{ display: 'flex', flexDirection: 'column' }}>
                         <div className="efe-chat-welcome">
@@ -182,7 +357,11 @@ export default function ChatBot() {
                                     alt="Novabot"
                                 />
                             </div>
-                            <h5 className="efe-chat-welcome-title">¡Hola! Soy Novabot</h5>
+                            <h5 className="efe-chat-welcome-title">
+                                {getVisitorName() 
+                                    ? `¡Hola, ${getVisitorName()}! 👋` 
+                                    : '¡Hola! Soy Novabot'}
+                            </h5>
                             <p className="efe-chat-welcome-text">
                                 Tu asistente virtual de Novape. Estoy aquí para ayudarte con tus compras, consultas y más.
                             </p>
@@ -219,7 +398,7 @@ export default function ChatBot() {
 
                         <div className="efe-chat-messages" style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '15px' }}>
                             {messages.map((m, i) => (
-                                <div key={i} style={{
+                                <div key={m.id || `msg-${i}`} style={{
                                     alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start',
                                     background: m.role === 'user' ? '#0F172A' : '#F1F5F9',
                                     color: m.role === 'user' ? '#FFFFFF' : '#334155',
@@ -231,7 +410,34 @@ export default function ChatBot() {
                                     fontSize: '14px',
                                     lineHeight: '1.4'
                                 }}>
+                                    {m.is_human && (
+                                        <div style={{ 
+                                            fontSize: '11px', 
+                                            color: '#0EA5E9', 
+                                            marginBottom: '4px', 
+                                            fontWeight: '600',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '4px'
+                                        }}>
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                                <circle cx="12" cy="7" r="4" />
+                                            </svg>
+                                            Agente
+                                        </div>
+                                    )}
                                     {renderText(m.text)}
+                                    {m.time && (
+                                        <div style={{
+                                            fontSize: '10px',
+                                            opacity: 0.5,
+                                            textAlign: 'right',
+                                            marginTop: '4px',
+                                        }}>
+                                            {m.time}
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                             {isLoading && (

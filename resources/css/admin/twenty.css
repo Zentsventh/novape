@@ -1,0 +1,281 @@
+/* ==========================================================================
+   TWENTY CRM GLOBAL STYLES (PREMIUM EDITION)
+   ========================================================================== */
+
+:root {
+    /* Brand Colors - Lighter, more vibrant, modern */
+    --twenty-primary: #3b82f6; /* Modern Blue */
+    --twenty-primary-hover: #2563eb;
+    
+    /* Backgrounds - Softer contrasts */
+    --twenty-background: #f8fafc; /* Very light slate for app bg */
+    --twenty-bg-app: #ffffff; /* White for cards/content */
+    --twenty-bg-hover: #f1f5f9;
+    --twenty-bg-active: #e2e8f0;
+    
+    /* Text - Better legibility */
+    --twenty-text-main: #0f172a; /* Slate 900 for high contrast */
+    --twenty-text-secondary: #334155; /* Slate 700 */
+    --twenty-text-muted: #64748b; /* Slate 500 */
+    
+    /* Borders and Shadows - Premium glass-like feel */
+    --twenty-border: #e2e8f0;
+    --twenty-shadow-sm: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+    --twenty-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -2px rgba(15, 23, 42, 0.02);
+    --twenty-shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+    
+    /* Layout */
+    --twenty-sidebar-width: 240px;
+    --twenty-sidebar-collapsed-width: 64px;
+    --twenty-topbar-height: 60px;
+    
+    /* Radius - Softer corners */
+    --twenty-radius-sm: 6px;
+    --twenty-radius: 12px;
+    --twenty-radius-md: 6px;
+    --twenty-radius-lg: 16px;
+    
+    --twenty-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Layout Core */
+.twenty-layout {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    background-color: var(--twenty-bg-app);
+    font-family: var(--twenty-font-sans);
+    color: var(--twenty-text-main);
+}
+
+/* Minimalist Sidebar */
+.twenty-sidebar {
+    width: 240px;
+    background-color: var(--twenty-bg-surface);
+    border-right: 1px solid var(--twenty-border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: width 0.2s ease;
+}
+
+.twenty-sidebar.collapsed {
+    width: 64px;
+}
+
+.twenty-sidebar-header {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--twenty-border);
+}
+
+.twenty-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 8px;
+}
+
+.twenty-nav-group-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--twenty-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 8px 12px;
+    margin-top: 8px;
+}
+
+.twenty-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border-radius: var(--twenty-radius-md);
+    color: var(--twenty-text-secondary);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background-color 0.15s;
+    margin-bottom: 2px;
+}
+
+.twenty-nav-item:hover {
+    background-color: var(--twenty-bg-hover);
+    color: var(--twenty-text-main);
+}
+
+.twenty-nav-item.active {
+    background-color: var(--twenty-primary-bg);
+    color: var(--twenty-primary);
+}
+
+/* Main Content Area */
+.twenty-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    position: relative;
+}
+
+/* Topbar */
+.twenty-topbar {
+    height: 56px;
+    background-color: var(--twenty-bg-surface);
+    border-bottom: 1px solid var(--twenty-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    flex-shrink: 0;
+}
+
+.twenty-topbar-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--twenty-text-main);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.twenty-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Buttons */
+.twenty-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: var(--twenty-radius-sm);
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+}
+
+.twenty-btn-primary {
+    background-color: var(--twenty-primary);
+    color: white;
+}
+
+.twenty-btn-primary:hover {
+    background-color: var(--twenty-primary-hover);
+}
+
+.twenty-btn-secondary {
+    background-color: white;
+    border-color: var(--twenty-border-strong);
+    color: var(--twenty-text-main);
+}
+
+.twenty-btn-secondary:hover {
+    background-color: var(--twenty-bg-hover);
+}
+
+.twenty-btn-icon {
+    padding: 6px;
+    background: transparent;
+    color: var(--twenty-text-secondary);
+    border-radius: var(--twenty-radius-sm);
+}
+
+.twenty-btn-icon:hover {
+    background-color: var(--twenty-bg-hover);
+    color: var(--twenty-text-main);
+}
+
+/* Content Container */
+.twenty-content {
+    flex: 1;
+    overflow: auto;
+    padding: 24px;
+    background-color: var(--twenty-bg-app);
+}
+
+/* Component: Card */
+.twenty-card {
+    background: var(--twenty-bg-app);
+    border: 1px solid var(--twenty-border);
+    border-radius: var(--twenty-radius);
+    padding: 24px;
+    box-shadow: var(--twenty-shadow-sm);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.twenty-card:hover {
+    box-shadow: var(--twenty-shadow);
+    border-color: rgba(59, 130, 246, 0.1);
+}
+
+.twenty-stat-value {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--twenty-text-main);
+    margin-top: 8px;
+}
+
+.twenty-stat-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--twenty-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Floating Right Drawer (Record View) */
+.twenty-drawer-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(17, 24, 39, 0.2);
+    z-index: 40;
+    backdrop-filter: blur(2px);
+}
+
+.twenty-drawer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 600px;
+    max-width: 100%;
+    background-color: var(--twenty-bg-surface);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.08);
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    border-left: 1px solid var(--twenty-border);
+}
+
+.twenty-drawer.open {
+    transform: translateX(0);
+}
+
+.twenty-drawer-header {
+    height: 64px;
+    padding: 0 24px;
+    border-bottom: 1px solid var(--twenty-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.twenty-drawer-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+}

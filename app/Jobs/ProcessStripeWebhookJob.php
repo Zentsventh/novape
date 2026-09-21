@@ -18,7 +18,7 @@ class ProcessStripeWebhookJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 3;
-    public int $backoff = [30, 60, 120];
+    public array $backoff = [60, 120, 300]; // Reintentos: 1m, 2m, 5m
 
     public function __construct(
         private readonly array $paymentIntentData

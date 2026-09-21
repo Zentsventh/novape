@@ -52,7 +52,7 @@ export default function MarketingIndex({ campaigns, stats }) {
                     </div>
                     <div>
                         <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--admin-text-main)' }}>{stats.at_risk}</div>
-                        <div style={{ fontSize: '14px', color: 'var(--admin-text-muted)' }}>En Riesgo (>90 días)</div>
+                        <div style={{ fontSize: '14px', color: 'var(--admin-text-muted)' }}>En Riesgo (&gt;90 días)</div>
                     </div>
                 </div>
             </div>

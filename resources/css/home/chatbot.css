@@ -230,6 +230,113 @@
     background: rgba(255, 255, 255, 0.25);
 }
 
+/* Header actions group */
+.efe-chat-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Botón Finalizar Chat */
+.efe-chat-end-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    transition: background 0.2s;
+}
+
+.efe-chat-end-btn:hover {
+    background: rgba(239, 68, 68, 0.7);
+}
+
+/* Modal de confirmación para finalizar */
+.efe-chat-confirm-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(3px);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.efe-chat-confirm-modal {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    max-width: 280px;
+    width: 100%;
+}
+
+.efe-chat-confirm-modal p {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0 0 6px;
+    font-family: 'Inter', sans-serif;
+}
+
+.efe-chat-confirm-hint {
+    font-size: 12px;
+    color: #888;
+    display: block;
+    margin-bottom: 18px;
+    font-family: 'Inter', sans-serif;
+    line-height: 1.4;
+}
+
+.efe-chat-confirm-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.efe-chat-confirm-cancel {
+    padding: 8px 18px;
+    border: 1px solid #d4d4d4;
+    border-radius: 10px;
+    background: white;
+    color: #555;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+}
+
+.efe-chat-confirm-cancel:hover {
+    background: #f5f5f5;
+}
+
+.efe-chat-confirm-end {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 10px;
+    background: #ef4444;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+}
+
+.efe-chat-confirm-end:hover {
+    background: #dc2626;
+}
+
 /* Cuerpo */
 .efe-chat-body {
     flex: 1;

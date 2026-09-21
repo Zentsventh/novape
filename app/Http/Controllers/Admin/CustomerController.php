@@ -11,8 +11,10 @@ use App\Http\Requests\Admin\Users\StoreCustomerNoteRequest;
 use App\Services\Admin\Users\UserManagementService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\DB;
 use App\Models\Usuario;
 use App\Models\Rol;
+use App\Jobs\AgentResearchJob;
 
 class CustomerController extends Controller
 {
@@ -44,9 +46,17 @@ class CustomerController extends Controller
             return $customer;
         });
 
+        $customFieldsSchema = DB::table('crm_custom_fields_schema')->where('model_type', 'user')->get();
+        $evidenceLedger = DB::table('crm_evidence_ledgers')
+                            ->where('model_type', 'user')
+                            ->where('status', 'pending')
+                            ->get();
+
         return Inertia::render('Admin/Clientes/Index', [
             'clientes' => $clientes,
             'filtros' => $filtros,
+            'customFieldsSchema' => $customFieldsSchema,
+            'evidenceLedger' => $evidenceLedger
         ]);
     }
 
@@ -59,7 +69,11 @@ class CustomerController extends Controller
 
     public function store(StoreCustomerRequest $request)
     {
-        $this->userService->createUser($request->validated(), false);
+        $user = $this->userService->createUser($request->validated(), false);
+        
+        // Dispatch the Autonomous Agent to research this new customer
+        AgentResearchJob::dispatch('user', $user->id, $user->nombres . ' ' . $user->apellidos);
+
         return redirect()->route('admin.clientes')->with('success', 'Usuario creado correctamente.');
     }
 
@@ -114,16 +128,21 @@ class CustomerController extends Controller
             },
             'omnichannelContacts.conversations' => function ($q) {
                 $q->orderBy('last_message_at', 'desc');
-            }
+            },
+            'carrito.items.producto',
+            'listas.items.producto'
         ])->findOrFail($id);
 
-        $pedidos = $cliente->pedidos()->orderBy('id', 'desc')->limit(10)->get();
+        $pedidos = $cliente->pedidos()->with(['items.producto'])->orderBy('id', 'desc')->get();
         $cliente->setRelation('pedidos', $pedidos);
+
+        // LTV calculation
+        $ltv = (float) $pedidos->where('estado', 'completado')->sum('total');
 
         return Inertia::render('Admin/Clientes/Show', [
             'cliente' => $cliente,
-            'totalCompras' => (float) $cliente->pedidos()->where('estado', 'completado')->sum('total'),
-            'totalPedidos' => $cliente->pedidos()->count(),
+            'totalCompras' => $ltv,
+            'totalPedidos' => $pedidos->count(),
         ]);
     }
 

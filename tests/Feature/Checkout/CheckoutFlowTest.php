@@ -68,7 +68,7 @@ class CheckoutFlowTest extends TestCase
         $sessionId = 'test_session_id';
         $checkoutService->reserveStock($cart, $sessionId);
         
-        $this->assertDatabaseHas('reserva_stocks', [
+        $this->assertDatabaseHas('reservas_stock', [
             'variante_id' => $variante->id,
             'cantidad' => 2,
             'session_id' => $sessionId
@@ -103,9 +103,26 @@ class CheckoutFlowTest extends TestCase
 
     public function test_webhook_stripe_dispatch_jobs_and_idempotency(): void
     {
+        $this->withoutExceptionHandling();
         Queue::fake();
+        
+        $mockGateway = $this->mock(\App\Services\Payment\StripePaymentGateway::class, function ($mock) {
+            $mock->shouldReceive('verifyWebhookSignature')->andReturn((object)[
+                'type' => 'payment_intent.succeeded',
+                'data' => (object)[
+                    'object' => (object)[
+                        'id' => 'pi_test_123',
+                        'amount' => 21500,
+                        'metadata' => (object)[
+                            'codigo_pedido' => 'PED-TEST-123',
+                            'email' => 'test@example.com'
+                        ]
+                    ]
+                ]
+            ]);
+        });
 
-        $usuario = Usuario::factory()->create();
+        $usuario = Usuario::factory()->create(['email' => 'test@example.com']);
         $pedido = Pedido::factory()->create([
             'usuario_id' => $usuario->id,
             'estado' => 'Pendiente',
@@ -117,6 +134,7 @@ class CheckoutFlowTest extends TestCase
             'type' => 'payment_intent.succeeded',
             'data' => [
                 'object' => [
+                    'id' => 'pi_test_123',
                     'amount' => 21500, // En centavos
                     'metadata' => [
                         'codigo_pedido' => 'PED-TEST-123',
@@ -125,9 +143,12 @@ class CheckoutFlowTest extends TestCase
                 ]
             ]
         ];
+        
+        config(['services.stripe.webhook_secret' => 'whsec_test']);
 
         // 1. Probar que el endpoint devuelve 200 rápido y despacha el Job principal de Webhook
         $response = $this->postJson('/webhook/stripe', $webhookPayload);
+        $response->assertStatus(200);
         $response->assertStatus(200);
         
         // Verifica que el Stripe Webhook Job se encoló

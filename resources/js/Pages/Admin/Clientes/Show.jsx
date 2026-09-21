@@ -217,44 +217,65 @@ export default function Show({ cliente, totalCompras, totalPedidos }) {
                         </div>
                     </div>
 
-                    {/* Historial de Pedidos */}
-                    <div style={{ background: 'var(--admin-bg-panel)', borderRadius: '12px', padding: '20px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
-                        <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--admin-text-main)', borderBottom: '1px solid var(--admin-border)', paddingBottom: '10px', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-                            Últimos Pedidos (Commerce)
-                        </h2>
-                        
-                        <div style={{ overflowX: 'auto' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                                <thead>
-                                    <tr style={{ color: 'var(--admin-text-muted)', borderBottom: '1px solid var(--admin-border)' }}>
-                                        <th style={{ padding: '10px' }}>Código</th>
-                                        <th style={{ padding: '10px' }}>Total</th>
-                                        <th style={{ padding: '10px' }}>Estado</th>
-                                        <th style={{ padding: '10px', textAlign: 'right' }}>Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {cliente.pedidos && cliente.pedidos.length > 0 ? cliente.pedidos.map(pedido => (
-                                        <tr key={pedido.id} style={{ borderBottom: '1px solid var(--admin-border)' }}>
-                                            <td style={{ padding: '10px', color: 'var(--admin-text-main)', fontWeight: 'bold', fontSize: '13px' }}>{pedido.codigo}</td>
-                                            <td style={{ padding: '10px', color: 'var(--admin-text-main)', fontWeight: 'bold', fontSize: '13px' }}>S/ {pedido.total}</td>
-                                            <td style={{ padding: '10px' }}>
-                                                <span style={{ background: 'rgba(107,114,128,0.1)', color: 'var(--admin-text-main)', padding: '4px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold', textTransform: 'capitalize' }}>
-                                                    {pedido.estado}
-                                                </span>
-                                            </td>
-                                            <td style={{ padding: '10px', textAlign: 'right' }}>
-                                                <Link href={`/admin/pedidos/${pedido.id}`} style={{ color: '#3b82f6', textDecoration: 'none', fontWeight: 'bold', fontSize: '12px' }}>Ver</Link>
-                                            </td>
-                                        </tr>
-                                    )) : (
-                                        <tr><td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: 'var(--admin-text-muted)', fontSize: '13px' }}>Este usuario no tiene pedidos.</td></tr>
-                                    )}
-                                </tbody>
-                            </table>
+                    {/* Carrito Activo y Wishlist */}
+                    {(cliente.carrito?.items?.length > 0 || cliente.listas?.length > 0) && (
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                            {/* Carrito Activo */}
+                            <div style={{ background: 'var(--admin-bg-panel)', borderRadius: '12px', padding: '20px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
+                                <h2 style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--admin-text-main)', borderBottom: '1px solid var(--admin-border)', paddingBottom: '10px', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                                    Carrito Activo
+                                </h2>
+                                {cliente.carrito?.items?.length > 0 ? (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        {cliente.carrito.items.map(item => (
+                                            <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', padding: '8px', borderBottom: '1px solid var(--admin-border)' }}>
+                                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                                    <div style={{ width: '32px', height: '32px', background: '#f3f4f6', borderRadius: '4px', overflow: 'hidden' }}>
+                                                        {item.producto?.imagen ? <img src={item.producto.imagen} alt="img" style={{ width: '100%', height: '100%', objectFit: 'cover' }}/> : null}
+                                                    </div>
+                                                    <div>
+                                                        <div style={{ fontWeight: 'bold', color: 'var(--admin-text-main)' }}>{item.producto?.nombre || 'Producto'}</div>
+                                                        <div style={{ color: 'var(--admin-text-muted)' }}>Cant: {item.cantidad}</div>
+                                                    </div>
+                                                </div>
+                                                <div style={{ fontWeight: 'bold', color: '#10b981' }}>S/ {item.precio * item.cantidad}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p style={{ fontSize: '13px', color: 'var(--admin-text-muted)' }}>El carrito está vacío.</p>
+                                )}
+                            </div>
+
+                            {/* Wishlist */}
+                            <div style={{ background: 'var(--admin-bg-panel)', borderRadius: '12px', padding: '20px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
+                                <h2 style={{ fontSize: '16px', fontWeight: 'bold', color: 'var(--admin-text-main)', borderBottom: '1px solid var(--admin-border)', paddingBottom: '10px', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ec4899" strokeWidth="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                                    Lista de Deseos
+                                </h2>
+                                {cliente.listas?.length > 0 ? (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        {cliente.listas.map(lista => (
+                                            <div key={lista.id}>
+                                                <h4 style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--admin-text-muted)', marginBottom: '8px', textTransform: 'uppercase' }}>{lista.nombre}</h4>
+                                                {lista.items?.map(item => (
+                                                    <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', padding: '4px 0' }}>
+                                                        <span style={{ color: '#ec4899' }}>♥</span>
+                                                        <span style={{ color: 'var(--admin-text-main)' }}>{item.producto?.nombre}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p style={{ fontSize: '13px', color: 'var(--admin-text-muted)' }}>Sin listas de deseos.</p>
+                                )}
+                            </div>
                         </div>
-                    </div>
+                    )}
+                    
+                    {/* Historial de Pedidos */}
 
                     {/* Chats Omnicanal */}
                     <div style={{ background: 'var(--admin-bg-panel)', borderRadius: '12px', padding: '20px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>

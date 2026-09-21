@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Head, router } from '@inertiajs/react';
-import CrmLayout from '../../../Layouts/CrmLayout';
+import TwentyCrmLayout from '../../../Layouts/TwentyCrmLayout';
 import { 
     MessageSquare, Send, Paperclip, Check, CheckCheck, 
     ChevronLeft, Search, Bot, User, Clock, CheckCircle2,
@@ -593,6 +593,7 @@ function InboxIndex() {
             case 'whatsapp': return <div className="channel-icon-wa"><WhatsAppIcon /></div>;
             case 'messenger': return <div className="channel-icon-msn"><MessengerIcon /></div>;
             case 'instagram': return <div className="channel-icon-ig"><InstagramIcon /></div>;
+            case 'web': return <div className="channel-icon-web"><Bot size={14} /></div>;
             default: return <MessageSquare size={14} />;
         }
     };
@@ -620,7 +621,7 @@ function InboxIndex() {
     // ═══════════════════════════════════════════════════════════
     // ═══════════════════════════════════════════════════════════
     return (
-        <CrmLayout title="Omnicanal CRM">
+        <TwentyCrmLayout title="Omnicanal CRM">
             <div className={`inbox-root ${isMobileChatOpen ? 'chat-open' : ''}`} style={{ height: '100%', width: '100%', position: 'relative' }}>
                 <Head title="Omnicanal CRM" />
 
@@ -664,6 +665,9 @@ function InboxIndex() {
                     </button>
                     <button className={`inbox-filter-btn ${filter === 'instagram' ? 'active' : ''}`} onClick={() => setFilter('instagram')}>
                         <InstagramIcon /> IG
+                    </button>
+                    <button className={`inbox-filter-btn ${filter === 'web' ? 'active' : ''}`} onClick={() => setFilter('web')}>
+                        <Bot size={14} /> Web
                     </button>
                 </div>
 
@@ -930,6 +934,6 @@ function InboxIndex() {
                 )}
             </div>
         </div>
-        </CrmLayout>
+        </TwentyCrmLayout>
     );
 }
