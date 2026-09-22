@@ -22,8 +22,10 @@ class DashboardController extends Controller
         $endDate = $request->query('end_date', now()->toDateString());
         $sortOrder = $request->query('sort_order', 'desc');
         $sortBy = $request->query('sort_by', 'created_at');
+        $status = $request->query('status');
+        $q = $request->query('q');
 
-        $stats = $this->analyticsService->getDashboardStats($startDate, $endDate, $sortBy, $sortOrder);
+        $stats = $this->analyticsService->getDashboardStats($startDate, $endDate, $sortBy, $sortOrder, $status, $q);
 
         return Inertia::render('Admin/Dashboard', array_merge($stats, [
             'logoUrl' => ConfiguracionSitio::obtener('logo_url'),
@@ -31,7 +33,9 @@ class DashboardController extends Controller
                 'start_date' => $startDate,
                 'end_date' => $endDate,
                 'sort_order' => $sortOrder,
-                'sort_by' => $sortBy
+                'sort_by' => $sortBy,
+                'status' => $status,
+                'q' => $q
             ]
         ]));
     }
@@ -50,8 +54,10 @@ class DashboardController extends Controller
     {
         $startDate = $request->query('start_date', now()->subDays(30)->toDateString());
         $endDate = $request->query('end_date', now()->toDateString());
+        $status = $request->query('status');
+        $q = $request->query('q');
 
-        $stats = $this->analyticsService->getDashboardStats($startDate, $endDate, 'created_at', 'desc');
+        $stats = $this->analyticsService->getDashboardStats($startDate, $endDate, 'created_at', 'desc', $status, $q);
 
         $logoUrl = ConfiguracionSitio::obtener('logo_url');
         $logoBase64 = null;
@@ -83,5 +89,30 @@ class DashboardController extends Controller
         return \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.dashboard', $data)
             ->setPaper('A4', 'portrait')
             ->download('reporte_dashboard_' . date('Y-m-d') . '.pdf');
+    }
+    public function exportarExcel(Request $request)
+    {
+        $startDate = $request->query('start_date', now()->subDays(30)->toDateString());
+        $endDate = $request->query('end_date', now()->toDateString());
+        $status = $request->query('status');
+        $q = $request->query('q');
+
+        $stats = $this->analyticsService->getDashboardStats($startDate, $endDate, 'created_at', 'desc', $status, $q);
+
+        $data = [
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+            'ventasTotal' => $stats['ventasTotal'],
+            'costosTotal' => $stats['costosTotal'],
+            'gananciaNeta' => $stats['gananciaNeta'],
+            'pedidosCount' => $stats['totalPedidos'],
+            'pedidos' => $stats['pedidosRecientes'],
+            'topProductosVendidos' => $this->analyticsService->getTopProducts($startDate, $endDate)
+        ];
+
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\DashboardExport($data), 
+            'reporte_dashboard_' . date('Y-m-d') . '.xlsx'
+        );
     }
 }

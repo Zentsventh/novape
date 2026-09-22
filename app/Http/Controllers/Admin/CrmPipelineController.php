@@ -129,4 +129,16 @@ class CrmPipelineController extends Controller
         
         return $pdf->download('Cotizacion_Deal_'.$deal->id.'.pdf');
     }
+
+    public function updateCustomFields(Request $request, int $id)
+    {
+        $deal = CrmDeal::findOrFail($id);
+        
+        $fields = $request->input('custom_fields', []);
+        
+        $deal->custom_fields = array_merge((array)$deal->custom_fields, $fields);
+        $deal->save();
+
+        return back()->with('success', 'Campos personalizados actualizados correctamente');
+    }
 }

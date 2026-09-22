@@ -16,12 +16,15 @@ export default function Dashboard({
 
     const [startDate, setStartDate] = useState(filters.start_date || '');
     const [endDate, setEndDate] = useState(filters.end_date || '');
-    const [searchQuery, setSearchQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState(filters.status || '');
+    const [searchQuery, setSearchQuery] = useState(filters.q || '');
 
     const applyFilters = () => {
         router.get('/admin', {
             start_date: startDate,
             end_date: endDate,
+            status: statusFilter,
+            q: searchQuery,
             sort_by: filters.sort_by,
             sort_order: filters.sort_order
         }, { preserveState: true });
@@ -30,6 +33,8 @@ export default function Dashboard({
     const clearFilters = () => {
         setStartDate('');
         setEndDate('');
+        setStatusFilter('');
+        setSearchQuery('');
         router.get('/admin', {}, { preserveState: true });
     };
 
@@ -38,6 +43,8 @@ export default function Dashboard({
         router.get('/admin', {
             start_date: startDate,
             end_date: endDate,
+            status: statusFilter,
+            q: searchQuery,
             sort_by: column,
             sort_order: filters.sort_by === column ? currentOrder : 'desc'
         }, { preserveState: true });
@@ -86,8 +93,24 @@ export default function Dashboard({
                         <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ border: 'none', background: 'transparent', color: 'var(--admin-text-main)', outline: 'none', fontSize: '13px' }} />
                         <span style={{ color: 'var(--admin-text-muted)', fontSize: '12px' }}>hasta</span>
                         <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} style={{ border: 'none', background: 'transparent', color: 'var(--admin-text-main)', outline: 'none', fontSize: '13px' }} />
+                        
+                        <div style={{ width: '1px', height: '20px', background: 'var(--admin-border)', margin: '0 5px' }}></div>
+                        
+                        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={{ border: 'none', background: 'transparent', color: 'var(--admin-text-main)', outline: 'none', fontSize: '13px' }}>
+                            <option value="">Todos los Estados</option>
+                            <option value="pendiente">Pendiente</option>
+                            <option value="pagado">Pagado</option>
+                            <option value="enviado">Enviado</option>
+                            <option value="completado">Completado</option>
+                            <option value="cancelado">Cancelado</option>
+                        </select>
+
+                        <div style={{ width: '1px', height: '20px', background: 'var(--admin-border)', margin: '0 5px' }}></div>
+                        
+                        <input type="text" placeholder="Buscar pedido..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} style={{ border: 'none', background: 'transparent', color: 'var(--admin-text-main)', outline: 'none', fontSize: '13px', width: '120px' }} />
+
                         <button onClick={applyFilters} style={{ background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', padding: '4px 12px', cursor: 'pointer', marginLeft: '5px', fontSize: '12px', fontWeight: 'bold' }}>Filtrar</button>
-                        {(startDate || endDate) && <button onClick={clearFilters} style={{ background: 'rgba(100,116,139,0.1)', color: '#64748B', border: 'none', borderRadius: '6px', padding: '4px 8px', cursor: 'pointer', marginLeft: '5px', fontSize: '12px', fontWeight: 'bold' }}>X</button>}
+                        {(startDate || endDate || statusFilter || searchQuery) && <button onClick={clearFilters} style={{ background: 'rgba(100,116,139,0.1)', color: '#64748B', border: 'none', borderRadius: '6px', padding: '4px 8px', cursor: 'pointer', marginLeft: '5px', fontSize: '12px', fontWeight: 'bold' }}>X</button>}
                     </div>
                     <Link 
                         href="/admin/pedidos" 
@@ -96,6 +119,15 @@ export default function Dashboard({
                     >
                         Gestionar Pedidos
                     </Link>
+                    <a 
+                        href={`/admin/pedidos/exportar-excel?start_date=${startDate || ''}&end_date=${endDate || ''}`}
+                        target="_blank"
+                        className="admin-btn-secondary"
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        Exportar Excel
+                    </a>
                     <a 
                         href={`/admin/pedidos/exportar-pdf?start_date=${startDate || ''}&end_date=${endDate || ''}`}
                         target="_blank"

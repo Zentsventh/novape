@@ -67,6 +67,9 @@ class ChatbotController extends Controller
 
                 broadcast(new NewMessageReceived($inboundMessage))->toOthers();
                 broadcast(new ConversationUpdated($conversation->refresh()))->toOthers();
+
+                // Detectar si el visitante se identifica por nombre
+                $this->detectAndUpdateContactName($contact, $lastUserMessage, $conversation);
             }
 
             // Si el bot no está pausado, obtener respuesta de Gemini
@@ -296,6 +299,9 @@ class ChatbotController extends Controller
                 'first_interaction_at' => now(),
                 'last_interaction_at' => now(),
             ]);
+
+            // Asignar nombre único con el ID del contacto
+            $contact->update(['name' => 'Visitante Web #' . $contact->id]);
         }
 
         return $contact;
@@ -346,5 +352,51 @@ class ChatbotController extends Controller
             ->whereNotIn('status', ['resolved', 'closed'])
             ->latest('updated_at')
             ->first();
+    }
+
+    /**
+     * Detectar si el visitante se identifica por nombre y actualizar el contacto.
+     * Patrones soportados: "Me llamo X", "Soy X", "Mi nombre es X", etc.
+     */
+    private function detectAndUpdateContactName(
+        OmnichannelContact $contact,
+        string $message,
+        OmnichannelConversation $conversation
+    ): void {
+        // Solo actualizar si el contacto tiene nombre genérico de visitante
+        if (!str_starts_with($contact->name, 'Visitante Web')) {
+            return;
+        }
+
+        $message = trim($message);
+
+        // Patrones comunes para identificarse en español
+        $patterns = [
+            '/^(?:me\s+llamo|soy|mi\s+nombre\s+es)\s+([A-Za-záéíóúñÁÉÍÓÚÑüÜ]{2,}(?:\s+[A-Za-záéíóúñÁÉÍÓÚÑüÜ]{2,})*)/iu',
+            '/^(?:hola[,!]?\s+)?(?:me\s+llamo|soy|mi\s+nombre\s+es)\s+([A-Za-záéíóúñÁÉÍÓÚÑüÜ]{2,}(?:\s+[A-Za-záéíóúñÁÉÍÓÚÑüÜ]{2,})*)/iu',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $message, $matches)) {
+                $detectedName = trim($matches[1]);
+
+                // Validar que no sea una palabra genérica
+                $genericWords = ['cliente', 'usuario', 'visitante', 'nadie', 'yo', 'tu', 'el', 'ella', 'que', 'de'];
+                if (in_array(mb_strtolower($detectedName), $genericWords)) {
+                    return;
+                }
+
+                // Capitalizar cada palabra del nombre
+                $detectedName = mb_convert_case($detectedName, MB_CASE_TITLE, 'UTF-8');
+
+                $contact->update(['name' => $detectedName]);
+
+                // Broadcast la actualización para que el CRM refleje el nuevo nombre
+                broadcast(new ConversationUpdated($conversation->refresh()))->toOthers();
+
+                \Illuminate\Support\Facades\Log::info("Contacto #{$contact->id} identificado como: {$detectedName}");
+                return;
+            }
+        }
     }
 }

@@ -35,5 +35,7 @@ class AppServiceProvider extends ServiceProvider
                 }
             });
         }
+
+        \App\Models\Pedido::observe(\App\Observers\PedidoObserver::class);
     }
 }

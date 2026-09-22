@@ -165,6 +165,13 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/perfil/seguimiento', [ShippingController::class, 'trackPage'])->name('perfil.seguimiento');
     Route::get('/factura/ecommerce/{id}/descargar', [InvoiceController::class, 'descargarComprobante'])->name('factura.ecommerce.descargar');
+
+    // Devoluciones / RMA
+    Route::controller(\App\Http\Controllers\RmaRequestController::class)->group(function () {
+        Route::get('/perfil/devoluciones', 'index')->name('perfil.rma.index');
+        Route::post('/perfil/devoluciones', 'store')->name('perfil.rma.store');
+        Route::get('/perfil/devoluciones/{id}', 'show')->name('perfil.rma.show');
+    });
 });
 
 // ==========================================
@@ -182,11 +189,36 @@ Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
     Route::controller(DashboardController::class)->group(function () {
         Route::get('/', 'dashboard')->name('admin.dashboard')->middleware('permiso:ver_dashboard');
         Route::get('/pedidos/exportar-pdf', 'exportarPdf')->name('admin.pedidos.exportar_pdf')->middleware('permiso:ver_dashboard');
+        Route::get('/pedidos/exportar-excel', 'exportarExcel')->name('admin.pedidos.exportar_excel')->middleware('permiso:ver_dashboard');
         Route::get('/buscar', 'globalSearch')->name('admin.buscar');
+    });
+
+    Route::get('/analiticas', [AnaliticasController::class, 'index'])->name('admin.analiticas')->middleware('permiso:ver_dashboard');
+
+    Route::get('/audit-logs', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('admin.audits')->middleware('permiso:ver_dashboard');
+
+    // Notificaciones
+    Route::controller(\App\Http\Controllers\Admin\NotificationController::class)->prefix('notificaciones')->group(function () {
+        Route::get('/', 'index')->name('admin.notificaciones');
+        Route::post('/{id}/read', 'markAsRead')->name('admin.notificaciones.read');
+        Route::post('/read-all', 'markAllAsRead')->name('admin.notificaciones.read_all');
+    });
+
+    // Importación de Clientes
+    Route::controller(\App\Http\Controllers\Admin\CustomerImportController::class)->prefix('clientes/importar')->middleware('permiso:usuarios.gestionar')->group(function () {
+        Route::get('/', 'index')->name('admin.clientes.import');
+        Route::post('/preview', 'preview')->name('admin.clientes.import.preview');
+        Route::post('/process', 'process')->name('admin.clientes.import.process');
     });
 
     Route::controller(\App\Http\Controllers\Admin\CrmDashboardController::class)->prefix('crm')->group(function () {
         Route::get('/dashboard', 'index')->name('admin.crm.dashboard');
+    });
+
+    Route::controller(\App\Http\Controllers\Admin\CrmCustomFieldController::class)->prefix('crm/custom-fields')->group(function () {
+        Route::get('/', 'index')->name('admin.crm.custom_fields.index');
+        Route::post('/', 'store')->name('admin.crm.custom_fields.store');
+        Route::delete('/{customField}', 'destroy')->name('admin.crm.custom_fields.destroy');
     });
 
     Route::controller(\App\Http\Controllers\Admin\CrmTaskController::class)->prefix('crm')->group(function () {
@@ -225,6 +257,7 @@ Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
         Route::post('/deals', 'store')->name('admin.crm.deals.store');
         Route::put('/deals/{id}/move', 'move')->name('admin.crm.deals.move');
         Route::get('/deals/{id}', 'show')->name('admin.crm.deals.show');
+        Route::post('/deals/{id}/custom-fields', 'updateCustomFields')->name('admin.crm.deals.updateCustomFields');
         Route::post('/deals/{id}/activities', 'storeActivity')->name('admin.crm.deals.activities.store');
         
         // Cotizador Integrado
@@ -248,9 +281,19 @@ Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
         Route::post('/evidence/{id}/resolve', 'resolveEvidence')->name('admin.crm.settings.evidence.resolve');
     });
 
+    // Devoluciones / RMA
+    Route::controller(\App\Http\Controllers\Admin\RmaRequestController::class)->prefix('rma')->group(function () {
+        Route::get('/', 'index')->name('admin.rma.index');
+        Route::get('/{id}', 'show')->name('admin.rma.show');
+        Route::put('/{id}/status', 'updateStatus')->name('admin.rma.update_status');
+    });
+
     // Marketing Cloud
-    Route::controller(\App\Http\Controllers\Admin\MarketingCampaignController::class)->prefix('marketing')->group(function () {
-        Route::get('/campaigns', 'index')->name('admin.marketing.campaigns');
+    Route::controller(\App\Http\Controllers\Admin\MarketingCampaignController::class)->prefix('marketing/campaigns')->group(function () {
+        Route::get('/', 'index')->name('admin.marketing.campaigns');
+        Route::get('/create', 'create')->name('admin.marketing.campaigns.create');
+        Route::post('/', 'store')->name('admin.marketing.campaigns.store');
+        Route::post('/{campaign}/send', 'send')->name('admin.marketing.campaigns.send');
     });
 
     Route::post('/clientes/{id}/notas', [\App\Http\Controllers\Admin\CustomerController::class, 'storeNota'])->name('admin.clientes.notas.store');
@@ -375,6 +418,7 @@ Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
         Route::get('/', 'index')->name('admin.clientes')->middleware('permiso:ver_usuarios');
         Route::get('/exportar', 'export')->name('admin.exportar.clientes')->middleware('permiso:ver_usuarios');
         Route::get('/create', 'create')->name('admin.clientes.create')->middleware('permiso:editar_usuario');
+
         Route::post('/', 'store')->name('admin.clientes.store')->middleware('permiso:editar_usuario');
         Route::get('/{id}', 'show')->name('admin.clientes.show')->middleware('permiso:usuarios.gestionar');
         Route::get('/{id}/api-profile', 'apiProfile')->name('admin.clientes.api_profile')->middleware('permiso:usuarios.gestionar');

@@ -32,6 +32,7 @@ class ProfileController extends Controller
         $datosReembolso = $usuario->datosReembolso()->first();
         $listas = $usuario->listas()->with('items.producto.imagenes')->get();
         $sesiones = \DB::table('sessions')->where('user_id', $usuario->id)->orderBy('last_activity', 'desc')->get();
+        $pointsHistory = \App\Models\LoyaltyPointsHistory::where('usuario_id', $usuario->id)->orderBy('created_at', 'desc')->get();
         $tab = $request->query('tab', 'home');
 
         $categoriaProductos = \Illuminate\Support\Facades\Cache::remember('home_categorias', 3600, function () {
@@ -54,6 +55,7 @@ class ProfileController extends Controller
             'datosReembolso' => $datosReembolso,
             'listas' => $listas,
             'sesiones' => $sesiones,
+            'pointsHistory' => $pointsHistory,
             'activeTabParam' => $tab,
             'categoriaProductos' => $categoriaProductos,
         ]);

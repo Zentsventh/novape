@@ -65,24 +65,89 @@ class AutomationEngineService
     private static function executeActions(array $actions, Model $model, array $context): void
     {
         foreach ($actions as $action) {
-            if (($action['type'] ?? '') === 'webhook') {
-                self::fireWebhook($action['url'], $model, $context);
+            $type = $action['type'] ?? '';
+            
+            try {
+                if ($type === 'webhook') {
+                    self::fireWebhook($action['url'], $model, $context);
+                } elseif ($type === 'send_email') {
+                    self::sendEmail($action['message'], $model);
+                } elseif ($type === 'send_coupon') {
+                    self::sendCoupon($action['message'], $model);
+                } elseif ($type === 'create_task') {
+                    self::createTask($action['message'], $model);
+                }
+                Log::info("Automation Action executed: {$type} for model " . $model->getKey());
+            } catch (\Exception $e) {
+                Log::error("Automation Action failed: {$type} for model " . $model->getKey() . ". Error: " . $e->getMessage());
             }
         }
     }
 
     private static function fireWebhook(string $url, Model $model, array $context): void
     {
-        try {
-            Http::timeout(5)->post($url, [
-                'event' => 'crm_automation',
-                'model' => $model->getMorphClass(),
-                'data' => $model->toArray(),
-                'context' => $context
+        Http::timeout(5)->post($url, [
+            'event' => 'crm_automation',
+            'model' => $model->getMorphClass(),
+            'data' => $model->toArray(),
+            'context' => $context
+        ]);
+    }
+
+    private static function sendEmail(string $message, Model $model): void
+    {
+        // Simple logic for sending email if model is CrmDeal or has contact info
+        $email = null;
+        if (method_exists($model, 'company') && $model->company) {
+            $email = $model->company->email;
+        } elseif (isset($model->email)) {
+            $email = $model->email;
+        }
+
+        if ($email) {
+            \Illuminate\Support\Facades\Mail::raw($message, function($msg) use ($email) {
+                $msg->to($email)->subject('Notificación Automática');
+            });
+        }
+    }
+
+    private static function sendCoupon(string $message, Model $model): void
+    {
+        // Example logic: create a 10% off coupon and send it
+        $email = null;
+        if (method_exists($model, 'company') && $model->company) {
+            $email = $model->company->email;
+        }
+
+        if ($email) {
+            $couponCode = strtoupper(substr(md5(uniqid()), 0, 8));
+            \App\Models\Cupon::create([
+                'codigo' => $couponCode,
+                'tipo_descuento' => 'porcentaje',
+                'valor' => 10,
+                'activo' => true,
+                'fecha_fin' => now()->addDays(30)
             ]);
-            Log::info("Webhook fired to $url for model " . $model->getKey());
-        } catch (\Exception $e) {
-            Log::error("Failed to fire webhook to $url: " . $e->getMessage());
+
+            $fullMessage = $message . "\n\nTu código de cupón es: " . $couponCode;
+            
+            \Illuminate\Support\Facades\Mail::raw($fullMessage, function($msg) use ($email) {
+                $msg->to($email)->subject('¡Tienes un cupón de regalo!');
+            });
+        }
+    }
+
+    private static function createTask(string $message, Model $model): void
+    {
+        if (get_class($model) === \App\Models\CrmDeal::class) {
+            \App\Models\CrmActivity::create([
+                'deal_id' => $model->id,
+                'usuario_id' => 1, // System admin
+                'tipo' => 'tarea',
+                'contenido' => '🤖 Tarea automática: ' . $message,
+                'fecha_vencimiento' => now()->addDays(1),
+                'completada' => false,
+            ]);
         }
     }
 }

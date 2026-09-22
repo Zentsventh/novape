@@ -23,6 +23,7 @@ class ConversationUpdated implements ShouldBroadcast
         $this->conversationData = [
             'id' => $conversation->id,
             'contactName' => $conversation->contact->name ?? 'Desconocido',
+            'initials' => $this->computeInitials($conversation->contact->name ?? 'XX'),
             'phone' => $conversation->contact->phone_number ?? null,
             'channel' => $conversation->channel,
             'lastMessagePreview' => $conversation->last_message_preview,
@@ -34,6 +35,15 @@ class ConversationUpdated implements ShouldBroadcast
             'assignedUserId' => $conversation->assigned_user_id,
             'agentName' => $conversation->assignedUser?->nombres ?? null,
         ];
+    }
+
+    private function computeInitials(string $name): string
+    {
+        $words = explode(' ', trim($name));
+        if (count($words) >= 2) {
+            return strtoupper(mb_substr($words[0], 0, 1) . mb_substr($words[1], 0, 1));
+        }
+        return strtoupper(mb_substr($name, 0, 2));
     }
 
     public function broadcastOn(): array

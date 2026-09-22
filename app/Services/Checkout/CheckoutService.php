@@ -19,7 +19,7 @@ use Illuminate\Support\Str;
 
 class CheckoutService
 {
-    public function validateAndCalculateTotal(array $cart, ?string $couponCode, float $shippingCost): array
+    public function validateAndCalculateTotal(array $cart, ?string $couponCode, float $shippingCost, bool $usePoints = false): array
     {
         $total = 0;
         foreach ($cart as &$item) {
@@ -65,10 +65,34 @@ class CheckoutService
             }
         }
 
+        $puntosUsados = 0;
+        $descuentoPuntos = 0;
+
+        if ($usePoints && auth()->check()) {
+            $user = auth()->user();
+            if ($user->loyalty_points > 0) {
+                // Assuming 10 points = S/ 1
+                $maxDiscount = $user->loyalty_points / 10;
+                
+                // Can't discount more than the remaining total
+                $remainingTotal = max(0, $total - $descuentoMonto);
+                
+                if ($maxDiscount > $remainingTotal) {
+                    $descuentoPuntos = $remainingTotal;
+                    $puntosUsados = $remainingTotal * 10;
+                } else {
+                    $descuentoPuntos = $maxDiscount;
+                    $puntosUsados = $user->loyalty_points;
+                }
+                
+                $descuentoMonto += $descuentoPuntos;
+            }
+        }
+
         $totalConDescuento = max(0, $total - $descuentoMonto) + $shippingCost;
 
-        if ($totalConDescuento < 2.00) {
-            throw new \Exception('El monto mínimo es de S/ 2.00');
+        if ($totalConDescuento < 2.00 && $totalConDescuento > 0) {
+            throw new \Exception('El monto mínimo es de S/ 2.00 (después de descuentos)');
         }
 
         return [
@@ -76,7 +100,8 @@ class CheckoutService
             'totalConDescuento' => $totalConDescuento,
             'descuentoMonto' => $descuentoMonto,
             'couponId' => $couponId,
-            'cart' => $cart
+            'cart' => $cart,
+            'puntosUsados' => $puntosUsados,
         ];
     }
 
@@ -154,6 +179,7 @@ class CheckoutService
                 'direccion_facturacion' => $direccionFacturacion,
                 'direccion_envio_snapshot' => $shippingAddress,
                 'cupon_id' => $checkoutData['couponId'],
+                'puntos_usados' => $checkoutData['puntosUsados'] ?? 0,
             ];
 
             if (!$pedido) {
@@ -217,6 +243,19 @@ class CheckoutService
 
                 if ($pedido->cupon_id) {
                     Cupon::where('id', $pedido->cupon_id)->increment('usos_actuales');
+                }
+
+                if ($pedido->puntos_usados > 0 && $pedido->usuario_id) {
+                    $user = \App\Models\Usuario::find($pedido->usuario_id);
+                    if ($user) {
+                        $user->decrement('loyalty_points', $pedido->puntos_usados);
+                        \App\Models\LoyaltyPointsHistory::create([
+                            'usuario_id' => $user->id,
+                            'points' => $pedido->puntos_usados,
+                            'type' => 'redeemed',
+                            'description' => "Puntos usados en el pedido {$pedido->codigo}",
+                        ]);
+                    }
                 }
 
                 foreach ($pedido->items as $item) {

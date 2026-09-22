@@ -142,19 +142,55 @@ export default function Index({ automations = [] }) {
                         </select>
                     </div>
 
-                    {/* Simplicity: Only webhook action supported right now */}
+                    {/* Actions Select */}
                     <div className="twenty-form-group">
-                        <label>Acción (Webhook URL)</label>
-                        <input 
-                            type="url" required className="twenty-input" placeholder="https://..."
-                            value={form.acciones[0].url} 
+                        <label>Tipo de Acción</label>
+                        <select 
+                            className="twenty-input"
+                            value={form.acciones[0]?.type || 'webhook'} 
                             onChange={e => {
+                                const type = e.target.value;
                                 const newAcc = [...form.acciones];
-                                newAcc[0].url = e.target.value;
+                                newAcc[0] = { type, url: '', email: '', message: '' };
                                 setForm({...form, acciones: newAcc});
                             }}
-                        />
+                        >
+                            <option value="webhook">Llamar Webhook</option>
+                            <option value="send_email">Enviar Correo Electrónico</option>
+                            <option value="send_coupon">Enviar Cupón de Descuento</option>
+                            <option value="create_task">Asignar Tarea en CRM</option>
+                        </select>
                     </div>
+
+                    {form.acciones[0]?.type === 'webhook' && (
+                        <div className="twenty-form-group">
+                            <label>URL del Webhook</label>
+                            <input 
+                                type="url" required className="twenty-input" placeholder="https://..."
+                                value={form.acciones[0].url || ''} 
+                                onChange={e => {
+                                    const newAcc = [...form.acciones];
+                                    newAcc[0].url = e.target.value;
+                                    setForm({...form, acciones: newAcc});
+                                }}
+                            />
+                        </div>
+                    )}
+
+                    {(form.acciones[0]?.type === 'send_email' || form.acciones[0]?.type === 'send_coupon') && (
+                        <div className="twenty-form-group">
+                            <label>Mensaje / Asunto</label>
+                            <input 
+                                type="text" required className="twenty-input" placeholder="Gracias por tu compra..."
+                                value={form.acciones[0].message || ''} 
+                                onChange={e => {
+                                    const newAcc = [...form.acciones];
+                                    newAcc[0].message = e.target.value;
+                                    setForm({...form, acciones: newAcc});
+                                }}
+                            />
+                        </div>
+                    )}
                     
                     <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                         <button type="button" className="twenty-btn twenty-btn-secondary" onClick={() => setDrawerOpen(false)}>Cancelar</button>

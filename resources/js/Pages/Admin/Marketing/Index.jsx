@@ -18,10 +18,13 @@ export default function MarketingIndex({ campaigns, stats }) {
                         Gestiona tus campañas, automatizaciones y segmentación RFM.
                     </p>
                 </div>
-                <button style={{ background: '#f59e0b', color: 'white', border: 'none', padding: '10px 16px', borderRadius: '8px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                <Link 
+                    href={route('admin.marketing.campaigns.create')}
+                    style={{ background: '#f59e0b', color: 'white', border: 'none', padding: '10px 16px', borderRadius: '8px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', textDecoration: 'none' }}
+                >
                     <Plus size={18} />
                     Nueva Campaña
-                </button>
+                </Link>
             </div>
 
             {/* Audiencia / RFM Stats */}

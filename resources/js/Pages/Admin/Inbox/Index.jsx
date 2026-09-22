@@ -281,6 +281,13 @@ function InboxIndex() {
     const messagesEndRef = useRef(null);
     const searchTimeoutRef = useRef(null);
     const actionsMenuRef = useRef(null);
+    const pollingRef = useRef(null);
+    const activeConvRef = useRef(null);
+
+    // ─── Mantener ref sincronizada con activeConv ──────────────
+    useEffect(() => {
+        activeConvRef.current = activeConv;
+    }, [activeConv]);
 
     // ─── Efecto inicial ───────────────────────────────────────
     useEffect(() => {
@@ -300,9 +307,21 @@ function InboxIndex() {
                 });
         }
 
+        // ─── Polling fallback (cada 8s) ───────────────────────
+        pollingRef.current = setInterval(() => {
+            fetchConversationsSilent();
+            // Si hay una conversación activa, refrescar sus mensajes
+            if (activeConvRef.current) {
+                fetchMessagesSilent(activeConvRef.current.id);
+            }
+        }, 8000);
+
         return () => {
             if (window.Echo) {
                 window.Echo.leave('novape-inbox');
+            }
+            if (pollingRef.current) {
+                clearInterval(pollingRef.current);
             }
         };
     }, []);
@@ -357,6 +376,22 @@ function InboxIndex() {
         }
     };
 
+    // ─── Fetch conversaciones silencioso (polling) ────────────
+    const fetchConversationsSilent = async () => {
+        try {
+            const params = new URLSearchParams();
+            if (filter !== 'all') params.append('channel', filter);
+            if (searchQuery) params.append('search', searchQuery);
+            const res = await fetch(`/admin/api/omnichannel/conversations?${params}`);
+            if (!res.ok) return;
+            const data = await res.json();
+            setConversations(data.data || []);
+        } catch (error) {
+            // Silencioso: no mostrar toast en polling
+            console.warn('Polling conversations failed:', error);
+        }
+    };
+
     // ─── Fetch mensajes ───────────────────────────────────────
     const fetchMessages = async (convId) => {
         try {
@@ -370,6 +405,26 @@ function InboxIndex() {
             showToast('Error al cargar mensajes', 'error');
         } finally {
             setIsLoadingChat(false);
+        }
+    };
+
+    // ─── Fetch mensajes silencioso (polling) ──────────────────
+    const fetchMessagesSilent = async (convId) => {
+        try {
+            const res = await fetch(`/admin/api/omnichannel/conversations/${convId}/messages`);
+            if (!res.ok) return;
+            const data = await res.json();
+            const newMsgs = data.data || [];
+            setMessages(prev => {
+                if (newMsgs.length !== prev.length) {
+                    // Hay mensajes nuevos, actualizar y hacer scroll
+                    setTimeout(() => scrollToBottom(), 100);
+                    return newMsgs;
+                }
+                return prev;
+            });
+        } catch (error) {
+            console.warn('Polling messages failed:', error);
         }
     };
 

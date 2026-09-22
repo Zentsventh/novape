@@ -16,10 +16,11 @@ use Illuminate\Support\Collection;
 use Spatie\SchemalessAttributes\Casts\SchemalessAttributes;
 use Spatie\SchemalessAttributes\SchemalessAttributesTrait;
 use App\Models\CrmCompany;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class Usuario extends Authenticatable
+class Usuario extends Authenticatable implements Auditable
 {
-    use Notifiable, SoftDeletes, SchemalessAttributesTrait, HasFactory;
+    use HasFactory, Notifiable, SoftDeletes, SchemalessAttributesTrait, \OwenIt\Auditing\Auditable;
 
     protected $table = 'usuario';
 
@@ -94,10 +95,7 @@ class Usuario extends Authenticatable
         return $this->hasMany(UsuarioLista::class, 'usuario_id');
     }
 
-    public function carrito(): \Illuminate\Database\Eloquent\Relations\HasOne
-    {
-        return $this->hasOne(Carrito::class, 'usuario_id');
-    }
+
 
     public function crmDeals(): HasMany
     {

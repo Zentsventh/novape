@@ -13,7 +13,7 @@ import { useConfirm } from '@/Contexts/ConfirmContext';
 
 const ubigeo = ubigeoData.reniec;
 
-export default function Profile({ usuario = {}, pedidos = [], direcciones = [], tarjetas = [], datosReembolso = null, listas = [], sesiones = [], activeTabParam = 'home', categoriaProductos = [] }) {
+export default function Profile({ usuario = {}, pedidos = [], direcciones = [], tarjetas = [], datosReembolso = null, listas = [], sesiones = [], pointsHistory = [], activeTabParam = 'home', categoriaProductos = [] }) {
     const confirmDialog = useConfirm();
 
     const { auth, flash, errors: pageErrors, cart } = usePage().props;
@@ -298,6 +298,18 @@ export default function Profile({ usuario = {}, pedidos = [], direcciones = [], 
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', justifyContent: 'center', flex: '1 1 200px' }}>
                                     <Link href={`/perfil/compras/${pedido.codigo}`} style={{ width: '100%', padding: '10px 0', background: '#00B4FF', color: 'white', borderRadius: '24px', textAlign: 'center', fontSize: '13px', fontWeight: '600', textDecoration: 'none' }}>Revisar detalle</Link>
+                                    {(pedido.estado === 'Completado' || pedido.estado === 'Entregado') && (
+                                        <button onClick={() => {
+                                            router.post('/perfil/devoluciones', {
+                                                pedido_id: pedido.id,
+                                                type: 'warranty',
+                                                reason: 'defective',
+                                                description: 'Solicito iniciar un proceso de garantía/devolución para este pedido.'
+                                            });
+                                        }} style={{ width: '100%', padding: '10px 0', marginTop: '10px', background: 'transparent', color: '#e11d48', border: '1px solid #e11d48', borderRadius: '24px', textAlign: 'center', fontSize: '13px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }}>
+                                            Solicitar Garantía/Devolución
+                                        </button>
+                                    )}
                                     <button onClick={() => { 
                                         const prodId = primerItem?.variante?.producto_id || primerItem?.variante?.producto?.id;
                                         if (prodId) {
@@ -337,6 +349,10 @@ export default function Profile({ usuario = {}, pedidos = [], direcciones = [], 
                 <button onClick={() => changeView('perfil')} style={getStyles('perfil')}>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                     Datos personales
+                </button>
+                <button onClick={() => { router.get('/perfil/devoluciones') }} style={getStyles('devoluciones')}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                    Devoluciones y Garantías
                 </button>
                 <button onClick={() => changeView('direcciones')} style={getStyles('direcciones')}>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
@@ -696,7 +712,73 @@ export default function Profile({ usuario = {}, pedidos = [], direcciones = [], 
         </div>
     );
     };
+    const renderPuntos = () => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', borderRadius: '16px', padding: '32px', color: 'white', boxShadow: '0 10px 25px rgba(245,158,11,0.3)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                    <h2 style={{ margin: '0 0 8px 0', fontSize: '24px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Star fill="white" size={28} /> Novapuntos Disponibles
+                    </h2>
+                    <p style={{ margin: 0, opacity: 0.9 }}>Usa tus puntos para obtener descuentos en tus próximas compras.</p>
+                    <div style={{ fontSize: '48px', fontWeight: '900', marginTop: '16px' }}>{usuario?.loyalty_points || 0}</div>
+                    <p style={{ margin: '4px 0 0 0', opacity: 0.8 }}>Equivale a S/ {((usuario?.loyalty_points || 0) / 10).toFixed(2)} de descuento</p>
+                </div>
+                <div style={{ background: 'rgba(255,255,255,0.2)', padding: '20px', borderRadius: '12px', textAlign: 'center', backdropFilter: 'blur(10px)' }}>
+                    <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>Cómo ganar puntos:</div>
+                    <div style={{ fontSize: '24px', fontWeight: 'bold' }}>1 Punto</div>
+                    <div style={{ fontSize: '12px', opacity: 0.9 }}>por cada S/ 10 de compra</div>
+                </div>
+            </div>
 
+            <div style={{ background: 'white', borderRadius: '12px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
+                <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0' }}>
+                    <h3 style={{ margin: 0, fontSize: '16px', color: '#1e293b' }}>Historial de Puntos</h3>
+                </div>
+                
+                {pointsHistory && pointsHistory.length > 0 ? (
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                            <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', textAlign: 'left', color: '#64748b', fontSize: '12px', textTransform: 'uppercase' }}>
+                                <th style={{ padding: '16px 24px', fontWeight: '600' }}>Fecha</th>
+                                <th style={{ padding: '16px 24px', fontWeight: '600' }}>Descripción</th>
+                                <th style={{ padding: '16px 24px', fontWeight: '600' }}>Tipo</th>
+                                <th style={{ padding: '16px 24px', fontWeight: '600', textAlign: 'right' }}>Puntos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {pointsHistory.map((h) => (
+                                <tr key={h.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                    <td style={{ padding: '16px 24px', color: '#333', fontSize: '14px' }}>
+                                        {new Date(h.created_at).toLocaleDateString('es-PE')}
+                                    </td>
+                                    <td style={{ padding: '16px 24px', color: '#475569', fontSize: '14px' }}>
+                                        {h.description}
+                                    </td>
+                                    <td style={{ padding: '16px 24px' }}>
+                                        <span style={{ 
+                                            padding: '4px 8px', borderRadius: '12px', fontSize: '12px', fontWeight: '500',
+                                            background: h.type === 'earned' ? '#dcfce7' : '#fee2e2',
+                                            color: h.type === 'earned' ? '#16a34a' : '#ef4444'
+                                        }}>
+                                            {h.type === 'earned' ? 'Ganados' : 'Canjeados'}
+                                        </span>
+                                    </td>
+                                    <td style={{ padding: '16px 24px', textAlign: 'right', fontWeight: 'bold', color: h.type === 'earned' ? '#16a34a' : '#ef4444' }}>
+                                        {h.type === 'earned' ? '+' : '-'}{h.points}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                ) : (
+                    <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
+                        <Star size={40} style={{ opacity: 0.3, marginBottom: '12px' }} />
+                        <p style={{ margin: 0 }}>No tienes historial de puntos aún.</p>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
     const renderSesiones = () => (
         <div style={{ flex: 1 }}>
             <h2 style={{ fontSize: '20px', color: '#333', fontWeight: '400', marginBottom: '25px' }}>Dispositivos vinculados</h2>
@@ -783,6 +865,7 @@ export default function Profile({ usuario = {}, pedidos = [], direcciones = [], 
                         {currentView === 'tarjetas' && renderTarjetas()}
                         {currentView === 'reembolso' && renderReembolsos()}
                         {currentView === 'listas' && renderListas()}
+                        {currentView === 'puntos' && renderPuntos()}
                         {currentView === 'sesiones' && renderSesiones()}
                         {currentView === 'configuracion' && renderConfiguracion()}
                     </div>

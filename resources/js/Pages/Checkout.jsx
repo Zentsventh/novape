@@ -110,7 +110,7 @@ const COSTOS_ENVIO = {
     'Santa Rosa': 25,
 };
 
-export default function Checkout({ cart = [], total = 0 }) {
+export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
     const { auth } = usePage().props;
     const user = auth?.user;
 
@@ -220,6 +220,9 @@ export default function Checkout({ cart = [], total = 0 }) {
     const [appliedCoupon, setAppliedCoupon] = useState(null);
     const [couponMessage, setCouponMessage] = useState(null);
     const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+    
+    // Puntos de fidelidad
+    const [usePoints, setUsePoints] = useState(false);
     const [highlightTotal, setHighlightTotal] = useState(false);
 
     useEffect(() => {
@@ -429,6 +432,15 @@ export default function Checkout({ cart = [], total = 0 }) {
 
     const [isFetchingIntent, setIsFetchingIntent] = useState(false);
     const [intentError, setIntentError] = useState(null);
+    const [usePoints, setUsePoints] = useState(false);
+    const user = auth?.user;
+    const loyaltyPoints = user?.loyalty_points || 0;
+
+    useEffect(() => {
+        if (step === 3) {
+            fetchIntent(appliedCoupon?.codigo || '');
+        }
+    }, [usePoints]);
 
     const fetchIntent = async (couponCodeStr) => {
         setIsFetchingIntent(true);
@@ -444,6 +456,7 @@ export default function Checkout({ cart = [], total = 0 }) {
                 shippingCost: apiShippingCost,
                 facturacion: facturacionData,
                 shippingAddress: addressData,
+                usePoints: usePoints,
             });
             const data = res.data;
             if (data.clientSecret) {
@@ -521,8 +534,17 @@ export default function Checkout({ cart = [], total = 0 }) {
         }
     }
 
+    let pointsDiscount = 0;
+    if (usePoints && loyaltyPoints > 0) {
+        pointsDiscount = loyaltyPoints / 10; // 10 puntos = 1 sol
+        const remainingTotal = Math.max(0, baseCartTotal - discountAmount);
+        if (pointsDiscount > remainingTotal) {
+            pointsDiscount = remainingTotal;
+        }
+    }
+
     const deliveryCost = deliveryType === 'domicilio' && addressData.distrito ? apiShippingCost : 0;
-    const cartTotal = Math.max(0, baseCartTotal - discountAmount) + deliveryCost;
+    const cartTotal = Math.max(0, baseCartTotal - discountAmount - pointsDiscount) + deliveryCost;
 
     return (
         <div className="efe-checkout-page">
@@ -1415,6 +1437,23 @@ export default function Checkout({ cart = [], total = 0 }) {
                                                     </p>
                                                 </div>
                                             )}
+
+                                            {user && loyaltyPoints > 0 && (
+                                                <div style={{ marginTop: '20px', padding: '16px', border: '1px dashed #f59e0b', borderRadius: '8px', background: '#fffbeb' }}>
+                                                    <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', margin: 0 }}>
+                                                        <input 
+                                                            type="checkbox" 
+                                                            checked={usePoints}
+                                                            onChange={(e) => setUsePoints(e.target.checked)}
+                                                            style={{ width: '20px', height: '20px', cursor: 'pointer' }}
+                                                        />
+                                                        <div>
+                                                            <div style={{ fontWeight: 'bold', color: '#b45309' }}>Usar mis Novapuntos</div>
+                                                            <div style={{ fontSize: '13px', color: '#d97706' }}>Tienes {loyaltyPoints} puntos disponibles (S/ {(loyaltyPoints/10).toFixed(2)} de descuento)</div>
+                                                        </div>
+                                                    </label>
+                                                </div>
+                                            )}
                                         </div>
 
                                         <h3
@@ -1852,6 +1891,12 @@ export default function Checkout({ cart = [], total = 0 }) {
                                 <div className="efe-summary-total-row" style={{ color: '#10b981' }}>
                                     <span>Descuento ({appliedCoupon.codigo})</span>
                                     <span>- S/ {formatPrice(discountAmount)}</span>
+                                </div>
+                            )}
+                            {pointsDiscount > 0 && (
+                                <div className="efe-summary-total-row" style={{ color: '#f59e0b' }}>
+                                    <span>Descuento por Puntos</span>
+                                    <span>- S/ {formatPrice(pointsDiscount)}</span>
                                 </div>
                             )}
                             <div

@@ -14,3 +14,6 @@ Schedule::command('stock:clear-expired-reservations')->everyFifteenMinutes();
 
 // Enviar correos de carritos abandonados (cada hora buscará carritos de 24h de antigüedad)
 Schedule::command('carts:recover-abandoned')->hourly();
+
+// Verificar stock bajo cada mañana
+Schedule::command('stock:check-alerts')->dailyAt('08:00');

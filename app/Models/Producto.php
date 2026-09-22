@@ -13,10 +13,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Cache;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class Producto extends Model
+class Producto extends Model implements Auditable
 {
-    use SoftDeletes, HasFactory;
+    use SoftDeletes, HasFactory, \OwenIt\Auditing\Auditable;
 
     protected $table = 'producto';
 

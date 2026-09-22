@@ -14,11 +14,21 @@ use Carbon\Carbon;
 
 class AnalyticsService
 {
-    public function getDashboardStats(string $startDate, string $endDate, string $sortBy, string $sortOrder): array
+    public function getDashboardStats(string $startDate, string $endDate, string $sortBy, string $sortOrder, ?string $status = null, ?string $q = null): array
     {
-        $dateFilterQuery = function ($query) use ($startDate, $endDate) {
+        $dateFilterQuery = function ($query) use ($startDate, $endDate, $status, $q) {
             if ($startDate) $query->whereDate('created_at', '>=', $startDate);
             if ($endDate) $query->whereDate('created_at', '<=', $endDate);
+            if ($status) $query->where('estado', $status);
+            if ($q) {
+                $query->where(function($sq) use ($q) {
+                    $sq->where('codigo', 'like', "%{$q}%")
+                       ->orWhereHas('usuario', function($uq) use ($q) {
+                           $uq->where('nombres', 'like', "%{$q}%")
+                              ->orWhere('apellidos', 'like', "%{$q}%");
+                       });
+                });
+            }
             return $query;
         };
 

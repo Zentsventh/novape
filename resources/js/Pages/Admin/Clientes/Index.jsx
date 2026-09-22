@@ -4,7 +4,11 @@ import TwentyCrmLayout from '../../../Layouts/TwentyCrmLayout';
 import TwentyTable from '../../../Components/Admin/CRM/TwentyTable';
 import TwentyRecordDrawer from '../../../Components/Admin/CRM/TwentyRecordDrawer';
 import { useConfirm } from '@/Contexts/ConfirmContext';
-import { Plus, Download } from 'lucide-react';
+import { 
+    Search, Plus, MoreHorizontal, Filter, 
+    Phone, Mail, MapPin, ExternalLink, Calendar, 
+    FileText, ShoppingBag, CreditCard, Bell, ChevronDown, CheckCircle, Trash2, ArrowRight, X, Upload, Download
+} from 'lucide-react';
 
 export default function Index() {
     const confirmDialog = useConfirm();
@@ -131,10 +135,20 @@ export default function Index() {
     ];
 
     const headerActions = (
-        <Link href="/admin/clientes/create" className="twenty-btn twenty-btn-primary" style={{ textDecoration: 'none' }}>
-            <Plus size={16} />
-            Nueva Persona
-        </Link>
+        <div style={{ display: 'flex', gap: '8px' }}>
+            <Link href="/admin/clientes/importar" className="twenty-btn twenty-btn-secondary" style={{ textDecoration: 'none' }}>
+                <Upload size={16} />
+                Importar CSV
+            </Link>
+            <Link href="/admin/exportar/clientes" className="twenty-btn twenty-btn-secondary" style={{ textDecoration: 'none' }}>
+                <Download size={16} />
+                Exportar
+            </Link>
+            <Link href="/admin/clientes/create" className="twenty-btn twenty-btn-primary" style={{ textDecoration: 'none' }}>
+                <Plus size={16} />
+                Nueva Persona
+            </Link>
+        </div>
     );
 
     return (

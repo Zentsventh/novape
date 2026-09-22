@@ -3,7 +3,7 @@ import { Link, usePage, router } from '@inertiajs/react';
 import {
     LayoutDashboard, MonitorSmartphone, ShoppingCart, Package,
     CreditCard, Wallet, Archive, Image, Users, Truck,
-    UserCog, Shield, Star, Settings, LogOut, Menu, X, Bell, Eye, Grid, Briefcase, Mail
+    UserCog, Shield, Star, Settings, LogOut, Menu, X, Bell, Eye, Grid, Briefcase, Mail, ShieldAlert
 } from 'lucide-react';
 import { useDeviceContext } from '@/Contexts/DeviceContext';
 import '../../css/admin/admin.css';
@@ -29,6 +29,7 @@ export default function AdminLayout({ children, logoUrl }) {
             title: 'Métricas',
             items: [
                 { href: '/admin', label: 'Dashboard', exact: true, permission: 'ver_dashboard', icon: <LayoutDashboard size={20} /> },
+                { href: '/admin/analiticas', label: 'Reportes y Analíticas', exact: true, permission: 'ver_dashboard', icon: <Grid size={20} /> },
             ]
         },
         {
@@ -56,6 +57,7 @@ export default function AdminLayout({ children, logoUrl }) {
                 { href: '/admin/gastos', label: 'Gastos', permission: 'reportes.ver', icon: <Wallet size={20} /> },
                 { href: '/admin/cupones', label: 'Cupones', permission: 'gestionar_cupones', icon: <Package size={20} /> },
                 { href: '/admin/banners', label: 'CMS Banners', permission: 'usuarios.gestionar', icon: <Image size={20} /> },
+                { href: '/admin/rma', label: 'Garantías/RMA', permission: 'pos.vender', icon: <ShieldAlert size={20} /> },
             ]
         },
         {
@@ -63,7 +65,18 @@ export default function AdminLayout({ children, logoUrl }) {
             items: [
                 { href: '/admin/trabajadores', label: 'Usuarios', permission: 'usuarios.gestionar', icon: <UserCog size={20} /> },
                 { href: '/admin/roles', label: 'Roles y Permisos', permission: 'usuarios.gestionar', icon: <Shield size={20} /> },
-                { href: '/admin/ajustes', label: 'Configuración', permission: 'usuarios.gestionar', icon: <Settings size={20} /> }
+                { href: '/admin/ajustes', label: 'Configuración', permission: 'usuarios.gestionar', icon: <Settings size={20} /> },
+                { href: '/admin/audit-logs', label: 'Audit Trail', permission: 'ver_dashboard', icon: <Shield size={20} /> },
+            ]
+        },
+        {
+            title: 'CRM / Sales Cloud',
+            items: [
+                { href: '/admin/crm/dashboard', label: 'Sales Cloud', permission: 'ver_dashboard', icon: <Briefcase size={20} />, exact: true },
+                { href: '/admin/crm/deals', label: 'Oportunidades', permission: 'ver_dashboard', icon: <DollarSign size={20} /> },
+                { href: '/admin/crm/companies', label: 'Empresas', permission: 'ver_dashboard', icon: <Building size={20} /> },
+                { href: '/admin/crm/automations', label: 'Automatización', permission: 'ver_dashboard', icon: <Zap size={20} /> },
+                { href: '/admin/crm/custom-fields', label: 'Campos Custom', permission: 'ver_dashboard', icon: <Tags size={20} /> },
             ]
         }
     ];
@@ -83,6 +96,30 @@ export default function AdminLayout({ children, logoUrl }) {
     const [showNotifs, setShowNotifs] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [appLauncherOpen, setAppLauncherOpen] = useState(false);
+    const [globalSearchQuery, setGlobalSearchQuery] = useState('');
+    const [globalSearchResults, setGlobalSearchResults] = useState(null);
+    const [isSearching, setIsSearching] = useState(false);
+    const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+
+    useEffect(() => {
+        if (globalSearchQuery.length > 2) {
+            setIsSearching(true);
+            const timer = setTimeout(() => {
+                fetch(`/admin/global-search?q=${globalSearchQuery}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        setGlobalSearchResults(data);
+                        setShowSearchDropdown(true);
+                        setIsSearching(false);
+                    });
+            }, 300);
+            return () => clearTimeout(timer);
+        } else {
+            setGlobalSearchResults(null);
+            setShowSearchDropdown(false);
+            setIsSearching(false);
+        }
+    }, [globalSearchQuery]);
 
     useEffect(() => {
         if (isMobile || isTablet) {
@@ -141,7 +178,7 @@ export default function AdminLayout({ children, logoUrl }) {
                 <nav className="admin-nav">
                     {visibleCategories.map((category, idx) => (
                         <div key={idx} className="admin-nav-category" style={{ marginBottom: '15px' }}>
-                            <div style={{ padding: '0 20px', fontSize: '0.75rem', textTransform: 'uppercase', color: '#64748b', fontWeight: '700', marginBottom: '5px', marginTop: idx > 0 ? '10px' : '0' }}>
+                            <div style={{ padding: '0 20px', fontSize: '0.75rem', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', fontWeight: '700', marginBottom: '5px', marginTop: idx > 0 ? '10px' : '0' }}>
                                 {category.title}
                             </div>
                             {category.items.map(item => (
@@ -263,6 +300,56 @@ export default function AdminLayout({ children, logoUrl }) {
                                 </div>
                             )}
                         </div>
+
+                        {/* Global Search Autocomplete */}
+                        <div style={{ position: 'relative', marginLeft: '20px' }} className="hidden md:block">
+                            <div style={{ display: 'flex', alignItems: 'center', background: 'var(--admin-bg)', borderRadius: '20px', padding: '6px 16px', border: '1px solid var(--admin-border)', width: '300px' }}>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--admin-text-muted)" strokeWidth="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                <input 
+                                    type="text" 
+                                    placeholder="Buscar globalmente..." 
+                                    value={globalSearchQuery}
+                                    onChange={e => setGlobalSearchQuery(e.target.value)}
+                                    style={{ border: 'none', background: 'transparent', outline: 'none', marginLeft: '8px', fontSize: '14px', width: '100%', color: 'var(--admin-text-main)' }}
+                                />
+                                {isSearching && <span style={{ fontSize: '12px', color: 'var(--admin-text-muted)' }}>...</span>}
+                            </div>
+                            
+                            {showSearchDropdown && globalSearchResults && (
+                                <div style={{
+                                    position: 'absolute', top: '100%', left: 0, marginTop: '8px',
+                                    width: '100%', background: '#fff', borderRadius: '12px',
+                                    boxShadow: '0 10px 40px rgba(0,0,0,0.15)', border: '1px solid #e5e7eb',
+                                    zIndex: 1000, overflow: 'hidden', padding: '10px'
+                                }}>
+                                    {globalSearchResults.productos?.length > 0 && (
+                                        <div style={{ marginBottom: '10px' }}>
+                                            <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#9ca3af', textTransform: 'uppercase', marginBottom: '5px' }}>Productos</div>
+                                            {globalSearchResults.productos.map(p => (
+                                                <Link key={p.id} href={`/admin/productos/${p.id}/edit`} style={{ display: 'block', padding: '6px 8px', fontSize: '13px', color: '#374151', textDecoration: 'none', borderRadius: '6px' }} className="hover:bg-gray-100">
+                                                    {p.nombre} - S/ {p.precio}
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    )}
+                                    {globalSearchResults.pedidos?.length > 0 && (
+                                        <div style={{ marginBottom: '10px' }}>
+                                            <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#9ca3af', textTransform: 'uppercase', marginBottom: '5px' }}>Pedidos</div>
+                                            {globalSearchResults.pedidos.map(p => (
+                                                <Link key={p.id} href={`/admin/pedidos/${p.id}`} style={{ display: 'block', padding: '6px 8px', fontSize: '13px', color: '#374151', textDecoration: 'none', borderRadius: '6px' }} className="hover:bg-gray-100">
+                                                    Pedido #{p.codigo} - {p.usuario?.nombres}
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    )}
+                                    {(!globalSearchResults.productos?.length && !globalSearchResults.pedidos?.length && !globalSearchResults.usuarios?.length) && (
+                                        <div style={{ padding: '10px', textAlign: 'center', color: '#6b7280', fontSize: '13px' }}>
+                                            No se encontraron resultados
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                     </div>
                     <div className="admin-topbar-actions">
                         <div style={{ position: 'relative' }}>
@@ -302,17 +389,20 @@ export default function AdminLayout({ children, logoUrl }) {
                                             notificaciones.map(n => (
                                                 <div
                                                     key={n.id}
-                                                    onClick={() => markAsRead(n.id, '/admin/pedidos/' + n.data.pedido_id)}
-                                                    style={{ padding: '16px', borderBottom: '1px solid #f5f5f5', cursor: 'pointer', transition: 'background 0.2s', display: 'flex', gap: '12px', alignItems: 'flex-start' }}
-                                                    onMouseOver={e => e.currentTarget.style.background = '#f9f9f9'}
-                                                    onMouseOut={e => e.currentTarget.style.background = 'transparent'}
+                                                    onClick={() => markAsRead(n.id, n.link)}
+                                                    style={{ padding: '16px', borderBottom: '1px solid #f5f5f5', cursor: 'pointer', transition: 'background 0.2s', display: 'flex', gap: '12px', alignItems: 'flex-start', background: n.read ? 'transparent' : '#f0f9ff' }}
+                                                    onMouseOver={e => e.currentTarget.style.background = n.read ? '#f9f9f9' : '#e0f2fe'}
+                                                    onMouseOut={e => e.currentTarget.style.background = n.read ? 'transparent' : '#f0f9ff'}
                                                 >
-                                                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(138,43,226,0.1)', color: '#8a2be2', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
+                                                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: `var(--admin-${n.color || 'blue'}-100, #e0f2fe)`, color: `var(--admin-${n.color || 'blue'}-600, #0284c7)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                                        {n.icon === 'alert-triangle' ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg> :
+                                                         n.icon === 'upload' ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg> :
+                                                         <Bell size={16} />}
                                                     </div>
                                                     <div>
-                                                        <p style={{ margin: '0 0 4px', fontSize: '13px', color: '#333', fontWeight: 500 }}>{n.data.mensaje}</p>
-                                                        <p style={{ margin: 0, fontSize: '11px', color: '#888' }}>Hace {Math.round((new Date() - new Date(n.created_at)) / 60000)} min</p>
+                                                        <p style={{ margin: '0 0 2px', fontSize: '13px', color: '#111827', fontWeight: 600 }}>{n.title}</p>
+                                                        {n.body && <p style={{ margin: '0 0 4px', fontSize: '12px', color: '#4b5563', lineHeight: '1.4' }}>{n.body}</p>}
+                                                        <p style={{ margin: 0, fontSize: '11px', color: '#888' }}>{n.time}</p>
                                                     </div>
                                                 </div>
                                             ))

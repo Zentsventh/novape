@@ -30,9 +30,12 @@ class StripePaymentController extends Controller
             return redirect('/')->with('error', 'El carrito está vacío.');
         }
 
+        $loyaltyPoints = auth()->check() ? auth()->user()->loyalty_points : 0;
+
         return Inertia::render('Checkout', [
             'cart' => array_values($cart),
             'montoTotal' => $monto,
+            'loyaltyPoints' => $loyaltyPoints,
         ]);
     }
 
@@ -41,6 +44,7 @@ class StripePaymentController extends Controller
         try {
             $cart = session('cart', []);
             $couponCode = $request->input('coupon');
+            $usePoints = $request->boolean('usePoints', false);
             $shippingCost = (float) $request->input('shippingCost', 0);
             
             $deliveryType = $request->input('deliveryType', '');
@@ -49,7 +53,7 @@ class StripePaymentController extends Controller
                 $shippingCost = (float) \App\Models\ConfiguracionSitio::obtener('envio_tarifa_plana', 15);
             }
 
-            $checkoutData = $this->checkoutService->validateAndCalculateTotal($cart, $couponCode, $shippingCost);
+            $checkoutData = $this->checkoutService->validateAndCalculateTotal($cart, $couponCode, $shippingCost, $usePoints);
             session(['cart' => $checkoutData['cart']]);
 
             $this->checkoutService->reserveStock($checkoutData['cart'], session()->getId());

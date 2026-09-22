@@ -7,9 +7,29 @@ import Swal from 'sweetalert2';
 
 export default function Show({ deal = {}, evidenceLedger = [], customFieldsSchema = [] }) {
     const [activeTab, setActiveTab] = useState('resumen');
+    const [isEditingCustomFields, setIsEditingCustomFields] = useState(false);
+    const [customFieldsData, setCustomFieldsData] = useState(deal.custom_fields || {});
     
     const formatMoney = (value) => {
         return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(value || 0);
+    };
+
+    const handleCustomFieldsSubmit = (e) => {
+        e.preventDefault();
+        router.post(`/admin/crm/deals/${deal.id}/custom-fields`, { custom_fields: customFieldsData }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setIsEditingCustomFields(false);
+                Swal.fire({
+                    toast: true,
+                    position: 'bottom-end',
+                    icon: 'success',
+                    title: 'Campos actualizados',
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            }
+        });
     };
 
     const handleResolveEvidence = (id, action, evidence) => {
@@ -139,8 +159,16 @@ export default function Show({ deal = {}, evidenceLedger = [], customFieldsSchem
 
                                 {/* Custom Fields (Enriched by AI or manual) */}
                                 {customFieldsSchema.length > 0 && (
-                                    <div className="twenty-card">
-                                        <h3 style={{ margin: '0 0 16px', fontSize: '14px', fontWeight: 600, color: 'var(--twenty-text-main)' }}>Campos Adicionales</h3>
+                                    <div className="twenty-card" style={{ position: 'relative' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                                            <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 600, color: 'var(--twenty-text-main)' }}>Campos Adicionales</h3>
+                                            <button 
+                                                onClick={() => setIsEditingCustomFields(true)}
+                                                style={{ background: 'transparent', border: '1px solid var(--twenty-border)', borderRadius: '6px', padding: '4px 12px', fontSize: '12px', cursor: 'pointer', color: 'var(--twenty-text-main)' }}
+                                            >
+                                                Editar
+                                            </button>
+                                        </div>
                                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                                             {customFieldsSchema.map(field => (
                                                 <div key={field.id}>
@@ -161,6 +189,59 @@ export default function Show({ deal = {}, evidenceLedger = [], customFieldsSchem
                         {activeTab === 'actividad' && (
                             <div className="twenty-card" style={{ maxWidth: '800px', margin: '0 auto' }}>
                                 <TimelineTab events={deal.timeline_events || []} />
+                            </div>
+                        )}
+
+                        {/* Edit Custom Fields Modal */}
+                        {isEditingCustomFields && (
+                            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <div style={{ background: 'var(--twenty-background)', width: '500px', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}>
+                                    <div style={{ padding: '20px', borderBottom: '1px solid var(--twenty-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 600 }}>Editar Campos Personalizados</h3>
+                                        <button onClick={() => setIsEditingCustomFields(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: 'var(--twenty-text-muted)' }}>&times;</button>
+                                    </div>
+                                    <form onSubmit={handleCustomFieldsSubmit} style={{ padding: '20px' }}>
+                                        {customFieldsSchema.map(field => (
+                                            <div key={field.id} style={{ marginBottom: '15px' }}>
+                                                <label style={{ display: 'block', fontSize: '13px', marginBottom: '5px', color: 'var(--twenty-text-muted)' }}>{field.label} {field.required && <span style={{ color: 'red' }}>*</span>}</label>
+                                                {field.type === 'select' ? (
+                                                    <select 
+                                                        value={customFieldsData[field.name] || ''} 
+                                                        onChange={e => setCustomFieldsData({ ...customFieldsData, [field.name]: e.target.value })}
+                                                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--twenty-border)', background: 'var(--twenty-background)' }}
+                                                        required={field.required}
+                                                    >
+                                                        <option value="">Selecciona una opción</option>
+                                                        {field.options && field.options.map(opt => (
+                                                            <option key={opt} value={opt}>{opt}</option>
+                                                        ))}
+                                                    </select>
+                                                ) : field.type === 'boolean' ? (
+                                                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                                        <input 
+                                                            type="checkbox" 
+                                                            checked={!!customFieldsData[field.name]}
+                                                            onChange={e => setCustomFieldsData({ ...customFieldsData, [field.name]: e.target.checked })}
+                                                        />
+                                                        <span style={{ fontSize: '14px', color: 'var(--twenty-text-main)' }}>Sí</span>
+                                                    </label>
+                                                ) : (
+                                                    <input 
+                                                        type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}
+                                                        value={customFieldsData[field.name] || ''}
+                                                        onChange={e => setCustomFieldsData({ ...customFieldsData, [field.name]: e.target.value })}
+                                                        style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--twenty-border)', background: 'var(--twenty-background)', color: 'var(--twenty-text-main)' }}
+                                                        required={field.required}
+                                                    />
+                                                )}
+                                            </div>
+                                        ))}
+                                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
+                                            <button type="button" onClick={() => setIsEditingCustomFields(false)} style={{ background: 'transparent', border: '1px solid var(--twenty-border)', padding: '10px 16px', borderRadius: '8px', cursor: 'pointer', color: 'var(--twenty-text-main)' }}>Cancelar</button>
+                                            <button type="submit" style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '10px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>Guardar Cambios</button>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
                         )}
 
