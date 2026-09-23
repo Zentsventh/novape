@@ -76,7 +76,7 @@ class ProcessIncomingWebhookJob implements ShouldQueue
             $mediaFileSize = $mediaObject['file_size'] ?? null;
 
             if ($mediaId) {
-                $accessToken = config('omnichannel.whatsapp.token');
+                $accessToken = \App\Models\ConfiguracionSitio::obtener('whatsapp_token', config('omnichannel.whatsapp.token'));
                 $mediaUrl = $mediaService->downloadAndStoreMedia($mediaId, $accessToken, $mediaMimeType ?? 'application/octet-stream');
             }
         }

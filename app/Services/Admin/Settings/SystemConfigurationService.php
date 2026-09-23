@@ -27,6 +27,20 @@ class SystemConfigurationService
         ConfiguracionSitio::establecer('pago_transferencia', isset($data['pago_transferencia']) && $data['pago_transferencia'] ? '1' : '0');
         ConfiguracionSitio::establecer('envio_gratis', isset($data['envio_gratis']) && $data['envio_gratis'] ? '1' : '0');
         ConfiguracionSitio::establecer('igv_porcentaje', (string) $data['igv_porcentaje']);
+
+        // WhatsApp
+        if (isset($data['whatsapp_token'])) {
+            ConfiguracionSitio::establecer('whatsapp_token', $data['whatsapp_token']);
+        }
+        if (isset($data['whatsapp_phone_number_id'])) {
+            ConfiguracionSitio::establecer('whatsapp_phone_number_id', $data['whatsapp_phone_number_id']);
+        }
+        if (isset($data['whatsapp_verify_token'])) {
+            ConfiguracionSitio::establecer('whatsapp_verify_token', $data['whatsapp_verify_token']);
+        }
+        if (isset($data['whatsapp_app_secret'])) {
+            ConfiguracionSitio::establecer('whatsapp_app_secret', $data['whatsapp_app_secret']);
+        }
     }
 
     public function getRoles(): Collection

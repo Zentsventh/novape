@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Head, router, Link } from '@inertiajs/react';
 import TwentyCrmLayout from '../../../../Layouts/TwentyCrmLayout';
-import { Plus, Search, Filter, AlertCircle, Clock, CheckCircle, Ticket, X } from 'lucide-react';
+import TwentyTable from '../../../../Components/Admin/CRM/TwentyTable';
+import { Plus, Search, Filter, AlertCircle, Clock, CheckCircle, Ticket, Trash2, X } from 'lucide-react';
 import { useConfirm } from '../../../../Contexts/ConfirmContext';
 
 export default function CasesIndex({ casos = { data: [], links: [] }, filters = {} }) {
-    const { confirm } = useConfirm();
+    const confirm = useConfirm();
     const [search, setSearch] = useState(filters.search || '');
     const [statusFilter, setStatusFilter] = useState(filters.estado || '');
     const [typeFilter, setTypeFilter] = useState(filters.tipo || '');
@@ -29,6 +30,24 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
         }
     };
 
+    const isFirstRender = useRef(true);
+    useEffect(() => {
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
+        }
+
+        const delayDebounceFn = setTimeout(() => {
+            router.get('/admin/crm/cases', {
+                search,
+                estado: statusFilter,
+                tipo: typeFilter
+            }, { preserveState: true, replace: true, preserveScroll: true });
+        }, 300);
+
+        return () => clearTimeout(delayDebounceFn);
+    }, [search, statusFilter, typeFilter]);
+
     const handleFilterChange = (key, value) => {
         if (key === 'estado') setStatusFilter(value);
         if (key === 'tipo') setTypeFilter(value);
@@ -40,17 +59,15 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
         }, { preserveState: true });
     };
 
-    const handleDelete = (id) => {
-        confirm({
+    const handleDelete = async (id) => {
+        const confirmed = await confirm('¿Estás seguro de que deseas eliminar este caso? Esta acción no se puede deshacer.', {
             title: 'Eliminar Caso',
-            message: '¿Estás seguro de que deseas eliminar este caso? Esta acción no se puede deshacer.',
-            confirmText: 'Sí, eliminar',
-            cancelText: 'Cancelar',
-            type: 'danger',
-            onConfirm: () => {
-                router.delete(`/admin/crm/cases/${id}`, { preserveScroll: true });
-            }
+            confirmText: 'Sí, eliminar'
         });
+
+        if (confirmed) {
+            router.delete(`/admin/crm/cases/${id}`, { preserveScroll: true });
+        }
     };
 
     const handleSubmit = (e) => {
@@ -83,131 +100,236 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
         }
     };
 
+    const columns = [
+        {
+            key: 'id',
+            header: 'ID',
+            accessor: 'id',
+            render: (row) => <span style={{ fontWeight: 600, color: 'var(--twenty-text-main)' }}>#{row.id}</span>
+        },
+        {
+            key: 'titulo',
+            header: 'Título',
+            accessor: 'titulo',
+            primary: true,
+            render: (row) => (
+                <div>
+                    <div style={{ fontWeight: 600, color: 'var(--twenty-text-main)' }}>{row.titulo}</div>
+                    {row.pedido_id && (
+                        <div style={{ fontSize: '12px', color: 'var(--twenty-text-muted)', marginTop: '4px' }}>
+                            Pedido: #{row.pedido_id}
+                        </div>
+                    )}
+                </div>
+            )
+        },
+        {
+            key: 'tipo',
+            header: 'Tipo',
+            accessor: 'tipo',
+            render: (row) => (
+                <span style={{ textTransform: 'capitalize', fontSize: '13px', background: 'var(--twenty-bg-hover)', padding: '4px 8px', borderRadius: '4px', color: 'var(--twenty-text-secondary)' }}>
+                    {row.tipo}
+                </span>
+            )
+        },
+        {
+            key: 'prioridad',
+            header: 'Prioridad',
+            accessor: 'prioridad',
+            render: (row) => (
+                <span className={`crm-badge ${getPriorityColor(row.prioridad)}`} style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 600 }}>
+                    {row.prioridad.toUpperCase()}
+                </span>
+            )
+        },
+        {
+            key: 'estado',
+            header: 'Estado',
+            accessor: 'estado',
+            render: (row) => (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', textTransform: 'capitalize', fontWeight: 600, color: 'var(--twenty-text-main)', background: 'var(--twenty-bg-surface)', padding: '6px 12px', borderRadius: '16px', display: 'inline-flex', border: '1px solid var(--twenty-border)' }}>
+                    {getStatusIcon(row.estado)}
+                    {row.estado.replace('_', ' ')}
+                </div>
+            )
+        },
+        {
+            key: 'vencimiento',
+            header: 'Vencimiento',
+            accessor: 'fecha_vencimiento',
+            render: (row) => {
+                if (!row.fecha_vencimiento) return <span style={{ color: 'var(--twenty-text-muted)', fontSize: '13px' }}>-</span>;
+                const isOverdue = new Date(row.fecha_vencimiento) < new Date() && row.estado !== 'resuelto' && row.estado !== 'cerrado';
+                return (
+                    <span style={{ fontSize: '13px', color: isOverdue ? 'var(--twenty-danger)' : 'var(--twenty-text-main)', fontWeight: isOverdue ? 600 : 500 }}>
+                        {new Date(row.fecha_vencimiento).toLocaleDateString()}
+                    </span>
+                );
+            }
+        },
+        {
+            key: 'cliente',
+            header: 'Cliente',
+            accessor: 'cliente',
+            render: (row) => (
+                row.cliente ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div className="crm-avatar" style={{ width: 32, height: 32, fontSize: '12px', background: 'var(--twenty-primary-bg)', color: 'var(--twenty-primary)', borderRadius: '50%' }}>
+                            {row.cliente.nombres?.charAt(0) || 'C'}
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--twenty-text-main)' }}>
+                                {row.cliente.nombres} {row.cliente.apellidos}
+                            </span>
+                            <span style={{ fontSize: '11px', color: 'var(--twenty-text-muted)' }}>
+                                {row.cliente.email || 'Sin correo'}
+                            </span>
+                        </div>
+                    </div>
+                ) : (
+                    <span style={{ color: 'var(--twenty-text-muted)', fontSize: '13px' }}>Sin asignar</span>
+                )
+            )
+        },
+        {
+            key: 'acciones',
+            header: '',
+            accessor: 'acciones',
+            render: (row) => (
+                <button 
+                    className="twenty-btn-icon" 
+                    onClick={(e) => { e.stopPropagation(); handleDelete(row.id); }} 
+                    style={{ padding: '6px' }}
+                    title="Eliminar Caso"
+                >
+                    <Trash2 size={16} style={{ color: 'var(--twenty-danger)' }} />
+                </button>
+            )
+        }
+    ];
+
+    const [selectedRows, setSelectedRows] = useState([]);
+
     return (
-        <TwentyCrmLayout title="Casos y Soporte" headerActions={
+        <TwentyCrmLayout title="Casos" headerActions={
             <button 
-                className="twenty-btn-primary" 
                 onClick={() => setIsCreateModalOpen(true)}
-                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '8px', 
+                    background: 'linear-gradient(135deg, #00B4FF 0%, #007BFF 100%)', 
+                    color: 'white', 
+                    border: 'none', 
+                    borderRadius: '8px', 
+                    padding: '8px 18px', 
+                    fontSize: '14px', 
+                    fontWeight: 600, 
+                    cursor: 'pointer', 
+                    boxShadow: '0 4px 12px rgba(0, 180, 255, 0.25)',
+                    transition: 'all 0.2s ease'
+                }}
+                onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 14px rgba(0, 180, 255, 0.35)'; }}
+                onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 180, 255, 0.25)'; }}
             >
-                <Plus size={16} />
+                <Plus size={18} strokeWidth={2.5} />
                 Nuevo Caso
             </button>
         }>
             <Head title="Casos CRM" />
 
-            <div className="twenty-card" style={{ marginBottom: '24px', padding: '16px', display: 'flex', gap: '16px', alignItems: 'center' }}>
-                <div style={{ position: 'relative', flex: 1 }}>
-                    <Search size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--twenty-text-muted)' }} />
-                    <input 
-                        type="text" 
-                        placeholder="Buscar casos por título o ID..."
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                        onKeyDown={handleSearch}
-                        className="twenty-input"
-                        style={{ paddingLeft: '36px', width: '100%' }}
-                    />
-                </div>
-                
-                <select 
-                    className="twenty-input" 
-                    value={statusFilter} 
-                    onChange={e => handleFilterChange('estado', e.target.value)}
-                    style={{ width: '180px' }}
-                >
-                    <option value="">Todos los Estados</option>
-                    <option value="abierto">Abiertos</option>
-                    <option value="en_progreso">En Progreso</option>
-                    <option value="resuelto">Resueltos</option>
-                    <option value="cerrado">Cerrados</option>
-                </select>
-
-                <select 
-                    className="twenty-input" 
-                    value={typeFilter} 
-                    onChange={e => handleFilterChange('tipo', e.target.value)}
-                    style={{ width: '180px' }}
-                >
-                    <option value="">Todos los Tipos</option>
-                    <option value="devolucion">Devoluciones</option>
-                    <option value="demora">Demoras</option>
-                    <option value="reclamo">Reclamos</option>
-                    <option value="consulta">Consultas</option>
-                </select>
-            </div>
-
-            <div className="twenty-card" style={{ padding: 0, overflow: 'hidden' }}>
-                {casos.data.length === 0 ? (
-                    <div style={{ padding: '60px', textAlign: 'center', color: 'var(--twenty-text-muted)' }}>
-                        <Ticket size={48} style={{ margin: '0 auto 16px', opacity: 0.2 }} />
-                        <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--twenty-text-main)', marginBottom: '8px' }}>No hay casos</h3>
-                        <p style={{ fontSize: '14px', marginBottom: '24px' }}>Crea tu primer ticket de soporte para hacer seguimiento.</p>
-                        <button className="twenty-btn-primary" onClick={() => setIsCreateModalOpen(true)}>Crear Caso</button>
+            <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                {/* Top Toolbar: Search & Filters */}
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                    <div style={{ position: 'relative', flex: 1, maxWidth: '450px' }}>
+                        <div style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Search size={18} style={{ color: '#64748B' }} />
+                        </div>
+                        <input 
+                            type="text" 
+                            placeholder="Buscar caso por ID o título..."
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                            onKeyDown={handleSearch}
+                            style={{ 
+                                width: '100%', 
+                                padding: '10px 16px 10px 44px',
+                                borderRadius: '8px', 
+                                fontFamily: 'Inter, system-ui, sans-serif', 
+                                fontSize: '14px', 
+                                fontWeight: 500,
+                                color: '#1E293B',
+                                border: '1px solid #E2E8F0',
+                                backgroundColor: '#F8FAFC',
+                                outline: 'none',
+                                transition: 'all 0.2s ease',
+                                boxSizing: 'border-box'
+                            }}
+                            onFocus={e => {
+                                e.currentTarget.style.backgroundColor = '#FFFFFF';
+                                e.currentTarget.style.borderColor = '#00B4FF';
+                                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.15)';
+                            }}
+                            onBlur={e => {
+                                e.currentTarget.style.backgroundColor = '#F8FAFC';
+                                e.currentTarget.style.borderColor = '#E2E8F0';
+                                e.currentTarget.style.boxShadow = 'none';
+                            }}
+                        />
                     </div>
-                ) : (
-                    <table className="twenty-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Título</th>
-                                <th>Tipo</th>
-                                <th>Prioridad</th>
-                                <th>Estado</th>
-                                <th>Cliente</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {casos.data.map(caso => (
-                                <tr key={caso.id}>
-                                    <td style={{ fontWeight: 600 }}>#{caso.id}</td>
-                                    <td>
-                                        <div style={{ fontWeight: 500, color: 'var(--twenty-text-main)' }}>{caso.titulo}</div>
-                                        {caso.pedido_id && (
-                                            <div style={{ fontSize: '12px', color: 'var(--twenty-text-muted)', marginTop: '4px' }}>
-                                                Pedido: #{caso.pedido_id}
-                                            </div>
-                                        )}
-                                    </td>
-                                    <td>
-                                        <span style={{ textTransform: 'capitalize', fontSize: '13px' }}>
-                                            {caso.tipo}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getPriorityColor(caso.prioridad)}`}>
-                                            {caso.prioridad.toUpperCase()}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', textTransform: 'capitalize' }}>
-                                            {getStatusIcon(caso.estado)}
-                                            {caso.estado.replace('_', ' ')}
-                                        </div>
-                                    </td>
-                                    <td>
-                                        {caso.cliente ? (
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--twenty-bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 600 }}>
-                                                    {caso.cliente.nombres?.charAt(0) || 'C'}
-                                                </div>
-                                                <span style={{ fontSize: '13px' }}>{caso.cliente.nombres} {caso.cliente.apellidos}</span>
-                                            </div>
-                                        ) : (
-                                            <span style={{ color: 'var(--twenty-text-muted)' }}>Sin asignar</span>
-                                        )}
-                                    </td>
-                                    <td>
-                                        <button className="twenty-btn-icon" onClick={() => handleDelete(caso.id)}>
-                                            <X size={14} className="text-red-500" />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                )}
+                    
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: 'auto' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--twenty-text-muted)', fontSize: '13px', fontWeight: 600 }}>
+                            <Filter size={14} /> Filtros:
+                        </div>
+                        <select 
+                            className="twenty-input" 
+                            value={statusFilter} 
+                            onChange={e => handleFilterChange('estado', e.target.value)}
+                            style={{ width: '160px', borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit', fontSize: '13px', fontWeight: 500 }}
+                        >
+                            <option value="">Todos los Estados</option>
+                            <option value="abierto">Abiertos</option>
+                            <option value="en_progreso">En Progreso</option>
+                            <option value="resuelto">Resueltos</option>
+                            <option value="cerrado">Cerrados</option>
+                        </select>
+
+                        <select 
+                            className="twenty-input" 
+                            value={typeFilter} 
+                            onChange={e => handleFilterChange('tipo', e.target.value)}
+                            style={{ width: '160px', borderRadius: '12px', cursor: 'pointer', fontFamily: 'inherit', fontSize: '13px', fontWeight: 500 }}
+                        >
+                            <option value="">Todos los Tipos</option>
+                            <option value="devolucion">Devoluciones</option>
+                            <option value="demora">Demoras</option>
+                            <option value="reclamo">Reclamos</option>
+                            <option value="consulta">Consultas</option>
+                        </select>
+                    </div>
+                </div>
+
+                {/* Main Table Card */}
+                <div className="twenty-card" style={{ padding: 0, overflow: 'hidden' }}>
+                    {casos.data.length === 0 ? (
+                        <div style={{ padding: '60px', textAlign: 'center', color: 'var(--twenty-text-muted)' }}>
+                            <Ticket size={48} style={{ margin: '0 auto 16px', opacity: 0.2 }} />
+                            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--twenty-text-main)', marginBottom: '8px' }}>No hay casos</h3>
+                            <p style={{ fontSize: '14px', marginBottom: '24px' }}>Crea tu primer ticket de soporte para hacer seguimiento.</p>
+                            <button className="twenty-btn-primary" onClick={() => setIsCreateModalOpen(true)}>Crear Caso</button>
+                        </div>
+                    ) : (
+                        <TwentyTable 
+                            columns={columns} 
+                            data={casos.data} 
+                            selectedRows={selectedRows}
+                            onSelectionChange={setSelectedRows}
+                            onRowClick={(row) => router.visit(`/admin/crm/cases/${row.id}`)}
+                        />
+                    )}
+                </div>
             </div>
 
             {/* Paginación simple */}
@@ -224,36 +346,83 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
                 </div>
             )}
 
-            {/* Modal de Creación */}
             {isCreateModalOpen && (
-                <div className="twenty-modal-overlay">
-                    <div className="twenty-modal">
-                        <div className="twenty-modal-header">
-                            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--twenty-text-main)' }}>Crear Nuevo Caso</h3>
-                            <button className="twenty-btn-icon" onClick={() => setIsCreateModalOpen(false)}>
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '20px' }}>
+                    <div style={{ backgroundColor: 'var(--twenty-bg-app)', borderRadius: '16px', width: '100%', maxWidth: '540px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', border: '1px solid var(--twenty-border)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--twenty-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--twenty-bg-surface)' }}>
+                            <h3 style={{ fontSize: '18px', fontWeight: 700, color: 'var(--twenty-text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <Ticket size={20} style={{ color: 'var(--twenty-primary)' }} />
+                                Crear Nuevo Caso
+                            </h3>
+                            <button onClick={() => setIsCreateModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--twenty-text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', borderRadius: '50%', transition: 'background 0.2s' }} onMouseOver={e => e.currentTarget.style.background = 'var(--twenty-bg-hover)'} onMouseOut={e => e.currentTarget.style.background = 'none'}>
                                 <X size={18} />
                             </button>
                         </div>
-                        <form onSubmit={handleSubmit} style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        <form onSubmit={handleSubmit} style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                             <div>
-                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Título del Problema</label>
+                                <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#1E293B', marginBottom: '8px' }}>Título del Problema</label>
                                 <input 
                                     type="text" 
                                     required 
-                                    className="twenty-input" 
-                                    style={{ width: '100%' }}
+                                    style={{ 
+                                        width: '100%', 
+                                        padding: '12px 16px',
+                                        borderRadius: '10px', 
+                                        fontFamily: 'Inter, system-ui, sans-serif', 
+                                        fontSize: '14px', 
+                                        fontWeight: 500,
+                                        color: '#1E293B',
+                                        border: '1px solid #E2E8F0',
+                                        backgroundColor: '#F8FAFC',
+                                        outline: 'none',
+                                        transition: 'all 0.2s ease',
+                                        boxSizing: 'border-box'
+                                    }}
+                                    onFocus={e => {
+                                        e.currentTarget.style.backgroundColor = '#FFFFFF';
+                                        e.currentTarget.style.borderColor = '#00B4FF';
+                                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.15)';
+                                    }}
+                                    onBlur={e => {
+                                        e.currentTarget.style.backgroundColor = '#F8FAFC';
+                                        e.currentTarget.style.borderColor = '#E2E8F0';
+                                        e.currentTarget.style.boxShadow = 'none';
+                                    }}
                                     value={formData.titulo}
                                     onChange={e => setFormData({...formData, titulo: e.target.value})}
                                     placeholder="Ej. Producto dañado en el envío"
                                 />
                             </div>
                             
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Tipo</label>
+                                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#1E293B', marginBottom: '8px' }}>Tipo</label>
                                     <select 
-                                        className="twenty-input" 
-                                        style={{ width: '100%' }}
+                                        style={{ 
+                                            width: '100%', 
+                                            padding: '12px 16px',
+                                            borderRadius: '10px', 
+                                            fontFamily: 'Inter, system-ui, sans-serif', 
+                                            fontSize: '14px', 
+                                            fontWeight: 500,
+                                            color: '#1E293B',
+                                            border: '1px solid #E2E8F0',
+                                            backgroundColor: '#F8FAFC',
+                                            outline: 'none',
+                                            transition: 'all 0.2s ease',
+                                            boxSizing: 'border-box',
+                                            cursor: 'pointer'
+                                        }}
+                                        onFocus={e => {
+                                            e.currentTarget.style.backgroundColor = '#FFFFFF';
+                                            e.currentTarget.style.borderColor = '#00B4FF';
+                                            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.15)';
+                                        }}
+                                        onBlur={e => {
+                                            e.currentTarget.style.backgroundColor = '#F8FAFC';
+                                            e.currentTarget.style.borderColor = '#E2E8F0';
+                                            e.currentTarget.style.boxShadow = 'none';
+                                        }}
                                         value={formData.tipo}
                                         onChange={e => setFormData({...formData, tipo: e.target.value})}
                                     >
@@ -264,10 +433,33 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
                                     </select>
                                 </div>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Prioridad</label>
+                                    <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#1E293B', marginBottom: '8px' }}>Prioridad</label>
                                     <select 
-                                        className="twenty-input" 
-                                        style={{ width: '100%' }}
+                                        style={{ 
+                                            width: '100%', 
+                                            padding: '12px 16px',
+                                            borderRadius: '10px', 
+                                            fontFamily: 'Inter, system-ui, sans-serif', 
+                                            fontSize: '14px', 
+                                            fontWeight: 500,
+                                            color: '#1E293B',
+                                            border: '1px solid #E2E8F0',
+                                            backgroundColor: '#F8FAFC',
+                                            outline: 'none',
+                                            transition: 'all 0.2s ease',
+                                            boxSizing: 'border-box',
+                                            cursor: 'pointer'
+                                        }}
+                                        onFocus={e => {
+                                            e.currentTarget.style.backgroundColor = '#FFFFFF';
+                                            e.currentTarget.style.borderColor = '#00B4FF';
+                                            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.15)';
+                                        }}
+                                        onBlur={e => {
+                                            e.currentTarget.style.backgroundColor = '#F8FAFC';
+                                            e.currentTarget.style.borderColor = '#E2E8F0';
+                                            e.currentTarget.style.boxShadow = 'none';
+                                        }}
                                         value={formData.prioridad}
                                         onChange={e => setFormData({...formData, prioridad: e.target.value})}
                                     >
@@ -280,19 +472,91 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
                             </div>
 
                             <div>
-                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px' }}>Descripción (Opcional)</label>
+                                <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, color: '#1E293B', marginBottom: '8px' }}>Descripción (Opcional)</label>
                                 <textarea 
-                                    className="twenty-input" 
-                                    style={{ width: '100%', minHeight: '100px', resize: 'vertical' }}
+                                    style={{ 
+                                        width: '100%', 
+                                        minHeight: '100px', 
+                                        resize: 'vertical',
+                                        padding: '12px 16px',
+                                        borderRadius: '10px', 
+                                        fontFamily: 'Inter, system-ui, sans-serif', 
+                                        fontSize: '14px', 
+                                        fontWeight: 500,
+                                        color: '#1E293B',
+                                        border: '1px solid #E2E8F0',
+                                        backgroundColor: '#F8FAFC',
+                                        outline: 'none',
+                                        transition: 'all 0.2s ease',
+                                        boxSizing: 'border-box'
+                                    }}
+                                    onFocus={e => {
+                                        e.currentTarget.style.backgroundColor = '#FFFFFF';
+                                        e.currentTarget.style.borderColor = '#00B4FF';
+                                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.15)';
+                                    }}
+                                    onBlur={e => {
+                                        e.currentTarget.style.backgroundColor = '#F8FAFC';
+                                        e.currentTarget.style.borderColor = '#E2E8F0';
+                                        e.currentTarget.style.boxShadow = 'none';
+                                    }}
                                     value={formData.descripcion}
                                     onChange={e => setFormData({...formData, descripcion: e.target.value})}
                                     placeholder="Detalles adicionales del caso..."
                                 />
                             </div>
 
-                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '10px' }}>
-                                <button type="button" className="twenty-btn-secondary" onClick={() => setIsCreateModalOpen(false)}>Cancelar</button>
-                                <button type="submit" className="twenty-btn-primary">Guardar Caso</button>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #F1F5F9' }}>
+                                <button 
+                                    type="button" 
+                                    onClick={() => setIsCreateModalOpen(false)}
+                                    style={{
+                                        background: 'transparent',
+                                        color: '#64748B',
+                                        border: '1px solid #E2E8F0',
+                                        borderRadius: '8px',
+                                        padding: '10px 20px',
+                                        fontSize: '14px',
+                                        fontWeight: 600,
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s ease',
+                                    }}
+                                    onMouseOver={e => {
+                                        e.currentTarget.style.background = '#F8FAFC';
+                                        e.currentTarget.style.color = '#0F172A';
+                                    }}
+                                    onMouseOut={e => {
+                                        e.currentTarget.style.background = 'transparent';
+                                        e.currentTarget.style.color = '#64748B';
+                                    }}
+                                >
+                                    Cancelar
+                                </button>
+                                <button 
+                                    type="submit" 
+                                    style={{
+                                        background: 'linear-gradient(135deg, #00B4FF 0%, #007BFF 100%)',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        padding: '10px 24px',
+                                        fontSize: '14px',
+                                        fontWeight: 600,
+                                        cursor: 'pointer',
+                                        boxShadow: '0 4px 12px rgba(0, 180, 255, 0.25)',
+                                        transition: 'all 0.2s ease',
+                                    }}
+                                    onMouseOver={e => {
+                                        e.currentTarget.style.transform = 'translateY(-1px)';
+                                        e.currentTarget.style.boxShadow = '0 6px 14px rgba(0, 180, 255, 0.35)';
+                                    }}
+                                    onMouseOut={e => {
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 180, 255, 0.25)';
+                                    }}
+                                >
+                                    Guardar Caso
+                                </button>
                             </div>
                         </form>
                     </div>

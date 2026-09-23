@@ -11,6 +11,7 @@ use App\Models\Omnichannel\CannedResponse;
 use App\Services\Omnichannel\WhatsAppService;
 use App\Services\Omnichannel\MessengerService;
 use App\Services\Omnichannel\InstagramService;
+use App\Services\Omnichannel\TicketAssignmentService;
 use App\Events\Omnichannel\ConversationUpdated;
 use App\Events\Omnichannel\NewMessageReceived;
 use Illuminate\Http\Request;
@@ -36,7 +37,13 @@ class ConversationApiController extends Controller
 
         // Filtro por estado
         if ($request->filled('status') && $request->status !== 'all') {
-            $query->where('status', $request->status);
+            if ($request->status === 'open') {
+                $query->whereNotIn('status', ['resolved', 'closed']);
+            } elseif ($request->status === 'closed') {
+                $query->whereIn('status', ['resolved', 'closed']);
+            } else {
+                $query->where('status', $request->status);
+            }
         }
 
         // Búsqueda por nombre de contacto o teléfono
@@ -163,6 +170,9 @@ class ConversationApiController extends Controller
 
         // Registrar nota interna de asignación
         $agentName = \App\Models\Usuario::find($request->input('user_id'))?->nombres ?? 'Agente';
+        
+        // Crear ticket
+        app(\App\Services\Omnichannel\TicketAssignmentService::class)->createCaseForConversation($conversation, $request->input('user_id'));
         OmnichannelMessage::create([
             'conversation_id' => $conversation->id,
             'contact_id' => $conversation->contact_id,

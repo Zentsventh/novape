@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, usePage } from '@inertiajs/react';
+import { AnimatePresence } from 'framer-motion';
+import PageTransition from '@/Components/Animations/PageTransition';
 import { 
     Search, Home, Target, Users, Building, 
     CheckSquare, Settings, Zap, Bell, ChevronLeft, ChevronRight, Menu, Ticket, Calendar
 } from 'lucide-react';
 import '../../css/admin/twenty.css'; // The new CSS file
+import '../../css/admin/crm-design.css'; // Enterprise CRM Design System
 import CrmCommandPalette from '../Components/Admin/CRM/CrmCommandPalette';
 
 export default function TwentyCrmLayout({ children, title, headerActions }) {
@@ -60,7 +63,7 @@ export default function TwentyCrmLayout({ children, title, headerActions }) {
         { href: '/admin/crm/companies', label: 'Empresas', icon: <Building size={18} /> },
         { href: '/admin/clientes', label: 'Personas', icon: <Users size={18} /> },
         { href: '/admin/crm/tasks', label: 'Tareas', icon: <CheckSquare size={18} /> },
-        { href: '/admin/crm/cases', label: 'Casos (Soporte)', icon: <Ticket size={18} /> },
+        { href: '/admin/crm/cases', label: 'Casos', icon: <Ticket size={18} /> },
         { href: '/admin/crm/automations', label: 'Automations', icon: <Zap size={18} /> },
         { href: '/admin/inbox', label: 'Bandeja', icon: <Bell size={18} /> },
     ];
@@ -181,22 +184,6 @@ export default function TwentyCrmLayout({ children, title, headerActions }) {
                     
                     <div className="twenty-topbar-actions">
                         <div style={{ position: 'relative' }}>
-                            <Search size={16} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--twenty-text-muted)' }} />
-                            <input 
-                                type="text" 
-                                placeholder="Buscar..." 
-                                style={{ 
-                                    padding: '6px 12px 6px 32px', 
-                                    borderRadius: '6px', 
-                                    border: '1px solid var(--twenty-border)', 
-                                    fontSize: '13px', 
-                                    outline: 'none',
-                                    width: '200px',
-                                    backgroundColor: 'var(--twenty-bg-app)'
-                                }} 
-                            />
-                        </div>
-                        <div style={{ position: 'relative' }}>
                             <button
                                 className="twenty-btn-icon"
                                 onClick={() => setShowNotifs(!showNotifs)}
@@ -259,7 +246,11 @@ export default function TwentyCrmLayout({ children, title, headerActions }) {
 
                 {/* Page Content */}
                 <div className="twenty-content-area">
-                    {children}
+                    <AnimatePresence mode="wait">
+                        <PageTransition key={url}>
+                            {children}
+                        </PageTransition>
+                    </AnimatePresence>
                 </div>
             </main>
 

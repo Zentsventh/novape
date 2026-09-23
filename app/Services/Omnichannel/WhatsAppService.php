@@ -7,6 +7,8 @@ namespace App\Services\Omnichannel;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
+use App\Models\ConfiguracionSitio;
+
 class WhatsAppService
 {
     protected string $token;
@@ -16,8 +18,8 @@ class WhatsAppService
 
     public function __construct()
     {
-        $this->token = config('omnichannel.whatsapp.token');
-        $this->phoneNumberId = config('omnichannel.whatsapp.phone_number_id');
+        $this->token = ConfiguracionSitio::obtener('whatsapp_token', config('omnichannel.whatsapp.token'));
+        $this->phoneNumberId = ConfiguracionSitio::obtener('whatsapp_phone_number_id', config('omnichannel.whatsapp.phone_number_id'));
         $this->apiVersion = config('omnichannel.whatsapp.api_version', 'v21.0');
         $this->baseUrl = "https://graph.facebook.com/{$this->apiVersion}";
     }

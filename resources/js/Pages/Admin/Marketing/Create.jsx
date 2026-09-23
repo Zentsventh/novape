@@ -106,7 +106,7 @@ export default function MarketingCreate() {
                             >
                                 <option value="all">Todos los Clientes</option>
                                 <option value="vip">Clientes VIP (Más de 5 compras)</option>
-                                <option value="at_risk">En Riesgo (Sin compras > 90 días)</option>
+                                <option value="at_risk">En Riesgo (Sin compras &gt; 90 días)</option>
                             </select>
                             {errors.segment && <span style={{ color: '#ef4444', fontSize: '12px' }}>{errors.segment}</span>}
                         </div>

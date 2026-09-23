@@ -14,10 +14,20 @@ export default function Pipeline({ pipeline, companies, personas }) {
     // Our CrmPipelineService returns the pipeline data formatted precisely like this.
 
     const handleSearch = (e) => {
+        // Search is handled reactively by the filteredPipeline below.
+        // We can just prevent default if they press Enter.
         if (e.key === 'Enter') {
-            // we could filter client side or server side
+            e.preventDefault();
         }
     };
+
+    const filteredPipeline = pipeline.map(stage => ({
+        ...stage,
+        deals: stage.deals ? stage.deals.filter(deal => 
+            deal.titulo.toLowerCase().includes(search.toLowerCase()) ||
+            (deal.cliente && (deal.cliente.nombres + ' ' + deal.cliente.apellidos).toLowerCase().includes(search.toLowerCase()))
+        ) : []
+    }));
 
     const handleDragEnd = (result) => {
         const { destination, source, draggableId } = result;
@@ -72,7 +82,7 @@ export default function Pipeline({ pipeline, companies, personas }) {
                 {/* Kanban Board */}
                 <div style={{ flex: 1, overflow: 'hidden' }}>
                     <TwentyKanban 
-                        stages={pipeline} 
+                        stages={filteredPipeline} 
                         onDragEnd={handleDragEnd} 
                         onDealClick={handleDealClick} 
                     />

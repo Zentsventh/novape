@@ -56,7 +56,7 @@ export default function Index() {
                         <label style={{ fontSize: '13px', color: 'var(--admin-text-muted)', fontWeight: 'bold' }}>Buscar Pedido o Cliente</label>
                         <input 
                             type="text" 
-                            placeholder="Ej. PED-STRIPE-123456"
+                            placeholder="Ej. PED-NIUBIZ-123456"
                             value={search} 
                             onChange={e => setSearch(e.target.value)} 
                             style={{ padding: '10px', borderRadius: '8px', border: '1px solid var(--admin-border)', background: 'transparent', color: 'var(--admin-text-main)' }} 

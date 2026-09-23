@@ -15,12 +15,15 @@ use App\Http\Requests\Admin\Crm\StoreDealActivityRequest;
 use App\Http\Requests\Admin\Crm\StoreDealProductRequest;
 use App\Http\Requests\Admin\Crm\StoreCrmDealRequest;
 use App\Http\Requests\Admin\Crm\UpdateCrmDealRequest;
+use App\Http\Requests\Admin\Crm\UpdateCustomFieldsRequest;
 use App\Services\Admin\Crm\CrmPipelineService;
+use App\Services\Admin\Crm\CrmDealQueryService;
 
 class CrmPipelineController extends Controller
 {
     public function __construct(
-        private readonly CrmPipelineService $pipelineService
+        private readonly CrmPipelineService $pipelineService,
+        private readonly CrmDealQueryService $dealQueryService
     ) {}
 
     public function index(Request $request)
@@ -44,26 +47,9 @@ class CrmPipelineController extends Controller
 
     public function show(int $id)
     {
-        $deal = CrmDeal::with([
-            'cliente', 
-            'empresa', 
-            'stage', 
-            'products.producto',
-            'timelineEvents.actor'
-        ])->findOrFail($id);
-        
-        // Sort timeline events
-        $deal->setRelation('timelineEvents', $deal->timelineEvents->sortByDesc('created_at')->values());
-
-        $evidenceLedger = DB::table('crm_evidence_ledgers')
-                            ->where('model_type', 'deal')
-                            ->where('model_id', $id)
-                            ->where('status', 'pending')
-                            ->get();
-
-        $customFieldsSchema = DB::table('crm_custom_fields_schema')
-                                ->where('model_type', 'deal')
-                                ->get();
+        $deal = $this->dealQueryService->getDealForShow($id);
+        $evidenceLedger = $this->dealQueryService->getEvidenceLedger($id);
+        $customFieldsSchema = $this->dealQueryService->getCustomFieldsSchema();
 
         return Inertia::render('Admin/CRM/Deals/Show', [
             'deal' => $deal,
@@ -82,7 +68,7 @@ class CrmPipelineController extends Controller
 
     public function getJson(int $id)
     {
-        $deal = CrmDeal::with(['cliente', 'stage', 'activities.autor', 'products.producto'])->findOrFail($id);
+        $deal = $this->dealQueryService->getDealJson($id);
         return response()->json($deal);
     }
 
@@ -119,7 +105,7 @@ class CrmPipelineController extends Controller
 
     public function generateQuote(int $id)
     {
-        $deal = CrmDeal::with(['cliente', 'products.producto'])->findOrFail($id);
+        $deal = $this->dealQueryService->getDealForQuote($id);
         
         if (!class_exists(\Barryvdh\DomPDF\Facade\Pdf::class)) {
             return response()->json(['error' => 'La librería de PDF no está instalada. Ejecuta: composer require barryvdh/laravel-dompdf'], 500);
@@ -130,14 +116,12 @@ class CrmPipelineController extends Controller
         return $pdf->download('Cotizacion_Deal_'.$deal->id.'.pdf');
     }
 
-    public function updateCustomFields(Request $request, int $id)
+    public function updateCustomFields(UpdateCustomFieldsRequest $request, int $id)
     {
+        // El FormRequest valida que vengan los campos correctamente y verifica autorización
         $deal = CrmDeal::findOrFail($id);
         
-        $fields = $request->input('custom_fields', []);
-        
-        $deal->custom_fields = array_merge((array)$deal->custom_fields, $fields);
-        $deal->save();
+        $this->pipelineService->updateCustomFields($deal, $request->validated()['custom_fields']);
 
         return back()->with('success', 'Campos personalizados actualizados correctamente');
     }

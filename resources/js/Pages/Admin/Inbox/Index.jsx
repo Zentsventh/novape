@@ -269,6 +269,7 @@ function InboxIndex() {
     const [messageInput, setMessageInput] = useState('');
     const [contactProfile, setContactProfile] = useState(null);
     const [filter, setFilter] = useState('all');
+    const [statusFilter, setStatusFilter] = useState('open');
     const [searchQuery, setSearchQuery] = useState('');
     const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
     const [isLoadingChat, setIsLoadingChat] = useState(false);
@@ -326,14 +327,14 @@ function InboxIndex() {
         };
     }, []);
 
-    // ─── Refetch al cambiar filtro ────────────────────────────
+    // ─── Refetch al cambiar filtro o estado ────────────────────
     useEffect(() => {
         setActiveConv(null);
         setMessages([]);
         setContactProfile(null);
         setIsMobileChatOpen(false);
         fetchConversations();
-    }, [filter]);
+    }, [filter, statusFilter]);
 
     // ─── Búsqueda con debounce ────────────────────────────────
     useEffect(() => {
@@ -364,6 +365,7 @@ function InboxIndex() {
             const params = new URLSearchParams();
             if (filter !== 'all') params.append('channel', filter);
             if (searchQuery) params.append('search', searchQuery);
+            params.append('status', statusFilter);
             const res = await fetch(`/admin/api/omnichannel/conversations?${params}`);
             if (!res.ok) throw new Error('Error al cargar conversaciones');
             const data = await res.json();
@@ -382,6 +384,7 @@ function InboxIndex() {
             const params = new URLSearchParams();
             if (filter !== 'all') params.append('channel', filter);
             if (searchQuery) params.append('search', searchQuery);
+            params.append('status', statusFilter);
             const res = await fetch(`/admin/api/omnichannel/conversations?${params}`);
             if (!res.ok) return;
             const data = await res.json();
@@ -698,6 +701,21 @@ function InboxIndex() {
                     </button>
                 </div>
 
+                <div className="inbox-sidebar__tabs">
+                    <button 
+                        className={`inbox-tab-btn ${statusFilter === 'open' ? 'active' : ''}`} 
+                        onClick={() => setStatusFilter('open')}
+                    >
+                        Abiertos
+                    </button>
+                    <button 
+                        className={`inbox-tab-btn ${statusFilter === 'closed' ? 'active' : ''}`} 
+                        onClick={() => setStatusFilter('closed')}
+                    >
+                        Cerrados
+                    </button>
+                </div>
+
                 <div className="inbox-sidebar__search">
                     <Search size={16} className="inbox-sidebar__search-icon" />
                     <input
@@ -738,7 +756,7 @@ function InboxIndex() {
                         conversations.map(conv => (
                             <div
                                 key={conv.id}
-                                className={`inbox-conversation-item ${activeConv?.id === conv.id ? 'active' : ''} ${conv.status === 'resolved' ? 'resolved' : ''}`}
+                                className={`inbox-conversation-item ${activeConv?.id === conv.id ? 'active' : ''} ${['resolved', 'closed'].includes(conv.status) ? 'resolved' : ''}`}
                                 onClick={() => handleSelectConversation(conv)}
                             >
                                 <div className="inbox-conv__avatar">
@@ -759,7 +777,7 @@ function InboxIndex() {
                                     {conv.unreadCount > 0 && (
                                         <div className="inbox-conv__badge">{conv.unreadCount}</div>
                                     )}
-                                    {conv.status === 'resolved' && (
+                                    {['resolved', 'closed'].includes(conv.status) && (
                                         <div className="inbox-conv__resolved-badge"><CheckCircle2 size={10} /></div>
                                     )}
                                 </div>
@@ -783,8 +801,8 @@ function InboxIndex() {
                                     <div className="inbox-chat__header-channel">
                                         {activeConv.isBotActive ? (
                                             <span className="inbox-bot-badge bot-active"><Bot size={12}/> Asistente IA</span>
-                                        ) : activeConv.status === 'resolved' ? (
-                                            <span className="inbox-bot-badge resolved-badge"><CheckCircle2 size={12}/> Resuelto</span>
+                                        ) : ['resolved', 'closed'].includes(activeConv.status) ? (
+                                            <span className="inbox-bot-badge resolved-badge"><CheckCircle2 size={12}/> {activeConv.status === 'closed' ? 'Cerrado' : 'Resuelto'}</span>
                                         ) : (
                                             <span className="inbox-bot-badge human-active"><User size={12}/> Agente</span>
                                         )}
@@ -793,7 +811,7 @@ function InboxIndex() {
                                 </div>
                             </div>
                             <div className="inbox-chat__header-actions">
-                                {activeConv.status !== 'resolved' ? (
+                                {!['resolved', 'closed'].includes(activeConv.status) ? (
                                     <button className="inbox-chat__header-btn resolve" onClick={handleResolve} title="Marcar como Resuelto">
                                         <CheckCircle2 size={16} /> Resolver
                                     </button>
@@ -884,9 +902,9 @@ function InboxIndex() {
                                 <textarea
                                     value={messageInput}
                                     onChange={(e) => setMessageInput(e.target.value)}
-                                    placeholder={activeConv.status === 'resolved' ? 'Reabre la conversación para enviar mensajes...' : 'Escribe un mensaje...'}
+                                    placeholder={['resolved', 'closed'].includes(activeConv.status) ? 'La conversación ha finalizado' : 'Escribe un mensaje...'}
                                     rows="1"
-                                    disabled={activeConv.status === 'resolved'}
+                                    disabled={['resolved', 'closed'].includes(activeConv.status)}
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter' && !e.shiftKey) {
                                             e.preventDefault();
@@ -897,7 +915,7 @@ function InboxIndex() {
                                 <button
                                     type="submit"
                                     className="inbox-chat__send-btn"
-                                    disabled={!messageInput.trim() || isSending || activeConv.status === 'resolved'}
+                                    disabled={!messageInput.trim() || isSending || ['resolved', 'closed'].includes(activeConv.status)}
                                 >
                                     {isSending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
                                     <span className="inbox-chat__send-text">Enviar</span>

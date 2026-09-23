@@ -2,7 +2,7 @@ import React from 'react';
 import { Head, usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { FileText, Shield, User, Clock, Activity } from 'lucide-react';
-import '../../../../css/admin/audit.css'; // Optional CSS for styling
+
 
 export default function Index({ audits }) {
     const { auth } = usePage().props;

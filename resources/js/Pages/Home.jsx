@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Head, usePage, Link } from '@inertiajs/react';
+import FadeIn from '../Components/Animations/FadeIn';
+import SlideUp from '../Components/Animations/SlideUp';
 
 /* Componentes del Home */
 import Header from '../Components/Home/Header';
@@ -114,50 +116,63 @@ export default function Home({ appName, categoriaProductos = [], mejorSemana = [
             />
 
             {hasCategorias ? (
-                <CategoryNavBar
-                    categorias={categoriaProductos}
-                    onOpenCategories={() => setIsCatOpen(true)}
-                />
+                <SlideUp delay={0.1}>
+                    <CategoryNavBar
+                        categorias={categoriaProductos}
+                        onOpenCategories={() => setIsCatOpen(true)}
+                    />
+                </SlideUp>
             ) : (
                 <div className="efe-empty-state">No hay categorias disponibles.</div>
             )}
 
             {/* Cintillo 1: Envío Gratis (inmediatamente debajo del navbar) */}
-            <div style={{ width: '100%', backgroundColor: '#002951', display: 'flex', justifyContent: 'center', padding: '10px 0' }}>
-                <Link href="/catalogo?categoria=Cyber+Bombas">
-                    <img 
-                        src="/images/cintillo1.webp" 
-                        alt="Envío Gratis a todo el Perú" 
-                        style={{ height: '50px', width: 'auto', display: 'block', objectFit: 'contain' }} 
-                    />
-                </Link>
-            </div>
+            <FadeIn delay={0.2}>
+                <div style={{ width: '100%', backgroundColor: '#002951', display: 'flex', justifyContent: 'center', padding: '10px 0' }}>
+                    <Link href="/catalogo?categoria=Cyber+Bombas">
+                        <img 
+                            src="/images/cintillo1.webp" 
+                            alt="Envío Gratis a todo el Perú" 
+                            style={{ height: '50px', width: 'auto', display: 'block', objectFit: 'contain' }} 
+                        />
+                    </Link>
+                </div>
+            </FadeIn>
 
             {hasBanners ? (
-                <HeroCarousel banners={banners} />
+                <FadeIn delay={0.3}>
+                    <HeroCarousel banners={banners} />
+                </FadeIn>
             ) : (
                 <div className="efe-empty-state">No hay banners activos.</div>
             )}
 
-            <RecentlyViewed />
-
+            <SlideUp delay={0.4}>
+                <RecentlyViewed />
+            </SlideUp>
 
             {hasMejorSemana ? (
-                <MejorSemanaSection productos={mejorSemana} />
+                <SlideUp delay={0.5}>
+                    <MejorSemanaSection productos={mejorSemana} />
+                </SlideUp>
             ) : (
                 <div className="efe-empty-state">No hay promociones activas.</div>
             )}
 
             {hasCategorias ? (
                 categoriaProductos.map((cat, index) => (
-                    <CategorySection key={cat.id} categoria={cat} index={index} />
+                    <SlideUp key={cat.id} delay={0.6 + (index * 0.1)}>
+                        <CategorySection categoria={cat} index={index} />
+                    </SlideUp>
                 ))
             ) : (
                 <div className="efe-empty-state">No hay categorias para mostrar.</div>
             )}
 
 
-            <Footer />
+            <FadeIn delay={0.8}>
+                <Footer />
+            </FadeIn>
 
             
             <CartDrawer 

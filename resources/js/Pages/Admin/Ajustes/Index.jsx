@@ -4,12 +4,18 @@ import AdminLayout from '../../../Layouts/AdminLayout';
 
 export default function Index({ configuraciones }) {
     const { flash } = usePage().props;
+    const [activeTab, setActiveTab] = React.useState('general');
+    
     const { data, setData, post, processing, errors } = useForm({
         nombre_sitio: configuraciones?.nombre_sitio || 'Novape',
         pago_tarjeta: configuraciones?.pago_tarjeta === '1',
         pago_transferencia: configuraciones?.pago_transferencia === '1',
         envio_gratis: configuraciones?.envio_gratis === '1',
         igv_porcentaje: configuraciones?.igv_porcentaje !== undefined ? configuraciones?.igv_porcentaje : '18',
+        whatsapp_token: configuraciones?.whatsapp_token || '',
+        whatsapp_phone_number_id: configuraciones?.whatsapp_phone_number_id || '',
+        whatsapp_verify_token: configuraciones?.whatsapp_verify_token || '',
+        whatsapp_app_secret: configuraciones?.whatsapp_app_secret || '',
     });
 
     const submit = (e) => {
@@ -34,13 +40,29 @@ export default function Index({ configuraciones }) {
                 <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--admin-text-main)' }}>Ajustes del Sistema</h1>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
-                <div style={{ background: 'var(--admin-bg-panel)', borderRadius: '12px', padding: '30px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', maxWidth: '800px' }}>
-                    <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--admin-text-main)', borderBottom: '1px solid var(--admin-border)', paddingBottom: '10px', marginBottom: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '250px 1fr', gap: '20px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <button 
+                        onClick={() => setActiveTab('general')}
+                        style={{ padding: '12px 20px', textAlign: 'left', borderRadius: '8px', border: 'none', background: activeTab === 'general' ? '#1d4ed8' : 'transparent', color: activeTab === 'general' ? 'white' : 'var(--admin-text-main)', cursor: 'pointer', fontWeight: 'bold' }}
+                    >
                         Configuración General
-                    </h2>
-                    
+                    </button>
+                    <button 
+                        onClick={() => setActiveTab('omnichannel')}
+                        style={{ padding: '12px 20px', textAlign: 'left', borderRadius: '8px', border: 'none', background: activeTab === 'omnichannel' ? '#1d4ed8' : 'transparent', color: activeTab === 'omnichannel' ? 'white' : 'var(--admin-text-main)', cursor: 'pointer', fontWeight: 'bold' }}
+                    >
+                        Omnichannel (WhatsApp)
+                    </button>
+                </div>
+
+                <div style={{ background: 'var(--admin-bg-panel)', borderRadius: '12px', padding: '30px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', maxWidth: '800px' }}>
                     <form onSubmit={submit} style={{ display: 'grid', gap: '25px' }}>
+                        {activeTab === 'general' && (
+                            <>
+                                <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--admin-text-main)', borderBottom: '1px solid var(--admin-border)', paddingBottom: '10px', marginBottom: '20px' }}>
+                                    Configuración General
+                                </h2>
                         
                         <div>
                             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: 'var(--admin-text-main)' }}>Nombre de la Tienda / Empresa *</label>
@@ -89,7 +111,63 @@ export default function Index({ configuraciones }) {
                                     <span style={{ color: 'var(--admin-text-main)' }}>Notificar al Administrador sobre Stock Bajo</span>
                                 </label>
                             </div>
-                        </div>
+                                </div>
+                            </>
+                        )}
+                        
+                        {activeTab === 'omnichannel' && (
+                            <>
+                                <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--admin-text-main)', borderBottom: '1px solid var(--admin-border)', paddingBottom: '10px', marginBottom: '20px' }}>
+                                    Credenciales WhatsApp Cloud API (Meta)
+                                </h2>
+                                
+                                <p style={{ fontSize: '14px', color: 'var(--admin-text-light)', marginBottom: '15px' }}>
+                                    Configura los tokens de acceso provistos por Meta for Developers para activar el Inbox Omnichannel.
+                                </p>
+
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: 'var(--admin-text-main)' }}>WhatsApp Access Token *</label>
+                                    <input
+                                        type="password"
+                                        value={data.whatsapp_token}
+                                        onChange={e => setData('whatsapp_token', e.target.value)}
+                                        style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid var(--admin-border)', background: 'transparent', color: 'var(--admin-text-main)' }}
+                                    />
+                                    <small style={{ color: 'var(--admin-text-light)', marginTop: '5px', display: 'block' }}>El token temporal o permanente de Meta.</small>
+                                </div>
+                                
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: 'var(--admin-text-main)' }}>Phone Number ID *</label>
+                                        <input
+                                            type="text"
+                                            value={data.whatsapp_phone_number_id}
+                                            onChange={e => setData('whatsapp_phone_number_id', e.target.value)}
+                                            style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid var(--admin-border)', background: 'transparent', color: 'var(--admin-text-main)' }}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: 'var(--admin-text-main)' }}>Verify Token (Webhook) *</label>
+                                        <input
+                                            type="text"
+                                            value={data.whatsapp_verify_token}
+                                            onChange={e => setData('whatsapp_verify_token', e.target.value)}
+                                            style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid var(--admin-border)', background: 'transparent', color: 'var(--admin-text-main)' }}
+                                        />
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: 'var(--admin-text-main)' }}>App Secret (Opcional - para validación SHA256)</label>
+                                    <input
+                                        type="password"
+                                        value={data.whatsapp_app_secret}
+                                        onChange={e => setData('whatsapp_app_secret', e.target.value)}
+                                        style={{ width: '100%', padding: '12px 14px', borderRadius: '8px', border: '1px solid var(--admin-border)', background: 'transparent', color: 'var(--admin-text-main)' }}
+                                    />
+                                </div>
+                            </>
+                        )}
 
                         <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '20px', borderTop: '1px solid var(--admin-border)' }}>
                             <button

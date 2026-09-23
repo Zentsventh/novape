@@ -4,8 +4,13 @@ import Header from '../Components/Home/Header';
 
 export default function CheckoutSuccess({ pedido }) {
     useEffect(() => {
-        // Redirigir de inmediato a la sección de órdenes en el perfil sin refrescar la página
-        router.visit('/perfil?tab=compras');
+        // Si estamos dentro de un iframe (Modal de Pago), redireccionamos la ventana principal
+        if (window.top !== window.self) {
+            window.top.location.href = '/perfil?tab=compras';
+        } else {
+            // Redirigir de inmediato a la sección de órdenes en el perfil sin refrescar la página
+            router.visit('/perfil?tab=compras');
+        }
     }, []);
 
     return (

@@ -1,6 +1,7 @@
 import React from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { Plus, MoreHorizontal, DollarSign } from 'lucide-react';
+import { AnimatedList } from '../../Animations/AnimatedList';
 
 export default function TwentyKanban({ stages = [], deals, onDragEnd, onDealClick }) {
     
@@ -21,7 +22,8 @@ export default function TwentyKanban({ stages = [], deals, onDragEnd, onDealClic
     return (
         <div style={{ display: 'flex', gap: '16px', overflowX: 'auto', paddingBottom: '16px', height: '100%', alignItems: 'flex-start' }}>
             <DragDropContext onDragEnd={onDragEnd}>
-                {stages.map((stage) => (
+                <AnimatedList style={{ display: 'flex', gap: '16px', height: '100%' }}>
+                    {stages.map((stage) => (
                     <div key={stage.id} style={{ 
                         minWidth: '280px', 
                         maxWidth: '280px',
@@ -116,7 +118,8 @@ export default function TwentyKanban({ stages = [], deals, onDragEnd, onDealClic
                             )}
                         </Droppable>
                     </div>
-                ))}
+                    ))}
+                </AnimatedList>
             </DragDropContext>
         </div>
     );

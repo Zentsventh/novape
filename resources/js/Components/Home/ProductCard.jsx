@@ -11,6 +11,8 @@ const formatPrice = (price) =>
 
 /* Renderiza una tarjeta de producto con imagen, precios y acciones. */
 export default function ProductCard({ product }) {
+    if (!product) return null;
+
     const [isWished, setIsWished] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -261,7 +263,7 @@ export default function ProductCard({ product }) {
             </div>
 
             <div className="efe-product-actions">
-                {product.stock > 0 ? (
+                {product?.stock > 0 ? (
                     <button
                         className={`efe-btn-cart ${isAdding ? 'is-loading' : ''} ${isAdding === 'success' ? 'is-success' : ''}`}
                         onClick={handleAddToCart}

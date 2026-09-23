@@ -202,7 +202,7 @@ export default function OrderDetails({ pedido }) {
                                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0284c7" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                                 </div>
                                 <div>
-                                    <div style={{ fontSize: '12px', color: '#0369a1', fontWeight: '600' }}>Pago con tarjeta (Stripe)</div>
+                                    <div style={{ fontSize: '12px', color: '#0369a1', fontWeight: '600' }}>Pago con tarjeta (Niubiz)</div>
                                     <div style={{ fontSize: '11px', color: '#0284c7' }}>Pago verificado y seguro</div>
                                 </div>
                             </div>

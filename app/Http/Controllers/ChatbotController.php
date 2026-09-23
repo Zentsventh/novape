@@ -11,14 +11,16 @@ use Illuminate\Http\Request;
 use App\Models\Omnichannel\OmnichannelContact;
 use App\Models\Omnichannel\OmnichannelConversation;
 use App\Models\Omnichannel\OmnichannelMessage;
-use App\Events\Omnichannel\ConversationUpdated;
 use App\Events\Omnichannel\NewMessageReceived;
+use App\Jobs\Omnichannel\ProcessWebChatbotMessageJob;
+use App\Services\Omnichannel\TicketAssignmentService;
 use Illuminate\Support\Facades\DB;
 
 class ChatbotController extends Controller
 {
     public function __construct(
-        private readonly ChatbotService $chatbotService
+        private readonly ChatbotService $chatbotService,
+        private readonly TicketAssignmentService $ticketAssignmentService
     ) {}
 
     /**
@@ -72,46 +74,59 @@ class ChatbotController extends Controller
                 $this->detectAndUpdateContactName($contact, $lastUserMessage, $conversation);
             }
 
-            // Si el bot no está pausado, obtener respuesta de Gemini
-            $reply = '';
+            // Si el bot no está pausado, procesar en segundo plano usando Jobs
             if (!$conversation->is_bot_paused) {
-                $reply = $this->chatbotService->getReply($messages);
-                
-                // Guardar mensaje del bot
-                $outboundMessage = OmnichannelMessage::create([
-                    'conversation_id' => $conversation->id,
-                    'contact_id' => $contact->id,
-                    'channel' => 'web',
-                    'direction' => 'outbound',
-                    'message_type' => 'text',
-                    'content' => $reply,
-                    'status' => 'sent',
-                    'is_ai_generated' => true,
-                ]);
-
-                $conversation->update([
-                    'last_message_preview' => mb_substr($reply, 0, 50),
-                    'last_message_at' => now(),
-                    'message_count' => DB::raw('message_count + 1'),
-                ]);
-
-                broadcast(new NewMessageReceived($outboundMessage))->toOthers();
-                broadcast(new ConversationUpdated($conversation->refresh()))->toOthers();
+                // Despachar a la cola (Queue)
+                ProcessWebChatbotMessageJob::dispatch(
+                    $conversation->id,
+                    $contact->id,
+                    $messages
+                );
             }
 
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'reply' => $reply,
                 'is_bot_paused' => $conversation->is_bot_paused,
                 'conversation_id' => $conversation->id,
+                'processing_in_background' => !$conversation->is_bot_paused
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
             \Illuminate\Support\Facades\Log::error('Error en ChatbotController: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    /**
+     * El cliente solicita hablar con un humano (Handoff).
+     */
+    public function handoff(Request $request): JsonResponse
+    {
+        $sessionId = $request->input('session_id') ?: session()->getId();
+        $authUser = auth()->user();
+
+        $contact = $this->findContact($authUser, $sessionId);
+        if (!$contact) {
+            return response()->json(['error' => 'Contacto no encontrado'], 404);
+        }
+
+        $conversation = $this->findActiveConversation($contact);
+        if (!$conversation) {
+            return response()->json(['error' => 'Conversación no encontrada'], 404);
+        }
+
+        // Asignar mediante Round-Robin y generar Ticket
+        $this->ticketAssignmentService->handoffToHuman($conversation);
+
+        // Notificar al frontend
+        broadcast(new ConversationUpdated($conversation->refresh()))->toOthers();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Transferido a un asesor humano exitosamente.'
+        ]);
     }
 
     /**

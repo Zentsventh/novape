@@ -18,10 +18,15 @@ class CrmCase extends Model
         'tipo',
         'estado',
         'prioridad',
+        'fecha_vencimiento',
         'cliente_id',
         'pedido_id',
         'asignado_a',
         'deal_id',
+    ];
+
+    protected $casts = [
+        'fecha_vencimiento' => 'datetime',
     ];
 
     public function cliente()
@@ -42,5 +47,15 @@ class CrmCase extends Model
     public function deal()
     {
         return $this->belongsTo(CrmDeal::class, 'deal_id');
+    }
+
+    public function notas()
+    {
+        return $this->morphMany(CrmNote::class, 'notable')->latest();
+    }
+
+    public function actividades()
+    {
+        return $this->morphMany(CrmTimelineEvent::class, 'trackable')->latest();
     }
 }

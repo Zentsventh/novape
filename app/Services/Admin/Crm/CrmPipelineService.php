@@ -157,6 +157,19 @@ class CrmPipelineService
         $deal->save();
     }
 
+    /**
+     * Actualiza los campos personalizados de forma segura y transaccional.
+     */
+    public function updateCustomFields(CrmDeal $deal, array $fields): void
+    {
+        DB::transaction(function () use ($deal, $fields) {
+            $deal->custom_fields = array_merge((array)$deal->custom_fields, $fields);
+            $deal->save();
+
+            TimelineService::log($deal, 'campos_actualizados', 'Campos personalizados actualizados');
+        });
+    }
+
     private function triggerAutomations(CrmDeal $deal, CrmDeal $oldDeal, int $oldStageId, int $newStageId, string $oldEstado, string $newEstado): void
     {
         $authorId = auth()->id() ?? 1;

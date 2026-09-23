@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Head, Link, usePage, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { ArrowLeft, Check, X, Box, FileText, AlertTriangle, MessageSquare } from 'lucide-react';
-import '../../../../css/admin/audit.css';
+
 
 export default function RmaShow({ rma }) {
     const { auth } = usePage().props;

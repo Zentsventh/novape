@@ -14,7 +14,8 @@ use Stripe\Stripe;
 class RefundOrderService
 {
     public function __construct(
-        private readonly InventoryService $inventoryService
+        private readonly InventoryService $inventoryService,
+        private readonly UpdateOrderStatusService $updateOrderStatusService
     ) {}
 
     /**
@@ -45,10 +46,10 @@ class RefundOrderService
                 return ['success' => true, 'message' => 'El pago por Niubiz requiere anulación manual en su portal. Estado cambiado a Reembolso Pendiente.'];
             }
 
-            $pedido->update(['estado' => 'cancelado']);
+            // Delegar la cancelación al servicio central para disparar los side-effects (CRM, Puntos, Correos)
+            $this->updateOrderStatusService->execute($pedido, ['estado' => 'cancelado']);
+            
             $pedido->pago->update(['estado' => 'reembolsado']);
-
-            $this->inventoryService->returnStockForOrder($pedido, auth()->id() ?? 1, 'Reembolso');
 
             DB::commit();
 

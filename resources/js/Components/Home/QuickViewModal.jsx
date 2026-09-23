@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { router } from '@inertiajs/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { DEFAULT_IMAGE } from './constants';
 import '../../../css/home/quick-view.css';
 
 export default function QuickViewModal({ product, isOpen, onClose, onAddToCart }) {
-    if (!isOpen || !product) return null;
+
+    if (!product) return null;
 
     const [quantity, setQuantity] = useState(1);
     const [isAdding, setIsAdding] = useState(false);
-    const maxPermitido = Math.min(5, product.stock || 0);
+    const maxPermitido = Math.min(5, product?.stock || 0);
 
     const formatPrice = (price) =>
         new Intl.NumberFormat('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(price);
@@ -28,9 +30,24 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart }
     };
 
     return (
-        <div className="efe-quick-view-overlay" onClick={onClose}>
-            <div className="efe-quick-view-modal" onClick={(e) => e.stopPropagation()}>
-                <button className="efe-quick-view-close" onClick={onClose}>&times;</button>
+        <AnimatePresence>
+            {isOpen && product && (
+                <motion.div 
+                    className="efe-quick-view-overlay" 
+                    onClick={onClose}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                >
+                    <motion.div 
+                        className="efe-quick-view-modal" 
+                        onClick={(e) => e.stopPropagation()}
+                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                    >
+                        <button className="efe-quick-view-close" onClick={onClose}>&times;</button>
                 
                 <div className="efe-qv-content">
                     <div className="efe-qv-image-side" onClick={goToProduct} style={{ cursor: 'pointer' }}>
@@ -112,7 +129,9 @@ export default function QuickViewModal({ product, isOpen, onClose, onAddToCart }
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
+        )}
+        </AnimatePresence>
     );
 }

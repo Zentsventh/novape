@@ -22,11 +22,22 @@ class CrmCaseController extends Controller
             $query->where('tipo', $request->tipo);
         }
 
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                if (is_numeric($search)) {
+                    $q->where('id', $search);
+                } else {
+                    $q->where('titulo', 'like', '%' . $search . '%');
+                }
+            });
+        }
+
         $casos = $query->latest()->paginate(15)->withQueryString();
 
         return Inertia::render('Admin/CRM/Cases/Index', [
             'casos' => $casos,
-            'filters' => $request->only(['estado', 'tipo'])
+            'filters' => $request->only(['search', 'estado', 'tipo'])
         ]);
     }
 
@@ -47,6 +58,40 @@ class CrmCaseController extends Controller
         CrmCase::create($validated);
 
         return redirect()->back()->with('success', 'Caso creado exitosamente');
+    }
+
+    public function show(CrmCase $crmCase)
+    {
+        $crmCase->load([
+            'cliente', 
+            'asignadoA', 
+            'pedido', 
+            'deal',
+            'notas' => function ($query) {
+                $query->with('autor');
+            },
+            'actividades' => function ($query) {
+                $query->with('usuario');
+            }
+        ]);
+
+        return Inertia::render('Admin/CRM/Cases/Show', [
+            'crmCase' => $crmCase
+        ]);
+    }
+
+    public function addNote(Request $request, CrmCase $crmCase)
+    {
+        $validated = $request->validate([
+            'contenido' => 'required|string'
+        ]);
+
+        $crmCase->notas()->create([
+            'contenido' => $validated['contenido'],
+            'usuario_id' => auth()->id()
+        ]);
+
+        return redirect()->back()->with('success', 'Nota añadida al caso');
     }
 
     public function update(Request $request, CrmCase $crmCase)
@@ -71,6 +116,7 @@ class CrmCaseController extends Controller
     public function destroy(CrmCase $crmCase)
     {
         $crmCase->delete();
-        return redirect()->back()->with('success', 'Caso eliminado');
+
+        return redirect()->back()->with('success', 'Caso eliminado exitosamente');
     }
 }

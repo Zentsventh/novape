@@ -9,9 +9,119 @@ use App\Models\ConfiguracionSitio;
 use App\Models\ReservaStock;
 use App\Models\Variante;
 use Illuminate\Support\Facades\DB;
+use App\Models\Producto;
 
 class CartService
 {
+    private const MAX_CANTIDAD_POR_ITEM = 5;
+
+    public function addProducto(int $productoId, int $cantidad, string $sessionId): array
+    {
+        $producto = Producto::with(['imagenes', 'variantes'])->find($productoId);
+        if (!$producto) {
+            return ['success' => false, 'message' => 'Producto no encontrado.'];
+        }
+
+        $imagen = $producto->imagenes->first();
+        $variante = $producto->variantes->first();
+        
+        $stockDisponible = $this->getStockDisponible($variante, $sessionId);
+
+        $cart = session()->get('cart', []);
+        $currentQuantity = isset($cart[$productoId]) ? (int) $cart[$productoId]['cantidad'] : 0;
+        $maxPermitido = min(self::MAX_CANTIDAD_POR_ITEM, $stockDisponible);
+
+        if (($currentQuantity + $cantidad) > $maxPermitido) {
+            if ($stockDisponible < self::MAX_CANTIDAD_POR_ITEM) {
+                return ['success' => false, 'message' => "Stock insuficiente. Solo puedes tener hasta {$stockDisponible} unidades de este producto."];
+            }
+            return ['success' => false, 'message' => "No puedes agregar más de 5 unidades del mismo producto al carrito."];
+        }
+
+        $precioFinal = $variante ? (float) $variante->precio : 0.0;
+
+        if (isset($cart[$productoId])) {
+            $cart[$productoId]['cantidad'] += $cantidad;
+            $cart[$productoId]['precio'] = $precioFinal;
+        } else {
+            $cart[$productoId] = [
+                'id' => $producto->id,
+                'nombre' => $producto->nombre,
+                'cantidad' => $cantidad,
+                'precio' => $precioFinal,
+                'imagen' => $imagen ? $imagen->url : null,
+                'variante_id' => $variante ? $variante->id : null
+            ];
+        }
+
+        session()->put('cart', $cart);
+        $this->syncCartToDB($cart, $sessionId);
+        
+        if ($variante) {
+            $this->syncReserva($variante->id, $cart[$productoId]['cantidad'], $sessionId);
+        }
+
+        return ['success' => true, 'message' => 'Producto agregado al carrito exitosamente.'];
+    }
+
+    public function updateCantidad(int $productoId, int $cantidadSolicitada, string $sessionId): array
+    {
+        $cart = session()->get('cart', []);
+
+        if (!isset($cart[$productoId])) {
+            return ['success' => false, 'message' => 'El producto no se encontró en el carrito.'];
+        }
+
+        $varianteId = $cart[$productoId]['variante_id'] ?? null;
+        
+        if ($varianteId) {
+            $variante = Variante::find($varianteId);
+            $stockDisponible = $this->getStockDisponible($variante, $sessionId);
+            $maxPermitido = min(self::MAX_CANTIDAD_POR_ITEM, $stockDisponible);
+            $nuevaCantidad = min($cantidadSolicitada, $maxPermitido);
+        } else {
+            $nuevaCantidad = $cantidadSolicitada;
+        }
+
+        $cart[$productoId]['cantidad'] = $nuevaCantidad;
+        session()->put('cart', $cart);
+        $this->syncCartToDB($cart, $sessionId);
+        
+        if ($varianteId) {
+            $this->syncReserva($varianteId, $nuevaCantidad, $sessionId);
+        }
+        
+        return ['success' => true, 'message' => 'Carrito actualizado.'];
+    }
+
+    public function removeProducto(int $productoId, string $sessionId): array
+    {
+        $cart = session()->get('cart', []);
+
+        if (isset($cart[$productoId])) {
+            $varianteId = $cart[$productoId]['variante_id'] ?? null;
+            unset($cart[$productoId]);
+            session()->put('cart', $cart);
+            
+            $this->syncCartToDB($cart, $sessionId);
+            
+            if ($varianteId) {
+                $this->syncReserva($varianteId, 0, $sessionId);
+            }
+        }
+
+        return ['success' => true, 'message' => 'Producto eliminado del carrito.'];
+    }
+
+    public function clearCart(string $sessionId): array
+    {
+        session()->forget('cart');
+        
+        $this->syncCartToDB([], $sessionId);
+        ReservaStock::where('session_id', $sessionId)->delete();
+        
+        return ['success' => true, 'message' => 'El carrito ha sido vaciado.'];
+    }
     public function syncCartToDB(array $cart, string $sessionId): void
     {
         if (auth()->check()) {

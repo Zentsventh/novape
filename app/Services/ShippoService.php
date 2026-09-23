@@ -122,9 +122,10 @@ class ShippoService
             return ['is_valid' => true, 'messages' => []]; // Permitir si falla la API
         } catch (\Exception $e) {
             Log::error("Error validando dirección con Shippo: " . $e->getMessage());
+            // En caso de error de conexión o API, permitimos que el proceso siga adelante sin bloquear al usuario.
             return [
-                'is_valid' => false,
-                'messages' => [['text' => 'No se pudo conectar con el servicio de validación de direcciones.']]
+                'is_valid' => true,
+                'messages' => []
             ];
         }
     }

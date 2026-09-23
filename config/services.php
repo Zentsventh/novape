@@ -44,5 +44,10 @@ return [
     'stripe' => [
         'secret' => env('STRIPE_SECRET'),
     ],
-
+    'niubiz' => [
+        'user' => env('NIUBIZ_USER'),
+        'password' => env('NIUBIZ_PASSWORD'),
+        'merchant_id' => env('NIUBIZ_MERCHANT_ID'),
+        'env' => env('NIUBIZ_ENV', 'sandbox'),
+    ],
 ];

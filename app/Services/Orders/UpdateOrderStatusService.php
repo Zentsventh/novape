@@ -39,6 +39,41 @@ class UpdateOrderStatusService
 
             if ($nuevoEstado === 'cancelado' && $estadoAnterior !== 'cancelado') {
                 $this->inventoryService->returnStockForOrder($pedido, auth()->id() ?? 1, 'Cancelación Administrativa');
+
+                // Restaurar Beneficios del Cliente (Puntos y Cupones)
+                if ($pedido->cupon_id) {
+                    \App\Models\Cupon::where('id', $pedido->cupon_id)->where('usos_actuales', '>', 0)->decrement('usos_actuales');
+                }
+
+                if ($pedido->puntos_usados > 0 && $pedido->usuario_id) {
+                    $user = \App\Models\Usuario::find($pedido->usuario_id);
+                    if ($user) {
+                        $user->increment('loyalty_points', $pedido->puntos_usados);
+                        \App\Models\LoyaltyPointsHistory::create([
+                            'usuario_id' => $user->id,
+                            'points' => $pedido->puntos_usados,
+                            'type' => 'refunded',
+                            'description' => "Puntos devueltos por cancelación del pedido {$pedido->codigo}",
+                        ]);
+                    }
+                }
+
+                // Sincronizar CRM: Si se cancela el pedido, cerrar oportunidad como perdida
+                if ($pedido->usuario_id) {
+                    $deal = \App\Models\CrmDeal::where('usuario_id', $pedido->usuario_id)
+                                ->where('estado', 'open')
+                                ->first();
+
+                    if ($deal) {
+                        $deal->update(['estado' => 'lost']);
+                        \App\Models\CrmActivity::create([
+                            'deal_id' => $deal->id,
+                            'tipo' => 'system',
+                            'titulo' => 'Pedido Cancelado',
+                            'descripcion' => "El pedido {$pedido->codigo} fue cancelado y devuelto a inventario.",
+                        ]);
+                    }
+                }
             }
 
             DB::commit();

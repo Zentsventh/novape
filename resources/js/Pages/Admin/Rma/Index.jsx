@@ -2,7 +2,7 @@ import React from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { ShieldAlert, Package, CheckCircle, Clock, Search, XCircle } from 'lucide-react';
-import '../../../../css/admin/audit.css'; // Optional styling reuse
+
 
 export default function RmaIndex({ rmas }) {
     const { auth } = usePage().props;

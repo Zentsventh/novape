@@ -13,7 +13,7 @@ use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\ReclamoController;
 use App\Http\Controllers\Auth\GoogleAuthController;
 use App\Http\Controllers\ShippingController;
-use App\Http\Controllers\StripePaymentController;
+
 use App\Http\Controllers\CompareController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ListaDeseoController;
@@ -108,12 +108,15 @@ Route::controller(ShippingController::class)->prefix('api/shipping')->group(func
     Route::post('/validate-address', 'validateAddress')->name('shipping.validate-address');
 });
 
-Route::controller(StripePaymentController::class)->group(function () {
+Route::controller(\App\Http\Controllers\CheckoutController::class)->group(function () {
     Route::get('/checkout', 'checkout')->name('checkout');
-    Route::post('/api/checkout/stripe/intent', 'createIntent');
     Route::post('/api/checkout/apply-coupon', 'applyCoupon');
-    Route::post('/webhook/stripe', 'webhook')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
-    Route::get('/checkout/success', 'success')->name('checkout.success');
+});
+
+Route::controller(\App\Http\Controllers\NiubizController::class)->group(function () {
+    Route::post('/api/checkout/niubiz/session', 'createSession');
+    Route::post('/api/checkout/niubiz/authorize', 'authorizeTransaction')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])->name('checkout.niubiz.authorize');
+    Route::get('/checkout/niubiz/success', 'success')->name('checkout.niubiz.success');
 });
 
 Route::controller(CompareController::class)->prefix('comparador')->group(function () {
@@ -233,7 +236,9 @@ Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
     Route::controller(\App\Http\Controllers\Admin\CrmCaseController::class)->prefix('crm')->group(function () {
         Route::get('/cases', 'index')->name('admin.crm.cases');
         Route::post('/cases', 'store')->name('admin.crm.cases.store');
+        Route::get('/cases/{crmCase}', 'show')->name('admin.crm.cases.show');
         Route::put('/cases/{crmCase}', 'update')->name('admin.crm.cases.update');
+        Route::post('/cases/{crmCase}/notes', 'addNote')->name('admin.crm.cases.notes.store');
         Route::delete('/cases/{crmCase}', 'destroy')->name('admin.crm.cases.destroy');
     });
 

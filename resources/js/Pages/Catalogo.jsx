@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import FadeIn from '../Components/Animations/FadeIn';
+import { AnimatedList } from '../Components/Animations/AnimatedList';
 import Header from '../Components/Home/Header';
 import CategoryNavBar from '../Components/Home/CategoryNavBar';
 import CategoryDrawer from '../Components/Home/CategoryDrawer';
@@ -518,7 +520,7 @@ export default function Catalogo({
                             <p>Prueba ajustando los filtros o la busqueda.</p>
                         </div>
                     ) : (
-                        <div className="catalogo-grid" style={{ position: 'relative' }}>
+                        <AnimatedList className="catalogo-grid" style={{ position: 'relative' }}>
                             {isLoadingFilters
                                 ? Array.from({ length: 8 }).map((_, i) => (
                                       <ProductCardSkeleton
@@ -671,7 +673,7 @@ export default function Catalogo({
                                           </div>
                                       </div>
                                   ))}
-                        </div>
+                        </AnimatedList>
                     )}
                 </main>
             </div>

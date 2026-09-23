@@ -40,7 +40,7 @@ class WhatsAppWebhookController extends Controller
         $challenge = $request->query('hub_challenge');
 
         if ($mode && $token) {
-            if ($mode === 'subscribe' && $token === config('omnichannel.whatsapp.verify_token')) {
+            if ($mode === 'subscribe' && $token === \App\Models\ConfiguracionSitio::obtener('whatsapp_verify_token', config('omnichannel.whatsapp.verify_token'))) {
                 Log::info('OMNICHANNEL_WHATSAPP_WEBHOOK_VERIFIED');
                 return response($challenge, 200)->header('Content-Type', 'text/plain');
             }
@@ -56,7 +56,7 @@ class WhatsAppWebhookController extends Controller
     public function handle(Request $request)
     {
         // Verificar firma de Meta (seguridad)
-        $appSecret = config('omnichannel.whatsapp.app_secret');
+        $appSecret = \App\Models\ConfiguracionSitio::obtener('whatsapp_app_secret', config('omnichannel.whatsapp.app_secret'));
         if ($appSecret) {
             $signature = $request->header('X-Hub-Signature-256', '');
             $expectedSignature = 'sha256=' . hash_hmac('sha256', $request->getContent(), $appSecret);

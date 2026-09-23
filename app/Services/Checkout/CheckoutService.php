@@ -297,6 +297,43 @@ class CheckoutService
                     }
                 }
 
+                // --- SINCRONIZACIÓN CON CRM ---
+                if ($pedido->usuario_id) {
+                    $deal = \App\Models\CrmDeal::where('usuario_id', $pedido->usuario_id)
+                                ->where('estado', 'open')
+                                ->first();
+
+                    if ($deal) {
+                        $deal->update([
+                            'estado' => 'won',
+                            'valor' => $pedido->total,
+                        ]);
+                        \App\Models\CrmActivity::create([
+                            'deal_id' => $deal->id,
+                            'tipo' => 'system',
+                            'titulo' => 'Compra Completada (Web)',
+                            'descripcion' => "El cliente pagó el pedido {$pedido->codigo} exitosamente por la tienda web.",
+                        ]);
+                    } else {
+                        // Buscar etapa adecuada (última etapa o ganada)
+                        $pipeline = \App\Models\CrmPipeline::with('stages')->first();
+                        $stageId = 1;
+                        if ($pipeline && $pipeline->stages->count() > 0) {
+                            $stageGanado = $pipeline->stages()->where('nombre', 'like', '%Ganado%')->orWhere('nombre', 'like', '%Won%')->first();
+                            $stageId = $stageGanado ? $stageGanado->id : $pipeline->stages->last()->id;
+                        }
+
+                        \App\Models\CrmDeal::create([
+                            'usuario_id' => $pedido->usuario_id,
+                            'stage_id' => $stageId,
+                            'titulo' => "Venta Web Directa: {$pedido->codigo}",
+                            'valor' => $pedido->total,
+                            'estado' => 'won'
+                        ]);
+                    }
+                }
+                // ------------------------------
+
                 DB::afterCommit(function () use ($pedido) {
                     \App\Jobs\ProcessSunatInvoiceJob::dispatch($pedido);
                 });

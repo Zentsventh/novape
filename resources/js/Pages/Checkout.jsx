@@ -2,16 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Head, Link, usePage, router } from '@inertiajs/react';
 import { APIProvider, Map, Marker } from '@vis.gl/react-google-maps';
 import Header from '../Components/Home/Header';
-import StripePaymentForm from '../Components/Home/StripePaymentForm';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements } from '@stripe/react-stripe-js';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import '../../css/home/base.css';
+import '../../css/home/header.css';
 import '../../css/home/checkout.css';
-
-const stripePromise = loadStripe(
-    'pk_test_51TVepVLBzrJGakQp4jrQwXP4IEj9xESBwsS0QFqj4eqouPLBrjaoVarXNQb0lC6vISU0RQDtMCpPZiLueNFiQxdB005pcaUaRH'
-);
 
 const formatPrice = (price) =>
     new Intl.NumberFormat('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
@@ -111,7 +106,7 @@ const COSTOS_ENVIO = {
 };
 
 export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
-    const { auth } = usePage().props;
+    const { auth, flash } = usePage().props;
     const user = auth?.user;
 
     // Si no hay items en props directos, usamos el formato de estructura del array
@@ -121,6 +116,18 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
 
     // Estados
     const [step, setStep] = useState(1);
+
+    // Mostrar errores flash si el servidor redirige de vuelta con un error (ej. Tarjeta rechazada)
+    useEffect(() => {
+        if (flash?.error) {
+            Swal.fire({
+                title: 'Atención',
+                text: flash.error,
+                icon: 'error',
+                confirmButtonColor: '#00B4FF'
+            });
+        }
+    }, [flash]);
 
     // Estado Dirección
     const [addressSaved, setAddressSaved] = useState(false);
@@ -212,8 +219,7 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
         }
     };
 
-    // Estado Stripe
-    const [clientSecret, setClientSecret] = useState(null);
+    const [niubizSession, setNiubizSession] = useState(null);
 
     // Estado Cupón
     const [couponCode, setCouponCode] = useState('');
@@ -430,25 +436,62 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
         );
     };
 
-    const [isFetchingIntent, setIsFetchingIntent] = useState(false);
-    const [intentError, setIntentError] = useState(null);
-    const [usePoints, setUsePoints] = useState(false);
-    const user = auth?.user;
-    const loyaltyPoints = user?.loyalty_points || 0;
+    const [isFetchingNiubiz, setIsFetchingNiubiz] = useState(false);
+    const [niubizError, setNiubizError] = useState(null);
+
 
     useEffect(() => {
-        if (step === 3) {
-            fetchIntent(appliedCoupon?.codigo || '');
+        if (step === 3 && !niubizSession) {
+            fetchNiubizSession(appliedCoupon?.codigo || '');
         }
-    }, [usePoints]);
+    }, [step, usePoints]);
 
-    const fetchIntent = async (couponCodeStr) => {
-        setIsFetchingIntent(true);
-        setIntentError(null);
+    // Cargar script de Niubiz dinámicamente
+    useEffect(() => {
+        const script = document.createElement('script');
+        script.src = 'https://static-content-qas.vnforapps.com/v2/js/checkout.js?qs=x';
+        script.async = true;
+        document.body.appendChild(script);
+        return () => {
+            if (document.body.contains(script)) {
+                document.body.removeChild(script);
+            }
+        };
+    }, []);
+
+    const openNiubizModal = () => {
+        if (!niubizSession || !window.VisanetCheckout) {
+            Swal.fire('Error', 'La pasarela aún no está lista', 'error');
+            return;
+        }
+
+        window.VisanetCheckout.configure({
+            sessiontoken: niubizSession.sessionKey,
+            channel: 'web',
+            merchantid: niubizSession.merchantId,
+            purchasenumber: niubizSession.purchaseNumber,
+            amount: niubizSession.amount,
+            expirationminutes: '20',
+            timeouturl: 'about:blank',
+            merchantlogo: 'https://novape.pe/images/logo.png',
+            formbuttoncolor: '#00B4FF',
+            action: '/api/checkout/niubiz/authorize',
+            complete: function(params) {
+                // Not strictly needed if action URL is set, the form will auto-submit
+            }
+        });
+        window.VisanetCheckout.open();
+    };
+
+    const fetchNiubizSession = async (couponCodeStr) => {
+        console.log("fetchNiubizSession called!", { step, niubizSession });
+        setIsFetchingNiubiz(true);
+        setNiubizError(null);
         const emailValue =
             facturacionData.email || document.getElementById('checkout-email')?.value || '';
         try {
-            const res = await axios.post('/api/checkout/stripe/intent', {
+            console.log("Sending Niubiz session request...", { emailValue, deliveryType, addressData });
+            const res = await axios.post('/api/checkout/niubiz/session', {
                 email: emailValue,
                 coupon: couponCodeStr || '',
                 deliveryType: deliveryType,
@@ -457,22 +500,26 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
                 facturacion: facturacionData,
                 shippingAddress: addressData,
                 usePoints: usePoints,
+                items: cartItems.map(item => ({ id: item.id, precio_final: item.precio_final, cantidad: item.cantidad }))
             });
             const data = res.data;
-            if (data.clientSecret) {
-                setClientSecret(data.clientSecret);
+            console.log("Niubiz session response:", data);
+            if (data.sessionKey) {
+                setNiubizSession(data);
             } else if (data.error) {
-                setIntentError(data.error);
+                setNiubizError(data.error);
+            } else {
+                setNiubizError("Respuesta desconocida del servidor");
             }
         } catch (e) {
             console.error('Error intent:', e);
             if (e.response && e.response.data && e.response.data.error) {
-                setIntentError(e.response.data.error);
+                setNiubizError(e.response.data.error);
             } else {
-                setIntentError('Error de conexión al procesar el pago seguro.');
+                setNiubizError('Error de conexión al procesar el pago seguro.');
             }
         } finally {
-            setIsFetchingIntent(false);
+            setIsFetchingNiubiz(false);
         }
     };
 
@@ -482,7 +529,7 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
             setStep(3);
             sessionStorage.setItem('checkout_delivery', deliveryType);
 
-            await fetchIntent(appliedCoupon?.codigo || '');
+            await fetchNiubizSession(appliedCoupon?.codigo || '');
         }
     };
 
@@ -509,7 +556,7 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
                 setTimeout(() => setHighlightTotal(false), 1500);
 
                 // Refrescar el PaymentIntent con el nuevo monto
-                await fetchIntent(data.codigo);
+                await fetchNiubizSession(data.codigo);
             }
         } catch (e) {
             if (e.response && e.response.data && e.response.data.error) {
@@ -1182,7 +1229,7 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
 
                         {step === 3 && (
                             <div className="efe-checkout-step-content">
-                                {isFetchingIntent ? (
+                                {isFetchingNiubiz ? (
                                     <div
                                         style={{
                                             padding: '40px',
@@ -1205,7 +1252,7 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
                                             Cargando pasarela de pago segura...
                                         </p>
                                     </div>
-                                ) : intentError ? (
+                                ) : niubizError ? (
                                     <div
                                         style={{
                                             padding: '20px',
@@ -1219,16 +1266,16 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
                                         <p style={{ fontWeight: 'bold', marginBottom: '10px' }}>
                                             No se pudo cargar el pago
                                         </p>
-                                        <p style={{ fontSize: '14px' }}>{intentError}</p>
+                                        <p style={{ fontSize: '14px' }}>{niubizError}</p>
                                         <button
-                                            onClick={() => fetchIntent(appliedCoupon?.codigo || '')}
+                                            onClick={() => fetchNiubizSession(appliedCoupon?.codigo || '')}
                                             className="efe-btn-primary"
                                             style={{ marginTop: '15px', padding: '8px 20px' }}
                                         >
                                             Reintentar
                                         </button>
                                     </div>
-                                ) : clientSecret ? (
+                                ) : (true) ? (
                                     <div className="efe-checkout-box">
                                         <div style={{ marginBottom: '20px' }}>
                                             <h3
@@ -1352,14 +1399,14 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
                                                                 setAppliedCoupon(null);
                                                                 setCouponCode('');
                                                                 setCouponMessage(null);
-                                                                fetchIntent('');
+                                                                fetchNiubizSession('');
                                                             }}
                                                             style={{
                                                                 padding: '5px 15px',
                                                                 borderColor: '#ef4444',
                                                                 color: '#ef4444',
                                                             }}
-                                                            disabled={isFetchingIntent}
+                                                            disabled={isFetchingNiubiz}
                                                         >
                                                             Quitar
                                                         </button>
@@ -1456,28 +1503,69 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
                                             )}
                                         </div>
 
-                                        <h3
-                                            style={{
-                                                fontSize: '15px',
-                                                fontWeight: 'bold',
-                                                marginBottom: '15px',
-                                                borderBottom: '1px solid #e5e7eb',
-                                                paddingBottom: '10px',
-                                            }}
-                                        >
-                                            Tarjeta de crédito o débito
-                                        </h3>
+                                        <div style={{ marginTop: '24px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '24px', boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                                    </svg>
+                                                    <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#0F172A', margin: 0 }}>Pago 100% Seguro</h3>
+                                                </div>
+                                                <div style={{ display: 'flex', gap: '4px' }}>
+                                                    <img src="https://logospng.org/download/mercado-pago/logo-mercado-pago-icono-1024.png" alt="Mercado Pago" style={{ height: '24px' }} />
+                                                </div>
+                                            </div>
+                                            <p style={{ fontSize: '14px', color: '#64748B', marginBottom: '24px', lineHeight: '1.5' }}>
+                                                Todas las transacciones están encriptadas y aseguradas por Mercado Pago. Puedes pagar con tarjeta, Yape, Plin o efectivo en agentes.
+                                            </p>
 
-                                        <Elements stripe={stripePromise} options={{ clientSecret }}>
-                                            <StripePaymentForm
-                                                clientSecret={clientSecret}
-                                                onSuccess={(intent) => {
-                                                    const successUrl = `/checkout/success?payment_intent=${intent.id}`;
-                                                    router.visit(successUrl);
-                                                }}
-                                                onFail={(msg) => console.error(msg)}
-                                            />
-                                        </Elements>
+                                            {isFetchingNiubiz && (
+                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px', gap: '16px', background: '#FFFFFF', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+                                                    <div style={{ width: '30px', height: '30px', border: '3px solid #F1F5F9', borderTopColor: '#00B4FF', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }}></div>
+                                                    <span style={{ color: '#64748B', fontSize: '14px', fontWeight: '500' }}>Conectando con Mercado Pago...</span>
+                                                    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                                                </div>
+                                            )}
+
+                                            {!isFetchingNiubiz && niubizSession && (
+                                                <div style={{ background: '#FFFFFF', borderRadius: '8px', padding: '16px', border: '1px solid #E2E8F0', textAlign: 'center' }}>
+                                                    <p style={{ color: '#1E293B', fontWeight: '500', marginBottom: '16px', fontSize: '15px' }}>
+                                                        Estás a un paso de completar tu compra.
+                                                    </p>
+                                                    <button 
+                                                        className="efe-btn-primary" 
+                                                        onClick={openNiubizModal}
+                                                        style={{ width: '100%', padding: '12px 0', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                                                    >
+                                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                                                        Pagar de Forma Segura
+                                                    </button>
+                                                    <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'center', gap: '8px' }}>
+                                                        <img src="https://static-content.vnforapps.com/v2/img/brands/visa.png" alt="Visa" style={{ height: '24px' }} />
+                                                        <img src="https://static-content.vnforapps.com/v2/img/brands/mastercard.png" alt="Mastercard" style={{ height: '24px' }} />
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {!isFetchingNiubiz && !niubizSession && !niubizError && (
+                                                <div style={{ textAlign: 'center', padding: '32px 24px', background: '#FFFFFF', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+                                                    <div style={{ width: '48px', height: '48px', background: '#FEE2E2', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                                                    </div>
+                                                    <p style={{ color: '#0F172A', fontWeight: '500', fontSize: '15px', margin: '0 0 8px 0' }}>Conexión interrumpida</p>
+                                                    <p style={{ color: '#64748B', fontSize: '14px', margin: '0 0 20px 0' }}>No pudimos cargar la pasarela de pagos.</p>
+                                                    <button 
+                                                        onClick={() => fetchNiubizSession(appliedCoupon?.codigo || '')}
+                                                        style={{ padding: '10px 24px', background: '#00B4FF', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '600', fontSize: '14px', boxShadow: '0 4px 14px 0 rgba(0, 180, 255, 0.25)', transition: 'all 0.2s ease' }}
+                                                        onMouseOver={(e) => e.target.style.transform = 'translateY(-1px)'}
+                                                        onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+                                                    >
+                                                        Reintentar Conexión
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 ) : null}
                             </div>

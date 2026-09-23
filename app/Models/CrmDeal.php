@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\SchemalessAttributes\Casts\SchemalessAttributes;
 use OwenIt\Auditing\Contracts\Auditable;
+use App\Traits\HasPolymorphicCleanup;
 
 class CrmDeal extends Model implements Auditable
 {
-    use HasFactory, \OwenIt\Auditing\Auditable;
+    use HasFactory, HasPolymorphicCleanup, \OwenIt\Auditing\Auditable;
 
     protected $table = 'crm_deals';
 

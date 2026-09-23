@@ -22,6 +22,10 @@ class UpdateSettingRequest extends FormRequest
             'pago_transferencia' => 'boolean',
             'envio_gratis' => 'boolean',
             'igv_porcentaje' => 'required|numeric|min:0|max:100',
+            'whatsapp_token' => 'nullable|string',
+            'whatsapp_phone_number_id' => 'nullable|string',
+            'whatsapp_verify_token' => 'nullable|string',
+            'whatsapp_app_secret' => 'nullable|string',
         ];
     }
 }

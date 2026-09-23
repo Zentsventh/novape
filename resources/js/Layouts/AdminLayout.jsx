@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link, usePage, router } from '@inertiajs/react';
+import { AnimatePresence } from 'framer-motion';
+import PageTransition from '@/Components/Animations/PageTransition';
 import {
     LayoutDashboard, MonitorSmartphone, ShoppingCart, Package,
     CreditCard, Wallet, Archive, Image, Users, Truck,
-    UserCog, Shield, Star, Settings, LogOut, Menu, X, Bell, Eye, Grid, Briefcase, Mail, ShieldAlert
+    UserCog, Shield, Star, Settings, LogOut, Menu, X, Bell, Eye, Grid, Briefcase, Mail, ShieldAlert, DollarSign, Building, Zap, Tags
 } from 'lucide-react';
 import { useDeviceContext } from '@/Contexts/DeviceContext';
 import '../../css/admin/admin.css';
@@ -433,7 +435,11 @@ export default function AdminLayout({ children, logoUrl }) {
                             <span style={{ fontWeight: 'bold' }}>{props.flash.error}</span>
                         </div>
                     )}
-                    {children}
+                    <AnimatePresence mode="wait">
+                        <PageTransition key={url}>
+                            {children}
+                        </PageTransition>
+                    </AnimatePresence>
                 </div>
             </main>
         </div>

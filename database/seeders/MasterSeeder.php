@@ -427,7 +427,7 @@ class MasterSeeder extends Seeder
                 if (in_array($estado, ['completado', 'enviado'])) {
                     DB::table('pago')->insert([
                         'pedido_id' => $pedidoId,
-                        'metodo' => ['stripe', 'yape', 'tarjeta'][array_rand([0, 1, 2])],
+                        'metodo' => ['niubiz', 'yape', 'tarjeta'][array_rand([0, 1, 2])],
                         'estado' => 'completado',
                         'monto' => $total,
                         'created_at' => $fechaPedido,

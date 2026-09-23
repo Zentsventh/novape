@@ -1,0 +1,217 @@
+/* 
+ * ----------------------------------------------------
+ *  NOVAPE CRM - ENTERPRISE DESIGN SYSTEM
+ * ----------------------------------------------------
+ */
+
+ :root {
+    /* Primary CRM Colors */
+    --crm-primary: #2563eb;
+    --crm-primary-hover: #1d4ed8;
+    --crm-primary-light: #eff6ff;
+    
+    /* Secondary / Accents */
+    --crm-secondary: #64748b;
+    --crm-secondary-light: #f1f5f9;
+    --crm-success: #10b981;
+    --crm-success-light: #d1fae5;
+    --crm-warning: #f59e0b;
+    --crm-warning-light: #fef3c7;
+    --crm-danger: #ef4444;
+    --crm-danger-light: #fee2e2;
+    --crm-purple: #8b5cf6;
+    --crm-purple-light: #ede9fe;
+    --crm-cyan: #06b6d4;
+    --crm-cyan-light: #cffafe;
+    
+    /* Surface & Background */
+    --crm-bg-body: #f8fafc;
+    --crm-bg-surface: #ffffff;
+    --crm-bg-subtle: #f1f5f9;
+    
+    /* Text */
+    --crm-text-heading: #0f172a;
+    --crm-text-main: #334155;
+    --crm-text-muted: #64748b;
+    
+    /* Borders */
+    --crm-border-light: #e2e8f0;
+    --crm-border-strong: #cbd5e1;
+    
+    /* Shadows */
+    --crm-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --crm-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --crm-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --crm-shadow-float: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    
+    /* Radii */
+    --crm-radius-sm: 6px;
+    --crm-radius-md: 8px;
+    --crm-radius-lg: 12px;
+    --crm-radius-xl: 16px;
+    --crm-radius-pill: 9999px;
+    
+    /* Transitions */
+    --crm-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Base Adjustments */
+body {
+    background-color: var(--crm-bg-body);
+    font-family: 'Inter', 'Roboto', sans-serif;
+    color: var(--crm-text-main);
+}
+
+/* Glassmorphism Surface */
+.crm-surface {
+    background: var(--crm-bg-surface);
+    border-radius: var(--crm-radius-lg);
+    border: 1px solid var(--crm-border-light);
+    box-shadow: var(--crm-shadow-sm);
+    transition: var(--crm-transition);
+}
+
+.crm-surface-hoverable:hover {
+    box-shadow: var(--crm-shadow-md);
+    transform: translateY(-2px);
+    border-color: var(--crm-border-strong);
+}
+
+/* Headings */
+.crm-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--crm-text-heading);
+    letter-spacing: -0.025em;
+    margin-bottom: 0.5rem;
+}
+
+.crm-subtitle {
+    font-size: 0.875rem;
+    color: var(--crm-text-muted);
+    font-weight: 500;
+}
+
+/* Buttons */
+.crm-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: var(--crm-radius-md);
+    transition: var(--crm-transition);
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.crm-btn-primary {
+    background-color: var(--crm-primary);
+    color: white;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.crm-btn-primary:hover {
+    background-color: var(--crm-primary-hover);
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3);
+}
+
+.crm-btn-secondary {
+    background-color: var(--crm-bg-surface);
+    color: var(--crm-text-main);
+    border-color: var(--crm-border-strong);
+}
+
+.crm-btn-secondary:hover {
+    background-color: var(--crm-secondary-light);
+    color: var(--crm-text-heading);
+}
+
+.crm-btn-ghost {
+    background-color: transparent;
+    color: var(--crm-text-muted);
+}
+
+.crm-btn-ghost:hover {
+    background-color: var(--crm-secondary-light);
+    color: var(--crm-text-heading);
+}
+
+/* Badges */
+.crm-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: var(--crm-radius-pill);
+    text-transform: capitalize;
+}
+
+.crm-badge-success { background: var(--crm-success-light); color: var(--crm-success); }
+.crm-badge-warning { background: var(--crm-warning-light); color: var(--crm-warning); }
+.crm-badge-danger { background: var(--crm-danger-light); color: var(--crm-danger); }
+.crm-badge-primary { background: var(--crm-primary-light); color: var(--crm-primary); }
+.crm-badge-purple { background: var(--crm-purple-light); color: var(--crm-purple); }
+.crm-badge-cyan { background: var(--crm-cyan-light); color: var(--crm-cyan); }
+.crm-badge-neutral { background: var(--crm-secondary-light); color: var(--crm-text-muted); }
+
+/* Avatars */
+.crm-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--crm-radius-pill);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: white;
+    background: linear-gradient(135deg, var(--crm-primary), var(--crm-purple));
+    box-shadow: inset 0 2px 4px rgba(255,255,255,0.2);
+}
+
+/* Micro-animations */
+@keyframes crmFadeInUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.crm-animate-fade {
+    animation: crmFadeInUp 0.4s ease-out forwards;
+}
+
+/* Utilities */
+.crm-flex-between { display: flex; align-items: center; justify-content: space-between; }
+.crm-flex-center { display: flex; align-items: center; justify-content: center; }
+.crm-flex-gap { display: flex; align-items: center; gap: 0.75rem; }
+
+/* Grid System for Dashboard */
+.crm-grid {
+    display: grid;
+    gap: 1.5rem;
+}
+.crm-grid-2 { grid-template-columns: repeat(1, 1fr); }
+@media (min-width: 768px) {
+    .crm-grid-2 { grid-template-columns: repeat(2, 1fr); }
+    .crm-grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .crm-grid-4 { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* Scrollbar styling */
+.crm-scroll::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+.crm-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+.crm-scroll::-webkit-scrollbar-thumb {
+    background: var(--crm-border-strong);
+    border-radius: var(--crm-radius-pill);
+}
+.crm-scroll::-webkit-scrollbar-thumb:hover {
+    background: var(--crm-secondary);
+}
