@@ -20,6 +20,7 @@ class StoreCrmCompanyRequest extends FormRequest
     {
         return [
             'nombre' => 'required|string|max:255',
+            'ruc' => 'nullable|string|max:20|unique:crm_companies,ruc',
             'dominio' => 'nullable|string|max:255|unique:crm_companies,dominio',
             'industria' => 'nullable|string|max:100',
             'tamaño' => 'nullable|in:startup,pequeña,mediana,grande,enterprise',

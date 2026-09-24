@@ -7,6 +7,11 @@ import CartDrawer from '../../Components/Home/CartDrawer';
 import Toast from '../../Components/Home/Toast';
 import Footer from '../../Components/Home/Footer';
 import '../../../css/home/base.css';
+import '../../../css/home/header.css';
+import '../../../css/home/category-nav.css';
+import '../../../css/home/category-drawer.css';
+import '../../../css/home/cart-drawer.css';
+import '../../../css/home/footer.css';
 import ubigeoData from 'ubigeo-peru';
 import { useConfirm } from '@/Contexts/ConfirmContext';
 

@@ -1,33 +1,90 @@
 import React, { useState } from 'react';
-import { Head, router, Link } from '@inertiajs/react';
+import { Head, router, Link, useForm } from '@inertiajs/react';
 import TwentyCrmLayout from '../../../Layouts/TwentyCrmLayout';
 import TwentyKanban from '../../../Components/Admin/CRM/TwentyKanban';
 import TwentyRecordDrawer from '../../../Components/Admin/CRM/TwentyRecordDrawer';
-import { Plus, ListFilter, Download } from 'lucide-react';
+import { Plus, ListFilter, Download, Search, X } from 'lucide-react';
+import Swal from 'sweetalert2';
 
 export default function Pipeline({ pipeline, companies, personas }) {
     const [search, setSearch] = useState('');
     const [drawerOpen, setDrawerOpen] = useState(false);
+    const [showFilters, setShowFilters] = useState(false);
 
-    // Flat list of all deals for filtering (if needed client side)
-    // The TwentyKanban component expects stages array, where each stage has deals array.
-    // Our CrmPipelineService returns the pipeline data formatted precisely like this.
+    const { data, setData, post, put, processing, errors, reset, clearErrors } = useForm({
+        id: null,
+        titulo: '',
+        valor: '',
+        stage_id: pipeline[0]?.id || '',
+        empresa_id: '',
+        usuario_id: '',
+        fecha_cierre_esperada: ''
+    });
 
-    const handleSearch = (e) => {
-        // Search is handled reactively by the filteredPipeline below.
-        // We can just prevent default if they press Enter.
-        if (e.key === 'Enter') {
-            e.preventDefault();
+    const openDrawer = (deal = null) => {
+        clearErrors();
+        if (deal) {
+            setData({
+                id: deal.id,
+                titulo: deal.titulo || '',
+                valor: deal.valor || '',
+                stage_id: deal.stage_id || '',
+                empresa_id: deal.empresa_id || '',
+                usuario_id: deal.usuario_id || '',
+                fecha_cierre_esperada: deal.fecha_cierre_esperada ? deal.fecha_cierre_esperada.substring(0, 10) : ''
+            });
+        } else {
+            reset();
+            setData('stage_id', pipeline[0]?.id || '');
+        }
+        setDrawerOpen(true);
+    };
+
+    const submitDeal = (e) => {
+        e.preventDefault();
+        if (data.id) {
+            put(`/admin/crm/deals/${data.id}`, {
+                preserveScroll: true,
+                onSuccess: () => setDrawerOpen(false),
+            });
+        } else {
+            post('/admin/crm/deals', {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setDrawerOpen(false);
+                    reset();
+                },
+            });
         }
     };
 
-    const filteredPipeline = pipeline.map(stage => ({
-        ...stage,
-        deals: stage.deals ? stage.deals.filter(deal => 
-            deal.titulo.toLowerCase().includes(search.toLowerCase()) ||
-            (deal.cliente && (deal.cliente.nombres + ' ' + deal.cliente.apellidos).toLowerCase().includes(search.toLowerCase()))
-        ) : []
-    }));
+    const deleteDeal = (id) => {
+        Swal.fire({
+            title: '¿Eliminar oportunidad?',
+            text: 'Esta acción borrará este negocio permanentemente.',
+            icon: 'warning',
+            iconColor: '#EF4444',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            customClass: {
+                popup: 'premium-swal-popup',
+                title: 'premium-swal-title',
+                htmlContainer: 'premium-swal-text',
+                confirmButton: 'premium-swal-confirm',
+                cancelButton: 'premium-swal-cancel',
+                actions: 'premium-swal-actions',
+                icon: 'premium-swal-icon'
+            },
+            buttonsStyling: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                router.delete(`/admin/crm/deals/${id}`, {
+                    preserveScroll: true
+                });
+            }
+        });
+    };
 
     const handleDragEnd = (result) => {
         const { destination, source, draggableId } = result;
@@ -45,34 +102,268 @@ export default function Pipeline({ pipeline, companies, personas }) {
         router.visit(`/admin/crm/deals/${deal.id}`);
     };
 
+    const filteredPipeline = pipeline.map(stage => ({
+        ...stage,
+        deals: stage.deals ? stage.deals.filter(deal => 
+            deal.titulo.toLowerCase().includes(search.toLowerCase()) ||
+            (deal.cliente && (deal.cliente.nombres + ' ' + deal.cliente.apellidos).toLowerCase().includes(search.toLowerCase()))
+        ) : []
+    }));
+
     return (
         <TwentyCrmLayout title="Pipeline">
             <Head title="Pipeline - CRM" />
 
-            <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <style>{`
+                .premium-pipeline-search {
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                    width: 320px;
+                }
+                .premium-pipeline-search-icon {
+                    position: absolute;
+                    left: 14px;
+                    color: #94A3B8;
+                    pointer-events: none;
+                }
+                .premium-pipeline-search-input {
+                    width: 100%;
+                    padding: 10px 36px;
+                    border-radius: 10px;
+                    border: 1px solid #E2E8F0;
+                    background-color: #FFFFFF;
+                    color: #1E293B;
+                    font-size: 14px;
+                    outline: none;
+                    transition: all 0.2s ease;
+                    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+                }
+                .premium-pipeline-search-input:focus {
+                    border-color: #00B4FF;
+                    box-shadow: 0 0 0 3px rgba(0, 180, 255, 0.15);
+                }
+                .premium-pipeline-search-clear {
+                    position: absolute;
+                    right: 10px;
+                    background: transparent;
+                    border: none;
+                    cursor: pointer;
+                    color: #94A3B8;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 4px;
+                    border-radius: 6px;
+                    transition: all 0.2s ease;
+                }
+                .premium-pipeline-search-clear:hover {
+                    background-color: #F1F5F9;
+                    color: #1E293B;
+                }
+                .premium-btn-secondary {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 10px 16px;
+                    border-radius: 10px;
+                    border: 1px solid #E2E8F0;
+                    background: #FFFFFF;
+                    font-weight: 600;
+                    font-size: 14px;
+                    color: #475569;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    text-decoration: none;
+                    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+                }
+                .premium-btn-secondary:hover {
+                    background: #F8FAFC;
+                    color: #1E293B;
+                    border-color: #CBD5E1;
+                }
+                .premium-btn-primary {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 10px 20px;
+                    border-radius: 10px;
+                    border: none;
+                    background: #00B4FF;
+                    font-weight: 600;
+                    font-size: 14px;
+                    color: #FFFFFF;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    box-shadow: 0 4px 6px -1px rgba(0, 180, 255, 0.2), 0 2px 4px -1px rgba(0, 180, 255, 0.1);
+                    text-decoration: none;
+                }
+                .premium-btn-primary:hover {
+                    background: #009be5;
+                    transform: translateY(-1px);
+                    box-shadow: 0 6px 10px -1px rgba(0, 180, 255, 0.3), 0 2px 4px -1px rgba(0, 180, 255, 0.1);
+                }
+                .premium-pipeline-header {
+                    padding: 32px 32px 16px 32px;
+                    background: transparent;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+                .premium-page-title {
+                    font-size: 24px;
+                    font-weight: 700;
+                    color: #1E293B;
+                    letter-spacing: -0.02em;
+                    margin: 0;
+                }
+                
+                /* SweetAlert Premium Classes */
+                .premium-swal-popup {
+                    border-radius: 16px !important;
+                    padding: 32px 24px !important;
+                    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15) !important;
+                    font-family: inherit !important;
+                    border: 1px solid #E2E8F0 !important;
+                }
+                .premium-swal-title {
+                    font-size: 20px !important;
+                    font-weight: 700 !important;
+                    color: #1E293B !important;
+                    margin-bottom: 8px !important;
+                }
+                .premium-swal-text {
+                    font-size: 15px !important;
+                    color: #64748B !important;
+                    margin-bottom: 8px !important;
+                }
+                .premium-swal-icon {
+                    border: none !important;
+                    background: #FEF2F2 !important;
+                    margin-bottom: 24px !important;
+                }
+                .premium-swal-actions {
+                    gap: 12px !important;
+                    margin-top: 24px !important;
+                }
+                .premium-swal-confirm {
+                    background: #EF4444 !important;
+                    color: #FFFFFF !important;
+                    padding: 12px 24px !important;
+                    border-radius: 10px !important;
+                    font-weight: 600 !important;
+                    font-size: 14px !important;
+                    border: none !important;
+                    cursor: pointer !important;
+                    transition: all 0.2s ease !important;
+                    box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.2) !important;
+                }
+                .premium-swal-confirm:hover {
+                    background: #DC2626 !important;
+                    transform: translateY(-1px) !important;
+                    box-shadow: 0 6px 10px -1px rgba(239, 68, 68, 0.3) !important;
+                }
+                .premium-swal-cancel {
+                    background: #FFFFFF !important;
+                    color: #475569 !important;
+                    padding: 12px 24px !important;
+                    border-radius: 10px !important;
+                    font-weight: 600 !important;
+                    font-size: 14px !important;
+                    border: 1px solid #E2E8F0 !important;
+                    cursor: pointer !important;
+                    transition: all 0.2s ease !important;
+                }
+                .premium-swal-cancel:hover {
+                    background: #F8FAFC !important;
+                    color: #1E293B !important;
+                    border-color: #CBD5E1 !important;
+                }
+                
+                /* Drawer Form Premium Styles */
+                .premium-form-container {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 24px;
+                    padding: 8px 4px;
+                }
+                .premium-form-group {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                }
+                .premium-label {
+                    font-size: 13px;
+                    font-weight: 600;
+                    color: #475569;
+                    letter-spacing: 0.01em;
+                }
+                .premium-input {
+                    padding: 12px 16px;
+                    border: 1px solid #E2E8F0;
+                    border-radius: 10px;
+                    font-size: 14px;
+                    color: #1E293B;
+                    background: #FFFFFF;
+                    outline: none;
+                    transition: all 0.2s ease;
+                    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+                    font-family: inherit;
+                    width: 100%;
+                    box-sizing: border-box;
+                }
+                .premium-input:focus {
+                    border-color: #00B4FF;
+                    box-shadow: 0 0 0 3px rgba(0, 180, 255, 0.15);
+                }
+                select.premium-input {
+                    cursor: pointer;
+                    appearance: none;
+                    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+                    background-repeat: no-repeat;
+                    background-position: right 12px center;
+                    padding-right: 40px;
+                }
+                .premium-drawer-actions {
+                    display: flex;
+                    justify-content: flex-end;
+                    gap: 12px;
+                    margin-top: 32px;
+                    padding-top: 24px;
+                    border-top: 1px solid #F1F5F9;
+                }
+            `}</style>
+
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', backgroundColor: '#F8FAFC' }}>
                 
                 {/* Header Section */}
-                <div className="twenty-header">
-                    <h1 className="twenty-title">Oportunidades</h1>
+                <div className="premium-pipeline-header">
+                    <h1 className="premium-page-title">Oportunidades</h1>
                     <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                        <div className="twenty-search-box">
+                        <div className="premium-pipeline-search">
+                            <Search size={16} className="premium-pipeline-search-icon" />
                             <input 
                                 type="text" 
-                                placeholder="Buscar en pipeline..." 
+                                className="premium-pipeline-search-input"
+                                placeholder="Buscar prospectos o clientes..." 
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
-                                onKeyDown={handleSearch}
                             />
+                            {search && (
+                                <button className="premium-pipeline-search-clear" onClick={() => setSearch('')}>
+                                    <X size={14} />
+                                </button>
+                            )}
                         </div>
-                        <button className="twenty-btn twenty-btn-secondary">
+                        <button className="premium-btn-secondary" onClick={() => setShowFilters(!showFilters)}>
                             <ListFilter size={16} />
                             <span>Filtros</span>
                         </button>
-                        <a href="/admin/crm/export?type=deals" className="twenty-btn twenty-btn-secondary" style={{ textDecoration: 'none' }}>
+                        <a href="/admin/crm/export?type=deals" className="premium-btn-secondary">
                             <Download size={16} />
                             <span>Exportar</span>
                         </a>
-                        <button className="twenty-btn twenty-btn-primary" onClick={() => setDrawerOpen(true)}>
+                        <button className="premium-btn-primary" onClick={() => openDrawer()}>
                             <Plus size={16} />
                             <span>Nueva Oportunidad</span>
                         </button>
@@ -84,49 +375,68 @@ export default function Pipeline({ pipeline, companies, personas }) {
                     <TwentyKanban 
                         stages={filteredPipeline} 
                         onDragEnd={handleDragEnd} 
-                        onDealClick={handleDealClick} 
+                        onDealClick={handleDealClick}
+                        onDealEdit={openDrawer}
+                        onDealDelete={deleteDeal}
                     />
                 </div>
             </div>
 
-            {/* Create Deal Drawer */}
+            {/* Create / Edit Deal Drawer */}
             <TwentyRecordDrawer
                 isOpen={drawerOpen}
                 onClose={() => setDrawerOpen(false)}
-                title="Nueva Oportunidad"
+                title={data.id ? "Editar Oportunidad" : "Nueva Oportunidad"}
             >
-                <form 
-                    className="twenty-form" 
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        const formData = new FormData(e.target);
-                        router.post('/admin/crm/deals', Object.fromEntries(formData), {
-                            onSuccess: () => setDrawerOpen(false)
-                        });
-                    }}
-                >
-                    <div className="twenty-form-group">
-                        <label>Título de la oportunidad *</label>
-                        <input type="text" name="titulo" required className="twenty-input" placeholder="Ej: Venta de software a Acme" />
+                <form onSubmit={submitDeal} className="premium-form-container">
+                    <div className="premium-form-group">
+                        <label className="premium-label">Título de la oportunidad *</label>
+                        <input 
+                            type="text" 
+                            className="premium-input" 
+                            placeholder="Ej: Venta de software a Acme"
+                            value={data.titulo}
+                            onChange={e => setData('titulo', e.target.value)}
+                            required
+                        />
+                        {errors.titulo && <span style={{color: '#ef4444', fontSize: '12px'}}>{errors.titulo}</span>}
                     </div>
 
-                    <div className="twenty-form-group">
-                        <label>Valor estimado (S/)</label>
-                        <input type="number" step="0.01" name="valor" className="twenty-input" placeholder="0.00" />
+                    <div className="premium-form-group">
+                        <label className="premium-label">Valor estimado (S/)</label>
+                        <input 
+                            type="number" 
+                            step="0.01" 
+                            className="premium-input" 
+                            placeholder="0.00"
+                            value={data.valor}
+                            onChange={e => setData('valor', e.target.value)}
+                        />
+                        {errors.valor && <span style={{color: '#ef4444', fontSize: '12px'}}>{errors.valor}</span>}
                     </div>
 
-                    <div className="twenty-form-group">
-                        <label>Etapa inicial *</label>
-                        <select name="stage_id" required className="twenty-input">
+                    <div className="premium-form-group">
+                        <label className="premium-label">Etapa *</label>
+                        <select 
+                            className="premium-input"
+                            value={data.stage_id}
+                            onChange={e => setData('stage_id', e.target.value)}
+                            required
+                        >
                             {pipeline.map(stage => (
                                 <option key={stage.id} value={stage.id}>{stage.nombre}</option>
                             ))}
                         </select>
+                        {errors.stage_id && <span style={{color: '#ef4444', fontSize: '12px'}}>{errors.stage_id}</span>}
                     </div>
 
-                    <div className="twenty-form-group">
-                        <label>Empresa asociada</label>
-                        <select name="empresa_id" className="twenty-input">
+                    <div className="premium-form-group">
+                        <label className="premium-label">Empresa asociada</label>
+                        <select 
+                            className="premium-input"
+                            value={data.empresa_id}
+                            onChange={e => setData('empresa_id', e.target.value)}
+                        >
                             <option value="">Seleccionar empresa (opcional)</option>
                             {companies?.map(company => (
                                 <option key={company.id} value={company.id}>{company.nombre}</option>
@@ -134,9 +444,13 @@ export default function Pipeline({ pipeline, companies, personas }) {
                         </select>
                     </div>
 
-                    <div className="twenty-form-group">
-                        <label>Contacto asociado (Persona)</label>
-                        <select name="usuario_id" className="twenty-input">
+                    <div className="premium-form-group">
+                        <label className="premium-label">Contacto asociado (Persona)</label>
+                        <select 
+                            className="premium-input"
+                            value={data.usuario_id}
+                            onChange={e => setData('usuario_id', e.target.value)}
+                        >
                             <option value="">Seleccionar contacto (opcional)</option>
                             {personas?.map(persona => (
                                 <option key={persona.id} value={persona.id}>{persona.nombres} {persona.apellidos}</option>
@@ -144,17 +458,22 @@ export default function Pipeline({ pipeline, companies, personas }) {
                         </select>
                     </div>
 
-                    <div className="twenty-form-group">
-                        <label>Fecha de cierre esperada</label>
-                        <input type="date" name="fecha_cierre_esperada" className="twenty-input" />
+                    <div className="premium-form-group">
+                        <label className="premium-label">Fecha de cierre esperada</label>
+                        <input 
+                            type="date" 
+                            className="premium-input"
+                            value={data.fecha_cierre_esperada}
+                            onChange={e => setData('fecha_cierre_esperada', e.target.value)}
+                        />
                     </div>
                     
-                    <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-                        <button type="button" className="twenty-btn twenty-btn-secondary" onClick={() => setDrawerOpen(false)}>
+                    <div className="premium-drawer-actions">
+                        <button type="button" className="premium-btn-secondary" onClick={() => setDrawerOpen(false)}>
                             Cancelar
                         </button>
-                        <button type="submit" className="twenty-btn twenty-btn-primary">
-                            Crear Oportunidad
+                        <button type="submit" className="premium-btn-primary" disabled={processing}>
+                            {data.id ? 'Guardar Cambios' : 'Crear Oportunidad'}
                         </button>
                     </div>
                 </form>

@@ -26,7 +26,7 @@ class Usuario extends Authenticatable implements Auditable
     protected $table = 'usuario';
 
     protected $fillable = [
-        'nombres', 'apellidos', 'tipo_documento', 'dni', 'email', 'telefono', 
+        'nombres', 'apellidos', 'tipo_documento', 'dni', 'email', 'telefono', 'telefono_secundario',
         'password_hash', 'estado', 'google_id', 'fecha_nacimiento', 'has_set_password',
         'rfm_score', 'ltv', 'last_order_date', 'total_orders', 'segmento', 'empresa_id'
     ];

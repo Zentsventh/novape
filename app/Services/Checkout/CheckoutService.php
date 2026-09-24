@@ -210,19 +210,19 @@ class CheckoutService
         });
     }
 
-    public function processSuccessfulPayment(string $codigoPedido, float $montoPagado, ?string $paymentIntentId = null): bool
+    public function processSuccessfulPayment(string $codigoPedido, float $montoPagado, ?string $paymentIntentId = null, string $pasarela = 'stripe'): bool
     {
-        return DB::transaction(function () use ($codigoPedido, $montoPagado, $paymentIntentId) {
+        return DB::transaction(function () use ($codigoPedido, $montoPagado, $paymentIntentId, $pasarela) {
             $pedido = Pedido::with('items')->where('codigo', $codigoPedido)->lockForUpdate()->first();
 
             if ($pedido && $pedido->estado === 'Pendiente') {
                 if (abs($montoPagado - $pedido->total) > 0.01) {
-                    Log::warning("Webhook Stripe: Monto pagado ($montoPagado) no coincide con total del pedido {$pedido->codigo} ({$pedido->total}).");
+                    Log::warning("Webhook {$pasarela}: Monto pagado ($montoPagado) no coincide con total del pedido {$pedido->codigo} ({$pedido->total}).");
                     
                     \App\Models\TransaccionPago::create([
                         'pedido_id' => $pedido->id,
                         'payment_intent_id' => $paymentIntentId,
-                        'pasarela' => 'stripe',
+                        'pasarela' => $pasarela,
                         'monto' => $montoPagado,
                         'estado' => 'fallido',
                         'error_message' => 'Monto inválido'
@@ -236,7 +236,7 @@ class CheckoutService
                 \App\Models\TransaccionPago::create([
                     'pedido_id' => $pedido->id,
                     'payment_intent_id' => $paymentIntentId,
-                    'pasarela' => 'stripe',
+                    'pasarela' => $pasarela,
                     'monto' => $montoPagado,
                     'estado' => 'exitoso'
                 ]);

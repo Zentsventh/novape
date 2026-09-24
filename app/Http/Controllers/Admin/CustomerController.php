@@ -101,6 +101,28 @@ class CustomerController extends Controller
         }
     }
 
+    public function bulkDestroy(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'No se seleccionaron usuarios.');
+        }
+
+        try {
+            $count = 0;
+            foreach ($ids as $id) {
+                $user = Usuario::find($id);
+                if ($user) {
+                    $this->userService->deleteUser($user, auth('admin')->id() ?? 0);
+                    $count++;
+                }
+            }
+            return redirect()->route('admin.clientes')->with('success', "{$count} usuarios movidos a la papelera.");
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
     public function toggleBloqueo(int $id)
     {
         try {

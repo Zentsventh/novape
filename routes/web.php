@@ -226,7 +226,10 @@ Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
 
     Route::controller(\App\Http\Controllers\Admin\CrmTaskController::class)->prefix('crm')->group(function () {
         Route::get('/tasks', 'index')->name('admin.crm.tasks');
+        Route::post('/tasks', 'store')->name('admin.crm.tasks.store');
+        Route::put('/tasks/{activity}', 'update')->name('admin.crm.tasks.update');
         Route::post('/tasks/{activity}/complete', 'complete')->name('admin.crm.tasks.complete');
+        Route::delete('/tasks/{activity}', 'destroy')->name('admin.crm.tasks.destroy');
     });
 
     Route::controller(\App\Http\Controllers\Admin\CrmSearchController::class)->prefix('crm')->group(function () {
@@ -425,6 +428,7 @@ Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
         Route::get('/create', 'create')->name('admin.clientes.create')->middleware('permiso:editar_usuario');
 
         Route::post('/', 'store')->name('admin.clientes.store')->middleware('permiso:editar_usuario');
+        Route::post('/bulk-delete', 'bulkDestroy')->name('admin.clientes.bulk_destroy')->middleware('permiso:editar_usuario');
         Route::get('/{id}', 'show')->name('admin.clientes.show')->middleware('permiso:usuarios.gestionar');
         Route::get('/{id}/api-profile', 'apiProfile')->name('admin.clientes.api_profile')->middleware('permiso:usuarios.gestionar');
         Route::get('/{id}/edit', 'edit')->name('admin.clientes.edit')->middleware('permiso:editar_usuario');

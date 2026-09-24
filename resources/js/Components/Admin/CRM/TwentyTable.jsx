@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronDown, MoreHorizontal } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 
 export default function TwentyTable({ columns, data, onRowClick, selectedRows = [], onSelectionChange }) {
     
@@ -54,7 +54,6 @@ export default function TwentyTable({ columns, data, onRowClick, selectedRows = 
                                     </div>
                                 </th>
                             ))}
-                            <th style={{ width: 40 }}></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -93,16 +92,11 @@ export default function TwentyTable({ columns, data, onRowClick, selectedRows = 
                                         {col.render ? col.render(row) : row[col.accessor]}
                                     </td>
                                 ))}
-                                <td style={{ padding: '10px 16px', textAlign: 'right' }}>
-                                    <button className="twenty-btn-icon" onClick={e => e.stopPropagation()}>
-                                        <MoreHorizontal size={16} />
-                                    </button>
-                                </td>
-                            </tr>
+                                </tr>
                         ))}
                         {data.length === 0 && (
                             <tr>
-                                <td colSpan={columns.length + 2} style={{ padding: '40px', textAlign: 'center', color: 'var(--twenty-text-muted)', fontSize: '13px' }}>
+                                <td colSpan={columns.length + 1} style={{ padding: '40px', textAlign: 'center', color: 'var(--twenty-text-muted)', fontSize: '13px' }}>
                                     No se encontraron registros.
                                 </td>
                             </tr>

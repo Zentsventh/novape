@@ -17,7 +17,7 @@ class CrmTaskController extends Controller
             ->map(function ($activity) {
                 // Categorize by date: overdue, today, upcoming
                 $status = 'upcoming';
-                if ($activity->estado === 'completado') {
+                if ($activity->completada) {
                     $status = 'completed';
                 } elseif ($activity->fecha_vencimiento) {
                     $dueDate = \Carbon\Carbon::parse($activity->fecha_vencimiento)->startOfDay();
@@ -33,16 +33,65 @@ class CrmTaskController extends Controller
                 return $activity;
             });
 
+        $deals = \App\Models\CrmDeal::with('cliente')->orderBy('titulo')->get();
+
         return Inertia::render('Admin/CRM/Tasks', [
-            'tasks' => $activities
+            'tasks' => $activities,
+            'deals' => $deals
         ]);
     }
 
     public function complete(Request $request, CrmActivity $activity)
     {
-        $activity->estado = $request->input('completado') ? 'completado' : 'pendiente';
+        $activity->completada = $request->input('completado') ? true : false;
         $activity->save();
 
+        return redirect()->back();
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'deal_id' => 'required|exists:crm_deals,id',
+            'tipo' => 'required|string',
+            'contenido' => 'required|string',
+            'fecha_vencimiento' => 'nullable|date',
+        ]);
+
+        CrmActivity::create([
+            'deal_id' => $request->deal_id,
+            'usuario_id' => auth()->id() ?? 1, // Fallback si auth no está disponible en esta capa
+            'tipo' => $request->tipo,
+            'contenido' => $request->contenido,
+            'fecha_vencimiento' => $request->fecha_vencimiento,
+            'completada' => false,
+        ]);
+
+        return redirect()->back();
+    }
+
+    public function update(Request $request, CrmActivity $activity)
+    {
+        $request->validate([
+            'deal_id' => 'required|exists:crm_deals,id',
+            'tipo' => 'required|string',
+            'contenido' => 'required|string',
+            'fecha_vencimiento' => 'nullable|date',
+        ]);
+
+        $activity->update([
+            'deal_id' => $request->deal_id,
+            'tipo' => $request->tipo,
+            'contenido' => $request->contenido,
+            'fecha_vencimiento' => $request->fecha_vencimiento,
+        ]);
+
+        return redirect()->back();
+    }
+
+    public function destroy(CrmActivity $activity)
+    {
+        $activity->delete();
         return redirect()->back();
     }
 }

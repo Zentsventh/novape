@@ -3,6 +3,8 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import Header from '../../Components/Home/Header';
 import Footer from '../../Components/Home/Footer';
 import '../../../css/home/base.css';
+import '../../../css/home/header.css';
+import '../../../css/home/footer.css';
 
 export default function OrderDetails({ pedido }) {
     const { auth } = usePage().props;

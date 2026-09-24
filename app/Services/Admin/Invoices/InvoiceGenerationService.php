@@ -175,4 +175,66 @@ class InvoiceGenerationService
         
         return $pdfPath;
     }
+
+    public function downloadInvoicePdf(\App\Models\Pedido $pedido)
+    {
+        $igvPorcentaje = 0.18;
+        $total = (float) $pedido->total;
+        $operacionesGravadas = round($total / (1 + $igvPorcentaje), 2);
+        $igvCalculado = round($total - $operacionesGravadas, 2);
+
+        $nombreCliente = $pedido->nombre_facturacion ?? ($pedido->usuario ? $pedido->usuario->nombres . ' ' . $pedido->usuario->apellidos : 'Cliente General');
+        $docCliente = $pedido->documento_cliente ?? ($pedido->usuario ? $pedido->usuario->dni : '00000000');
+        $tipoDocCliente = $pedido->tipo_comprobante === 'factura' ? 'RUC' : 'DNI';
+
+        $importeEnLetras = $this->numeroALetras($total);
+        $qrUrl = url("/seguimiento?codigo={$pedido->codigo}");
+        
+        $qrCodeSvg = QrCode::size(120)->generate($qrUrl);
+        $qrBase64 = 'data:image/svg+xml;base64,' . base64_encode((string)$qrCodeSvg);
+
+        $logoPath = public_path('images/logofactura.png');
+        $logoBase64 = '';
+        if (file_exists($logoPath)) {
+            $logoData = file_get_contents($logoPath);
+            $logoBase64 = 'data:image/png;base64,' . base64_encode($logoData);
+        }
+
+        $items = $pedido->items;
+
+        $data = [
+            'pedido' => $pedido,
+            'items' => $items,
+            'operacionesGravadas' => $operacionesGravadas,
+            'igvCalculado' => $igvCalculado,
+            'total' => $total,
+            'importeEnLetras' => $importeEnLetras,
+            'nombreCliente' => $nombreCliente,
+            'docCliente' => $docCliente,
+            'tipo_comprobante' => strtoupper($pedido->tipo_comprobante ?? 'BOLETA'),
+            'qrBase64' => $qrBase64,
+            'logoBase64' => $logoBase64,
+            'empresa' => [
+                'razon_social' => 'NOVAPE S.A.C.',
+                'ruc' => '20123456789',
+                'direccion' => 'Av. José Carlos Mariátegui, Lote 60 Zona A',
+                'telefono' => '+51 986 784 384',
+                'email' => 'atencionalcliente@novape.me',
+                'horario' => 'Lunes a Viernes de 9 am a 6 pm'
+            ]
+        ];
+
+        $html = view('pdf.comprobante_ecommerce', $data)->render();
+
+        $pdfContent = \Spatie\Browsershot\Browsershot::html($html)
+            ->format('A4')
+            ->showBackground()
+            ->margins(0, 0, 0, 0)
+            ->pdf();
+
+        return response($pdfContent, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="comprobante_' . $pedido->codigo . '.pdf"',
+        ]);
+    }
 }

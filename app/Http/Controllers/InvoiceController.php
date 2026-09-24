@@ -16,7 +16,7 @@ class InvoiceController extends Controller
         private readonly InvoiceGenerationService $invoiceGenerationService
     ) {}
 
-    public function descargarComprobante($pedidoId): Response
+    public function descargarComprobante($pedidoId)
     {
         $pedido = Pedido::with(['items.variante.producto', 'usuario'])->findOrFail($pedidoId);
 

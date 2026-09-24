@@ -2,6 +2,8 @@ import { Head, useForm, Link } from '@inertiajs/react';
 import Header from '../../Components/Home/Header';
 import Footer from '../../Components/Home/Footer';
 import '../../../css/home/base.css';
+import '../../../css/home/header.css';
+import '../../../css/home/footer.css';
 
 export default function Login() {
     const { data, setData, post, processing, errors } = useForm({

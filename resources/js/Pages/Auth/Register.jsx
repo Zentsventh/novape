@@ -4,6 +4,8 @@ import Header from '../../Components/Home/Header';
 import Footer from '../../Components/Home/Footer';
 import Swal from 'sweetalert2';
 import '../../../css/home/base.css';
+import '../../../css/home/header.css';
+import '../../../css/home/footer.css';
 import '../../../css/auth.css';
 
 export default function Register({ errors }) {

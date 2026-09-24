@@ -446,18 +446,8 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
         }
     }, [step, usePoints]);
 
-    // Cargar script de Niubiz dinámicamente
-    useEffect(() => {
-        const script = document.createElement('script');
-        script.src = 'https://static-content-qas.vnforapps.com/v2/js/checkout.js?qs=x';
-        script.async = true;
-        document.body.appendChild(script);
-        return () => {
-            if (document.body.contains(script)) {
-                document.body.removeChild(script);
-            }
-        };
-    }, []);
+    // Eliminamos el useEffect que cargaba el script estáticamente.
+    // Lo cargaremos dinámicamente cuando tengamos la sesión de Niubiz para usar el entorno correcto.
 
     const openNiubizModal = () => {
         if (!niubizSession || !window.VisanetCheckout) {
@@ -475,7 +465,7 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
             timeouturl: 'about:blank',
             merchantlogo: 'https://novape.pe/images/logo.png',
             formbuttoncolor: '#00B4FF',
-            action: '/api/checkout/niubiz/authorize',
+            action: window.location.origin + '/api/checkout/niubiz/authorize',
             complete: function(params) {
                 // Not strictly needed if action URL is set, the form will auto-submit
             }
@@ -506,6 +496,21 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
             console.log("Niubiz session response:", data);
             if (data.sessionKey) {
                 setNiubizSession(data);
+                
+                // Cargar el script de Niubiz dinámicamente basado en el entorno
+                const existingScript = document.getElementById('niubiz-checkout-script');
+                if (existingScript) {
+                    existingScript.remove();
+                }
+                
+                const script = document.createElement('script');
+                script.id = 'niubiz-checkout-script';
+                script.src = data.env === 'production' 
+                    ? 'https://static-content.vnforapps.com/v2/js/checkout.js?qs=x' 
+                    : 'https://static-content-qas.vnforapps.com/env/sandbox/js/checkout.js?qs=x';
+                script.async = true;
+                document.body.appendChild(script);
+                
             } else if (data.error) {
                 setNiubizError(data.error);
             } else {
