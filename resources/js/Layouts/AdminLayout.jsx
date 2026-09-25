@@ -30,16 +30,17 @@ export default function AdminLayout({ children, logoUrl }) {
         {
             title: 'Métricas',
             items: [
-                { href: '/admin', label: 'Dashboard', exact: true, permission: 'ver_dashboard', icon: <LayoutDashboard size={20} /> },
+                { href: '/admin', label: 'Panel Principal', exact: true, permission: 'ver_dashboard', icon: <LayoutDashboard size={20} /> },
                 { href: '/admin/analiticas', label: 'Reportes y Analíticas', exact: true, permission: 'ver_dashboard', icon: <Grid size={20} /> },
             ]
         },
         {
             title: 'Ventas y Atención',
             items: [
-                { href: '/admin/crm/dashboard', label: 'CRM', permission: 'pos.vender', icon: <Users size={20} /> },
-                { href: '/admin/pos', label: 'POS', permission: 'pos.vender', icon: <MonitorSmartphone size={20} /> },
-                { href: '/admin/pedidos', label: 'Ventas', permission: 'pos.vender', icon: <ShoppingCart size={20} /> },
+                { href: '/admin/inbox', label: 'Bandeja Omnicanal', permission: 'gestionar_omnichannel', icon: <Bell size={20} /> },
+                { href: '/admin/crm/dashboard', label: 'Panel CRM', permission: 'pos.vender', icon: <Users size={20} /> },
+                { href: '/admin/pos', label: 'Punto de Venta', permission: 'pos.vender', icon: <MonitorSmartphone size={20} /> },
+                { href: '/admin/pedidos', label: 'Pedidos', permission: 'pos.vender', icon: <ShoppingCart size={20} /> },
             ]
         },
         {
@@ -58,8 +59,8 @@ export default function AdminLayout({ children, logoUrl }) {
                 { href: '/admin/proveedores', label: 'Proveedores', permission: 'inventario.gestionar', icon: <Truck size={20} /> },
                 { href: '/admin/gastos', label: 'Gastos', permission: 'reportes.ver', icon: <Wallet size={20} /> },
                 { href: '/admin/cupones', label: 'Cupones', permission: 'gestionar_cupones', icon: <Package size={20} /> },
-                { href: '/admin/banners', label: 'CMS Banners', permission: 'usuarios.gestionar', icon: <Image size={20} /> },
-                { href: '/admin/rma', label: 'Garantías/RMA', permission: 'pos.vender', icon: <ShieldAlert size={20} /> },
+                { href: '/admin/banners', label: 'Banners Web', permission: 'usuarios.gestionar', icon: <Image size={20} /> },
+                { href: '/admin/rma', label: 'Garantías y Cambios', permission: 'pos.vender', icon: <ShieldAlert size={20} /> },
             ]
         },
         {
@@ -68,17 +69,17 @@ export default function AdminLayout({ children, logoUrl }) {
                 { href: '/admin/trabajadores', label: 'Usuarios', permission: 'usuarios.gestionar', icon: <UserCog size={20} /> },
                 { href: '/admin/roles', label: 'Roles y Permisos', permission: 'usuarios.gestionar', icon: <Shield size={20} /> },
                 { href: '/admin/ajustes', label: 'Configuración', permission: 'usuarios.gestionar', icon: <Settings size={20} /> },
-                { href: '/admin/audit-logs', label: 'Audit Trail', permission: 'ver_dashboard', icon: <Shield size={20} /> },
+                { href: '/admin/audit-logs', label: 'Registro de Auditoría', permission: 'ver_dashboard', icon: <Shield size={20} /> },
             ]
         },
         {
-            title: 'CRM / Sales Cloud',
+            title: 'CRM / Ventas',
             items: [
-                { href: '/admin/crm/dashboard', label: 'Sales Cloud', permission: 'ver_dashboard', icon: <Briefcase size={20} />, exact: true },
+                { href: '/admin/crm/dashboard', label: 'Panel CRM', permission: 'ver_dashboard', icon: <Briefcase size={20} />, exact: true },
                 { href: '/admin/crm/deals', label: 'Oportunidades', permission: 'ver_dashboard', icon: <DollarSign size={20} /> },
                 { href: '/admin/crm/companies', label: 'Empresas', permission: 'ver_dashboard', icon: <Building size={20} /> },
                 { href: '/admin/crm/automations', label: 'Automatización', permission: 'ver_dashboard', icon: <Zap size={20} /> },
-                { href: '/admin/crm/custom-fields', label: 'Campos Custom', permission: 'ver_dashboard', icon: <Tags size={20} /> },
+                { href: '/admin/crm/custom-fields', label: 'Campos Personalizados', permission: 'ver_dashboard', icon: <Tags size={20} /> },
             ]
         }
     ];

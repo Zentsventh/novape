@@ -12,6 +12,7 @@ use App\Models\Omnichannel\OmnichannelContact;
 use App\Models\Omnichannel\OmnichannelConversation;
 use App\Models\Omnichannel\OmnichannelMessage;
 use App\Events\Omnichannel\NewMessageReceived;
+use App\Events\Omnichannel\ConversationUpdated;
 use App\Jobs\Omnichannel\ProcessWebChatbotMessageJob;
 use App\Services\Omnichannel\TicketAssignmentService;
 use Illuminate\Support\Facades\DB;
@@ -76,8 +77,8 @@ class ChatbotController extends Controller
 
             // Si el bot no está pausado, procesar en segundo plano usando Jobs
             if (!$conversation->is_bot_paused) {
-                // Despachar a la cola (Queue)
-                ProcessWebChatbotMessageJob::dispatch(
+                // Despachar SINCRONAMENTE para que la web muestre "escribiendo..." hasta que Gemini responda
+                ProcessWebChatbotMessageJob::dispatchSync(
                     $conversation->id,
                     $contact->id,
                     $messages
@@ -146,28 +147,43 @@ class ChatbotController extends Controller
 
         $conversation = $this->findActiveConversation($contact);
         if (!$conversation) {
-            return response()->json(['messages' => []]);
+            return response()->json([
+                'messages' => [],
+                'conversation_ended' => true
+            ]);
         }
 
-        // Obtener nuevos mensajes posteriores al último recibido
-        $newMessages = OmnichannelMessage::where('conversation_id', $conversation->id)
+        // Obtener nuevos mensajes posteriores al último recibido (excluyendo notas internas)
+        $newMessages = OmnichannelMessage::with('user')
+            ->where('conversation_id', $conversation->id)
+            ->where('is_internal_note', false)
             ->where('id', '>', $lastMessageId)
             ->orderBy('id', 'asc')
             ->get();
 
         $formattedMessages = $newMessages->map(function ($msg) {
+            $agentName = null;
+            if (!$msg->is_ai_generated && $msg->direction === 'outbound' && $msg->user) {
+                $firstName = explode(' ', $msg->user->nombres ?? '')[0];
+                $lastName = explode(' ', $msg->user->apellidos ?? '')[0];
+                $agentName = trim($firstName . ' ' . $lastName);
+            }
             return [
                 'id' => $msg->id,
                 'role' => $msg->direction === 'inbound' ? 'user' : 'bot',
                 'text' => $msg->content,
                 'is_human' => !$msg->is_ai_generated && $msg->direction === 'outbound',
+                'agent_name' => $agentName ?: 'Agente',
                 'time' => $msg->created_at->format('H:i'),
             ];
         });
 
+        $conversation->load('assignedUser');
+
         return response()->json([
             'messages' => $formattedMessages,
             'is_bot_paused' => $conversation->is_bot_paused,
+            'agent_name' => $conversation->assignedUser ? trim($conversation->assignedUser->nombres . ' ' . $conversation->assignedUser->apellidos) : null,
         ]);
     }
 
@@ -190,26 +206,37 @@ class ChatbotController extends Controller
             return response()->json(['messages' => [], 'has_active_conversation' => false]);
         }
 
-        $messages = OmnichannelMessage::where('conversation_id', $conversation->id)
+        $messages = OmnichannelMessage::with('user')
+            ->where('conversation_id', $conversation->id)
             ->where('is_internal_note', false)
             ->orderBy('id', 'asc')
             ->get();
 
         $formattedMessages = $messages->map(function ($msg) {
+            $agentName = null;
+            if (!$msg->is_ai_generated && $msg->direction === 'outbound' && $msg->user) {
+                $firstName = explode(' ', $msg->user->nombres ?? '')[0];
+                $lastName = explode(' ', $msg->user->apellidos ?? '')[0];
+                $agentName = trim($firstName . ' ' . $lastName);
+            }
             return [
                 'id' => $msg->id,
                 'role' => $msg->direction === 'inbound' ? 'user' : 'bot',
                 'text' => $msg->content,
                 'is_human' => !$msg->is_ai_generated && $msg->direction === 'outbound',
+                'agent_name' => $agentName ?: 'Agente',
                 'time' => $msg->created_at->format('H:i'),
             ];
         });
+
+        $conversation->load('assignedUser');
 
         return response()->json([
             'messages' => $formattedMessages,
             'has_active_conversation' => true,
             'conversation_id' => $conversation->id,
             'is_bot_paused' => $conversation->is_bot_paused,
+            'agent_name' => $conversation->assignedUser ? trim($conversation->assignedUser->nombres . ' ' . $conversation->assignedUser->apellidos) : null,
         ]);
     }
 

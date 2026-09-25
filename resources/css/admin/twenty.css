@@ -71,13 +71,14 @@
 /* Minimalist Sidebar */
 .twenty-sidebar {
     width: var(--twenty-sidebar-width);
-    background-color: var(--twenty-bg-surface);
-    border-right: 1px solid var(--twenty-border);
+    background-color: #0A48B3;
+    background: linear-gradient(135deg, #0A48B3 0%, #007BFF 100%);
+    border-right: none;
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
     transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 1px 0 10px rgba(0,0,0,0.02);
+    box-shadow: 4px 0 15px rgba(0,0,0,0.05);
     z-index: 20;
 }
 
@@ -86,13 +87,13 @@
 }
 
 .twenty-sidebar-header {
-    height: var(--twenty-topbar-height);
+    height: 80px;
     display: flex;
     align-items: center;
-    padding: 0 20px;
-    border-bottom: 1px solid var(--twenty-border);
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(10px);
+    justify-content: center;
+    padding: 0 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.05);
 }
 
 .twenty-nav {
@@ -102,12 +103,12 @@
 }
 
 .twenty-nav::-webkit-scrollbar { width: 4px; }
-.twenty-nav::-webkit-scrollbar-thumb { background-color: var(--twenty-border); border-radius: 4px; }
+.twenty-nav::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, 0.2); border-radius: 4px; }
 
 .twenty-nav-group-title {
     font-size: 11px;
     font-weight: 700;
-    color: var(--twenty-text-muted);
+    color: rgba(255, 255, 255, 0.6);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     padding: 12px 12px 8px;
@@ -120,7 +121,7 @@
     gap: 12px;
     padding: 10px 14px;
     border-radius: var(--twenty-radius-md);
-    color: var(--twenty-text-secondary);
+    color: rgba(255, 255, 255, 0.8);
     text-decoration: none;
     font-size: 14px;
     font-weight: 500;
@@ -129,15 +130,17 @@
 }
 
 .twenty-nav-item:hover {
-    background-color: var(--twenty-bg-hover);
-    color: var(--twenty-text-main);
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
     transform: translateX(4px);
 }
 
 .twenty-nav-item.active {
-    background-color: var(--twenty-bg-active);
-    color: var(--twenty-primary);
+    background-color: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
     font-weight: 600;
+    box-shadow: inset 3px 0 0 #ffffff;
+
 }
 
 /* Main Content Area */
@@ -252,7 +255,7 @@
     flex-direction: column;
     min-height: 0;
     position: relative;
-    overflow: hidden;
+    overflow-y: auto;
 }
 
 /* Component: Card (Glassmorphism) */

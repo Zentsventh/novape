@@ -971,6 +971,18 @@ function InboxIndex() {
                                     </div>
                                 </>
                             )}
+                            {contactProfile.contact.metadata?.dni && (
+                                <div className="inbox-detail__info-row">
+                                    <span className="inbox-detail__info-label">DNI</span>
+                                    <span className="inbox-detail__info-value">{contactProfile.contact.metadata.dni}</span>
+                                </div>
+                            )}
+                            {contactProfile.conversation?.subject && (
+                                <div className="inbox-detail__info-row">
+                                    <span className="inbox-detail__info-label">Motivo</span>
+                                    <span className="inbox-detail__info-value font-semibold text-blue-600">{contactProfile.conversation.subject}</span>
+                                </div>
+                            )}
                         </div>
 
                         <div className="inbox-detail__section">

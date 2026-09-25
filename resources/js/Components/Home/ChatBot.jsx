@@ -8,6 +8,8 @@ export default function ChatBot({ user }) {
     const [isLoading, setIsLoading] = useState(false);
     const [historyLoaded, setHistoryLoaded] = useState(false);
     const [showEndConfirm, setShowEndConfirm] = useState(false);
+    const [agentName, setAgentName] = useState('Novabot');
+    const [isResolved, setIsResolved] = useState(false);
     
     const wrapperRef = useRef(null);
     const posRef = useRef({ target: 0, current: 0, velocity: 0 });
@@ -112,7 +114,13 @@ export default function ChatBot({ user }) {
                         text: m.text,
                         is_human: m.is_human,
                         time: m.time,
+                        agent_name: m.agent_name
                     })));
+                }
+                if (data.agent_name) {
+                    setAgentName(data.agent_name);
+                } else {
+                    setAgentName('Novabot');
                 }
             }
         } catch (e) {
@@ -134,11 +142,34 @@ export default function ChatBot({ user }) {
                     const res = await fetch(`/chatbot/poll?session_id=${sessionId}&last_message_id=${lastMessageId}`);
                     if (res.ok) {
                         const data = await res.json();
+                        
+                        if (data.conversation_ended) {
+                            setIsResolved(true);
+                            return; // Stop processing further for this tick
+                        } else {
+                            setIsResolved(false);
+                        }
+
+                        if (data.agent_name) {
+                            setAgentName(data.agent_name);
+                        } else {
+                            setAgentName('Novabot');
+                        }
+
                         if (data.messages && data.messages.length > 0) {
                             setMessages(prev => {
                                 const newMessages = [...prev];
                                 data.messages.forEach(msg => {
                                     if (!newMessages.find(m => m.id === msg.id)) {
+                                        if (msg.role === 'user' || msg.role === 'bot') {
+                                            // Buscar un mensaje local (optimista) que coincida en rol, texto y no tenga ID
+                                            const localMsg = newMessages.find(m => m.role === msg.role && !m.id && m.text.trim() === msg.text.trim());
+                                            if (localMsg) {
+                                                localMsg.id = msg.id;
+                                                localMsg.time = msg.time;
+                                                return; // Ya lo actualizamos, no lo empujamos de nuevo
+                                            }
+                                        }
                                         newMessages.push(msg);
                                     }
                                 });
@@ -156,7 +187,7 @@ export default function ChatBot({ user }) {
 
     // Enviar mensaje a Laravel / Gemini
     const sendMessage = async (text) => {
-        if (!text.trim() || isLoading) return;
+        if (!text.trim() || isLoading || isResolved) return;
         
         const newMessages = [...messages, { role: 'user', text }];
         setMessages(newMessages);
@@ -216,6 +247,7 @@ export default function ChatBot({ user }) {
         setHistoryLoaded(false);
         setShowEndConfirm(false);
         setIsOpen(false);
+        setIsResolved(false);
 
         // Generar nueva session_id para la próxima conversación (solo visitantes)
         if (!authUser) {
@@ -290,14 +322,8 @@ export default function ChatBot({ user }) {
                 <div className="efe-chat-panel">
                     <div className="efe-chat-header">
                         <div className="efe-chat-header-left">
-                            <div className="efe-chat-logo">
-                                <img
-                                    src="/images/chatbot_novape.png"
-                                    alt="Novape"
-                                />
-                            </div>
                             <div className="efe-chat-header-text">
-                                <h4>Novabot</h4>
+                                <h4>{agentName}</h4>
                                 <div className="efe-chat-online">
                                     <span className="efe-chat-online-dot" />
                                     En línea
@@ -351,16 +377,10 @@ export default function ChatBot({ user }) {
 
                     <div className="efe-chat-body" style={{ display: 'flex', flexDirection: 'column' }}>
                         <div className="efe-chat-welcome">
-                            <div className="efe-chat-welcome-icon">
-                                <img
-                                    src="/images/chatbot_novape.png"
-                                    alt="Novabot"
-                                />
-                            </div>
                             <h5 className="efe-chat-welcome-title">
                                 {getVisitorName() 
                                     ? `¡Hola, ${getVisitorName()}! 👋` 
-                                    : '¡Hola! Soy Novabot'}
+                                    : `¡Hola! Soy ${agentName}`}
                             </h5>
                             <p className="efe-chat-welcome-text">
                                 Tu asistente virtual de Novape. Estoy aquí para ayudarte con tus compras, consultas y más.
@@ -400,15 +420,17 @@ export default function ChatBot({ user }) {
                             {messages.map((m, i) => (
                                 <div key={m.id || `msg-${i}`} style={{
                                     alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start',
-                                    background: m.role === 'user' ? '#0F172A' : '#F1F5F9',
-                                    color: m.role === 'user' ? '#FFFFFF' : '#334155',
-                                    padding: '10px 14px',
-                                    borderRadius: '12px',
-                                    borderBottomRightRadius: m.role === 'user' ? '4px' : '12px',
-                                    borderBottomLeftRadius: m.role === 'bot' ? '4px' : '12px',
+                                    background: m.role === 'user' ? '#00B4FF' : '#ffffff',
+                                    color: m.role === 'user' ? '#FFFFFF' : '#1E293B',
+                                    padding: '12px 16px',
+                                    borderRadius: '16px',
+                                    borderBottomRightRadius: m.role === 'user' ? '4px' : '16px',
+                                    borderBottomLeftRadius: m.role === 'bot' ? '4px' : '16px',
                                     maxWidth: '85%',
                                     fontSize: '14px',
-                                    lineHeight: '1.4'
+                                    lineHeight: '1.5',
+                                    boxShadow: m.role === 'user' ? '0 4px 12px rgba(0,180,255,0.2)' : '0 2px 8px rgba(0,0,0,0.04)',
+                                    border: m.role === 'bot' ? '1px solid #E2E8F0' : 'none'
                                 }}>
                                     {m.is_human && (
                                         <div style={{ 
@@ -424,7 +446,7 @@ export default function ChatBot({ user }) {
                                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                                                 <circle cx="12" cy="7" r="4" />
                                             </svg>
-                                            Agente
+                                            {m.agent_name || 'Agente'}
                                         </div>
                                     )}
                                     {renderText(m.text)}
@@ -441,17 +463,10 @@ export default function ChatBot({ user }) {
                                 </div>
                             ))}
                             {isLoading && (
-                                <div style={{
-                                    alignSelf: 'flex-start',
-                                    background: '#F1F5F9',
-                                    color: '#94A3B8',
-                                    padding: '10px 14px',
-                                    borderRadius: '12px',
-                                    borderBottomLeftRadius: '4px',
-                                    fontSize: '13px',
-                                    fontStyle: 'italic'
-                                }}>
-                                    Novabot está escribiendo...
+                                <div className="efe-chat-typing">
+                                    <div className="efe-chat-typing-dot"></div>
+                                    <div className="efe-chat-typing-dot"></div>
+                                    <div className="efe-chat-typing-dot"></div>
                                 </div>
                             )}
                             <div ref={messagesEndRef} />
@@ -459,24 +474,36 @@ export default function ChatBot({ user }) {
                     </div>
 
                     <div className="efe-chat-footer">
-                        <div className="efe-chat-input-row">
-                            <input
-                                type="text"
-                                value={message}
-                                onChange={(e) => setMessage(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                                placeholder="Escribe tu mensaje..."
-                                className="efe-chat-input"
-                                disabled={isLoading}
-                            />
-                            <button className="efe-chat-send" onClick={() => sendMessage(message)} disabled={!message.trim() || isLoading}>
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <line x1="22" y1="2" x2="11" y2="13" />
-                                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                                </svg>
-                            </button>
-                        </div>
-                        <span className="efe-chat-powered">Powered by Novape & Gemini IA</span>
+                        {isResolved ? (
+                            <div className="efe-chat-resolved-notice" style={{ padding: '12px', textAlign: 'center', background: '#f8fafc', borderTop: '1px solid #e2e8f0', fontSize: '13px', color: '#64748b' }}>
+                                <p style={{ margin: '0 0 8px 0' }}>Esta conversación ha finalizado.</p>
+                                <button 
+                                    onClick={handleEndConversation}
+                                    style={{ background: '#00B4FF', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}
+                                >
+                                    Iniciar nuevo chat
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="efe-chat-input-row">
+                                <input
+                                    type="text"
+                                    value={message}
+                                    onChange={(e) => setMessage(e.target.value)}
+                                    onKeyDown={handleKeyDown}
+                                    placeholder="Escribe tu mensaje..."
+                                    className="efe-chat-input"
+                                    disabled={isLoading}
+                                />
+                                <button className="efe-chat-send" onClick={() => sendMessage(message)} disabled={!message.trim() || isLoading}>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <line x1="22" y1="2" x2="11" y2="13" />
+                                        <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                                    </svg>
+                                </button>
+                            </div>
+                        )}
+                        <span className="efe-chat-powered">{agentName}</span>
                     </div>
                 </div>
             )}

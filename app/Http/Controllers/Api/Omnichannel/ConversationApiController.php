@@ -26,9 +26,17 @@ class ConversationApiController extends Controller
      */
     public function conversations(Request $request)
     {
+        $user = auth()->user();
+        $isAdmin = $user->roles()->where('nombre', 'admin')->exists();
+
         $query = OmnichannelConversation::with(['contact.usuario', 'assignedUser'])
             ->orderBy('last_message_at', 'desc')
             ->orderBy('updated_at', 'desc');
+
+        if (!$isAdmin) {
+            // Si es un asesor, SOLO ve los chats que están explícitamente asignados a él.
+            $query->where('assigned_user_id', $user->id);
+        }
 
         // Filtro por canal
         if ($request->filled('channel') && $request->channel !== 'all') {
@@ -95,6 +103,14 @@ class ConversationApiController extends Controller
      */
     public function messages(Request $request, OmnichannelConversation $conversation)
     {
+        $user = auth()->user();
+        $isAdmin = $user->roles()->where('nombre', 'admin')->exists();
+
+        // Validar que el asesor solo acceda a SUS conversaciones
+        if (!$isAdmin && $conversation->assigned_user_id !== $user->id) {
+            abort(403, 'No tienes permiso para ver esta conversación.');
+        }
+
         // Marcar como leídos
         $conversation->update(['unread_count' => 0]);
         broadcast(new ConversationUpdated($conversation))->toOthers();
@@ -115,6 +131,14 @@ class ConversationApiController extends Controller
      */
     public function sendMessage(Request $request, OmnichannelConversation $conversation)
     {
+        $user = auth()->user();
+        $isAdmin = $user->roles()->where('nombre', 'admin')->exists();
+
+        // Validar que el asesor solo acceda a SUS conversaciones
+        if (!$isAdmin && $conversation->assigned_user_id !== $user->id) {
+            abort(403, 'No tienes permiso para enviar mensajes en esta conversación.');
+        }
+
         $request->validate([
             'content' => 'required|string|max:4096',
         ]);
@@ -337,6 +361,11 @@ class ConversationApiController extends Controller
                 'lastInteraction' => $contact->last_interaction_at?->format('d/m/Y H:i'),
                 'linkedUserId' => $contact->usuario_id,
                 'isRegisteredUser' => (bool) $contact->usuario_id,
+                'metadata' => $contact->metadata,
+            ],
+            'conversation' => [
+                'id' => $conversation->id,
+                'subject' => $conversation->subject,
             ],
             'lastOrder' => $lastOrder ? [
                 'id' => $lastOrder->id,

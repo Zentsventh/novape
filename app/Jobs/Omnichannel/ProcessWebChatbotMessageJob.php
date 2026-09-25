@@ -38,7 +38,7 @@ class ProcessWebChatbotMessageJob implements ShouldQueue
         try {
             DB::beginTransaction();
 
-            $reply = $chatbotService->getReply($this->messagesHistory);
+            $reply = $chatbotService->getReply($this->messagesHistory, $this->conversationId, $this->contactId);
 
             if ($reply) {
                 $outboundMessage = OmnichannelMessage::create([

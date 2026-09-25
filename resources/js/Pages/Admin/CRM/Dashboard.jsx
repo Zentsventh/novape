@@ -28,6 +28,7 @@ import {
     Activity,
     ArrowUpRight,
     Zap,
+    ChevronLeft,
 } from 'lucide-react';
 
 export default function Dashboard({ metrics }) {
@@ -132,34 +133,61 @@ export default function Dashboard({ metrics }) {
         <TwentyCrmLayout title="Dashboard Analítico">
             <Head title="Dashboard - CRM" />
 
-            {/* Injected CSS for premium feel */}
             <style>{`
                 .twenty-card {
                     background: #ffffff;
-                    border: 1px solid var(--twenty-border);
+                    border: 1px solid #E2E8F0;
                     border-radius: 12px;
-                    padding: 20px;
-                    box-shadow: 0 1px 3px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.03);
-                    transition: transform 0.2s ease, box-shadow 0.2s ease;
+                    padding: 24px;
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+                    transition: all 0.3s ease;
                 }
                 .twenty-card:hover {
-                    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
-                    transform: translateY(-2px);
+                    box-shadow: 0 10px 15px -3px rgba(0, 123, 255, 0.1), 0 4px 6px -2px rgba(0, 123, 255, 0.05);
+                    transform: translateY(-4px);
+                    border-color: #007BFF;
                 }
                 .kpi-icon-wrapper {
-                    width: 40px; height: 40px;
-                    border-radius: 10px;
+                    width: 48px; height: 48px;
+                    border-radius: 12px;
                     display: flex; align-items: center; justify-content: center;
+                    transition: all 0.3s ease;
+                }
+                .twenty-card:hover .kpi-icon-wrapper {
+                    transform: scale(1.1);
                 }
                 .recharts-default-tooltip {
-                    border-radius: 8px !important;
-                    border: none !important;
+                    border-radius: 12px !important;
+                    border: 1px solid #E2E8F0 !important;
                     box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1) !important;
                 }
                 .gradient-text {
-                    background: linear-gradient(135deg, var(--twenty-primary) 0%, #60a5fa 100%);
+                    background: linear-gradient(135deg, #007BFF 0%, #0056B3 100%);
                     -webkit-background-clip: text;
                     -webkit-text-fill-color: transparent;
+                }
+                .btn-volver {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 8px 16px;
+                    background: #ffffff;
+                    border: 1px solid #E2E8F0;
+                    border-radius: 8px;
+                    color: #1E293B;
+                    font-weight: 500;
+                    font-size: 14px;
+                    text-decoration: none;
+                    transition: all 0.2s ease;
+                    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+                }
+                .btn-volver:hover, .btn-volver:focus {
+                    background: #f8fafc;
+                    border-color: #007BFF;
+                    color: #007BFF;
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 6px -1px rgba(0, 123, 255, 0.15);
+                    outline: none;
                 }
             `}</style>
 
@@ -180,8 +208,8 @@ export default function Dashboard({ metrics }) {
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'flex-end',
-                        borderBottom: '1px solid var(--twenty-border)',
-                        paddingBottom: '20px',
+                        borderBottom: '1px solid #E2E8F0',
+                        paddingBottom: '24px',
                     }}
                 >
                     <div>
@@ -189,13 +217,13 @@ export default function Dashboard({ metrics }) {
                             style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '8px',
-                                marginBottom: '4px',
+                                gap: '10px',
+                                marginBottom: '6px',
                             }}
                         >
-                            <Activity size={20} color="var(--twenty-primary)" />
+                            <Activity size={24} color="#007BFF" />
                             <h2
-                                style={{ fontSize: '26px', fontWeight: 700, margin: 0 }}
+                                style={{ fontSize: '28px', fontWeight: 800, margin: 0, color: '#1E293B' }}
                                 className="gradient-text"
                             >
                                 Rendimiento General
@@ -204,8 +232,8 @@ export default function Dashboard({ metrics }) {
                         <p
                             style={{
                                 margin: 0,
-                                color: 'var(--twenty-text-muted)',
-                                fontSize: '14px',
+                                color: '#64748B',
+                                fontSize: '15px',
                             }}
                         >
                             Métricas en tiempo real y proyecciones de ventas basadas en IA.
@@ -214,17 +242,24 @@ export default function Dashboard({ metrics }) {
                     <div style={{ display: 'flex', gap: '12px' }}>
                         <a
                             href="/admin/crm/export?type=dashboard"
-                            className="twenty-btn twenty-btn-secondary"
-                            style={{ textDecoration: 'none' }}
+                            className="btn-volver"
                         >
                             Exportar Reporte
                         </a>
                         <button
                             onClick={handleRefresh}
                             className="twenty-btn twenty-btn-primary"
-                            style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '6px',
+                                background: '#007BFF', color: '#fff', border: 'none',
+                                borderRadius: '8px', padding: '8px 16px', fontWeight: 500,
+                                cursor: 'pointer', boxShadow: '0 4px 6px -1px rgba(0, 123, 255, 0.3)',
+                                transition: 'all 0.2s ease'
+                            }}
+                            onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 8px -1px rgba(0, 123, 255, 0.4)'; }}
+                            onMouseOut={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 123, 255, 0.3)'; }}
                         >
-                            <Zap size={14} /> Actualizar Datos
+                            <Zap size={16} /> Actualizar Datos
                         </button>
                     </div>
                 </div>
@@ -245,7 +280,7 @@ export default function Dashboard({ metrics }) {
                         >
                             <div
                                 className="kpi-icon-wrapper"
-                                style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}
+                                style={{ background: 'rgba(0, 86, 179, 0.1)', color: '#0056B3' }}
                             >
                                 <DollarSign size={20} />
                             </div>
@@ -254,10 +289,10 @@ export default function Dashboard({ metrics }) {
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '4px',
-                                    color: '#10b981',
+                                    color: '#007BFF',
                                     fontSize: '12px',
                                     fontWeight: 600,
-                                    background: 'rgba(16, 185, 129, 0.1)',
+                                    background: 'rgba(0, 123, 255, 0.1)',
                                     padding: '4px 8px',
                                     borderRadius: '12px',
                                 }}
@@ -283,7 +318,7 @@ export default function Dashboard({ metrics }) {
                                 letterSpacing: '-0.5px',
                             }}
                         >
-                            {formatMoney(kpis.total_revenue)}
+                            {formatMoney(kpis?.total_revenue)}
                         </div>
                     </div>
 
@@ -299,7 +334,7 @@ export default function Dashboard({ metrics }) {
                         >
                             <div
                                 className="kpi-icon-wrapper"
-                                style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}
+                                style={{ background: 'rgba(0, 123, 255, 0.1)', color: '#007BFF' }}
                             >
                                 <Target size={20} />
                             </div>
@@ -308,10 +343,10 @@ export default function Dashboard({ metrics }) {
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '4px',
-                                    color: '#10b981',
+                                    color: '#007BFF',
                                     fontSize: '12px',
                                     fontWeight: 600,
-                                    background: 'rgba(16, 185, 129, 0.1)',
+                                    background: 'rgba(0, 123, 255, 0.1)',
                                     padding: '4px 8px',
                                     borderRadius: '12px',
                                 }}
@@ -337,7 +372,7 @@ export default function Dashboard({ metrics }) {
                                 letterSpacing: '-0.5px',
                             }}
                         >
-                            {kpis.win_rate}%
+                            {kpis?.win_rate || 0}%
                         </div>
                     </div>
 
@@ -353,7 +388,7 @@ export default function Dashboard({ metrics }) {
                         >
                             <div
                                 className="kpi-icon-wrapper"
-                                style={{ background: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6' }}
+                                style={{ background: 'rgba(77, 156, 255, 0.1)', color: '#4D9CFF' }}
                             >
                                 <Users size={20} />
                             </div>
@@ -376,7 +411,7 @@ export default function Dashboard({ metrics }) {
                                 letterSpacing: '-0.5px',
                             }}
                         >
-                            {formatMoney(kpis.avg_ltv)}
+                            {formatMoney(kpis?.avg_ltv)}
                         </div>
                     </div>
 
@@ -392,7 +427,7 @@ export default function Dashboard({ metrics }) {
                         >
                             <div
                                 className="kpi-icon-wrapper"
-                                style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b' }}
+                                style={{ background: 'rgba(140, 191, 255, 0.1)', color: '#8CBFFF' }}
                             >
                                 <Clock size={20} />
                             </div>
@@ -401,10 +436,10 @@ export default function Dashboard({ metrics }) {
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '4px',
-                                    color: '#ef4444',
+                                    color: '#0056B3',
                                     fontSize: '12px',
                                     fontWeight: 600,
-                                    background: 'rgba(239, 68, 68, 0.1)',
+                                    background: 'rgba(0, 86, 179, 0.1)',
                                     padding: '4px 8px',
                                     borderRadius: '12px',
                                 }}
@@ -430,7 +465,7 @@ export default function Dashboard({ metrics }) {
                                 letterSpacing: '-0.5px',
                             }}
                         >
-                            {kpis.deal_velocity || 0}{' '}
+                            {kpis?.deal_velocity || 0}{' '}
                             <span
                                 style={{
                                     fontSize: '16px',
@@ -614,7 +649,7 @@ export default function Dashboard({ metrics }) {
                                         color: 'var(--twenty-text-main)',
                                     }}
                                 >
-                                    {kpis.total_deals}
+                                    {kpis?.total_deals || 0}
                                 </div>
                                 <div
                                     style={{ fontSize: '12px', color: 'var(--twenty-text-muted)' }}
@@ -706,15 +741,15 @@ export default function Dashboard({ metrics }) {
                                     />
                                     <Bar
                                         dataKey="value"
-                                        fill="#60a5fa"
+                                        fill="#007BFF"
                                         radius={[0, 6, 6, 0]}
-                                        barSize={24}
+                                        barSize={36}
                                         animationDuration={1500}
                                     >
                                         {funnel.map((entry, index) => (
                                             <Cell
                                                 key={`cell-${index}`}
-                                                fill={entry.color || '#60a5fa'}
+                                                fill={`rgba(0, 123, 255, ${1 - index * 0.18})`}
                                             />
                                         ))}
                                     </Bar>
@@ -798,7 +833,7 @@ export default function Dashboard({ metrics }) {
                                                 fontWeight: 600,
                                             }}
                                         >
-                                            {deal.cliente
+                                            {deal.cliente?.nombres
                                                 ? deal.cliente.nombres.charAt(0).toUpperCase()
                                                 : 'C'}
                                         </div>

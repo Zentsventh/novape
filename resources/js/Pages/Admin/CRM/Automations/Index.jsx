@@ -48,63 +48,240 @@ export default function Index({ automations = [] }) {
         <TwentyCrmLayout title="Automatizaciones">
             <Head title="Automatizaciones - CRM" />
 
-            <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <style>{`
+                .auto-card {
+                    background: #ffffff;
+                    border: 1px solid #E2E8F0;
+                    border-radius: 12px;
+                    padding: 24px;
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+                    transition: all 0.3s ease;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 16px;
+                }
+                .auto-card:hover {
+                    box-shadow: 0 10px 15px -3px rgba(0, 123, 255, 0.1), 0 4px 6px -2px rgba(0, 123, 255, 0.05);
+                    transform: translateY(-4px);
+                    border-color: #007BFF;
+                }
+                .btn-primary-custom {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    padding: 10px 20px;
+                    background: #007BFF;
+                    color: #ffffff;
+                    border: none;
+                    border-radius: 8px;
+                    font-weight: 500;
+                    font-size: 14px;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    box-shadow: 0 4px 6px -1px rgba(0, 123, 255, 0.3);
+                }
+                .btn-primary-custom:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 8px -1px rgba(0, 123, 255, 0.4);
+                }
+                .btn-icon-danger {
+                    background: none;
+                    border: none;
+                    color: #94A3B8;
+                    cursor: pointer;
+                    padding: 6px;
+                    border-radius: 6px;
+                    transition: all 0.2s ease;
+                }
+                .btn-icon-danger:hover {
+                    color: #EF4444;
+                    background: #FEE2E2;
+                }
+                .flow-step {
+                    padding: 16px;
+                    background: #F8FAFC;
+                    border: 1px solid #E2E8F0;
+                    border-radius: 8px;
+                    font-size: 13px;
+                    transition: all 0.2s ease;
+                }
+                .auto-card:hover .flow-step {
+                    border-color: rgba(0, 123, 255, 0.2);
+                    background: #F0F7FF;
+                }
+                .flow-step-title {
+                    font-weight: 600;
+                    color: #1E293B;
+                    margin-bottom: 6px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .empty-state {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 80px 32px;
+                    text-align: center;
+                    background: #ffffff;
+                    border: 1px dashed #CBD5E1;
+                    border-radius: 12px;
+                    color: #64748B;
+                }
+                /* Drawer Form Styles */
+                .drawer-form {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 20px;
+                    padding: 24px 32px;
+                }
+                .drawer-form-group {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                }
+                .drawer-label {
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: #1E293B;
+                }
+                .drawer-input {
+                    width: 100%;
+                    padding: 12px 16px;
+                    border: 1px solid #E2E8F0;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    color: #1E293B;
+                    background: #F8FAFC;
+                    transition: all 0.2s ease;
+                    outline: none;
+                    appearance: none;
+                }
+                .drawer-input:focus {
+                    background: #ffffff;
+                    border-color: #007BFF;
+                    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.1);
+                }
+                .drawer-input::placeholder {
+                    color: #94A3B8;
+                }
+                .drawer-select {
+                    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+                    background-repeat: no-repeat;
+                    background-position: right 16px center;
+                    padding-right: 40px;
+                }
+                .btn-secondary-custom {
+                    padding: 10px 20px;
+                    background: #ffffff;
+                    color: #475569;
+                    border: 1px solid #E2E8F0;
+                    border-radius: 8px;
+                    font-weight: 500;
+                    font-size: 14px;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                }
+                .btn-secondary-custom:hover {
+                    background: #F8FAFC;
+                    color: #1E293B;
+                    border-color: #CBD5E1;
+                }
+                .drawer-footer {
+                    margin-top: 16px;
+                    display: flex;
+                    justify-content: flex-end;
+                    gap: 12px;
+                    padding-top: 24px;
+                    border-top: 1px solid #E2E8F0;
+                }
+            `}</style>
+
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F4F7F6' }}>
                 {/* Header */}
-                <div className="twenty-header">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '32px', borderBottom: '1px solid #E2E8F0', background: '#ffffff' }}>
                     <div>
-                        <h1 className="twenty-title">Automatizaciones</h1>
-                        <p style={{ margin: 0, fontSize: '13px', color: 'var(--twenty-text-muted)' }}>Configura flujos de trabajo visuales y webhooks para responder a eventos del CRM.</p>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                            <div style={{ background: 'rgba(0, 123, 255, 0.1)', padding: '8px', borderRadius: '10px', color: '#007BFF' }}>
+                                <Zap size={20} />
+                            </div>
+                            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 800, color: '#1E293B' }}>Automatizaciones</h1>
+                        </div>
+                        <p style={{ margin: 0, fontSize: '15px', color: '#64748B' }}>Configura flujos de trabajo visuales y webhooks para responder a eventos del CRM.</p>
                     </div>
-                    <button className="twenty-btn twenty-btn-primary" onClick={() => setDrawerOpen(true)}>
-                        <Plus size={16} />
+                    <button className="btn-primary-custom" onClick={() => setDrawerOpen(true)}>
+                        <Plus size={18} />
                         <span>Nueva Automatización</span>
                     </button>
                 </div>
 
                 {/* List Content */}
-                <div style={{ flex: 1, padding: '24px 32px', overflowY: 'auto' }}>
+                <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
                     {automations.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: '64px', color: 'var(--twenty-text-muted)' }}>
-                            <Zap size={48} style={{ margin: '0 auto 16px', opacity: 0.3 }} />
-                            <h3>No hay automatizaciones</h3>
-                            <p>Crea tu primera automatización para optimizar tus flujos de trabajo.</p>
+                        <div className="empty-state">
+                            <div style={{ width: '64px', height: '64px', borderRadius: '16px', background: 'rgba(0, 123, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px' }}>
+                                <Zap size={32} color="#007BFF" />
+                            </div>
+                            <h3 style={{ margin: '0 0 8px 0', color: '#1E293B', fontSize: '18px', fontWeight: 600 }}>No hay automatizaciones</h3>
+                            <p style={{ margin: '0 0 24px 0', fontSize: '15px' }}>Crea tu primera automatización para optimizar tus flujos de trabajo.</p>
+                            <button className="btn-primary-custom" onClick={() => setDrawerOpen(true)}>
+                                <Plus size={16} /> Crear Automatización
+                            </button>
                         </div>
                     ) : (
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '24px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '24px' }}>
                             {automations.map(auto => (
-                                <div key={auto.id} className="twenty-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '20px' }}>
+                                <div key={auto.id} className="auto-card">
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: auto.activo ? '#10b981' : '#d1d5db' }} />
-                                            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 600 }}>{auto.nombre}</h3>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: auto.activo ? '#10b981' : '#94A3B8', boxShadow: auto.activo ? '0 0 10px rgba(16, 185, 129, 0.4)' : 'none' }} />
+                                            <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 600, color: '#1E293B' }}>{auto.nombre}</h3>
                                         </div>
                                         <button 
                                             onClick={() => handleDelete(auto.id)}
-                                            style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}
+                                            className="btn-icon-danger"
+                                            title="Eliminar automatización"
                                         >
                                             <Trash2 size={16} />
                                         </button>
                                     </div>
                                     
-                                    <div style={{ padding: '12px', background: 'var(--twenty-background-tertiary)', borderRadius: '8px', fontSize: '13px' }}>
-                                        <div style={{ fontWeight: 600, color: 'var(--twenty-text-main)', marginBottom: '4px' }}>Cuándo</div>
-                                        <div style={{ color: 'var(--twenty-text-muted)' }}>
-                                            {auto.trigger_type === 'deal_created' && 'Se crea una oportunidad'}
-                                            {auto.trigger_type === 'deal_moved' && 'Se mueve una oportunidad de etapa'}
-                                            {auto.trigger_type === 'company_created' && 'Se crea una empresa'}
+                                    <div className="flow-step">
+                                        <div className="flow-step-title">
+                                            <div style={{ background: '#E2E8F0', color: '#475569', padding: '4px 8px', borderRadius: '6px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 700 }}>Trigger</div>
+                                            Cuándo
+                                        </div>
+                                        <div style={{ color: '#475569', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '8px' }}>
+                                            <Zap size={14} color="#94A3B8" />
+                                            {auto.trigger_type === 'deal_created' && 'Se crea una nueva oportunidad'}
+                                            {auto.trigger_type === 'deal_moved' && 'Una oportunidad cambia de etapa'}
+                                            {auto.trigger_type === 'company_created' && 'Se registra una nueva empresa'}
                                         </div>
                                     </div>
                                     
-                                    <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                        <ArrowRight size={16} color="var(--twenty-text-muted)" />
+                                    <div style={{ display: 'flex', justifySelf: 'center', margin: '-8px 0', alignSelf: 'center', position: 'relative', zIndex: 1 }}>
+                                        <div style={{ background: '#ffffff', border: '1px solid #E2E8F0', borderRadius: '50%', padding: '6px', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                                            <ArrowRight size={14} color="#94A3B8" style={{ transform: 'rotate(90deg)' }} />
+                                        </div>
                                     </div>
 
-                                    <div style={{ padding: '12px', border: '1px solid var(--twenty-border)', borderRadius: '8px', fontSize: '13px' }}>
-                                        <div style={{ fontWeight: 600, color: 'var(--twenty-text-main)', marginBottom: '4px' }}>Entonces (Acciones)</div>
+                                    <div className="flow-step">
+                                        <div className="flow-step-title">
+                                            <div style={{ background: 'rgba(0, 123, 255, 0.1)', color: '#007BFF', padding: '4px 8px', borderRadius: '6px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 700 }}>Action</div>
+                                            Entonces
+                                        </div>
                                         {auto.acciones.map((acc, i) => (
-                                            <div key={i} style={{ color: 'var(--twenty-text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                <Zap size={12} color="var(--twenty-primary)" />
-                                                {acc.type === 'webhook' && <span>Llamar webhook: <span style={{ fontFamily: 'monospace' }}>{acc.url}</span></span>}
+                                            <div key={i} style={{ color: '#475569', display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
+                                                {acc.type === 'webhook' && (
+                                                    <>
+                                                        <div style={{ background: '#1E293B', color: '#fff', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: 700 }}>POST</div>
+                                                        <span style={{ fontFamily: 'monospace', background: '#F1F5F9', padding: '2px 8px', borderRadius: '4px', border: '1px solid #E2E8F0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '12px' }}>{acc.url}</span>
+                                                    </>
+                                                )}
+                                                {acc.type === 'send_email' && <span>Enviar Correo: {acc.message}</span>}
+                                                {acc.type === 'send_coupon' && <span>Enviar Cupón: {acc.message}</span>}
+                                                {acc.type === 'create_task' && <span>Crear Tarea en CRM</span>}
                                             </div>
                                         ))}
                                     </div>
@@ -121,19 +298,19 @@ export default function Index({ automations = [] }) {
                 onClose={() => setDrawerOpen(false)}
                 title="Nueva Automatización"
             >
-                <form className="twenty-form" onSubmit={handleSubmit}>
-                    <div className="twenty-form-group">
-                        <label>Nombre</label>
+                <form className="drawer-form" onSubmit={handleSubmit}>
+                    <div className="drawer-form-group">
+                        <label className="drawer-label">Nombre de la automatización</label>
                         <input 
-                            type="text" required className="twenty-input" placeholder="Ej: Enviar webhook al crear deal"
+                            type="text" required className="drawer-input" placeholder="Ej: Enviar webhook al crear oportunidad"
                             value={form.nombre} onChange={e => setForm({...form, nombre: e.target.value})}
                         />
                     </div>
 
-                    <div className="twenty-form-group">
-                        <label>Evento (Trigger)</label>
+                    <div className="drawer-form-group">
+                        <label className="drawer-label">Evento (Trigger)</label>
                         <select 
-                            className="twenty-input"
+                            className="drawer-input drawer-select"
                             value={form.trigger_type} onChange={e => setForm({...form, trigger_type: e.target.value})}
                         >
                             <option value="deal_created">Oportunidad creada</option>
@@ -143,10 +320,10 @@ export default function Index({ automations = [] }) {
                     </div>
 
                     {/* Actions Select */}
-                    <div className="twenty-form-group">
-                        <label>Tipo de Acción</label>
+                    <div className="drawer-form-group">
+                        <label className="drawer-label">Tipo de Acción</label>
                         <select 
-                            className="twenty-input"
+                            className="drawer-input drawer-select"
                             value={form.acciones[0]?.type || 'webhook'} 
                             onChange={e => {
                                 const type = e.target.value;
@@ -163,10 +340,10 @@ export default function Index({ automations = [] }) {
                     </div>
 
                     {form.acciones[0]?.type === 'webhook' && (
-                        <div className="twenty-form-group">
-                            <label>URL del Webhook</label>
+                        <div className="drawer-form-group">
+                            <label className="drawer-label">URL del Webhook</label>
                             <input 
-                                type="url" required className="twenty-input" placeholder="https://..."
+                                type="url" required className="drawer-input" placeholder="https://api.ejemplo.com/webhook"
                                 value={form.acciones[0].url || ''} 
                                 onChange={e => {
                                     const newAcc = [...form.acciones];
@@ -178,10 +355,10 @@ export default function Index({ automations = [] }) {
                     )}
 
                     {(form.acciones[0]?.type === 'send_email' || form.acciones[0]?.type === 'send_coupon') && (
-                        <div className="twenty-form-group">
-                            <label>Mensaje / Asunto</label>
+                        <div className="drawer-form-group">
+                            <label className="drawer-label">Mensaje / Asunto</label>
                             <input 
-                                type="text" required className="twenty-input" placeholder="Gracias por tu compra..."
+                                type="text" required className="drawer-input" placeholder="Ej: ¡Gracias por tu compra!"
                                 value={form.acciones[0].message || ''} 
                                 onChange={e => {
                                     const newAcc = [...form.acciones];
@@ -192,9 +369,9 @@ export default function Index({ automations = [] }) {
                         </div>
                     )}
                     
-                    <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-                        <button type="button" className="twenty-btn twenty-btn-secondary" onClick={() => setDrawerOpen(false)}>Cancelar</button>
-                        <button type="submit" className="twenty-btn twenty-btn-primary">Guardar</button>
+                    <div className="drawer-footer">
+                        <button type="button" className="btn-secondary-custom" onClick={() => setDrawerOpen(false)}>Cancelar</button>
+                        <button type="submit" className="btn-primary-custom">Crear Automatización</button>
                     </div>
                 </form>
             </TwentyRecordDrawer>

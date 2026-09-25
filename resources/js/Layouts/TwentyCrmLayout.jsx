@@ -64,7 +64,7 @@ export default function TwentyCrmLayout({ children, title, headerActions }) {
         { href: '/admin/clientes', label: 'Personas', icon: <Users size={18} /> },
         { href: '/admin/crm/tasks', label: 'Tareas', icon: <CheckSquare size={18} /> },
         { href: '/admin/crm/cases', label: 'Casos', icon: <Ticket size={18} /> },
-        { href: '/admin/crm/automations', label: 'Automations', icon: <Zap size={18} /> },
+        { href: '/admin/crm/automations', label: 'Automatizaciones', icon: <Zap size={18} /> },
         { href: '/admin/inbox', label: 'Bandeja', icon: <Bell size={18} /> },
     ];
 
@@ -79,19 +79,16 @@ export default function TwentyCrmLayout({ children, title, headerActions }) {
             {/* Sidebar */}
             <aside className={`twenty-sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
                 <div className="twenty-sidebar-header">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%', justifyContent: sidebarCollapsed ? 'center' : 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
                         {!sidebarCollapsed && (
-                            <Link href="/admin/crm/dashboard" style={{ textDecoration: 'none', color: 'var(--twenty-text-main)', fontWeight: 700, fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <div style={{ width: 24, height: 24, background: 'var(--twenty-primary)', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 800, fontSize: 14 }}>
-                                    N
-                                </div>
-                                Novape CRM
+                            <Link href="/admin/crm/dashboard" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+                                <img src="/images/logo.png" alt="Novape" style={{ height: '40px', width: '140px', objectFit: 'contain' }} />
                             </Link>
                         )}
                         {sidebarCollapsed && (
-                            <div style={{ width: 24, height: 24, background: 'var(--twenty-primary)', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 800, fontSize: 14 }}>
+                            <Link href="/admin/crm/dashboard" style={{ width: 32, height: 32, background: 'white', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0d6efd', fontWeight: 900, fontSize: 16, textDecoration: 'none', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
                                 N
-                            </div>
+                            </Link>
                         )}
                     </div>
                 </div>
@@ -127,20 +124,20 @@ export default function TwentyCrmLayout({ children, title, headerActions }) {
                 </nav>
 
                 {/* Sidebar Footer */}
-                <div style={{ padding: '16px', borderTop: '1px solid var(--twenty-border)', display: 'flex', alignItems: 'center', justifyContent: sidebarCollapsed ? 'center' : 'space-between' }}>
+                <div style={{ padding: '16px', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: sidebarCollapsed ? 'center' : 'space-between' }}>
                     {!sidebarCollapsed && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
-                            <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--twenty-bg-active)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 600 }}>
+                            <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 600, color: '#fff' }}>
                                 {user?.nombres?.charAt(0) || 'U'}
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                                <span style={{ fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.nombres}</span>
-                                <span style={{ fontSize: 11, color: 'var(--twenty-text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.email}</span>
+                                <span style={{ fontSize: 13, fontWeight: 600, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.nombres}</span>
+                                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.email}</span>
                             </div>
                         </div>
                     )}
                     {sidebarCollapsed && (
-                         <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--twenty-bg-active)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 600, margin: '16px auto 0' }}>
+                         <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 600, color: '#fff', margin: '16px auto 0' }}>
                             {user?.nombres?.charAt(0) || 'U'}
                         </div>
                     )}
@@ -153,15 +150,18 @@ export default function TwentyCrmLayout({ children, title, headerActions }) {
                             onClick={() => setPaletteOpen(true)}
                             style={{ 
                                 width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                                padding: '8px 12px', background: 'var(--twenty-background)', 
-                                border: '1px solid var(--twenty-border)', borderRadius: '6px',
-                                color: 'var(--twenty-text-muted)', fontSize: '13px', cursor: 'pointer'
+                                padding: '8px 12px', background: 'rgba(255,255,255,0.1)', 
+                                border: '1px solid rgba(255,255,255,0.2)', borderRadius: '6px',
+                                color: 'rgba(255,255,255,0.9)', fontSize: '13px', cursor: 'pointer',
+                                transition: 'all 0.2s'
                             }}
+                            onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; e.currentTarget.style.color = '#fff'; }}
+                            onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = 'rgba(255,255,255,0.9)'; }}
                         >
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <Search size={14} /> Buscar...
                             </div>
-                            <span style={{ fontSize: '11px', background: 'var(--twenty-background-tertiary)', padding: '2px 4px', borderRadius: '4px' }}>⌘K</span>
+                            <span style={{ fontSize: '11px', background: 'rgba(0,0,0,0.2)', color: 'white', padding: '2px 4px', borderRadius: '4px' }}>⌘K</span>
                         </button>
                     </div>
                 )}

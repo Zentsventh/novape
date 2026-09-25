@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Http\Requests\Admin\Auth\AdminLoginRequest;
 
 class AdminAuthController extends Controller
@@ -26,6 +27,12 @@ class AdminAuthController extends Controller
             $request->session()->regenerate();
             
             $user = Auth::guard('admin')->user();
+
+            // Desloguear a este usuario de cualquier otra computadora/sesión activa
+            DB::table('sessions')
+                ->where('user_id', $user->id)
+                ->where('id', '!=', $request->session()->getId())
+                ->delete();
             
             if ($user->tienePermiso('ver_dashboard')) {
                 return redirect()->route('admin.dashboard');
