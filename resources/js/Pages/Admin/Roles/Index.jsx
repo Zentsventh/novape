@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { Head, Link, usePage, router } from '@inertiajs/react';
 import AdminLayout from '../../../Layouts/AdminLayout';
 import { useConfirm } from '@/Contexts/ConfirmContext';
+import { ShieldCheck, Search, X, Shield, Edit2, Trash2, Users, Lock, KeyRound } from 'lucide-react';
 
-
-export default function Index() {
+export default function RolesIndex() {
     const confirmDialog = useConfirm();
 
     const { roles, filtros, flash, errors } = usePage().props;
@@ -23,99 +23,180 @@ export default function Index() {
         }
     };
 
+    const inputStyle = {
+        width: '100%', padding: '14px 16px 14px 44px', borderRadius: '12px', border: '1px solid #E2E8F0',
+        background: '#F8FAFC', color: '#1E293B', fontSize: '15px', outline: 'none', transition: 'all 0.2s',
+        boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
+    };
+    
+    const inputFocusStyle = {
+        borderColor: '#00B4FF', boxShadow: '0 0 0 4px rgba(0, 180, 255, 0.1)', backgroundColor: '#ffffff'
+    };
+
     return (
         <AdminLayout logoUrl={null}>
             <Head title="Roles y Permisos" />
             
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--admin-text-main)' }}>Roles y Permisos</h1>
-                <Link 
-                    href="/admin/roles/create" 
-                    style={{ background: '#1d4ed8', color: 'white', padding: '10px 16px', borderRadius: '8px', textDecoration: 'none', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 10px rgba(29, 78, 216, 0.3)' }}
-                >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
-                    Nuevo Rol
-                </Link>
-            </div>
-
-            {flash?.success && (
-                <div style={{ background: 'rgba(37,99,235,0.1)', color: '#2563eb', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', fontWeight: '500', border: '1px solid rgba(37,99,235,0.2)' }}>
-                    {flash.success}
+            <div style={{ fontFamily: "'Inter', sans-serif", padding: '24px 32px', maxWidth: '1400px', margin: '0 auto' }}>
+                
+                {/* Header Section */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+                    <div>
+                        <h1 style={{ fontSize: '28px', margin: '0 0 8px 0', fontWeight: 800, color: '#1E293B', letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ background: '#E0F2FE', padding: '10px', borderRadius: '12px', color: '#00B4FF', display: 'flex' }}>
+                                <ShieldCheck size={24} />
+                            </div>
+                            Roles y Permisos
+                        </h1>
+                        <p style={{ margin: 0, color: '#64748B', fontSize: '15px' }}>
+                            Gestiona los niveles de acceso y los privilegios de los usuarios del sistema.
+                        </p>
+                    </div>
+                    
+                    <Link 
+                        href="/admin/roles/create" 
+                        style={{ 
+                            display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', borderRadius: '12px', 
+                            border: 'none', background: '#00B4FF', color: '#ffffff', fontWeight: 700, fontSize: '14px', 
+                            textDecoration: 'none', transition: 'all 0.2s', boxShadow: '0 4px 14px rgba(0, 180, 255, 0.3)'
+                        }}
+                        onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 180, 255, 0.4)'; }}
+                        onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 180, 255, 0.3)'; }}
+                    >
+                        <Shield size={18} /> Nuevo Rol
+                    </Link>
                 </div>
-            )}
-            
-            {(flash?.error || errors?.error) && (
-                <div style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', fontWeight: '500', border: '1px solid rgba(239,68,68,0.2)' }}>
-                    {flash?.error || errors?.error}
-                </div>
-            )}
 
-            <div style={{ background: 'var(--admin-bg-panel)', borderRadius: '12px', padding: '20px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', marginBottom: '20px' }}>
-                <form onSubmit={handleSearch} style={{ display: 'flex', gap: '10px' }}>
-                    <input 
-                        type="text" 
-                        placeholder="Buscar rol por nombre o descripción..." 
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                        style={{ flex: 1, padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--admin-border)', background: 'transparent', color: 'var(--admin-text-main)' }}
-                    />
-                    <button type="submit" style={{ background: '#4b5563', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
-                        Buscar
-                    </button>
-                    {search && (
-                        <Link href="/admin/roles" style={{ background: 'transparent', border: '1px solid var(--admin-border)', color: 'var(--admin-text-muted)', padding: '10px 20px', borderRadius: '8px', textDecoration: 'none', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
-                            Limpiar
-                        </Link>
-                    )}
-                </form>
-            </div>
+                {/* Alerts */}
+                {flash?.success && (
+                    <div style={{ background: '#F0FDF4', color: '#16A34A', padding: '16px 20px', borderRadius: '12px', marginBottom: '24px', fontWeight: 600, border: '1px solid #BBF7D0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <ShieldCheck size={18} /> {flash.success}
+                    </div>
+                )}
+                
+                {(flash?.error || errors?.error) && (
+                    <div style={{ background: '#FEF2F2', color: '#DC2626', padding: '16px 20px', borderRadius: '12px', marginBottom: '24px', fontWeight: 600, border: '1px solid #FECACA', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Lock size={18} /> {flash?.error || errors?.error}
+                    </div>
+                )}
 
-            <div style={{ background: 'var(--admin-bg-panel)', borderRadius: '12px', padding: '20px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                    <thead>
-                        <tr style={{ borderBottom: '2px solid var(--admin-border)', color: 'var(--admin-text-muted)' }}>
-                            <th style={{ padding: '12px' }}>ID</th>
-                            <th style={{ padding: '12px' }}>Rol (Slug)</th>
-                            <th style={{ padding: '12px' }}>Descripción</th>
-                            <th style={{ padding: '12px' }}>Usuarios Asignados</th>
-                            <th style={{ padding: '12px', textAlign: 'right' }}>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {data.length > 0 ? data.map(rol => (
-                            <tr key={rol.id} style={{ borderBottom: '1px solid var(--admin-border)', transition: 'all 0.2s' }}>
-                                <td style={{ padding: '12px', color: 'var(--admin-text-main)' }}>#{rol.id}</td>
-                                <td style={{ padding: '12px', color: 'var(--admin-text-main)' }}>
-                                    <span style={{ fontWeight: 'bold', background: 'rgba(29,78,216,0.1)', color: '#1d4ed8', padding: '4px 8px', borderRadius: '6px' }}>{rol.nombre}</span>
-                                </td>
-                                <td style={{ padding: '12px', color: 'var(--admin-text-main)' }}>
-                                    {rol.descripcion}
-                                </td>
-                                <td style={{ padding: '12px', color: 'var(--admin-text-main)' }}>
-                                    <strong>{rol.usuarios_count}</strong>
-                                </td>
-                                <td style={{ padding: '12px', textAlign: 'right' }}>
-                                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-                                        <Link href={`/admin/roles/${rol.id}/edit`} style={{ color: '#1d4ed8', textDecoration: 'none', padding: '6px', borderRadius: '6px', background: 'rgba(29,78,216,0.1)' }} title="Editar">
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                                        </Link>
-                                        {!['admin', 'cajero', 'almacen'].includes(rol.nombre) && (
-                                            <button onClick={() => handleDelete(rol.id)} style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: 'none', cursor: 'pointer', padding: '6px', borderRadius: '6px' }} title="Eliminar">
-                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                            </button>
-                                        )}
-                                    </div>
-                                </td>
-                            </tr>
-                        )) : (
-                            <tr>
-                                <td colSpan="5" style={{ padding: '20px', textAlign: 'center', color: 'var(--admin-text-muted)' }}>
-                                    No se encontraron roles.
-                                </td>
-                            </tr>
+                {/* Filters */}
+                <div style={{ background: '#ffffff', borderRadius: '20px', padding: '24px', boxShadow: '0 4px 20px -2px rgba(0,0,0,0.03)', marginBottom: '24px', border: '1px solid #E2E8F0' }}>
+                    <form onSubmit={handleSearch} style={{ display: 'flex', gap: '16px' }}>
+                        <div style={{ position: 'relative', flex: 1 }}>
+                            <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+                            <input 
+                                type="text" 
+                                placeholder="Buscar rol por nombre o descripción..." 
+                                value={search}
+                                onChange={e => setSearch(e.target.value)}
+                                style={inputStyle}
+                                onFocus={e => Object.assign(e.target.style, inputFocusStyle)}
+                                onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }}
+                            />
+                        </div>
+                        <button type="submit" style={{ background: '#1E293B', color: 'white', border: 'none', padding: '0 24px', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.background = '#334155'} onMouseOut={e => e.currentTarget.style.background = '#1E293B'}>
+                            Buscar
+                        </button>
+                        {search && (
+                            <Link href="/admin/roles" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#F1F5F9', border: 'none', color: '#64748B', padding: '0 20px', borderRadius: '12px', textDecoration: 'none', fontWeight: 700, transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.background = '#E2E8F0'; e.currentTarget.style.color = '#1E293B'; }} onMouseOut={e => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#64748B'; }}>
+                                <X size={16} /> Limpiar
+                            </Link>
                         )}
-                    </tbody>
-                </table>
+                    </form>
+                </div>
+
+                {/* Table */}
+                <div style={{ background: '#ffffff', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 10px 30px -10px rgba(0,0,0,0.05)', border: '1px solid #E2E8F0' }}>
+                    <div style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                            <thead>
+                                <tr style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
+                                    <th style={{ padding: '20px 32px', color: '#64748B', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Rol (Slug)</th>
+                                    <th style={{ padding: '20px 32px', color: '#64748B', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Descripción</th>
+                                    <th style={{ padding: '20px 32px', color: '#64748B', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Asignaciones</th>
+                                    <th style={{ padding: '20px 32px', color: '#64748B', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'right' }}>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {data.length > 0 ? data.map(rol => {
+                                    const isSystemRole = ['admin', 'cajero', 'almacen'].includes(rol.nombre);
+                                    
+                                    return (
+                                    <tr key={rol.id} style={{ 
+                                        borderBottom: '1px solid #F1F5F9', transition: 'all 0.2s'
+                                    }} onMouseOver={e => { e.currentTarget.style.backgroundColor = '#F8FAFC'; }} onMouseOut={e => { e.currentTarget.style.backgroundColor = 'transparent'; }}>
+                                        
+                                        <td style={{ padding: '24px 32px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: isSystemRole ? '#F1F5F9' : '#E0F2FE', color: isSystemRole ? '#64748B' : '#00B4FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <KeyRound size={20} />
+                                                </div>
+                                                <div>
+                                                    <span style={{ fontWeight: 800, color: '#1E293B', fontSize: '15px' }}>
+                                                        {rol.nombre}
+                                                    </span>
+                                                    {isSystemRole && (
+                                                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#F1F5F9', color: '#475569', padding: '2px 6px', borderRadius: '6px', fontSize: '10px', fontWeight: 800, marginLeft: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                                            <Lock size={10} /> Sistema
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        
+                                        <td style={{ padding: '24px 32px' }}>
+                                            <div style={{ color: '#475569', fontSize: '14px', lineHeight: '1.5' }}>
+                                                {rol.descripcion || 'Sin descripción adicional'}
+                                            </div>
+                                        </td>
+                                        
+                                        <td style={{ padding: '24px 32px' }}>
+                                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#F8FAFC', padding: '8px 12px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+                                                <Users size={16} color="#94A3B8" />
+                                                <span style={{ fontWeight: 800, color: '#1E293B', fontSize: '14px' }}>
+                                                    {rol.usuarios_count}
+                                                </span>
+                                                <span style={{ color: '#64748B', fontSize: '13px' }}>usuarios</span>
+                                            </div>
+                                        </td>
+                                        
+                                        <td style={{ padding: '24px 32px', textAlign: 'right' }}>
+                                            <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                                                <Link href={`/admin/roles/${rol.id}/edit`} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: '#F1F5F9', color: '#475569', borderRadius: '10px', textDecoration: 'none', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.background = '#E0F2FE'; e.currentTarget.style.color = '#00B4FF'; }} onMouseOut={e => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#475569'; }} title="Editar Permisos">
+                                                    <Edit2 size={16} />
+                                                </Link>
+                                                {!isSystemRole ? (
+                                                    <button onClick={() => handleDelete(rol.id)} style={{ border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: '#FEF2F2', color: '#EF4444', borderRadius: '10px', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.background = '#EF4444'; e.currentTarget.style.color = '#ffffff'; }} onMouseOut={e => { e.currentTarget.style.background = '#FEF2F2'; e.currentTarget.style.color = '#EF4444'; }} title="Eliminar Rol">
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                ) : (
+                                                    <button disabled style={{ border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: '#F8FAFC', color: '#CBD5E1', borderRadius: '10px', cursor: 'not-allowed' }} title="Rol de sistema protegido">
+                                                        <Lock size={16} />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}) : (
+                                    <tr>
+                                        <td colSpan="4" style={{ padding: '80px 40px', textAlign: 'center' }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                                                <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#CBD5E1' }}>
+                                                    <Shield size={40} />
+                                                </div>
+                                                <h3 style={{ margin: 0, color: '#1E293B', fontSize: '18px', fontWeight: 700 }}>No hay roles registrados</h3>
+                                                <p style={{ margin: 0, color: '#64748B', fontSize: '15px', maxWidth: '400px', lineHeight: '1.5' }}>
+                                                    No se encontraron roles que coincidan con tu búsqueda. Crea un nuevo rol para gestionar accesos.
+                                                </p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </AdminLayout>
     );

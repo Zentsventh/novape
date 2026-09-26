@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { Head, Link, usePage, router } from '@inertiajs/react';
 import AdminLayout from '../../../Layouts/AdminLayout';
 import { useConfirm } from '@/Contexts/ConfirmContext';
+import { Users, Download, UserPlus, Search, X, Shield, KeyRound, Lock, Unlock, Eye, Edit2, Trash2, ChevronLeft, ChevronRight, MoreHorizontal, UserCircle2 } from 'lucide-react';
 
-
-export default function Index() {
+export default function TrabajadoresIndex() {
     const confirmDialog = useConfirm();
 
     const { trabajadores, filtros, flash, errors } = usePage().props;
@@ -33,160 +33,249 @@ export default function Index() {
         }
     };
 
+    const inputStyle = {
+        width: '100%', padding: '14px 16px 14px 44px', borderRadius: '12px', border: '1px solid #E2E8F0',
+        background: '#F8FAFC', color: '#1E293B', fontSize: '15px', outline: 'none', transition: 'all 0.2s',
+        boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
+    };
+    
+    const inputFocusStyle = {
+        borderColor: '#00B4FF', boxShadow: '0 0 0 4px rgba(0, 180, 255, 0.1)', backgroundColor: '#ffffff'
+    };
+
     return (
         <AdminLayout logoUrl={null}>
-            <Head title="Trabajadores CRM" />
+            <Head title="Directorio de Trabajadores" />
             
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--admin-text-main)' }}>Directorio de Trabajadores</h1>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                    <a 
-                        href="/admin/exportar/trabajadores" 
-                        target="_blank"
-                        style={{ background: '#2563eb', color: 'white', padding: '10px 16px', borderRadius: '8px', textDecoration: 'none', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 10px rgba(37, 99, 235, 0.3)' }}
-                    >
-                        Exportar CSV
-                    </a>
-                    <Link 
-                        href="/admin/trabajadores/create" 
-                        style={{ background: '#1d4ed8', color: 'white', padding: '10px 16px', borderRadius: '8px', textDecoration: 'none', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 4px 10px rgba(29, 78, 216, 0.3)' }}
-                    >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
-                        Nuevo Trabajador
-                    </Link>
-                </div>
-            </div>
-
-            {flash?.success && (
-                <div style={{ background: 'rgba(37,99,235,0.1)', color: '#2563eb', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', fontWeight: '500', border: '1px solid rgba(37,99,235,0.2)' }}>
-                    {flash.success}
-                </div>
-            )}
-            
-            {(flash?.error || errors?.error) && (
-                <div style={{ background: 'rgba(59,130,246,0.1)', color: '#3b82f6', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px', fontWeight: '500', border: '1px solid rgba(59,130,246,0.2)' }}>
-                    {flash?.error || errors?.error}
-                </div>
-            )}
-
-            <div style={{ background: 'var(--admin-bg-panel)', borderRadius: '12px', padding: '20px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', marginBottom: '20px' }}>
-                <form onSubmit={handleSearch} style={{ display: 'flex', gap: '10px' }}>
-                    <input 
-                        type="text" 
-                        placeholder="Buscar por nombre, email o DNI..." 
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                        style={{ flex: 1, padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--admin-border)', background: 'transparent', color: 'var(--admin-text-main)' }}
-                    />
-                    <button type="submit" style={{ background: '#4b5563', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
-                        Buscar
-                    </button>
-                    {search && (
-                        <Link href="/admin/trabajadores" style={{ background: 'transparent', border: '1px solid var(--admin-border)', color: 'var(--admin-text-muted)', padding: '10px 20px', borderRadius: '8px', textDecoration: 'none', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
-                            Limpiar
-                        </Link>
-                    )}
-                </form>
-            </div>
-
-            <div style={{ background: 'var(--admin-bg-panel)', borderRadius: '12px', padding: '20px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                    <thead>
-                        <tr style={{ borderBottom: '2px solid var(--admin-border)', color: 'var(--admin-text-muted)' }}>
-                            <th style={{ padding: '12px' }}>Usuario</th>
-                            <th style={{ padding: '12px' }}>DNI / Teléfono</th>
-                            <th style={{ padding: '12px' }}>Roles</th>
-                            <th style={{ padding: '12px' }}>Pedidos</th>
-                            <th style={{ padding: '12px' }}>Estado</th>
-                            <th style={{ padding: '12px', textAlign: 'right' }}>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {data.length > 0 ? data.map(trabajador => (
-                            <tr key={trabajador.id} style={{ 
-                                borderBottom: '1px solid var(--admin-border)', 
-                                transition: 'all 0.2s',
-                                background: trabajador.estado === 'bloqueado' ? 'rgba(239,68,68,0.05)' : 'transparent', 
-                                opacity: trabajador.estado === 'bloqueado' ? 0.75 : 1 
-                            }}>
-                                <td style={{ padding: '12px', color: 'var(--admin-text-main)' }}>
-                                    <div style={{ fontWeight: 'bold', textDecoration: trabajador.estado === 'bloqueado' ? 'line-through' : 'none' }}>{trabajador.nombres} {trabajador.apellidos}</div>
-                                    <div style={{ fontSize: '12px', color: 'var(--admin-text-muted)' }}>{trabajador.email}</div>
-                                </td>
-                                <td style={{ padding: '12px', color: 'var(--admin-text-main)' }}>
-                                    <div>{trabajador.dni || '-'}</div>
-                                    <div style={{ fontSize: '12px', color: 'var(--admin-text-muted)' }}>{trabajador.telefono || '-'}</div>
-                                </td>
-                                <td style={{ padding: '12px' }}>
-                                    {trabajador.roles && trabajador.roles.length > 0 ? trabajador.roles.map(r => (
-                                        <span key={r.id} style={{ background: 'rgba(29,78,216,0.1)', color: '#1d4ed8', padding: '2px 6px', borderRadius: '6px', fontSize: '11px', marginRight: '4px', display: 'inline-block' }}>
-                                            {r.nombre}
-                                        </span>
-                                    )) : <span style={{ color: 'var(--admin-text-muted)', fontSize: '12px' }}>Sin rol</span>}
-                                </td>
-                                <td style={{ padding: '12px', color: 'var(--admin-text-main)', fontWeight: 'bold' }}>
-                                    {trabajador.pedidos_count}
-                                </td>
-                                <td style={{ padding: '12px' }}>
-                                    <span style={{ 
-                                        background: trabajador.estado === 'activo' ? 'rgba(37,99,235,0.1)' : 'rgba(59,130,246,0.1)', 
-                                        color: trabajador.estado === 'activo' ? '#2563eb' : '#3b82f6', 
-                                        padding: '4px 8px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', textTransform: 'capitalize' 
-                                    }}>
-                                        {trabajador.estado === 'bloqueado' ? 'Bloqueado' : 'Activo'}
-                                    </span>
-                                </td>
-                                <td style={{ padding: '12px', textAlign: 'right' }}>
-                                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-                                        <Link href={`/admin/trabajadores/${trabajador.id}`} style={{ color: '#3b82f6', textDecoration: 'none', padding: '6px', borderRadius: '6px', background: 'rgba(59,130,246,0.1)' }} title="Ver Detalle">
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                                        </Link>
-                                        <Link href={`/admin/trabajadores/${trabajador.id}/edit`} style={{ color: '#1d4ed8', textDecoration: 'none', padding: '6px', borderRadius: '6px', background: 'rgba(29,78,216,0.1)' }} title="Editar">
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                                        </Link>
-                                        <button onClick={() => toggleBloqueo(trabajador.id)} style={{ background: trabajador.estado === 'bloqueado' ? 'rgba(37,99,235,0.1)' : 'rgba(96,165,250,0.1)', color: trabajador.estado === 'bloqueado' ? '#2563eb' : '#60a5fa', border: 'none', cursor: 'pointer', padding: '6px', borderRadius: '6px' }} title={trabajador.estado === 'bloqueado' ? 'Desbloquear' : 'Bloquear'}>
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                                        </button>
-                                        <button onClick={() => resetPassword(trabajador.id)} style={{ background: 'rgba(107,114,128,0.1)', color: 'var(--admin-text-main)', border: 'none', cursor: 'pointer', padding: '6px', borderRadius: '6px' }} title="Resetear Contraseña">
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 12h4l2-2 4 4 4-4 4 4 2-2"/></svg>
-                                        </button>
-                                        <button onClick={() => handleDelete(trabajador.id)} style={{ background: 'rgba(59,130,246,0.1)', color: '#3b82f6', border: 'none', cursor: 'pointer', padding: '6px', borderRadius: '6px' }} title="Eliminar">
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        )) : (
-                            <tr>
-                                <td colSpan="6" style={{ padding: '20px', textAlign: 'center', color: 'var(--admin-text-muted)' }}>
-                                    No hay trabajadores registrados o que coincidan con la búsqueda.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-
-            {trabajadores?.links && trabajadores.links.length > 3 && (
-                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px', gap: '5px' }}>
-                    {trabajadores.links.map((link, i) => (
-                        <Link 
-                            key={i} 
-                            href={link.url || '#'} 
+            <div style={{ fontFamily: "'Inter', sans-serif", padding: '24px 32px', maxWidth: '1400px', margin: '0 auto' }}>
+                
+                {/* Header Section */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+                    <div>
+                        <h1 style={{ fontSize: '28px', margin: '0 0 8px 0', fontWeight: 800, color: '#1E293B', letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ background: '#E0F2FE', padding: '10px', borderRadius: '12px', color: '#00B4FF', display: 'flex' }}>
+                                <Users size={24} />
+                            </div>
+                            Directorio de Trabajadores
+                        </h1>
+                        <p style={{ margin: 0, color: '#64748B', fontSize: '15px' }}>
+                            Gestiona el equipo, roles, permisos y accesos al sistema CRM y ERP.
+                        </p>
+                    </div>
+                    
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                        <a 
+                            href="/admin/exportar/trabajadores" 
+                            target="_blank"
                             style={{ 
-                                padding: '8px 12px', 
-                                background: link.active ? '#1d4ed8' : 'var(--admin-bg-panel)', 
-                                color: link.active ? 'white' : 'var(--admin-text-main)', 
-                                borderRadius: '6px', 
-                                textDecoration: 'none',
-                                opacity: link.url ? 1 : 0.5,
-                                pointerEvents: link.url ? 'auto' : 'none'
+                                display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 20px', borderRadius: '12px', 
+                                border: '1px solid #E2E8F0', background: '#ffffff', color: '#475569', fontWeight: 700, fontSize: '14px', 
+                                textDecoration: 'none', transition: 'all 0.2s', boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
                             }}
-                            dangerouslySetInnerHTML={{ __html: link.label }}
-                        />
-                    ))}
+                            onMouseOver={e => { e.currentTarget.style.background = '#F8FAFC'; e.currentTarget.style.color = '#1E293B'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                            onMouseOut={e => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.color = '#475569'; e.currentTarget.style.transform = 'none'; }}
+                        >
+                            <Download size={18} /> Exportar CSV
+                        </a>
+                        <Link 
+                            href="/admin/trabajadores/create" 
+                            style={{ 
+                                display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 20px', borderRadius: '12px', 
+                                border: 'none', background: '#00B4FF', color: '#ffffff', fontWeight: 700, fontSize: '14px', 
+                                textDecoration: 'none', transition: 'all 0.2s', boxShadow: '0 4px 14px rgba(0, 180, 255, 0.3)'
+                            }}
+                            onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 180, 255, 0.4)'; }}
+                            onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 180, 255, 0.3)'; }}
+                        >
+                            <UserPlus size={18} /> Nuevo Trabajador
+                        </Link>
+                    </div>
                 </div>
-            )}
+
+                {/* Alerts */}
+                {flash?.success && (
+                    <div style={{ background: '#F0FDF4', color: '#16A34A', padding: '16px 20px', borderRadius: '12px', marginBottom: '24px', fontWeight: 600, border: '1px solid #BBF7D0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Shield size={18} /> {flash.success}
+                    </div>
+                )}
+                
+                {(flash?.error || errors?.error) && (
+                    <div style={{ background: '#FEF2F2', color: '#DC2626', padding: '16px 20px', borderRadius: '12px', marginBottom: '24px', fontWeight: 600, border: '1px solid #FECACA', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Lock size={18} /> {flash?.error || errors?.error}
+                    </div>
+                )}
+
+                {/* Filters */}
+                <div style={{ background: '#ffffff', borderRadius: '20px', padding: '24px', boxShadow: '0 4px 20px -2px rgba(0,0,0,0.03)', marginBottom: '24px', border: '1px solid #E2E8F0' }}>
+                    <form onSubmit={handleSearch} style={{ display: 'flex', gap: '16px' }}>
+                        <div style={{ position: 'relative', flex: 1 }}>
+                            <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+                            <input 
+                                type="text" 
+                                placeholder="Buscar por nombre, email o DNI..." 
+                                value={search}
+                                onChange={e => setSearch(e.target.value)}
+                                style={inputStyle}
+                                onFocus={e => Object.assign(e.target.style, inputFocusStyle)}
+                                onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }}
+                            />
+                        </div>
+                        <button type="submit" style={{ background: '#1E293B', color: 'white', border: 'none', padding: '0 24px', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.background = '#334155'} onMouseOut={e => e.currentTarget.style.background = '#1E293B'}>
+                            Buscar
+                        </button>
+                        {search && (
+                            <Link href="/admin/trabajadores" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#F1F5F9', border: 'none', color: '#64748B', padding: '0 20px', borderRadius: '12px', textDecoration: 'none', fontWeight: 700, transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.background = '#E2E8F0'; e.currentTarget.style.color = '#1E293B'; }} onMouseOut={e => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#64748B'; }}>
+                                <X size={16} /> Limpiar
+                            </Link>
+                        )}
+                    </form>
+                </div>
+
+                {/* Table */}
+                <div style={{ background: '#ffffff', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 10px 30px -10px rgba(0,0,0,0.05)', border: '1px solid #E2E8F0' }}>
+                    <div style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                            <thead>
+                                <tr style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
+                                    <th style={{ padding: '20px 32px', color: '#64748B', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Usuario</th>
+                                    <th style={{ padding: '20px 32px', color: '#64748B', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Identidad / Contacto</th>
+                                    <th style={{ padding: '20px 32px', color: '#64748B', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Rol Asignado</th>
+                                    <th style={{ padding: '20px 32px', color: '#64748B', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Pedidos</th>
+                                    <th style={{ padding: '20px 32px', color: '#64748B', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Estado</th>
+                                    <th style={{ padding: '20px 32px', color: '#64748B', fontWeight: 700, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', textAlign: 'right' }}>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {data.length > 0 ? data.map(trabajador => {
+                                    const isBloqueado = trabajador.estado === 'bloqueado';
+
+                                    return (
+                                    <tr key={trabajador.id} style={{ 
+                                        borderBottom: '1px solid #F1F5F9', transition: 'all 0.2s',
+                                        background: isBloqueado ? '#FEF2F2' : 'transparent',
+                                    }} onMouseOver={e => { if(!isBloqueado) e.currentTarget.style.backgroundColor = '#F8FAFC'; }} onMouseOut={e => { if(!isBloqueado) e.currentTarget.style.backgroundColor = 'transparent'; }}>
+                                        <td style={{ padding: '24px 32px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: isBloqueado ? '#FECACA' : '#E0F2FE', color: isBloqueado ? '#DC2626' : '#00B4FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                    <UserCircle2 size={20} />
+                                                </div>
+                                                <div>
+                                                    <div style={{ fontWeight: 800, color: isBloqueado ? '#991B1B' : '#1E293B', fontSize: '15px', textDecoration: isBloqueado ? 'line-through' : 'none', marginBottom: '2px' }}>
+                                                        {trabajador.nombres} {trabajador.apellidos}
+                                                    </div>
+                                                    <div style={{ fontSize: '13px', color: isBloqueado ? '#EF4444' : '#64748B' }}>{trabajador.email}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style={{ padding: '24px 32px' }}>
+                                            <div style={{ fontWeight: 600, color: '#1E293B', fontSize: '14px', marginBottom: '2px' }}>{trabajador.dni || '-'}</div>
+                                            <div style={{ fontSize: '13px', color: '#64748B' }}>{trabajador.telefono || '-'}</div>
+                                        </td>
+                                        <td style={{ padding: '24px 32px' }}>
+                                            {trabajador.roles && trabajador.roles.length > 0 ? trabajador.roles.map(r => (
+                                                <span key={r.id} style={{ background: '#F1F5F9', color: '#475569', padding: '6px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 700, marginRight: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                                    <Shield size={12} /> {r.nombre}
+                                                </span>
+                                            )) : <span style={{ color: '#94A3B8', fontSize: '13px', fontWeight: 500 }}>Sin rol</span>}
+                                        </td>
+                                        <td style={{ padding: '24px 32px', color: '#1E293B', fontWeight: 800, fontSize: '15px' }}>
+                                            <span style={{ background: '#F8FAFC', padding: '6px 12px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+                                                {trabajador.pedidos_count}
+                                            </span>
+                                        </td>
+                                        <td style={{ padding: '24px 32px' }}>
+                                            <span style={{ 
+                                                display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                                background: isBloqueado ? '#FEE2E2' : '#D1FAE5', 
+                                                color: isBloqueado ? '#DC2626' : '#059669', 
+                                                padding: '6px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' 
+                                            }}>
+                                                {isBloqueado ? <Lock size={14} /> : <Unlock size={14} />}
+                                                {isBloqueado ? 'Bloqueado' : 'Activo'}
+                                            </span>
+                                        </td>
+                                        <td style={{ padding: '24px 32px', textAlign: 'right' }}>
+                                            <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
+                                                <Link href={`/admin/trabajadores/${trabajador.id}`} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: '#F1F5F9', color: '#475569', borderRadius: '10px', textDecoration: 'none', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.background = '#E0F2FE'; e.currentTarget.style.color = '#00B4FF'; }} onMouseOut={e => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#475569'; }} title="Ver Detalle">
+                                                    <Eye size={16} />
+                                                </Link>
+                                                <Link href={`/admin/trabajadores/${trabajador.id}/edit`} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: '#F1F5F9', color: '#475569', borderRadius: '10px', textDecoration: 'none', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.background = '#E0F2FE'; e.currentTarget.style.color = '#00B4FF'; }} onMouseOut={e => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#475569'; }} title="Editar">
+                                                    <Edit2 size={16} />
+                                                </Link>
+                                                <button onClick={() => resetPassword(trabajador.id)} style={{ border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: '#F1F5F9', color: '#475569', borderRadius: '10px', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.background = '#FFFBEB'; e.currentTarget.style.color = '#D97706'; }} onMouseOut={e => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#475569'; }} title="Resetear Contraseña">
+                                                    <KeyRound size={16} />
+                                                </button>
+                                                <button onClick={() => toggleBloqueo(trabajador.id)} style={{ border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: '#F1F5F9', color: isBloqueado ? '#DC2626' : '#475569', borderRadius: '10px', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.background = isBloqueado ? '#DC2626' : '#FEE2E2'; e.currentTarget.style.color = isBloqueado ? '#ffffff' : '#DC2626'; }} onMouseOut={e => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = isBloqueado ? '#DC2626' : '#475569'; }} title={isBloqueado ? 'Desbloquear' : 'Bloquear'}>
+                                                    {isBloqueado ? <Unlock size={16} /> : <Lock size={16} />}
+                                                </button>
+                                                <button onClick={() => handleDelete(trabajador.id)} style={{ border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: '#FEF2F2', color: '#EF4444', borderRadius: '10px', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.background = '#EF4444'; e.currentTarget.style.color = '#ffffff'; }} onMouseOut={e => { e.currentTarget.style.background = '#FEF2F2'; e.currentTarget.style.color = '#EF4444'; }} title="Eliminar">
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}) : (
+                                    <tr>
+                                        <td colSpan="6" style={{ padding: '80px 40px', textAlign: 'center' }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                                                <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#CBD5E1' }}>
+                                                    <Users size={40} />
+                                                </div>
+                                                <h3 style={{ margin: 0, color: '#1E293B', fontSize: '18px', fontWeight: 700 }}>No hay trabajadores</h3>
+                                                <p style={{ margin: 0, color: '#64748B', fontSize: '15px', maxWidth: '400px', lineHeight: '1.5' }}>
+                                                    No se encontraron usuarios o miembros del equipo que coincidan con tu búsqueda.
+                                                </p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {/* Paginación Premium */}
+                {trabajadores?.links && trabajadores.links.length > 3 && (
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '32px', gap: '8px' }}>
+                        {trabajadores.links.map((link, idx) => {
+                            let label = link.label;
+                            if (label.includes('Previous')) label = <ChevronLeft size={18} />;
+                            if (label.includes('Next')) label = <ChevronRight size={18} />;
+                            if (label === '...') label = <MoreHorizontal size={18} />;
+
+                            if (!link.url) {
+                                return (
+                                    <span
+                                        key={idx}
+                                        style={{
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '40px', height: '40px', padding: '0 12px',
+                                            background: '#F8FAFC', color: '#94A3B8', borderRadius: '10px', fontSize: '14px', fontWeight: 600, pointerEvents: 'none'
+                                        }}
+                                    >
+                                        {label}
+                                    </span>
+                                );
+                            }
+                            return (
+                                <Link
+                                    key={idx}
+                                    href={link.url}
+                                    style={{
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '40px', height: '40px', padding: '0 12px',
+                                        background: link.active ? '#00B4FF' : '#ffffff', border: link.active ? 'none' : '1px solid #E2E8F0',
+                                        color: link.active ? '#ffffff' : '#475569', borderRadius: '10px', fontSize: '14px', fontWeight: link.active ? 800 : 600, textDecoration: 'none',
+                                        boxShadow: link.active ? '0 4px 12px rgba(0, 180, 255, 0.3)' : '0 2px 4px rgba(0,0,0,0.02)', transition: 'all 0.2s'
+                                    }}
+                                    onMouseOver={e => { if(!link.active) { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.color = '#1E293B'; e.currentTarget.style.transform = 'translateY(-1px)'; } }}
+                                    onMouseOut={e => { if(!link.active) { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.color = '#475569'; e.currentTarget.style.transform = 'none'; } }}
+                                >
+                                    {label}
+                                </Link>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
         </AdminLayout>
     );
 }

@@ -1,9 +1,8 @@
 import React from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import AdminLayout from '../../../Layouts/AdminLayout';
-import '../../../../css/admin/admin.css';
 import { useConfirm } from '@/Contexts/ConfirmContext';
-
+import { ArrowLeft, CheckCircle2, Clock, XCircle, Package, Box, Hash, FileText, Mail, Phone, Building2, DollarSign, Check } from 'lucide-react';
 
 export default function CompraShow({ compra, items, logoUrl }) {
     const confirmDialog = useConfirm();
@@ -13,123 +12,191 @@ export default function CompraShow({ compra, items, logoUrl }) {
             router.post(`/admin/compras/${compra.id}/completar`, {}, { preserveScroll: true });
         }
     };
+
+    const getStatusStyle = (estado) => {
+        if (estado === 'completado') return { bg: '#D1FAE5', text: '#059669', icon: <CheckCircle2 size={16} /> };
+        if (estado === 'pendiente') return { bg: '#FEF3C7', text: '#D97706', icon: <Clock size={16} /> };
+        return { bg: '#FEE2E2', text: '#DC2626', icon: <XCircle size={16} /> };
+    };
+
+    const statusStyle = getStatusStyle(compra.estado);
+
     return (
         <AdminLayout logoUrl={logoUrl}>
             <Head title={`Orden #OC-${String(compra.id).padStart(4, '0')}`} />
 
-            <div style={{ marginBottom: '20px' }}>
-                <Link href="/admin/compras" style={{ color: 'var(--admin-primary)', textDecoration: 'none', fontWeight: 'bold', fontSize: '14px' }}>
-                    ← Volver al Historial
-                </Link>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '20px' }}>
-                {/* Detalle de Items */}
-                <div>
-                    <div style={{ background: 'var(--admin-card-bg)', borderRadius: '12px', padding: '25px', boxShadow: 'var(--admin-shadow-sm)', marginBottom: '20px' }}>
-                        <h1 style={{ fontSize: '24px', margin: '0 0 5px 0', fontWeight: '700', color: 'var(--admin-text-main)' }}>
-                            Orden de Compra #OC-{String(compra.id).padStart(4, '0')}
-                        </h1>
-                        <p style={{ color: 'var(--admin-text-secondary)', margin: 0 }}>
-                            Fecha: {compra.fecha_compra} &nbsp;|&nbsp;
-                            Estado: <span style={{
-                                background: compra.estado === 'completado' ? 'rgba(37,99,235,0.1)' : compra.estado === 'pendiente' ? 'rgba(245,158,11,0.1)' : 'rgba(59,130,246,0.1)',
-                                color: compra.estado === 'completado' ? '#2563eb' : compra.estado === 'pendiente' ? '#1e40af' : '#3b82f6',
-                                padding: '3px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold'
-                            }}>{compra.estado === 'completado' ? 'Completado' : compra.estado === 'pendiente' ? 'Pendiente' : 'Cancelado'}</span>
-                        </p>
-                    </div>
-
-                    <div style={{ background: 'var(--admin-card-bg)', borderRadius: '12px', overflowX: 'auto', boxShadow: 'var(--admin-shadow-sm)' }}>
-                        <div style={{ padding: '15px 20px', borderBottom: '1px solid var(--admin-border)', fontWeight: 'bold', color: 'var(--admin-text-main)' }}>
-                            Productos de la Orden ({items.length} ítems)
-                        </div>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                            <thead style={{ background: 'var(--admin-bg)' }}>
-                                <tr>
-                                    <th style={{ padding: '12px 20px', textAlign: 'left', color: 'var(--admin-text-secondary)', fontSize: '12px', fontWeight: '600' }}>PRODUCTO</th>
-                                    <th style={{ padding: '12px 20px', textAlign: 'left', color: 'var(--admin-text-secondary)', fontSize: '12px', fontWeight: '600' }}>SKU</th>
-                                    <th style={{ padding: '12px 20px', textAlign: 'right', color: 'var(--admin-text-secondary)', fontSize: '12px', fontWeight: '600' }}>CANTIDAD</th>
-                                    <th style={{ padding: '12px 20px', textAlign: 'right', color: 'var(--admin-text-secondary)', fontSize: '12px', fontWeight: '600' }}>COSTO UNIT.</th>
-                                    <th style={{ padding: '12px 20px', textAlign: 'right', color: 'var(--admin-text-secondary)', fontSize: '12px', fontWeight: '600' }}>SUBTOTAL</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {items.map(item => (
-                                    <tr key={item.id} style={{ borderBottom: '1px solid var(--admin-border-light)' }}>
-                                        <td style={{ padding: '12px 20px', fontWeight: 'bold', color: 'var(--admin-text-main)' }}>{item.producto_nombre || 'Producto'}</td>
-                                        <td style={{ padding: '12px 20px', color: 'var(--admin-text-muted)', fontSize: '13px' }}>{item.sku || '—'}</td>
-                                        <td style={{ padding: '12px 20px', textAlign: 'right', fontWeight: 'bold' }}>{item.cantidad}</td>
-                                        <td style={{ padding: '12px 20px', textAlign: 'right', color: 'var(--admin-text-secondary)' }}>S/ {Number(item.costo_unitario).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                                        <td style={{ padding: '12px 20px', textAlign: 'right', fontWeight: 'bold', color: 'var(--admin-primary)' }}>S/ {Number(item.subtotal).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                            <tfoot style={{ borderTop: '2px solid var(--admin-border)' }}>
-                                <tr>
-                                    <td colSpan="4" style={{ padding: '15px 20px', textAlign: 'right', fontWeight: 'bold', fontSize: '16px' }}>TOTAL ORDEN:</td>
-                                    <td style={{ padding: '15px 20px', textAlign: 'right', fontWeight: 'bold', fontSize: '18px', color: '#2563eb' }}>S/ {Number(compra.total).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-
-                    {compra.notas && (
-                        <div style={{ background: 'var(--admin-card-bg)', borderRadius: '12px', padding: '20px', marginTop: '20px', boxShadow: 'var(--admin-shadow-sm)' }}>
-                            <h3 style={{ margin: '0 0 10px 0', fontSize: '14px', color: 'var(--admin-text-main)' }}>Notas de la Orden</h3>
-                            <p style={{ color: 'var(--admin-text-secondary)', margin: 0, lineHeight: '1.6' }}>{compra.notas}</p>
-                        </div>
-                    )}
+            <div style={{ fontFamily: "'Inter', sans-serif", padding: '24px 32px', maxWidth: '1400px', margin: '0 auto' }}>
+                <div style={{ marginBottom: '24px' }}>
+                    <Link 
+                        href="/admin/compras" 
+                        style={{ 
+                            display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#64748B', 
+                            textDecoration: 'none', fontWeight: 600, fontSize: '14px', transition: 'color 0.2s'
+                        }}
+                        onMouseOver={e => e.currentTarget.style.color = '#00B4FF'}
+                        onMouseOut={e => e.currentTarget.style.color = '#64748B'}
+                    >
+                        <ArrowLeft size={16} /> Volver al Historial
+                    </Link>
                 </div>
 
-                {/* Sidebar: Info del Proveedor */}
-                <div>
-                    <div style={{ background: 'var(--admin-card-bg)', borderRadius: '12px', padding: '20px', boxShadow: 'var(--admin-shadow-sm)' }}>
-                        <h3 style={{ margin: '0 0 15px 0', fontSize: '14px', color: 'var(--admin-text-main)', borderBottom: '1px solid var(--admin-border)', paddingBottom: '10px' }}>Información del Proveedor</h3>
-                        <div style={{ marginBottom: '12px' }}>
-                            <div style={{ fontSize: '11px', color: 'var(--admin-text-muted)', textTransform: 'uppercase', marginBottom: '3px' }}>Razón Social</div>
-                            <div style={{ fontWeight: 'bold', color: 'var(--admin-text-main)' }}>{compra.proveedor_nombre || 'No asignado'}</div>
-                        </div>
-                        {compra.proveedor_email && (
-                            <div style={{ marginBottom: '12px' }}>
-                                <div style={{ fontSize: '11px', color: 'var(--admin-text-muted)', textTransform: 'uppercase', marginBottom: '3px' }}>Email</div>
-                                <div style={{ color: 'var(--admin-primary)' }}>{compra.proveedor_email}</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '32px' }}>
+                    {/* Columna Principal: Detalle de Items */}
+                    <div>
+                        <div style={{ background: '#ffffff', borderRadius: '20px', padding: '32px', boxShadow: '0 4px 20px -2px rgba(0,0,0,0.03)', border: '1px solid #E2E8F0', marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                                <div style={{ fontSize: '13px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Detalle de la Transacción</div>
+                                <h1 style={{ fontSize: '32px', margin: '0 0 12px 0', fontWeight: 800, color: '#1E293B', letterSpacing: '-1px' }}>
+                                    Orden #OC-{String(compra.id).padStart(4, '0')}
+                                </h1>
+                                <div style={{ color: '#64748B', fontSize: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <Clock size={16} color="#94A3B8" /> {compra.fecha_compra}
+                                </div>
                             </div>
-                        )}
-                        {compra.proveedor_telefono && (
-                            <div style={{ marginBottom: '12px' }}>
-                                <div style={{ fontSize: '11px', color: 'var(--admin-text-muted)', textTransform: 'uppercase', marginBottom: '3px' }}>Teléfono</div>
-                                <div style={{ color: 'var(--admin-text-main)' }}>{compra.proveedor_telefono}</div>
+                            <div>
+                                <span style={{
+                                    display: 'flex', alignItems: 'center', gap: '8px',
+                                    background: statusStyle.bg, color: statusStyle.text,
+                                    padding: '8px 16px', borderRadius: '16px', fontSize: '14px', fontWeight: 700, textTransform: 'capitalize'
+                                }}>
+                                    {statusStyle.icon} {compra.estado}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div style={{ background: '#ffffff', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 4px 20px -2px rgba(0,0,0,0.03)', border: '1px solid #E2E8F0' }}>
+                            <div style={{ padding: '24px 32px', borderBottom: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <div style={{ background: '#F1F5F9', padding: '8px', borderRadius: '10px', color: '#64748B' }}>
+                                    <Package size={20} />
+                                </div>
+                                <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: '#1E293B' }}>Productos de la Orden ({items.length} ítems)</h2>
+                            </div>
+                            <div style={{ overflowX: 'auto' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                    <thead>
+                                        <tr style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
+                                            <th style={{ padding: '16px 32px', textAlign: 'left', color: '#64748B', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Producto</th>
+                                            <th style={{ padding: '16px 32px', textAlign: 'left', color: '#64748B', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>SKU</th>
+                                            <th style={{ padding: '16px 32px', textAlign: 'center', color: '#64748B', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Cant.</th>
+                                            <th style={{ padding: '16px 32px', textAlign: 'right', color: '#64748B', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Costo Unit.</th>
+                                            <th style={{ padding: '16px 32px', textAlign: 'right', color: '#64748B', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Subtotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {items.map(item => (
+                                            <tr key={item.id} style={{ borderBottom: '1px solid #F1F5F9', transition: 'background-color 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#F8FAFC'} onMouseOut={e => e.currentTarget.style.backgroundColor = 'transparent'}>
+                                                <td style={{ padding: '20px 32px' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                        <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94A3B8' }}>
+                                                            <Box size={18} />
+                                                        </div>
+                                                        <span style={{ fontWeight: 700, color: '#1E293B', fontSize: '14px' }}>{item.producto_nombre || 'Producto'}</span>
+                                                    </div>
+                                                </td>
+                                                <td style={{ padding: '20px 32px' }}>
+                                                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#F1F5F9', padding: '4px 8px', borderRadius: '6px', color: '#64748B', fontSize: '12px', fontWeight: 600 }}>
+                                                        <Hash size={12} /> {item.sku || '—'}
+                                                    </span>
+                                                </td>
+                                                <td style={{ padding: '20px 32px', textAlign: 'center', fontWeight: 700, color: '#1E293B', fontSize: '14px' }}>{item.cantidad}</td>
+                                                <td style={{ padding: '20px 32px', textAlign: 'right', color: '#475569', fontSize: '14px', fontWeight: 500 }}>S/ {Number(item.costo_unitario).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                                <td style={{ padding: '20px 32px', textAlign: 'right', fontWeight: 800, color: '#1E293B', fontSize: '14px' }}>S/ {Number(item.subtotal).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colSpan="4" style={{ padding: '24px 32px', textAlign: 'right', fontWeight: 700, fontSize: '14px', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total de la Orden:</td>
+                                            <td style={{ padding: '24px 32px', textAlign: 'right', fontWeight: 800, fontSize: '20px', color: '#00B4FF' }}>S/ {Number(compra.total).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+
+                        {compra.notas && (
+                            <div style={{ background: '#ffffff', borderRadius: '20px', padding: '24px 32px', marginTop: '32px', boxShadow: '0 4px 20px -2px rgba(0,0,0,0.03)', border: '1px solid #E2E8F0' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+                                    <FileText size={18} color="#94A3B8" />
+                                    <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#1E293B' }}>Notas u Observaciones</h3>
+                                </div>
+                                <p style={{ color: '#475569', margin: 0, lineHeight: '1.6', fontSize: '15px', background: '#F8FAFC', padding: '16px', borderRadius: '12px', border: '1px dashed #CBD5E1' }}>{compra.notas}</p>
                             </div>
                         )}
                     </div>
 
-                    <div style={{ background: 'var(--admin-card-bg)', borderRadius: '12px', padding: '20px', marginTop: '15px', boxShadow: 'var(--admin-shadow-sm)' }}>
-                        <h3 style={{ margin: '0 0 15px 0', fontSize: '14px', color: 'var(--admin-text-main)', borderBottom: '1px solid var(--admin-border)', paddingBottom: '10px' }}>Resumen Financiero</h3>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                            <span style={{ color: 'var(--admin-text-secondary)', fontSize: '13px' }}>Items</span>
-                            <span style={{ fontWeight: 'bold' }}>{items.length}</span>
+                    {/* Sidebar: Info del Proveedor y Financiero */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                        <div style={{ background: '#ffffff', borderRadius: '20px', padding: '24px', boxShadow: '0 4px 20px -2px rgba(0,0,0,0.03)', border: '1px solid #E2E8F0' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                                <div style={{ background: '#E0F2FE', color: '#00B4FF', padding: '8px', borderRadius: '10px' }}><Building2 size={18} /></div>
+                                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#1E293B' }}>Proveedor</h3>
+                            </div>
+                            
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                <div>
+                                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.5px' }}>Razón Social</div>
+                                    <div style={{ fontWeight: 700, color: '#1E293B', fontSize: '15px' }}>{compra.proveedor_nombre || 'No asignado'}</div>
+                                </div>
+                                {compra.proveedor_email && (
+                                    <div>
+                                        <div style={{ fontSize: '12px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.5px' }}>Email</div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#00B4FF', fontSize: '14px', fontWeight: 500 }}>
+                                            <Mail size={14} /> {compra.proveedor_email}
+                                        </div>
+                                    </div>
+                                )}
+                                {compra.proveedor_telefono && (
+                                    <div>
+                                        <div style={{ fontSize: '12px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.5px' }}>Teléfono</div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#475569', fontSize: '14px', fontWeight: 500 }}>
+                                            <Phone size={14} /> {compra.proveedor_telefono}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                            <span style={{ color: 'var(--admin-text-secondary)', fontSize: '13px' }}>Unidades totales</span>
-                            <span style={{ fontWeight: 'bold' }}>{items.reduce((sum, i) => sum + i.cantidad, 0)}</span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px dashed var(--admin-border)', paddingTop: '10px', marginTop: '10px' }}>
-                            <span style={{ fontWeight: 'bold', fontSize: '15px' }}>Total</span>
-                            <span style={{ fontWeight: 'bold', fontSize: '15px', color: '#2563eb' }}>S/ {Number(compra.total).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
-                        </div>
-                    </div>
 
-                    {compra.estado === 'pendiente' && (
-                        <button 
-                            onClick={handleCompletar}
-                            className="admin-btn-primary"
-                            style={{ width: '100%', marginTop: '15px', padding: '12px', display: 'flex', justifyContent: 'center', gap: '8px' }}
-                        >
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-                            Completar Compra y Cargar Stock
-                        </button>
-                    )}
+                        <div style={{ background: '#1E293B', borderRadius: '20px', padding: '24px', boxShadow: '0 10px 25px -5px rgba(15, 23, 42, 0.4)', color: '#ffffff' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
+                                <div style={{ background: 'rgba(255,255,255,0.1)', color: '#ffffff', padding: '8px', borderRadius: '10px' }}><DollarSign size={18} /></div>
+                                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#ffffff' }}>Resumen Financiero</h3>
+                            </div>
+                            
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span style={{ color: '#94A3B8', fontSize: '14px' }}>Líneas de Ítems</span>
+                                    <span style={{ fontWeight: 700, fontSize: '15px' }}>{items.length}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span style={{ color: '#94A3B8', fontSize: '14px' }}>Unidades Totales</span>
+                                    <span style={{ fontWeight: 700, fontSize: '15px' }}>{items.reduce((sum, i) => sum + i.cantidad, 0)}</span>
+                                </div>
+                                <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px', marginTop: '4px' }}>
+                                    <div style={{ color: '#94A3B8', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px', fontWeight: 700 }}>Total Estimado</div>
+                                    <div style={{ fontSize: '32px', fontWeight: 800, letterSpacing: '-1px', display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                                        <span style={{ fontSize: '18px', color: '#94A3B8' }}>S/</span>
+                                        {Number(compra.total).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {compra.estado === 'pendiente' && (
+                            <button 
+                                onClick={handleCompletar}
+                                style={{ 
+                                    width: '100%', padding: '16px', borderRadius: '16px', border: 'none', background: '#00B4FF', color: 'white', 
+                                    fontWeight: 700, fontSize: '15px', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px',
+                                    boxShadow: '0 4px 14px rgba(0, 180, 255, 0.3)', transition: 'all 0.2s ease'
+                                }}
+                                onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 180, 255, 0.4)'; }}
+                                onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 180, 255, 0.3)'; }}
+                            >
+                                <Check size={20} /> Completar y Cargar Stock
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
         </AdminLayout>
