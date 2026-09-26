@@ -14,7 +14,7 @@ use App\Http\Requests\Profile\UpdatePasswordRequest;
 use App\Http\Requests\Profile\StoreDireccionRequest;
 use App\Http\Requests\Profile\StoreTarjetaRequest;
 use App\Http\Requests\Profile\DeleteAccountRequest;
-use App\Services\User\UserProfileService;
+use Illuminate\Support\Facades\Log;
 
 class ProfileController extends Controller
 {
@@ -77,12 +77,16 @@ class ProfileController extends Controller
 
     public function update(UpdateProfileRequest $request)
     {
+        Log::info('Profile update', ['user_id'=>Auth::id(), 'data'=>$request->validated()]);
+
         $this->profileService->updateProfile(Auth::user(), $request->validated());
         return back()->with('success', 'Perfil actualizado exitosamente.');
     }
 
     public function requestPhoneUpdateOtp(RequestPhoneOtpRequest $request)
     {
+        Log::info('Request phone OTP', ['user_id'=>Auth::id(), 'phone'=>$request->telefono]);
+
 
         $this->profileService->requestPhoneOtp(Auth::user(), $request->telefono);
         return back()->with('success', 'Código enviado a tu correo.');
@@ -90,6 +94,8 @@ class ProfileController extends Controller
 
     public function verifyPhoneUpdateOtp(VerifyPhoneOtpRequest $request)
     {
+        Log::info('Verify phone OTP', ['user_id'=>Auth::id(), 'code'=>$request->codigo]);
+
 
         try {
             $this->profileService->verifyPhoneOtp(Auth::user(), $request->codigo);
@@ -101,6 +107,8 @@ class ProfileController extends Controller
 
     public function updatePassword(UpdatePasswordRequest $request)
     {
+        Log::info('Update password attempt', ['user_id'=>Auth::id()]);
+
         $usuario = Auth::user();
 
         try {
@@ -113,6 +121,8 @@ class ProfileController extends Controller
 
     public function storeDireccion(StoreDireccionRequest $request)
     {
+        Log::info('Store address', ['user_id'=>Auth::id(), 'data'=>$request->all()]);
+
 
         $this->profileService->addAddress(Auth::user(), $request->all(), (bool) $request->input('principal', false));
         return back()->with('success', 'Dirección agregada correctamente.');
@@ -120,18 +130,24 @@ class ProfileController extends Controller
 
     public function setPrincipalDireccion($id)
     {
+        Log::info('Set principal address', ['user_id'=>Auth::id(), 'address_id'=>$id]);
+
         $this->profileService->setPrincipalAddress(Auth::user(), (int) $id);
         return back()->with('success', 'Dirección establecida como principal.');
     }
 
     public function destroyDireccion($id)
     {
+        Log::info('Destroy address', ['user_id'=>Auth::id(), 'address_id'=>$id]);
+
         $this->profileService->deleteAddress(Auth::user(), (int) $id);
         return back()->with('success', 'Dirección eliminada.');
     }
 
     public function storeTarjeta(StoreTarjetaRequest $request)
     {
+        Log::info('Store card', ['user_id'=>Auth::id(), 'data'=>$request->all()]);
+
 
         $this->profileService->addCard(Auth::user(), $request->all());
         return back()->with('success', 'Tarjeta agregada exitosamente (Simulación).');
@@ -139,12 +155,16 @@ class ProfileController extends Controller
 
     public function destroyTarjeta($id)
     {
+        Log::info('Destroy card', ['user_id'=>Auth::id(), 'card_id'=>$id]);
+
         $this->profileService->deleteCard(Auth::user(), (int) $id);
         return back()->with('success', 'Tarjeta eliminada.');
     }
 
     public function updateDatosReembolso(Request $request)
     {
+        Log::info('Update refund data', ['user_id'=>Auth::id(), 'data'=>$request->all()]);
+
         $validated = $request->validate([
             'tipo_documento' => 'required|string',
             'numero_documento' => 'required|string',
@@ -164,12 +184,16 @@ class ProfileController extends Controller
 
     public function destroySession($id)
     {
+        Log::info('Destroy session', ['user_id'=>Auth::id(), 'session_id'=>$id]);
+
         $this->profileService->deleteSession(Auth::user(), (string) $id);
         return back()->with('success', 'Sesión cerrada exitosamente.');
     }
 
     public function destroyAccount(DeleteAccountRequest $request)
     {
+        Log::info('Destroy account', ['user_id'=>Auth::id()]);
+
 
         try {
             $this->profileService->deleteAccount(Auth::user(), $request->password);

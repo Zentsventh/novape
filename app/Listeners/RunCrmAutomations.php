@@ -22,46 +22,14 @@ class RunCrmAutomations
     public function handle(CrmDealMoved $event): void
     {
         $deal = $event->deal;
-        $automations = \App\Models\CrmAutomation::where('activo', true)
-                            ->where('trigger_type', 'deal_moved')
-                            ->get();
-
-        foreach ($automations as $auto) {
-            $conditions = $auto->condiciones ?? [];
-            // Check if automation requires entering a specific stage
-            if (isset($conditions['stage_id']) && $deal->stage_id != $conditions['stage_id']) {
-                continue; // Stage doesn't match condition
-            }
-
-            // Execute Actions
-            foreach ($auto->acciones as $action) {
-                if ($action['type'] === 'webhook') {
-                    \Illuminate\Support\Facades\Http::post($action['url'], [
-                        'event' => 'deal_moved',
-                        'deal_id' => $deal->id,
-                        'deal_title' => $deal->title,
-                        'stage_id' => $deal->stage_id,
-                        'value' => $deal->value,
-                    ]);
-                } elseif ($action['type'] === 'create_task') {
-                    \App\Models\CrmActivity::create([
-                        'deal_id' => $deal->id,
-                        'type' => 'task',
-                        'title' => 'Tarea automática: ' . ($action['message'] ?? 'Revisar deal'),
-                        'description' => 'Generado por la automatización: ' . $auto->nombre,
-                        'status' => 'pending',
-                        'due_date' => now()->addDays(1),
-                    ]);
-                } elseif ($action['type'] === 'send_email') {
-                    // Logic to send email to the deal contact
-                    if ($deal->company && $deal->company->email) {
-                        \Illuminate\Support\Facades\Mail::raw($action['message'], function($msg) use ($deal) {
-                            $msg->to($deal->company->email)
-                                ->subject('Actualización de tu oportunidad');
-                        });
-                    }
-                }
-            }
-        }
+        
+        // Use the centralized Automation Engine Service
+        \App\Services\Admin\Crm\AutomationEngineService::trigger('deal_moved', $deal, [
+            'stage_id' => $deal->stage_id,
+            'previous_stage_id' => $event->previousStageId ?? null,
+        ]);
+        
+        // Si el deal se movió a una etapa que significa "Ganado" (por ejemplo stage_id = 4 o 5, asumiendo)
+        // se podría disparar 'deal_won' si quisieras.
     }
 }

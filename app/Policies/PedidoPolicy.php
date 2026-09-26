@@ -12,4 +12,13 @@ class PedidoPolicy
     {
         return $user->id === $pedido->usuario_id;
     }
+    public function update(Usuario $user, Pedido $pedido): bool
+    {
+        return $user->id === $pedido->usuario_id;
+    }
+
+    public function delete(Usuario $user, Pedido $pedido): bool
+    {
+        return $user->id === $pedido->usuario_id;
+    }
 }

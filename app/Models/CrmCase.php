@@ -23,6 +23,7 @@ class CrmCase extends Model
         'pedido_id',
         'asignado_a',
         'deal_id',
+        'omnichannel_conversation_id',
     ];
 
     protected $casts = [
@@ -47,6 +48,11 @@ class CrmCase extends Model
     public function deal()
     {
         return $this->belongsTo(CrmDeal::class, 'deal_id');
+    }
+
+    public function omnichannelConversation()
+    {
+        return $this->belongsTo(\App\Models\Omnichannel\OmnichannelConversation::class, 'omnichannel_conversation_id');
     }
 
     public function notas()

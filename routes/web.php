@@ -81,9 +81,9 @@ Route::post('/libro-de-reclamaciones', [ReclamoController::class, 'store']);
 
 Route::controller(AuthController::class)->group(function () {
     Route::get('/login', 'showLogin')->name('login');
-    Route::post('/login', 'login');
+    Route::post('/login', 'login')->middleware('throttle:5,1');
     Route::get('/registro', 'showRegister')->name('registro');
-    Route::post('/registro', 'register');
+    Route::post('/registro', 'register')->middleware('throttle:5,1');
     Route::any('/logout', 'logout')->name('logout');
 });
 
@@ -97,14 +97,14 @@ Route::controller(GoogleAuthController::class)->prefix('auth/google')->group(fun
 // ==========================================
 
 Route::controller(CartController::class)->prefix('cart')->group(function () {
-    Route::post('/add', 'add')->name('cart.add');
-    Route::post('/update', 'update')->name('cart.update');
-    Route::post('/remove', 'remove')->name('cart.remove');
-    Route::post('/clear', 'clear')->name('cart.clear');
+    Route::post('/add', 'add')->middleware('throttle:10,1')->name('cart.add');
+    Route::post('/update', 'update')->middleware('throttle:5,1')->name('cart.update');
+    Route::post('/remove', 'remove')->middleware('throttle:5,1')->name('cart.remove');
+    Route::post('/clear', 'clear')->middleware('throttle:5,1')->name('cart.clear');
 });
 
 Route::controller(ShippingController::class)->prefix('api/shipping')->group(function () {
-    Route::post('/calculate', 'calculate')->name('shipping.calculate');
+    Route::post('/calculate', 'calculate')->middleware('throttle:10,1')->name('shipping.calculate');
     Route::post('/validate-address', 'validateAddress')->name('shipping.validate-address');
 });
 
@@ -115,7 +115,7 @@ Route::controller(\App\Http\Controllers\CheckoutController::class)->group(functi
 
 Route::controller(\App\Http\Controllers\NiubizController::class)->group(function () {
     Route::post('/api/checkout/niubiz/session', 'createSession');
-    Route::post('/api/checkout/niubiz/authorize', 'authorizeTransaction')->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])->name('checkout.niubiz.authorize');
+    Route::post('/api/checkout/niubiz/authorize', 'authorizeTransaction')->name('checkout.niubiz.authorize');
     Route::get('/checkout/niubiz/success', 'success')->name('checkout.niubiz.success');
 });
 
@@ -138,18 +138,18 @@ Route::middleware('auth')->group(function () {
     Route::controller(ProfileController::class)->prefix('perfil')->group(function () {
         Route::get('/', 'index')->name('perfil');
         Route::get('/compras/{codigo}', 'showOrder')->name('perfil.compras.show');
-        Route::post('/update', 'update')->name('perfil.update');
+        Route::post('/update', 'update')->middleware('throttle:5,1')->name('perfil.update');
         Route::post('/celular/solicitar-codigo', 'requestPhoneUpdateOtp')->middleware('throttle:3,1')->name('perfil.celular.solicitar');
         Route::post('/celular/verificar-codigo', 'verifyPhoneUpdateOtp')->name('perfil.celular.verificar');
-        Route::post('/password', 'updatePassword')->name('perfil.password');
+        Route::post('/password', 'updatePassword')->middleware('throttle:5,1')->name('perfil.password');
         
         // Direcciones
-        Route::post('/direccion', 'storeDireccion')->name('perfil.direccion.store');
+        Route::post('/direccion', 'storeDireccion')->middleware('throttle:5,1')->name('perfil.direccion.store');
         Route::post('/direccion/{id}/principal', 'setPrincipalDireccion')->name('perfil.direccion.principal');
         Route::delete('/direccion/{id}', 'destroyDireccion')->name('perfil.direccion.destroy');
         
         // Tarjetas y Cuenta
-        Route::post('/tarjetas', 'storeTarjeta')->name('perfil.tarjetas.store');
+        Route::post('/tarjetas', 'storeTarjeta')->middleware('throttle:5,1')->name('perfil.tarjetas.store');
         Route::delete('/tarjetas/{id}', 'destroyTarjeta')->name('perfil.tarjetas.destroy');
         Route::post('/reembolso', 'updateDatosReembolso')->name('perfil.reembolso.update');
         Route::delete('/sesiones/{id}', 'destroySession')->name('perfil.sesiones.destroy');
@@ -183,11 +183,11 @@ Route::middleware('auth')->group(function () {
 
 Route::controller(AdminAuthController::class)->prefix('admin')->group(function () {
     Route::get('/login', 'showLogin')->name('admin.login')->middleware('guest:admin');
-    Route::post('/login', 'login')->middleware('guest:admin');
+    Route::post('/login', 'login')->middleware(['guest:admin','throttle:5,1']);
     Route::any('/logout', 'logout')->name('admin.logout')->middleware('auth:admin');
 });
 
-Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
+Route::prefix('admin')->middleware(['auth:admin','throttle:60,1'])->group(function () {
 
     Route::controller(DashboardController::class)->group(function () {
         Route::get('/', 'dashboard')->name('admin.dashboard')->middleware('permiso:ver_dashboard');
@@ -481,6 +481,14 @@ Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
             Route::post('/conversations/{conversation}/notes', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'addInternalNote']);
             Route::get('/conversations/{conversation}/contact-profile', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'contactProfile']);
             Route::get('/canned-responses', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'cannedResponses']);
+
+            // Enterprise routes
+            Route::post('/conversations/{conversation}/transfer', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'transferConversation']);
+            Route::post('/conversations/{conversation}/close', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'closeConversation']);
+            Route::get('/agent-status', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'getAgentStatus']);
+            Route::post('/agent-status', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'updateAgentStatus']);
+            Route::get('/supervisor/dashboard', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'supervisorDashboard']);
+            Route::get('/available-agents', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'availableAgents']);
         });
     });
 });
@@ -490,6 +498,6 @@ Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
 // ==========================================
 Route::prefix('api/webhooks')->group(function () {
     Route::get('/whatsapp', [\App\Http\Controllers\Api\Omnichannel\WhatsAppWebhookController::class, 'verify']);
-    Route::post('/whatsapp', [\App\Http\Controllers\Api\Omnichannel\WhatsAppWebhookController::class, 'handle']);
+    Route::post('/whatsapp', [\App\Http\Controllers\Api\Omnichannel\WhatsAppWebhookController::class, 'handle'])->middleware('throttle:10,1');
 });
 

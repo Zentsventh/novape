@@ -148,7 +148,7 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
             header: 'Estado',
             accessor: 'estado',
             render: (row) => (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', textTransform: 'capitalize', fontWeight: 600, color: 'var(--twenty-text-main)', background: 'var(--twenty-bg-surface)', padding: '6px 12px', borderRadius: '16px', display: 'inline-flex', border: '1px solid var(--twenty-border)' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', textTransform: 'capitalize', fontWeight: 600, color: 'var(--twenty-text-main)', background: 'var(--twenty-bg-surface)', padding: '6px 12px', borderRadius: '16px', border: '1px solid var(--twenty-border)' }}>
                     {getStatusIcon(row.estado)}
                     {row.estado.replace('_', ' ')}
                 </div>

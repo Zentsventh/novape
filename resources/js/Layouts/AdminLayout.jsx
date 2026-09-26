@@ -5,7 +5,7 @@ import PageTransition from '@/Components/Animations/PageTransition';
 import {
     LayoutDashboard, MonitorSmartphone, ShoppingCart, Package,
     CreditCard, Wallet, Archive, Image, Users, Truck,
-    UserCog, Shield, Star, Settings, LogOut, Menu, X, Bell, Eye, Grid, Briefcase, Mail, ShieldAlert, DollarSign, Building, Zap, Tags
+    UserCog, Shield, Star, Settings, LogOut, Menu, X, Bell, Eye, Grid, Briefcase, Mail, ShieldAlert, DollarSign, Building, Zap, Tags, Map, Ticket
 } from 'lucide-react';
 import { useDeviceContext } from '@/Contexts/DeviceContext';
 import '../../css/admin/admin.css';
@@ -35,51 +35,45 @@ export default function AdminLayout({ children, logoUrl }) {
             ]
         },
         {
-            title: 'Ventas y Atención',
+            title: 'Ventas y CRM',
             items: [
-                { href: '/admin/inbox', label: 'Bandeja Omnicanal', permission: 'gestionar_omnichannel', icon: <Bell size={20} /> },
-                { href: '/admin/crm/dashboard', label: 'Panel CRM', permission: 'pos.vender', icon: <Users size={20} /> },
                 { href: '/admin/pos', label: 'Punto de Venta', permission: 'pos.vender', icon: <MonitorSmartphone size={20} /> },
                 { href: '/admin/pedidos', label: 'Pedidos', permission: 'pos.vender', icon: <ShoppingCart size={20} /> },
+                { href: '/admin/rma', label: 'Garantías y Cambios', permission: 'pos.vender', icon: <ShieldAlert size={20} /> },
+                { href: '/admin/inbox', label: 'Bandeja CRM', permission: 'gestionar_omnichannel', icon: <Briefcase size={20} /> },
             ]
         },
         {
             title: 'Catálogo y Logística',
             items: [
-                { href: '/admin/inventario', label: 'Inventario', permission: 'inventario.gestionar', icon: <LayoutDashboard size={20} /> },
                 { href: '/admin/products', label: 'Productos', permission: 'inventario.gestionar', icon: <Package size={20} /> },
-                { href: '/admin/almacenes', label: 'Almacén', permission: 'inventario.gestionar', icon: <Archive size={20} /> },
-                { href: '/admin/zonas', label: 'Zonas Envío', permission: 'usuarios.gestionar', icon: <Truck size={20} /> },
+                { href: '/admin/inventario', label: 'Inventario', permission: 'inventario.gestionar', icon: <LayoutDashboard size={20} /> },
+                { href: '/admin/almacenes', label: 'Almacenes', permission: 'inventario.gestionar', icon: <Archive size={20} /> },
+                { href: '/admin/zonas', label: 'Zonas de Envío', permission: 'usuarios.gestionar', icon: <Map size={20} /> },
             ]
         },
         {
-            title: 'Administración',
+            title: 'Compras y Finanzas',
             items: [
                 { href: '/admin/compras', label: 'Compras', permission: 'inventario.gestionar', icon: <CreditCard size={20} /> },
                 { href: '/admin/proveedores', label: 'Proveedores', permission: 'inventario.gestionar', icon: <Truck size={20} /> },
                 { href: '/admin/gastos', label: 'Gastos', permission: 'reportes.ver', icon: <Wallet size={20} /> },
-                { href: '/admin/cupones', label: 'Cupones', permission: 'gestionar_cupones', icon: <Package size={20} /> },
+            ]
+        },
+        {
+            title: 'Marketing y Tienda',
+            items: [
+                { href: '/admin/cupones', label: 'Cupones', permission: 'gestionar_cupones', icon: <Ticket size={20} /> },
                 { href: '/admin/banners', label: 'Banners Web', permission: 'usuarios.gestionar', icon: <Image size={20} /> },
-                { href: '/admin/rma', label: 'Garantías y Cambios', permission: 'pos.vender', icon: <ShieldAlert size={20} /> },
             ]
         },
         {
             title: 'Sistema',
             items: [
-                { href: '/admin/trabajadores', label: 'Usuarios', permission: 'usuarios.gestionar', icon: <UserCog size={20} /> },
+                { href: '/admin/trabajadores', label: 'Usuarios', permission: 'usuarios.gestionar', icon: <Users size={20} /> },
                 { href: '/admin/roles', label: 'Roles y Permisos', permission: 'usuarios.gestionar', icon: <Shield size={20} /> },
                 { href: '/admin/ajustes', label: 'Configuración', permission: 'usuarios.gestionar', icon: <Settings size={20} /> },
-                { href: '/admin/audit-logs', label: 'Registro de Auditoría', permission: 'ver_dashboard', icon: <Shield size={20} /> },
-            ]
-        },
-        {
-            title: 'CRM / Ventas',
-            items: [
-                { href: '/admin/crm/dashboard', label: 'Panel CRM', permission: 'ver_dashboard', icon: <Briefcase size={20} />, exact: true },
-                { href: '/admin/crm/deals', label: 'Oportunidades', permission: 'ver_dashboard', icon: <DollarSign size={20} /> },
-                { href: '/admin/crm/companies', label: 'Empresas', permission: 'ver_dashboard', icon: <Building size={20} /> },
-                { href: '/admin/crm/automations', label: 'Automatización', permission: 'ver_dashboard', icon: <Zap size={20} /> },
-                { href: '/admin/crm/custom-fields', label: 'Campos Personalizados', permission: 'ver_dashboard', icon: <Tags size={20} /> },
+                { href: '/admin/audit-logs', label: 'Registro Auditoría', permission: 'ver_dashboard', icon: <ShieldAlert size={20} /> },
             ]
         }
     ];

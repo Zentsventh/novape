@@ -113,6 +113,16 @@ class Usuario extends Authenticatable implements Auditable
         return $this->hasMany(\App\Models\Omnichannel\OmnichannelContact::class, 'usuario_id');
     }
 
+    public function omnichannelConfig(): HasOne
+    {
+        return $this->hasOne(\App\Models\Omnichannel\OmnichannelAgentConfig::class, 'usuario_id');
+    }
+
+    public function omnichannelConversations(): HasMany
+    {
+        return $this->hasMany(\App\Models\Omnichannel\OmnichannelConversation::class, 'assigned_user_id');
+    }
+
     public function empresa(): BelongsTo
     {
         return $this->belongsTo(CrmCompany::class, 'empresa_id');

@@ -1,10 +1,7 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import AdminLayout from '../../Layouts/AdminLayout';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
-import { Pie } from 'react-chartjs-2';
-
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ArcElement);
+import { Package, DollarSign, Users, AlertTriangle, Box, Activity, ArrowRight, CheckCircle, TrendingUp } from 'lucide-react';
 
 export default function Inventario({ 
     totalProductos, totalCategorias, totalProveedores,
@@ -14,119 +11,218 @@ export default function Inventario({
         <AdminLayout logoUrl={logoUrl}>
             <Head title="Panel de Inventario" />
 
-            <div className="flex justify-between items-center mb-6">
-                <div>
-                    <h1 className="text-2xl font-bold" style={{ color: 'var(--admin-text-main)' }}>Panel de Inventario y Almacén</h1>
-                    <p style={{ color: 'var(--admin-text-muted)', fontSize: '14px', marginTop: '4px' }}>Control de mercadería, proveedores y valoraciones.</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
+                <h1 style={{ fontSize: '24px', margin: 0, fontWeight: '700', color: '#1E293B', display: 'flex', alignItems: 'center', gap: '12px', letterSpacing: '-0.02em' }}>
+                    <div style={{ padding: '8px', backgroundColor: '#F0F9FF', borderRadius: '10px', color: '#00B4FF' }}>
+                        <Box size={24} />
+                    </div>
+                    <div>
+                        Panel de Inventario
+                        <p style={{ color: '#64748B', fontSize: '13px', margin: '4px 0 0 0', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <Activity size={14} /> Control de mercadería, proveedores y valoraciones.
+                        </p>
+                    </div>
+                </h1>
+                
+                <div style={{ display: 'flex', gap: '12px' }}>
+                    <Link 
+                        href="/admin/productos" 
+                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F1F5F9'; e.currentTarget.style.color = '#1E293B'; e.currentTarget.style.borderColor = '#94A3B8'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.color = '#475569'; e.currentTarget.style.borderColor = '#E2E8F0'; }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#ffffff', color: '#475569', textDecoration: 'none', padding: '10px 14px', borderRadius: '8px', fontWeight: '600', fontSize: '13px', border: '1px solid #E2E8F0', transition: 'all 0.2s ease', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}
+                    >
+                        Ver Productos
+                    </Link>
+                    <Link 
+                        href="/admin/almacen/entradas" 
+                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#009BE0'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 180, 255, 0.3)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#00B4FF'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 180, 255, 0.2)'; }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#00B4FF', color: 'white', textDecoration: 'none', padding: '10px 16px', borderRadius: '8px', fontWeight: '600', fontSize: '13px', transition: 'all 0.2s ease', boxShadow: '0 2px 4px rgba(0, 180, 255, 0.2)' }}
+                    >
+                        <ArrowRight size={16} />
+                        Registrar Entrada
+                    </Link>
                 </div>
             </div>
 
             {/* KPI Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px', marginBottom: '32px' }}>
                 
-                <div style={{ background: 'var(--admin-bg-panel)', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', gap: '15px' }}>
-                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(59, 130, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                <div 
+                    onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.1)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px -2px rgba(0, 0, 0, 0.05)'; }}
+                    style={{ background: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.3s ease' }}
+                >
+                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#F0F9FF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00B4FF', flexShrink: 0 }}>
+                        <Package size={24} />
                     </div>
                     <div>
-                        <div style={{ color: 'var(--admin-text-muted)', fontSize: '12px', fontWeight: 'bold' }}>PRODUCTOS EN CATÁLOGO</div>
-                        <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--admin-text-main)' }}>{totalProductos}</div>
+                        <div style={{ color: '#64748B', fontSize: '12px', fontWeight: '600', letterSpacing: '0.05em' }}>PRODUCTOS CATÁLOGO</div>
+                        <div style={{ fontSize: '24px', fontWeight: '800', color: '#1E293B', letterSpacing: '-0.02em', marginTop: '2px' }}>{totalProductos}</div>
+                        <div style={{ fontSize: '12px', color: '#00B4FF', marginTop: '4px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <TrendingUp size={12} /> Activos
+                        </div>
                     </div>
                 </div>
 
-                <div style={{ background: 'var(--admin-bg-panel)', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', gap: '15px' }}>
-                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                <div 
+                    onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.1)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px -2px rgba(0, 0, 0, 0.05)'; }}
+                    style={{ background: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.3s ease' }}
+                >
+                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#ECFDF5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', flexShrink: 0 }}>
+                        <DollarSign size={24} />
                     </div>
                     <div>
-                        <div style={{ color: 'var(--admin-text-muted)', fontSize: '12px', fontWeight: 'bold' }}>VALOR DEL INVENTARIO</div>
-                        <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--admin-text-main)' }}>S/ {valorInventario.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                        <div style={{ color: '#64748B', fontSize: '12px', fontWeight: '600', letterSpacing: '0.05em' }}>VALOR INVENTARIO</div>
+                        <div style={{ fontSize: '24px', fontWeight: '800', color: '#1E293B', letterSpacing: '-0.02em', marginTop: '2px' }}>S/ {valorInventario.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                        <div style={{ fontSize: '12px', color: '#10B981', marginTop: '4px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <Activity size={12} /> Valuación Actual
+                        </div>
                     </div>
                 </div>
 
-                <div style={{ background: 'var(--admin-bg-panel)', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', gap: '15px' }}>
-                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(138, 43, 226, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1d4ed8" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <div 
+                    onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.1)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px -2px rgba(0, 0, 0, 0.05)'; }}
+                    style={{ background: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.3s ease' }}
+                >
+                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#F5F3FF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8B5CF6', flexShrink: 0 }}>
+                        <Users size={24} />
                     </div>
                     <div>
-                        <div style={{ color: 'var(--admin-text-muted)', fontSize: '12px', fontWeight: 'bold' }}>PROVEEDORES ACTIVOS</div>
-                        <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--admin-text-main)' }}>{totalProveedores}</div>
+                        <div style={{ color: '#64748B', fontSize: '12px', fontWeight: '600', letterSpacing: '0.05em' }}>PROVEEDORES</div>
+                        <div style={{ fontSize: '24px', fontWeight: '800', color: '#1E293B', letterSpacing: '-0.02em', marginTop: '2px' }}>{totalProveedores}</div>
+                        <div style={{ fontSize: '12px', color: '#8B5CF6', marginTop: '4px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <CheckCircle size={12} /> Activos
+                        </div>
                     </div>
                 </div>
 
-                <div style={{ background: 'var(--admin-bg-panel)', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', gap: '15px' }}>
-                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(59, 130, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                <div 
+                    onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.1)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px -2px rgba(0, 0, 0, 0.05)'; }}
+                    style={{ background: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.3s ease' }}
+                >
+                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#EF4444', flexShrink: 0 }}>
+                        <AlertTriangle size={24} />
                     </div>
                     <div>
-                        <div style={{ color: 'var(--admin-text-muted)', fontSize: '12px', fontWeight: 'bold' }}>PRODUCTOS BAJO STOCK</div>
-                        <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--admin-text-main)' }}>{stockBajo.length}</div>
+                        <div style={{ color: '#64748B', fontSize: '12px', fontWeight: '600', letterSpacing: '0.05em' }}>BAJO STOCK</div>
+                        <div style={{ fontSize: '24px', fontWeight: '800', color: '#1E293B', letterSpacing: '-0.02em', marginTop: '2px' }}>{stockBajo.length}</div>
+                        <div style={{ fontSize: '12px', color: '#EF4444', marginTop: '4px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <AlertTriangle size={12} /> Requieren Atención
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px', marginBottom: '30px' }}>
-                <div className="admin-card">
-                    <div className="admin-card-header">
-                        <h2 className="admin-card-title">Listado Rápido de Stock</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: '24px', marginBottom: '32px', alignItems: 'start' }}>
+                
+                {/* Listado de Stock */}
+                <div style={{ background: '#ffffff', borderRadius: '12px', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0', overflow: 'hidden' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px 24px 20px 24px' }}>
+                        <h2 style={{ fontSize: '16px', fontWeight: '700', color: '#1E293B', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <Package size={18} style={{ color: '#00B4FF' }} /> Resumen de Stock
+                        </h2>
+                        <Link href="/admin/productos" style={{ color: '#00B4FF', fontSize: '13px', textDecoration: 'none', fontWeight: '600', transition: 'color 0.2s ease' }} onMouseEnter={e => e.target.style.color = '#009BE0'} onMouseLeave={e => e.target.style.color = '#00B4FF'}>
+                            Ver Catálogo
+                        </Link>
                     </div>
-                    <div className="admin-card-body p-0">
-                        <div className="overflow-x-auto">
-                            <table className="admin-table">
-                                <thead>
-                                    <tr>
-                                        <th>Producto</th>
-                                        <th>Marca</th>
-                                        <th>Proveedor</th>
-                                        <th>Costo</th>
-                                        <th>Stock Total</th>
+
+                    <div style={{ width: '100%', overflowX: 'auto' }}>
+                        <table style={{ width: '100%', minWidth: '500px', borderCollapse: 'collapse', textAlign: 'left' }}>
+                            <thead>
+                                <tr style={{ background: '#F8FAFC', borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0' }}>
+                                    <th style={{ padding: '12px 24px', fontSize: '12px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Producto</th>
+                                    <th style={{ padding: '12px 24px', fontSize: '12px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Marca</th>
+                                    <th style={{ padding: '12px 24px', fontSize: '12px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Proveedor</th>
+                                    <th style={{ padding: '12px 24px', fontSize: '12px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Costo</th>
+                                    <th style={{ padding: '12px 24px', fontSize: '12px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'right' }}>Stock Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {productos.length > 0 ? productos.map(p => (
+                                    <tr 
+                                        key={p.id}
+                                        style={{ borderBottom: '1px solid #E2E8F0', transition: 'background 0.2s' }}
+                                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F8FAFC'; }}
+                                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+                                    >
+                                        <td style={{ padding: '16px 24px', color: '#1E293B', fontWeight: '600', fontSize: '14px', maxWidth: '250px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                            {p.nombre}
+                                        </td>
+                                        <td style={{ padding: '16px 24px', color: '#64748B', fontSize: '13px' }}>{p.marca || '-'}</td>
+                                        <td style={{ padding: '16px 24px', color: '#64748B', fontSize: '13px' }}>{p.proveedor || '-'}</td>
+                                        <td style={{ padding: '16px 24px', color: '#1E293B', fontWeight: '600', fontSize: '14px' }}>
+                                            S/ {p.costo ? Number(p.costo).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '0.00'}
+                                        </td>
+                                        <td style={{ padding: '16px 24px', textAlign: 'right' }}>
+                                            <span style={{ background: '#F1F5F9', color: '#1E293B', padding: '4px 10px', borderRadius: '9999px', fontSize: '12px', fontWeight: '700' }}>
+                                                {p.stock}
+                                            </span>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    {productos.map(p => (
-                                        <tr key={p.id}>
-                                            <td className="font-medium text-gray-800 line-clamp-1">{p.nombre}</td>
-                                            <td>{p.marca || '-'}</td>
-                                            <td>{p.proveedor || '-'}</td>
-                                            <td>S/ {p.costo ? Number(p.costo).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '0.00'}</td>
-                                            <td className="font-bold">{p.stock}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                )) : (
+                                    <tr>
+                                        <td colSpan="5" style={{ padding: '40px 0', textAlign: 'center', color: '#94A3B8', fontSize: '14px' }}>No hay productos registrados.</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                <div className="admin-card" style={{ borderTop: '4px solid #3b82f6' }}>
-                    <div className="admin-card-header">
-                        <h2 className="admin-card-title" style={{ color: '#3b82f6' }}>¡Alerta de Stock Bajo!</h2>
+                {/* Alertas Stock */}
+                <div style={{ background: '#ffffff', borderRadius: '12px', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', border: '1px solid #FCA5A5', overflow: 'hidden', position: 'relative' }}>
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: '#EF4444' }}></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px 24px 20px 24px' }}>
+                        <h2 style={{ fontSize: '16px', fontWeight: '700', color: '#EF4444', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <AlertTriangle size={18} /> ¡Alerta de Stock Bajo!
+                        </h2>
                     </div>
-                    <div className="admin-card-body p-0">
-                        <div className="overflow-x-auto">
-                            <table className="admin-table">
-                                <thead>
+
+                    <div style={{ width: '100%', overflowX: 'auto', maxHeight: '420px', overflowY: 'auto' }}>
+                        <table style={{ width: '100%', minWidth: '250px', borderCollapse: 'collapse', textAlign: 'left' }}>
+                            <thead>
+                                <tr style={{ background: '#FEF2F2', borderTop: '1px solid #FEE2E2', borderBottom: '1px solid #FEE2E2' }}>
+                                    <th style={{ padding: '12px 24px', fontSize: '12px', fontWeight: '600', color: '#B91C1C', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Producto</th>
+                                    <th style={{ padding: '12px 24px', fontSize: '12px', fontWeight: '600', color: '#B91C1C', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'right' }}>Stock</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {stockBajo.length === 0 ? (
                                     <tr>
-                                        <th>Producto</th>
-                                        <th>Proveedor</th>
-                                        <th>Stock</th>
+                                        <td colSpan="2" style={{ padding: '40px 0', textAlign: 'center', color: '#94A3B8' }}>
+                                            <CheckCircle size={32} style={{ color: '#10B981', margin: '0 auto 12px auto', opacity: 0.5 }} />
+                                            <div style={{ fontSize: '14px', fontWeight: '500' }}>Excelente. No hay stock bajo.</div>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    {stockBajo.length === 0 ? (
-                                        <tr><td colSpan="3" className="text-center p-4">Excelente. No hay stock bajo.</td></tr>
-                                    ) : stockBajo.map(p => (
-                                        <tr key={p.id}>
-                                            <td className="font-medium text-gray-800 line-clamp-1" title={p.nombre}>{p.nombre.substring(0, 20)}...</td>
-                                            <td className="text-sm">{p.proveedor_nombre || '-'}</td>
-                                            <td className="font-bold text-red-600">{p.stock_total}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                ) : stockBajo.map(p => (
+                                    <tr 
+                                        key={p.id}
+                                        style={{ borderBottom: '1px solid #FEE2E2', transition: 'background 0.2s' }}
+                                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#FEF2F2'; }}
+                                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+                                    >
+                                        <td style={{ padding: '16px 24px' }}>
+                                            <div style={{ color: '#1E293B', fontWeight: '600', fontSize: '14px', maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={p.nombre}>
+                                                {p.nombre}
+                                            </div>
+                                            <div style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>{p.proveedor_nombre || 'Sin Proveedor'}</div>
+                                        </td>
+                                        <td style={{ padding: '16px 24px', textAlign: 'right' }}>
+                                            <span style={{ background: '#FEE2E2', color: '#DC2626', padding: '4px 10px', borderRadius: '9999px', fontSize: '12px', fontWeight: '700' }}>
+                                                {p.stock_total} u.
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
+
             </div>
         </AdminLayout>
     );

@@ -5,6 +5,18 @@
 
 /* Root container — pantalla completa sin sidebar principal */
 .inbox-root {
+    --admin-primary: #00B4FF;
+    --admin-primary-dark: #009BE0;
+    --admin-primary-glow: rgba(0, 180, 255, 0.25);
+    --admin-text-main: #1E293B;
+    --admin-border: #E2E8F0;
+    --admin-border-light: rgba(226, 232, 240, 0.5);
+    --admin-surface: #ffffff;
+    --admin-bg: #F8FAFC;
+    --admin-radius-xs: 8px;
+    --admin-radius-sm: 12px;
+    --admin-radius-md: 16px;
+    
     display: flex;
     height: 100vh;
     width: 100vw;
@@ -30,13 +42,13 @@
 
 /* ─── COLUMNA IZQUIERDA (Lista de chats) ─── */
 .inbox-sidebar {
-    width: 360px;
-    min-width: 360px;
-    background: #ffffff; /* Fondo blanco limpio */
-    border-right: 1px solid var(--admin-border-light, rgba(0,0,0,0.05));
+    width: 380px;
+    min-width: 380px;
+    background: #ffffff;
+    border-right: 1px solid var(--admin-border);
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: visible;
     z-index: 10;
     box-shadow: 4px 0 24px rgba(0,0,0,0.02);
 }
@@ -49,6 +61,8 @@
     background: rgba(255,255,255,0.9);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--admin-border-light, rgba(0,0,0,0.05));
+    position: relative;
+    z-index: 50;
 }
 
 .inbox-sidebar__back-btn {
@@ -223,18 +237,23 @@
     align-items: center;
     gap: 14px;
     padding: 16px 20px;
+    margin: 8px 16px;
+    border-radius: 12px;
     cursor: pointer;
     transition: all 0.2s ease;
-    border-bottom: 1px solid rgba(0,0,0,0.03);
+    border: 1px solid transparent;
     position: relative;
     background: #ffffff;
 }
 .inbox-conversation-item:hover {
-    background: #f9fafb;
+    background: #F8FAFC;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
 }
 .inbox-conversation-item.active {
-    background: linear-gradient(to right, #eff6ff, #ffffff);
-    border-left: 4px solid var(--admin-primary);
+    background: #ffffff;
+    border-color: rgba(0, 180, 255, 0.3);
+    box-shadow: 0 4px 20px -2px rgba(0, 180, 255, 0.15);
 }
 .inbox-conversation-item.resolved {
     opacity: 0.6;
@@ -337,7 +356,7 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    background: #f3f4f6;
+    background: #F8FAFC;
     min-width: 0;
     position: relative;
     overflow: hidden;
@@ -514,30 +533,32 @@
 .inbox-message {
     max-width: 65%;
     padding: 14px 18px;
-    border-radius: 20px; /* Bordes más suaves */
+    border-radius: 16px;
     font-size: 14px;
     line-height: 1.5;
     word-wrap: break-word;
     position: relative;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.03); /* Sombra flotante elegante */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
     transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .inbox-message:hover {
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 .inbox-message.inbound {
     align-self: flex-start;
-    background: #FFFFFF;
+    background: #ffffff;
     color: var(--admin-text-main);
     border-bottom-left-radius: 4px;
-    border: 1px solid rgba(0,0,0,0.05); /* Borde más sutil */
+    border: 1px solid var(--admin-border);
 }
 .inbox-message.outbound {
     align-self: flex-end;
-    background: linear-gradient(135deg, var(--admin-primary), var(--admin-primary-dark)); /* Gradiente sutil */
-    color: #FFFFFF;
+    background: var(--admin-primary);
+    color: #ffffff;
     border-bottom-right-radius: 4px;
     border: none;
+    box-shadow: 0 4px 12px rgba(0, 180, 255, 0.2);
 }
 .inbox-message.outbound.failed {
     background: var(--admin-error, #dc2626);
@@ -678,23 +699,24 @@
 }
 .inbox-chat__input textarea {
     flex: 1;
-    padding: 10px 14px;
-    border-radius: var(--admin-radius-sm);
+    padding: 14px 18px;
+    border-radius: 12px;
     border: 1px solid var(--admin-border);
-    background: var(--admin-bg);
+    background: #ffffff;
     color: var(--admin-text-main);
     font-size: 14px;
     resize: none;
     outline: none;
     max-height: 120px;
-    min-height: 42px;
+    min-height: 52px;
     font-family: inherit;
     transition: all 0.2s ease;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
 }
 .inbox-chat__input textarea:focus {
     border-color: var(--admin-primary);
-    background: var(--admin-surface);
-    box-shadow: 0 0 0 3px var(--admin-primary-glow);
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(0, 180, 255, 0.1);
 }
 .inbox-chat__input textarea::placeholder {
     color: var(--admin-text-muted);
@@ -1181,4 +1203,75 @@
     .inbox-chat__mobile-back {
         display: flex;
     }
+}
+
+/* ==========================================
+   ENTERPRISE MODALS
+   ========================================== */
+.inbox-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeInOverlay 0.2s ease;
+}
+
+@keyframes fadeInOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.inbox-modal {
+    background: var(--admin-card-bg, #1e1f2e);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    width: 440px;
+    max-width: 95vw;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    animation: slideInModal 0.25s ease;
+}
+
+.inbox-modal--wide {
+    width: 720px;
+}
+
+@keyframes slideInModal {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.inbox-modal__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    font-weight: 700;
+    font-size: 15px;
+    color: #e0e0e0;
+}
+
+.inbox-modal__header span {
+    flex: 1;
+}
+
+.inbox-modal__header button {
+    background: none;
+    border: none;
+    color: #8b8fa3;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+
+.inbox-modal__header button:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #e0e0e0;
 }

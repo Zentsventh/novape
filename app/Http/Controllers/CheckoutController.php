@@ -20,6 +20,8 @@ class CheckoutController extends Controller
 
     public function checkout()
     {
+        Log::info('Checkout accessed', ['user_id' => auth()->id(), 'cart' => session('cart', [])]);
+    
         $cart = session('cart', []);
         $monto = array_reduce($cart, fn($carry, $item) => $carry + ($item['precio'] * $item['cantidad']), 0);
 
@@ -38,6 +40,7 @@ class CheckoutController extends Controller
 
     public function applyCoupon(Request $request): JsonResponse
     {
+        Log::info('Apply coupon called', ['user_id' => auth()->id(), 'codigo' => $request->input('codigo')]);
         $codigo = $request->input('codigo');
         if (!$codigo) {
             return response()->json(['error' => 'Código no proporcionado'], 400);

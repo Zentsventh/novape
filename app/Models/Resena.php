@@ -8,5 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Resena extends Model
 {
+    protected $guarded = [];
+
     //
 }

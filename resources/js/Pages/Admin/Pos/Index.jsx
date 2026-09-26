@@ -420,13 +420,16 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
             <Head title="Terminal POS" />
 
             {/* Header KPIs */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                <h1 style={{ fontSize: '24px', margin: 0, fontWeight: '700', color: 'var(--admin-text-main)' }}>
-                    Terminal POS — Caja Registradora
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <h1 style={{ fontSize: '24px', margin: 0, fontWeight: '700', color: '#1E293B', display: 'flex', alignItems: 'center', gap: '12px', letterSpacing: '-0.02em' }}>
+                    <div style={{ padding: '8px', backgroundColor: '#F0F9FF', borderRadius: '10px', color: '#00B4FF' }}>
+                        <ShoppingCart size={24} />
+                    </div>
+                    Terminal POS
                 </h1>
-                <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748B', fontSize: '13px', fontWeight: 'bold' }}>
-                        <User size={16} /> {auth?.user?.nombres || 'Cajero'}
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748B', fontSize: '13px', fontWeight: '600' }}>
+                        <User size={16} style={{ color: '#94A3B8' }} /> {auth?.user?.nombres || 'Cajero'}
                     </div>
                     {cajaAbierta && (
                         <button
@@ -435,56 +438,67 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                                 setMontoDeclarado(esperado.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
                                 setShowCierre(true);
                             }}
-                            style={{ padding: '8px 18px', background: 'var(--admin-text-main)', color: 'white', border: 'none', borderRadius: '9999px', fontWeight: 'bold', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <Lock size={16} /> Cerrar Turno
+                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#0F172A'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#1E293B'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+                            style={{ padding: '8px 16px', background: '#1E293B', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s ease' }}>
+                            <Lock size={14} /> Cerrar Turno
                         </button>
                     )}
-                    <Link href="/admin/pos/historial" style={{ padding: '8px 18px', background: 'transparent', border: '1px solid var(--admin-border)', color: 'var(--admin-text-main)', borderRadius: '9999px', textDecoration: 'none', fontWeight: 'bold', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <FileText size={16} /> Historial
+                    <Link 
+                        href="/admin/pos/historial" 
+                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F1F5F9'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                        style={{ padding: '8px 16px', background: '#ffffff', border: '1px solid #E2E8F0', color: '#475569', borderRadius: '8px', textDecoration: 'none', fontWeight: '600', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s ease', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
+                        <FileText size={14} style={{ color: '#94A3B8' }} /> Historial
                     </Link>
-                    <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '8px 16px', borderRadius: '8px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '11px', color: '#64748B', fontWeight: 'bold' }}>VENTAS HOY</div>
-                        <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#0F172A' }}>S/ {Number(ventasHoy).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                    <div style={{ background: '#ffffff', border: '1px solid #E2E8F0', padding: '8px 16px', borderRadius: '8px', textAlign: 'center', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
+                        <div style={{ fontSize: '11px', color: '#64748B', fontWeight: '600', letterSpacing: '0.05em' }}>VENTAS HOY</div>
+                        <div style={{ fontSize: '16px', fontWeight: '700', color: '#00B4FF' }}>S/ {Number(ventasHoy).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                     </div>
-                    <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '8px 16px', borderRadius: '8px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '11px', color: '#64748B', fontWeight: 'bold' }}>TICKETS HOY</div>
-                        <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#0F172A' }}>{ticketsHoy}</div>
+                    <div style={{ background: '#ffffff', border: '1px solid #E2E8F0', padding: '8px 16px', borderRadius: '8px', textAlign: 'center', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
+                        <div style={{ fontSize: '11px', color: '#64748B', fontWeight: '600', letterSpacing: '0.05em' }}>TICKETS</div>
+                        <div style={{ fontSize: '16px', fontWeight: '700', color: '#00B4FF' }}>{ticketsHoy}</div>
                     </div>
                 </div>
             </div>
 
-            <div className="pos-grid">
+            <div className="pos-grid" style={{ gap: '24px' }}>
                 {/* Cuadrícula de Productos */}
-                <div style={{ background: 'var(--admin-card-bg)', borderRadius: '12px', padding: '15px', boxShadow: 'var(--admin-shadow-sm)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                    <div style={{ position: 'relative', marginBottom: '10px' }}>
-                        <Search size={18} style={{ position: 'absolute', left: '12px', top: '10px', color: 'var(--admin-text-muted)' }} />
+                <div style={{ background: '#ffffff', borderRadius: '12px', padding: '24px', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                    <div style={{ position: 'relative', marginBottom: '16px' }}>
+                        <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
                         <input
                             ref={searchInputRef}
                             type="text"
-                            placeholder="🔍 Buscar por código de barras o nombre (F4)"
+                            placeholder="Buscar por código de barras o nombre (F4)"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            style={{ width: '100%', padding: '10px 10px 10px 38px', borderRadius: '8px', border: '1px solid var(--admin-border)', fontSize: '14px', outline: 'none' }}
+                            onFocus={(e) => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.15)'; e.target.style.backgroundColor = '#ffffff'; }}
+                            onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; e.target.style.backgroundColor = '#F8FAFC'; }}
+                            style={{ width: '100%', padding: '12px 16px 12px 44px', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '14px', outline: 'none', transition: 'all 0.2s ease', backgroundColor: '#F8FAFC', color: '#1E293B' }}
                         />
                     </div>
                     
                     {/* Filtro de Categorías */}
-                    <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '10px', marginBottom: '10px', scrollbarWidth: 'none' }}>
+                    <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '12px', marginBottom: '12px', scrollbarWidth: 'none' }}>
                         {categoriasDisponibles.map(cat => (
                             <button
                                 key={cat}
                                 onClick={() => setSelectedCategory(cat)}
+                                onMouseEnter={(e) => { if(selectedCategory !== cat) e.currentTarget.style.backgroundColor = '#F1F5F9'; }}
+                                onMouseLeave={(e) => { if(selectedCategory !== cat) e.currentTarget.style.backgroundColor = '#ffffff'; }}
                                 style={{
-                                    padding: '6px 14px',
-                                    borderRadius: '99px',
-                                    border: '1px solid',
-                                    borderColor: selectedCategory === cat ? '#0F172A' : '#E2E8F0',
-                                    background: selectedCategory === cat ? '#0F172A' : 'white',
-                                    color: selectedCategory === cat ? 'white' : '#475569',
-                                    fontSize: '12px',
-                                    fontWeight: 'bold',
+                                    padding: '8px 16px',
+                                    borderRadius: '8px',
+                                    border: `1px solid ${selectedCategory === cat ? '#00B4FF' : '#E2E8F0'}`,
+                                    background: selectedCategory === cat ? '#00B4FF' : '#ffffff',
+                                    color: selectedCategory === cat ? '#ffffff' : '#475569',
+                                    fontSize: '13px',
+                                    fontWeight: selectedCategory === cat ? '600' : '500',
                                     cursor: 'pointer',
-                                    whiteSpace: 'nowrap'
+                                    whiteSpace: 'nowrap',
+                                    transition: 'all 0.2s ease',
+                                    boxShadow: selectedCategory === cat ? '0 2px 4px rgba(0, 180, 255, 0.25)' : 'none'
                                 }}
                             >
                                 {cat}
@@ -492,67 +506,83 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                         ))}
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '15px', overflowY: 'auto', flex: 1, paddingRight: '5px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '16px', overflowY: 'auto', flex: 1, paddingRight: '6px' }}>
                         {productList.map((prod) => (
                             <div
                                 key={prod.id}
                                 onClick={() => prod.stock > 0 && agregarAlCarrito(prod)}
+                                onMouseEnter={(e) => { if(prod.stock > 0) { e.currentTarget.style.borderColor = '#00B4FF'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 16px -4px rgba(0, 180, 255, 0.15)'; } }}
+                                onMouseLeave={(e) => { if(prod.stock > 0) { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; } }}
                                 style={{
-                                    border: '1px solid var(--admin-border)',
-                                    borderRadius: '8px',
-                                    padding: '10px',
+                                    border: '1px solid #E2E8F0',
+                                    borderRadius: '10px',
+                                    padding: '16px 12px',
                                     cursor: prod.stock > 0 ? 'pointer' : 'not-allowed',
-                                    opacity: prod.stock > 0 ? 1 : 0.5,
+                                    opacity: prod.stock > 0 ? 1 : 0.6,
                                     textAlign: 'center',
-                                    background: 'var(--admin-surface)',
-                                    transition: 'transform 0.1s',
+                                    background: '#ffffff',
+                                    transition: 'all 0.2s ease',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'space-between'
                                 }}
                             >
-                                <div style={{ fontSize: '24px', marginBottom: '5px', color: 'var(--admin-text-main)' }}>
-                                    <Package size={24} style={{ margin: '0 auto' }} />
+                                <div>
+                                    <div style={{ color: '#00B4FF', marginBottom: '12px' }}>
+                                        <Package size={32} style={{ margin: '0 auto' }} strokeWidth={1.5} />
+                                    </div>
+                                    <div style={{ fontSize: '13px', fontWeight: '600', color: '#1E293B', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', height: '38px', lineHeight: '1.4' }}>
+                                        {prod.nombre}
+                                    </div>
+                                    <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '6px' }}>{prod.sku}</div>
                                 </div>
-                                <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--admin-text-main)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', height: '34px' }}>
-                                    {prod.nombre}
+                                <div>
+                                    <div style={{ fontWeight: '700', color: '#1E293B', fontSize: '16px', marginTop: '12px' }}>S/ {Number(prod.precio).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                                    <div style={{ fontSize: '11px', fontWeight: '600', color: prod.stock <= 5 ? '#EF4444' : '#10B981', marginTop: '6px', padding: '2px 6px', backgroundColor: prod.stock <= 5 ? '#FEF2F2' : '#ECFDF5', borderRadius: '4px', display: 'inline-block' }}>Stock: {prod.stock}</div>
                                 </div>
-                                <div style={{ fontSize: '10px', color: 'var(--admin-text-muted)' }}>{prod.sku}</div>
-                                <div style={{ fontWeight: 'bold', color: '#0F172A', fontSize: '14px', marginTop: '4px' }}>S/ {Number(prod.precio).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
-                                <div style={{ fontSize: '10px', color: prod.stock <= 5 ? '#0F172A' : 'var(--admin-text-muted)' }}>Stock: {prod.stock}</div>
                             </div>
                         ))}
                     </div>
                 </div>
 
                 {/* Ticket / Carrito */}
-                <div style={{ background: 'var(--admin-card-bg)', borderRadius: '12px', padding: '20px', boxShadow: 'var(--admin-shadow-sm)', display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ textAlign: 'center', borderBottom: '2px dashed var(--admin-border)', paddingBottom: '10px', marginBottom: '15px' }}>
-                        <h2 style={{ fontSize: '16px', fontWeight: 'bold', margin: 0, color: 'var(--admin-text-main)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                            <Receipt size={18} /> TICKET DE VENTA
+                <div style={{ background: '#ffffff', borderRadius: '12px', padding: '24px', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ textAlign: 'center', borderBottom: '1px solid #E2E8F0', paddingBottom: '16px', marginBottom: '16px' }}>
+                        <h2 style={{ fontSize: '15px', fontWeight: '700', margin: 0, color: '#1E293B', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', letterSpacing: '0.05em' }}>
+                            <Receipt size={18} style={{ color: '#00B4FF' }} /> TICKET DE VENTA
                         </h2>
                     </div>
 
-                    <div style={{ flex: 1, overflowY: 'auto', marginBottom: '10px' }}>
+                    <div style={{ flex: 1, overflowY: 'auto', marginBottom: '16px' }}>
                         {carrito.length === 0 ? (
-                            <div style={{ textAlign: 'center', color: 'var(--admin-text-muted)', marginTop: '50px' }}>
-                                <ShoppingCart size={40} style={{ margin: '0 auto', opacity: 0.2 }} />
-                                <p style={{ marginTop: '10px' }}>Selecciona productos de la grilla</p>
+                            <div style={{ textAlign: 'center', color: '#94A3B8', marginTop: '60px' }}>
+                                <div style={{ background: '#F8FAFC', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', marginBottom: '16px' }}>
+                                    <ShoppingCart size={32} style={{ color: '#CBD5E1' }} />
+                                </div>
+                                <p style={{ fontSize: '14px', fontWeight: '500' }}>Selecciona productos de la grilla</p>
                             </div>
                         ) : (
                             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                                 {carrito.map((item, index) => (
-                                    <li key={index} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--admin-border-light)', gap: '8px' }}>
+                                    <li key={index} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #F1F5F9', gap: '12px' }}>
                                         <div style={{ flex: 1, minWidth: 0 }}>
-                                            <div style={{ fontSize: '12px', fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.producto_nombre}</div>
-                                            <div style={{ fontSize: '11px', color: 'var(--admin-text-secondary)' }}>S/ {item.precio_unitario.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} c/u</div>
+                                            <div style={{ fontSize: '13px', fontWeight: '600', color: '#1E293B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.producto_nombre}</div>
+                                            <div style={{ fontSize: '12px', color: '#64748B', marginTop: '2px' }}>S/ {item.precio_unitario.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} c/u</div>
                                         </div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            <button onClick={() => cambiarCantidad(index, -1)} style={{ width: '24px', height: '24px', borderRadius: '4px', border: '1px solid var(--admin-border)', background: 'transparent', cursor: 'pointer', fontWeight: 'bold' }}>−</button>
-                                            <span style={{ fontWeight: 'bold', minWidth: '20px', textAlign: 'center' }}>{item.cantidad}</span>
-                                            <button onClick={() => cambiarCantidad(index, 1)} style={{ width: '24px', height: '24px', borderRadius: '4px', border: '1px solid var(--admin-border)', background: 'transparent', cursor: 'pointer', fontWeight: 'bold' }}>+</button>
+                                        <div style={{ display: 'flex', alignItems: 'center', background: '#F8FAFC', borderRadius: '6px', border: '1px solid #E2E8F0' }}>
+                                            <button onClick={() => cambiarCantidad(index, -1)} style={{ width: '28px', height: '28px', border: 'none', background: 'transparent', cursor: 'pointer', color: '#475569', transition: 'color 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+                                            <span style={{ fontWeight: '600', minWidth: '24px', textAlign: 'center', fontSize: '13px', color: '#1E293B' }}>{item.cantidad}</span>
+                                            <button onClick={() => cambiarCantidad(index, 1)} style={{ width: '28px', height: '28px', border: 'none', background: 'transparent', cursor: 'pointer', color: '#475569', transition: 'color 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
                                         </div>
-                                        <div style={{ fontWeight: 'bold', minWidth: '65px', textAlign: 'right', fontSize: '13px' }}>
+                                        <div style={{ fontWeight: '700', minWidth: '70px', textAlign: 'right', fontSize: '14px', color: '#1E293B' }}>
                                             S/ {(item.precio_unitario * item.cantidad).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                                         </div>
-                                        <button onClick={() => eliminarItem(index)} style={{ color: 'var(--admin-error)', background: 'transparent', border: 'none', cursor: 'pointer', padding: '0 5px' }}>
+                                        <button 
+                                            onClick={() => eliminarItem(index)} 
+                                            onMouseEnter={(e) => e.currentTarget.style.color = '#EF4444'}
+                                            onMouseLeave={(e) => e.currentTarget.style.color = '#94A3B8'}
+                                            style={{ color: '#94A3B8', background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px', transition: 'color 0.2s ease', display: 'flex' }}
+                                        >
                                             <Trash2 size={16} />
                                         </button>
                                     </li>
@@ -562,13 +592,13 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                     </div>
 
                     {/* Totals & Discounts */}
-                    <div style={{ borderTop: '2px dashed var(--admin-border)', paddingTop: '12px' }}>
+                    <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: '16px' }}>
                         {/* Control de Descuento */}
-                        <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', background: 'var(--admin-surface)', padding: '8px', borderRadius: '8px', border: '1px solid var(--admin-border-light)' }}>
+                        <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
                             <select
                                 value={descuentoTipo}
                                 onChange={e => setDescuentoTipo(e.target.value)}
-                                style={{ padding: '6px', borderRadius: '6px', border: '1px solid var(--admin-border)', fontSize: '12px', outline: 'none' }}
+                                style={{ flex: 1, padding: '10px 12px', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '13px', outline: 'none', backgroundColor: '#F8FAFC', color: '#1E293B', fontWeight: '500' }}
                             >
                                 <option value="fijo">Descuento (S/)</option>
                                 <option value="porcentaje">Descuento (%)</option>
@@ -580,30 +610,32 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                                 onChange={e => setDescuentoValor(e.target.value)}
                                 min="0"
                                 step={descuentoTipo === 'porcentaje' ? "1" : "0.50"}
-                                style={{ flex: 1, padding: '6px', borderRadius: '6px', border: '1px solid var(--admin-border)', fontSize: '12px', outline: 'none' }}
+                                onFocus={(e) => { e.target.style.borderColor = '#00B4FF'; e.target.style.backgroundColor = '#ffffff'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.1)'; }}
+                                onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.backgroundColor = '#F8FAFC'; e.target.style.boxShadow = 'none'; }}
+                                style={{ flex: 1, padding: '10px 12px', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '13px', outline: 'none', backgroundColor: '#F8FAFC', transition: 'all 0.2s ease', color: '#1E293B' }}
                             />
                         </div>
 
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--admin-text-secondary)', marginBottom: '4px' }}>
-                            <span>Subtotal Bruto:</span><span>S/ {subtotalBruto.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#64748B', marginBottom: '6px' }}>
+                            <span>Subtotal Bruto:</span><span style={{ fontWeight: '500', color: '#1E293B' }}>S/ {subtotalBruto.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                         </div>
                         {montoDescuento > 0 && (
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#3b82f6', marginBottom: '4px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#00B4FF', marginBottom: '6px', fontWeight: '500' }}>
                                 <span>Descuento:</span><span>- S/ {montoDescuento.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                             </div>
                         )}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--admin-text-secondary)', marginBottom: '4px' }}>
-                            <span>Subtotal Neto:</span><span>S/ {subtotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#64748B', marginBottom: '6px' }}>
+                            <span>Subtotal Neto:</span><span style={{ fontWeight: '500', color: '#1E293B' }}>S/ {subtotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: 'var(--admin-text-secondary)', marginBottom: '8px' }}>
-                            <span>IGV ({igv_porcentaje}%):</span><span>S/ {igv.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#64748B', marginBottom: '12px' }}>
+                            <span>IGV ({igv_porcentaje}%):</span><span style={{ fontWeight: '500', color: '#1E293B' }}>S/ {igv.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '22px', fontWeight: 'bold', color: '#0F172A', marginBottom: '15px' }}>
-                            <span>TOTAL:</span><span>S/ {total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '24px', fontWeight: '800', color: '#1E293B', marginBottom: '20px', padding: '12px 16px', background: '#F0F9FF', borderRadius: '8px' }}>
+                            <span>TOTAL:</span><span style={{ color: '#00B4FF' }}>S/ {total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                         </div>
 
                         {/* Tipo de Comprobante */}
-                        <div style={{ display: 'flex', gap: '5px', marginBottom: '12px', background: '#F3F4F6', padding: '4px', borderRadius: '8px' }}>
+                        <div style={{ display: 'flex', gap: '6px', marginBottom: '16px', background: '#F8FAFC', padding: '6px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
                             {['ticket', 'boleta', 'factura'].map(t => (
                                 <button
                                     key={t}
@@ -613,11 +645,11 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                                         setClienteNombre('');
                                     }}
                                     style={{
-                                        flex: 1, padding: '8px 0', border: 'none', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', textTransform: 'capitalize',
-                                        background: tipoComprobante === t ? 'white' : 'transparent',
-                                        color: tipoComprobante === t ? '#374151' : '#6B7280',
-                                        boxShadow: tipoComprobante === t ? '0 1px 3px rgba(0,0,0,0.1)' : 'none',
-                                        transition: 'all 0.2s'
+                                        flex: 1, padding: '8px 0', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', textTransform: 'capitalize',
+                                        background: tipoComprobante === t ? '#ffffff' : 'transparent',
+                                        color: tipoComprobante === t ? '#00B4FF' : '#64748B',
+                                        boxShadow: tipoComprobante === t ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
+                                        transition: 'all 0.2s ease'
                                     }}
                                 >
                                     {t === 'ticket' ? 'V. Simple' : t}
@@ -627,29 +659,33 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
 
                         {/* Datos del Cliente si no es Ticket */}
                         {tipoComprobante !== 'ticket' && (
-                            <div style={{ marginBottom: '12px', background: '#F8FAFC', padding: '10px', borderRadius: '8px', border: '1px dashed #CBD5E1' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: 'var(--admin-text-main)' }}>
-                                    <User size={16} /> <strong>Datos del Cliente</strong> 
+                            <div style={{ marginBottom: '16px', padding: '12px', borderRadius: '8px', border: '1px solid #E2E8F0', backgroundColor: '#ffffff' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', color: '#1E293B' }}>
+                                    <User size={16} style={{ color: '#00B4FF' }} /> <strong style={{ fontSize: '13px' }}>Datos del Cliente</strong> 
                                     {tipoComprobante === 'factura' || (tipoComprobante === 'boleta' && total >= 700) ? (
-                                        <span style={{ fontSize: '11px', color: '#DC2626', fontWeight: 'bold' }}>(Obligatorio SUNAT)</span>
+                                        <span style={{ fontSize: '11px', color: '#EF4444', fontWeight: '600' }}>(Obligatorio)</span>
                                     ) : (
-                                        <span style={{ fontSize: '11px', color: '#64748B' }}>(Opcional)</span>
+                                        <span style={{ fontSize: '11px', color: '#94A3B8' }}>(Opcional)</span>
                                     )}
                                 </div>
-                                <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
+                                <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
                                     <input
                                         type="text"
                                         placeholder={tipoComprobante === 'factura' ? 'RUC' : 'DNI'}
                                         value={clienteDoc}
                                         onChange={e => setClienteDoc(e.target.value)}
-                                        style={{ flex: 1, padding: '8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', outline: 'none' }}
+                                        onFocus={(e) => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.1)'; }}
+                                        onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; }}
+                                        style={{ flex: 1, padding: '10px 12px', borderRadius: '6px', border: '1px solid #E2E8F0', fontSize: '13px', outline: 'none', transition: 'all 0.2s ease', color: '#1E293B' }}
                                     />
                                     <button
                                         onClick={buscarCliente}
                                         disabled={isSearchingCliente || !clienteDoc}
-                                        style={{ padding: '0 12px', background: '#3B82F6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
+                                        onMouseEnter={(e) => { if(!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = '#009BE0'; }}
+                                        onMouseLeave={(e) => { if(!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = '#00B4FF'; }}
+                                        style={{ padding: '0 16px', background: '#00B4FF', color: 'white', border: 'none', borderRadius: '6px', cursor: (isSearchingCliente || !clienteDoc) ? 'not-allowed' : 'pointer', fontSize: '13px', fontWeight: '600', transition: 'all 0.2s ease', opacity: (isSearchingCliente || !clienteDoc) ? 0.6 : 1 }}
                                     >
-                                        {isSearchingCliente ? '...' : '🔍'}
+                                        {isSearchingCliente ? '...' : 'Buscar'}
                                     </button>
                                 </div>
                                 <input
@@ -657,7 +693,9 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                                     placeholder={tipoComprobante === 'factura' ? 'Razón Social' : 'Nombre Completo'}
                                     value={clienteNombre}
                                     onChange={e => setClienteNombre(e.target.value)}
-                                    style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', outline: 'none', marginBottom: '8px' }}
+                                    onFocus={(e) => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.1)'; }}
+                                    onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; }}
+                                    style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #E2E8F0', fontSize: '13px', outline: 'none', marginBottom: '8px', transition: 'all 0.2s ease', boxSizing: 'border-box', color: '#1E293B' }}
                                 />
                                 {tipoComprobante === 'factura' && (
                                     <input
@@ -665,43 +703,56 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                                         placeholder="Dirección Fiscal"
                                         value={clienteDireccion}
                                         onChange={e => setClienteDireccion(e.target.value)}
-                                        style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '12px', outline: 'none' }}
+                                        onFocus={(e) => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.1)'; }}
+                                        onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; }}
+                                        style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #E2E8F0', fontSize: '13px', outline: 'none', transition: 'all 0.2s ease', boxSizing: 'border-box', color: '#1E293B' }}
                                     />
                                 )}
                             </div>
                         )}
 
                         {/* Método de pago */}
-                        <div style={{ marginBottom: '12px' }}>
-                            <select value={metodoPagoId} onChange={e => setMetodoPagoId(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid var(--admin-border)', fontSize: '13px', outline: 'none' }}>
+                        <div style={{ marginBottom: '16px' }}>
+                            <select 
+                                value={metodoPagoId} 
+                                onChange={e => setMetodoPagoId(e.target.value)} 
+                                onFocus={(e) => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.1)'; }}
+                                onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; }}
+                                style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '13px', outline: 'none', backgroundColor: '#F8FAFC', transition: 'all 0.2s ease', color: '#1E293B', fontWeight: '500', cursor: 'pointer' }}>
                                 {metodosPago?.map(m => (
                                     <option key={m.id} value={m.id}>{m.nombre}</option>
                                 ))}
                             </select>
                         </div>
-                        <div style={{ display: 'flex', gap: '8px' }}>
+                        <div style={{ display: 'flex', gap: '12px' }}>
                             <button
                                 onClick={pausarVenta}
                                 disabled={carrito.length === 0 || !cajaAbierta}
-                                style={{ flex: 1, padding: '10px', background: '#475569', color: 'white', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', boxShadow: '0 4px 6px rgba(71, 85, 105, 0.2)' }}
+                                onMouseEnter={(e) => { if(!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = '#E2E8F0'; }}
+                                onMouseLeave={(e) => { if(!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = '#F1F5F9'; }}
+                                style={{ flex: 1, padding: '12px', background: '#F1F5F9', color: '#475569', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: (carrito.length === 0 || !cajaAbierta) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', transition: 'all 0.2s ease', opacity: (carrito.length === 0 || !cajaAbierta) ? 0.6 : 1 }}
                             >
                                 Pausar (F8)
                             </button>
                             <button
                                 onClick={iniciarCobro}
                                 disabled={carrito.length === 0 || !cajaAbierta}
-                                style={{ flex: 1, padding: '10px', background: '#0F172A', color: 'white', fontSize: '13px', fontWeight: 'bold', borderRadius: '8px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                                onMouseEnter={(e) => { if(!e.currentTarget.disabled) { e.currentTarget.style.backgroundColor = '#009BE0'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 180, 255, 0.3)'; } }}
+                                onMouseLeave={(e) => { if(!e.currentTarget.disabled) { e.currentTarget.style.backgroundColor = '#00B4FF'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 180, 255, 0.2)'; } }}
+                                style={{ flex: 2, padding: '12px', background: '#00B4FF', color: 'white', fontSize: '14px', fontWeight: '700', borderRadius: '8px', border: 'none', cursor: (carrito.length === 0 || !cajaAbierta) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s ease', opacity: (carrito.length === 0 || !cajaAbierta) ? 0.6 : 1, boxShadow: '0 2px 4px rgba(0, 180, 255, 0.2)' }}
                             >
-                                <ShoppingCart size={16} />
-                                COBRAR S/ {total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} (F2)
+                                <ShoppingCart size={18} />
+                                COBRAR (F2)
                             </button>
                         </div>
                         {ventasPausadas.length > 0 && (
-                            <div style={{ marginTop: '15px' }}>
+                            <div style={{ marginTop: '16px' }}>
                                 <button 
                                     onClick={() => setShowPausadas(true)}
-                                    style={{ width: '100%', padding: '10px', background: '#374151', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
-                                    Recuperar Ventas Pausadas ({ventasPausadas.length})
+                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F8FAFC'}
+                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
+                                    style={{ width: '100%', padding: '10px', background: '#ffffff', color: '#00B4FF', border: '1px dashed #00B4FF', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s ease', fontSize: '13px' }}>
+                                    Recuperar Pausadas ({ventasPausadas.length})
                                 </button>
                             </div>
                         )}

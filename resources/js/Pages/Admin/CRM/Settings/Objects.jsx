@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Head, useForm, router } from '@inertiajs/react';
 import TwentyCrmLayout from '../../../../Layouts/TwentyCrmLayout';
-import { Plus, Database, Type, Hash, List, ToggleLeft, Calendar as CalendarIcon, Trash2, X } from 'lucide-react';
+import { Plus, Database, Type, Hash, List, ToggleLeft, Calendar as CalendarIcon, Trash2, X, ChevronRight } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 export default function ObjectsSettings({ fields = [], flash, errors }) {
@@ -100,96 +100,163 @@ export default function ObjectsSettings({ fields = [], flash, errors }) {
         <TwentyCrmLayout title="Configuración de Objetos">
             <Head title="Modelo de Datos - Configuración CRM" />
 
-            <div style={{ display: 'flex', height: '100%' }}>
+            <div style={{ display: 'flex', height: '100%', backgroundColor: '#F8FAFC', fontFamily: "'Inter', sans-serif" }}>
                 {/* Internal Sidebar for Settings */}
-                <div style={{ width: '240px', borderRight: '1px solid var(--twenty-border)', padding: '24px 16px' }}>
-                    <h3 style={{ fontSize: '12px', fontWeight: 600, color: 'var(--twenty-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '16px', paddingLeft: '8px' }}>
+                <div style={{ 
+                    width: '260px', 
+                    backgroundColor: '#ffffff',
+                    borderRight: '1px solid #E2E8F0', 
+                    padding: '32px 20px',
+                    boxShadow: '4px 0 24px rgba(0,0,0,0.02)',
+                    zIndex: 10
+                }}>
+                    <h3 style={{ fontSize: '12px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '20px', paddingLeft: '12px' }}>
                         Objetos Estandar
                     </h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                         <button 
                             onClick={() => setSelectedObject('deal')}
                             style={{ 
-                                display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', width: '100%',
-                                border: 'none', background: selectedObject === 'deal' ? 'var(--twenty-bg-hover)' : 'transparent',
-                                borderRadius: 'var(--twenty-radius-md)', cursor: 'pointer',
-                                color: selectedObject === 'deal' ? 'var(--twenty-text-main)' : 'var(--twenty-text-secondary)',
-                                fontWeight: selectedObject === 'deal' ? 500 : 400,
-                                textAlign: 'left'
+                                display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', width: '100%',
+                                border: 'none', background: selectedObject === 'deal' ? '#00B4FF' : 'transparent',
+                                borderRadius: '12px', cursor: 'pointer',
+                                color: selectedObject === 'deal' ? '#ffffff' : '#64748B',
+                                fontWeight: selectedObject === 'deal' ? 600 : 500,
+                                transition: 'all 0.2s ease',
+                                boxShadow: selectedObject === 'deal' ? '0 4px 12px rgba(0, 180, 255, 0.3)' : 'none'
                             }}
+                            onMouseOver={(e) => { if(selectedObject !== 'deal') { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#1E293B'; } }}
+                            onMouseOut={(e) => { if(selectedObject !== 'deal') { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748B'; } }}
                         >
-                            <Database size={16} />
-                            Oportunidades
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <Database size={18} />
+                                <span style={{ fontSize: '14px' }}>Oportunidades</span>
+                            </div>
+                            {selectedObject === 'deal' && <ChevronRight size={16} opacity={0.8} />}
                         </button>
                         <button 
                             onClick={() => setSelectedObject('user')}
                             style={{ 
-                                display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', width: '100%',
-                                border: 'none', background: selectedObject === 'user' ? 'var(--twenty-bg-hover)' : 'transparent',
-                                borderRadius: 'var(--twenty-radius-md)', cursor: 'pointer',
-                                color: selectedObject === 'user' ? 'var(--twenty-text-main)' : 'var(--twenty-text-secondary)',
-                                fontWeight: selectedObject === 'user' ? 500 : 400,
-                                textAlign: 'left'
+                                display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', width: '100%',
+                                border: 'none', background: selectedObject === 'user' ? '#00B4FF' : 'transparent',
+                                borderRadius: '12px', cursor: 'pointer',
+                                color: selectedObject === 'user' ? '#ffffff' : '#64748B',
+                                fontWeight: selectedObject === 'user' ? 600 : 500,
+                                transition: 'all 0.2s ease',
+                                boxShadow: selectedObject === 'user' ? '0 4px 12px rgba(0, 180, 255, 0.3)' : 'none'
                             }}
+                            onMouseOver={(e) => { if(selectedObject !== 'user') { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#1E293B'; } }}
+                            onMouseOut={(e) => { if(selectedObject !== 'user') { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748B'; } }}
                         >
-                            <Database size={16} />
-                            Personas (Clientes)
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <Database size={18} />
+                                <span style={{ fontSize: '14px' }}>Personas (Clientes)</span>
+                            </div>
+                            {selectedObject === 'user' && <ChevronRight size={16} opacity={0.8} />}
                         </button>
                     </div>
                 </div>
 
                 {/* Main Content Area */}
-                <div style={{ flex: 1, padding: '32px 48px', overflowY: 'auto' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
+                <div style={{ flex: 1, padding: '40px 56px', overflowY: 'auto' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '40px' }}>
                         <div>
-                            <h2 style={{ fontSize: '24px', fontWeight: 600, color: 'var(--twenty-text-main)', margin: '0 0 8px 0' }}>
+                            <h2 style={{ fontSize: '28px', fontWeight: 800, color: '#1E293B', margin: '0 0 8px 0', letterSpacing: '-0.5px' }}>
                                 {selectedObject === 'deal' ? 'Campos de Oportunidad' : 'Campos de Persona'}
                             </h2>
-                            <p style={{ margin: 0, color: 'var(--twenty-text-muted)', fontSize: '14px' }}>
+                            <p style={{ margin: 0, color: '#64748B', fontSize: '15px' }}>
                                 Personaliza la estructura de datos para este objeto añadiendo campos personalizados.
                             </p>
                         </div>
-                        <button className="twenty-btn twenty-btn-primary" onClick={openModal}>
-                            <Plus size={16} />
+                        <button 
+                            onClick={openModal}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '8px',
+                                background: '#00B4FF', color: '#ffffff',
+                                border: 'none', borderRadius: '12px', padding: '12px 20px',
+                                fontSize: '14px', fontWeight: 600, cursor: 'pointer',
+                                boxShadow: '0 4px 14px rgba(0, 180, 255, 0.4)',
+                                transition: 'all 0.2s ease',
+                            }}
+                            onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 180, 255, 0.5)'; }}
+                            onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 180, 255, 0.4)'; }}
+                        >
+                            <Plus size={18} />
                             Crear Campo
                         </button>
                     </div>
 
-                    <div style={{ backgroundColor: 'var(--twenty-bg-surface)', border: '1px solid var(--twenty-border)', borderRadius: 'var(--twenty-radius-lg)', overflow: 'hidden' }}>
+                    <div style={{ 
+                        backgroundColor: '#ffffff', 
+                        border: '1px solid #E2E8F0', 
+                        borderRadius: '16px', 
+                        overflow: 'hidden',
+                        boxShadow: '0 4px 20px -2px rgba(0,0,0,0.05)'
+                    }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                             <thead>
-                                <tr style={{ borderBottom: '1px solid var(--twenty-border)' }}>
-                                    <th style={{ padding: '12px 24px', fontSize: '12px', fontWeight: 600, color: 'var(--twenty-text-muted)' }}>Etiqueta (Label)</th>
-                                    <th style={{ padding: '12px 24px', fontSize: '12px', fontWeight: 600, color: 'var(--twenty-text-muted)' }}>Nombre Interno</th>
-                                    <th style={{ padding: '12px 24px', fontSize: '12px', fontWeight: 600, color: 'var(--twenty-text-muted)' }}>Tipo</th>
-                                    <th style={{ padding: '12px 24px', fontSize: '12px', fontWeight: 600, color: 'var(--twenty-text-muted)', textAlign: 'right' }}>Acciones</th>
+                                <tr style={{ backgroundColor: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
+                                    <th style={{ padding: '16px 24px', fontSize: '12px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Etiqueta (Label)</th>
+                                    <th style={{ padding: '16px 24px', fontSize: '12px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Nombre Interno</th>
+                                    <th style={{ padding: '16px 24px', fontSize: '12px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tipo</th>
+                                    <th style={{ padding: '16px 24px', fontSize: '12px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'right' }}>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {filteredFields.length > 0 ? filteredFields.map(field => (
-                                    <tr key={field.id} style={{ borderBottom: '1px solid var(--twenty-border)' }}>
-                                        <td style={{ padding: '16px 24px', fontSize: '14px', fontWeight: 500, color: 'var(--twenty-text-main)' }}>
+                                    <tr 
+                                        key={field.id} 
+                                        style={{ borderBottom: '1px solid #F1F5F9', transition: 'all 0.2s ease', backgroundColor: '#ffffff' }}
+                                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#F8FAFC'}
+                                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
+                                    >
+                                        <td style={{ padding: '20px 24px', fontSize: '14px', fontWeight: 600, color: '#1E293B' }}>
                                             {field.label}
                                         </td>
-                                        <td style={{ padding: '16px 24px', fontSize: '13px', color: 'var(--twenty-text-muted)', fontFamily: 'monospace' }}>
+                                        <td style={{ padding: '20px 24px', fontSize: '13px', color: '#64748B', fontFamily: 'monospace', background: '#F1F5F9', borderRadius: '4px', padding: '4px 8px', margin: '16px 24px', display: 'inline-block', fontWeight: 500 }}>
                                             {field.name}
                                         </td>
-                                        <td style={{ padding: '16px 24px', fontSize: '13px', color: 'var(--twenty-text-secondary)' }}>
+                                        <td style={{ padding: '20px 24px', fontSize: '14px', color: '#475569', fontWeight: 500 }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                {typeIcons[field.type]}
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '8px', backgroundColor: '#E0F2FE', color: '#00B4FF' }}>
+                                                    {typeIcons[field.type]}
+                                                </div>
                                                 {typeLabels[field.type]}
                                             </div>
                                         </td>
-                                        <td style={{ padding: '16px 24px', textAlign: 'right' }}>
-                                            <button className="twenty-btn-icon" style={{ color: '#ef4444' }} onClick={() => handleDelete(field.id)}>
-                                                <Trash2 size={16} />
+                                        <td style={{ padding: '20px 24px', textAlign: 'right' }}>
+                                            <button 
+                                                onClick={() => handleDelete(field.id)}
+                                                style={{ 
+                                                    background: 'transparent', border: 'none', color: '#EF4444', cursor: 'pointer',
+                                                    padding: '8px', borderRadius: '8px', transition: 'all 0.2s ease',
+                                                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center'
+                                                }}
+                                                onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#FEE2E2'; e.currentTarget.style.transform = 'scale(1.1)'; }}
+                                                onMouseOut={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.transform = 'scale(1)'; }}
+                                                title="Eliminar Campo"
+                                            >
+                                                <Trash2 size={18} />
                                             </button>
                                         </td>
                                     </tr>
                                 )) : (
                                     <tr>
-                                        <td colSpan="4" style={{ padding: '48px', textAlign: 'center', color: 'var(--twenty-text-muted)', fontSize: '14px' }}>
-                                            No hay campos personalizados para este objeto.
+                                        <td colSpan="4" style={{ padding: '64px', textAlign: 'center' }}>
+                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                                                <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94A3B8' }}>
+                                                    <Database size={32} />
+                                                </div>
+                                                <p style={{ margin: 0, color: '#64748B', fontSize: '15px', fontWeight: 500 }}>No hay campos personalizados para este objeto.</p>
+                                                <button 
+                                                    onClick={openModal}
+                                                    style={{ background: 'transparent', border: '1px solid #00B4FF', color: '#00B4FF', padding: '8px 16px', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', marginTop: '8px' }}
+                                                    onMouseOver={(e) => { e.currentTarget.style.background = '#00B4FF'; e.currentTarget.style.color = '#fff'; }}
+                                                    onMouseOut={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#00B4FF'; }}
+                                                >
+                                                    Agregar mi primer campo
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 )}
@@ -201,53 +268,85 @@ export default function ObjectsSettings({ fields = [], flash, errors }) {
 
             {/* Modal de Creación de Campo */}
             {isModalOpen && (
-                <>
-                    <div className="twenty-drawer-overlay" onClick={() => setIsModalOpen(false)} style={{ zIndex: 100 }} />
+                <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div 
+                        style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(4px)' }} 
+                        onClick={() => setIsModalOpen(false)} 
+                    />
+                    
                     <div style={{
-                        position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-                        backgroundColor: 'var(--twenty-bg-surface)', borderRadius: 'var(--twenty-radius-lg)',
-                        width: '480px', maxWidth: '90%', zIndex: 101, boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-                        display: 'flex', flexDirection: 'column', maxHeight: '90vh'
+                        position: 'relative',
+                        backgroundColor: '#ffffff', borderRadius: '24px',
+                        width: '500px', maxWidth: '90%', zIndex: 101, 
+                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                        display: 'flex', flexDirection: 'column', maxHeight: '90vh',
+                        animation: 'fadeInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
                     }}>
-                        <div style={{ padding: '24px', borderBottom: '1px solid var(--twenty-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 600, color: 'var(--twenty-text-main)' }}>
+                        <div style={{ padding: '24px 32px', borderBottom: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: '#1E293B', letterSpacing: '-0.3px' }}>
                                 {step === 1 ? 'Seleccionar Tipo de Campo' : 'Detalles del Campo'}
                             </h3>
-                            <button className="twenty-btn-icon" onClick={() => setIsModalOpen(false)}><X size={20} /></button>
+                            <button 
+                                onClick={() => setIsModalOpen(false)}
+                                style={{ background: '#F1F5F9', border: 'none', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B', cursor: 'pointer', transition: 'all 0.2s' }}
+                                onMouseOver={(e) => { e.currentTarget.style.background = '#E2E8F0'; e.currentTarget.style.color = '#1E293B'; }}
+                                onMouseOut={(e) => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#64748B'; }}
+                            >
+                                <X size={18} />
+                            </button>
                         </div>
                         
-                        <div style={{ padding: '24px', overflowY: 'auto' }}>
+                        <div style={{ padding: '32px', overflowY: 'auto' }}>
                             {errors.error && (
-                                <div style={{ padding: '12px', backgroundColor: '#fee2e2', color: '#b91c1c', borderRadius: 'var(--twenty-radius-md)', marginBottom: '16px', fontSize: '13px' }}>
+                                <div style={{ padding: '16px', backgroundColor: '#FEF2F2', border: '1px solid #FECACA', color: '#DC2626', borderRadius: '12px', marginBottom: '24px', fontSize: '14px', fontWeight: 500 }}>
                                     {errors.error}
                                 </div>
                             )}
 
                             {step === 1 ? (
-                                <div style={{ display: 'grid', gap: '12px' }}>
+                                <div style={{ display: 'grid', gap: '16px' }}>
                                     {Object.entries(typeLabels).map(([typeKey, label]) => (
                                         <button 
                                             key={typeKey}
                                             onClick={() => handleTypeSelect(typeKey)}
                                             style={{
-                                                display: 'flex', alignItems: 'center', gap: '12px', padding: '16px',
-                                                border: '1px solid var(--twenty-border)', borderRadius: 'var(--twenty-radius-md)',
-                                                background: 'white', cursor: 'pointer', textAlign: 'left', transition: 'border-color 0.2s'
+                                                display: 'flex', alignItems: 'center', gap: '16px', padding: '20px',
+                                                border: '1px solid #E2E8F0', borderRadius: '16px',
+                                                background: '#ffffff', cursor: 'pointer', textAlign: 'left', 
+                                                transition: 'all 0.2s ease', boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
                                             }}
-                                            onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--twenty-primary)'}
-                                            onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--twenty-border)'}
+                                            onMouseEnter={e => {
+                                                e.currentTarget.style.borderColor = '#00B4FF';
+                                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 180, 255, 0.15)';
+                                            }}
+                                            onMouseLeave={e => {
+                                                e.currentTarget.style.borderColor = '#E2E8F0';
+                                                e.currentTarget.style.transform = 'translateY(0)';
+                                                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.02)';
+                                            }}
                                         >
-                                            <div style={{ color: 'var(--twenty-primary)', background: 'var(--twenty-primary-bg)', padding: '8px', borderRadius: 'var(--twenty-radius-md)' }}>
+                                            <div style={{ color: '#00B4FF', background: '#E0F2FE', padding: '12px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                 {typeIcons[typeKey]}
                                             </div>
-                                            <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--twenty-text-main)' }}>{label}</span>
+                                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                <span style={{ fontSize: '15px', fontWeight: 600, color: '#1E293B' }}>{label}</span>
+                                                <span style={{ fontSize: '13px', color: '#64748B', marginTop: '2px' }}>
+                                                    {typeKey === 'text' && 'Textos cortos, nombres o enlaces.'}
+                                                    {typeKey === 'number' && 'Cantidades, montos o métricas.'}
+                                                    {typeKey === 'select' && 'Una lista desplegable de opciones.'}
+                                                    {typeKey === 'boolean' && 'Una casilla de verificación sí/no.'}
+                                                    {typeKey === 'date' && 'Un selector de fecha del calendario.'}
+                                                </span>
+                                            </div>
+                                            <ChevronRight size={20} color="#CBD5E1" style={{ marginLeft: 'auto' }} />
                                         </button>
                                     ))}
                                 </div>
                             ) : (
-                                <form id="field-form" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                <form id="field-form" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                                     <div>
-                                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px', color: 'var(--twenty-text-main)' }}>
+                                        <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '8px', color: '#1E293B' }}>
                                             Etiqueta (Nombre visible)
                                         </label>
                                         <input 
@@ -255,17 +354,23 @@ export default function ObjectsSettings({ fields = [], flash, errors }) {
                                             value={data.label}
                                             onChange={e => {
                                                 setData('label', e.target.value);
-                                                if (!data.name) setData('name', e.target.value); // Auto-fill name
+                                                if (!data.name) setData('name', e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, ''));
                                             }}
                                             placeholder="Ej: Sector Industrial"
-                                            style={{ width: '100%', padding: '8px 12px', borderRadius: 'var(--twenty-radius-md)', border: '1px solid var(--twenty-border)', fontSize: '14px', outline: 'none' }}
+                                            style={{ 
+                                                width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #E2E8F0', 
+                                                fontSize: '15px', outline: 'none', transition: 'all 0.2s',
+                                                boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
+                                            }}
+                                            onFocus={e => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 4px rgba(0, 180, 255, 0.1)'; }}
+                                            onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; }}
                                             required
                                         />
-                                        {errors.label && <span style={{ color: '#ef4444', fontSize: '12px', marginTop: '4px', display: 'block' }}>{errors.label}</span>}
+                                        {errors.label && <span style={{ color: '#EF4444', fontSize: '13px', marginTop: '6px', display: 'block', fontWeight: 500 }}>{errors.label}</span>}
                                     </div>
 
                                     <div>
-                                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px', color: 'var(--twenty-text-main)' }}>
+                                        <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '8px', color: '#1E293B' }}>
                                             Nombre Interno (API Key)
                                         </label>
                                         <input 
@@ -273,23 +378,34 @@ export default function ObjectsSettings({ fields = [], flash, errors }) {
                                             value={data.name}
                                             onChange={e => setData('name', e.target.value)}
                                             placeholder="sector_industrial"
-                                            style={{ width: '100%', padding: '8px 12px', borderRadius: 'var(--twenty-radius-md)', border: '1px solid var(--twenty-border)', fontSize: '14px', outline: 'none', backgroundColor: 'var(--twenty-bg-hover)' }}
+                                            style={{ 
+                                                width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #E2E8F0', 
+                                                fontSize: '15px', outline: 'none', backgroundColor: '#F8FAFC', transition: 'all 0.2s'
+                                            }}
+                                            onFocus={e => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 4px rgba(0, 180, 255, 0.1)'; e.target.style.backgroundColor = '#ffffff'; }}
+                                            onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; e.target.style.backgroundColor = '#F8FAFC'; }}
                                             required
                                         />
-                                        <p style={{ margin: '4px 0 0', fontSize: '11px', color: 'var(--twenty-text-muted)' }}>Solo minúsculas y guiones bajos (_).</p>
-                                        {errors.name && <span style={{ color: '#ef4444', fontSize: '12px', marginTop: '4px', display: 'block' }}>{errors.name}</span>}
+                                        <p style={{ margin: '6px 0 0', fontSize: '12px', color: '#64748B', fontWeight: 500 }}>Solo letras minúsculas, números y guiones bajos (_).</p>
+                                        {errors.name && <span style={{ color: '#EF4444', fontSize: '13px', marginTop: '6px', display: 'block', fontWeight: 500 }}>{errors.name}</span>}
                                     </div>
 
                                     {fieldType === 'select' && (
                                         <div>
-                                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 500, marginBottom: '6px', color: 'var(--twenty-text-main)' }}>
-                                                Opciones (separadas por coma)
+                                            <label style={{ display: 'block', fontSize: '14px', fontWeight: 600, marginBottom: '8px', color: '#1E293B' }}>
+                                                Opciones
                                             </label>
                                             <input 
                                                 type="text" 
                                                 onChange={e => setData('options', e.target.value.split(',').map(s => s.trim()).filter(s => s))}
-                                                placeholder="Tecnología, Salud, Educación"
-                                                style={{ width: '100%', padding: '8px 12px', borderRadius: 'var(--twenty-radius-md)', border: '1px solid var(--twenty-border)', fontSize: '14px', outline: 'none' }}
+                                                placeholder="Tecnología, Salud, Educación (separadas por coma)"
+                                                style={{ 
+                                                    width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #E2E8F0', 
+                                                    fontSize: '15px', outline: 'none', transition: 'all 0.2s',
+                                                    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
+                                                }}
+                                                onFocus={e => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 4px rgba(0, 180, 255, 0.1)'; }}
+                                                onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; }}
                                                 required
                                             />
                                         </div>
@@ -299,18 +415,45 @@ export default function ObjectsSettings({ fields = [], flash, errors }) {
                         </div>
 
                         {step === 2 && (
-                            <div style={{ padding: '16px 24px', borderTop: '1px solid var(--twenty-border)', display: 'flex', justifyContent: 'space-between', backgroundColor: 'var(--twenty-bg-app)' }}>
-                                <button className="twenty-btn twenty-btn-secondary" onClick={() => setStep(1)}>
+                            <div style={{ padding: '24px 32px', borderTop: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', backgroundColor: '#F8FAFC', borderBottomLeftRadius: '24px', borderBottomRightRadius: '24px' }}>
+                                <button 
+                                    onClick={() => setStep(1)}
+                                    style={{
+                                        background: '#ffffff', border: '1px solid #E2E8F0', color: '#475569',
+                                        padding: '10px 20px', borderRadius: '10px', fontSize: '14px', fontWeight: 600,
+                                        cursor: 'pointer', transition: 'all 0.2s'
+                                    }}
+                                    onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#F1F5F9'; e.currentTarget.style.borderColor = '#CBD5E1'; }}
+                                    onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.borderColor = '#E2E8F0'; }}
+                                >
                                     Atrás
                                 </button>
-                                <button type="submit" form="field-form" className="twenty-btn twenty-btn-primary" disabled={processing}>
+                                <button 
+                                    type="submit" 
+                                    form="field-form" 
+                                    disabled={processing}
+                                    style={{
+                                        background: '#00B4FF', border: 'none', color: '#ffffff',
+                                        padding: '10px 24px', borderRadius: '10px', fontSize: '14px', fontWeight: 600,
+                                        cursor: processing ? 'not-allowed' : 'pointer', transition: 'all 0.2s',
+                                        boxShadow: '0 4px 12px rgba(0, 180, 255, 0.3)', opacity: processing ? 0.7 : 1
+                                    }}
+                                    onMouseOver={(e) => { if(!processing) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 180, 255, 0.4)'; } }}
+                                    onMouseOut={(e) => { if(!processing) { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 180, 255, 0.3)'; } }}
+                                >
                                     {processing ? 'Guardando...' : 'Crear Campo'}
                                 </button>
                             </div>
                         )}
                     </div>
-                </>
+                </div>
             )}
+            <style>{`
+                @keyframes fadeInUp {
+                    from { opacity: 0; transform: translateY(20px) scale(0.95); }
+                    to { opacity: 1; transform: translateY(0) scale(1); }
+                }
+            `}</style>
         </TwentyCrmLayout>
     );
 }

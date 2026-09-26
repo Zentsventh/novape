@@ -139,22 +139,22 @@ export default function Dashboard({ metrics }) {
                     border: 1px solid #E2E8F0;
                     border-radius: 12px;
                     padding: 24px;
-                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+                    transition: all 0.2s ease;
                 }
                 .twenty-card:hover {
-                    box-shadow: 0 10px 15px -3px rgba(0, 123, 255, 0.1), 0 4px 6px -2px rgba(0, 123, 255, 0.05);
-                    transform: translateY(-4px);
-                    border-color: #007BFF;
+                    box-shadow: 0 10px 25px -5px rgba(0, 180, 255, 0.15);
+                    transform: translateY(-2px);
+                    border-color: rgba(0, 180, 255, 0.3);
                 }
                 .kpi-icon-wrapper {
                     width: 48px; height: 48px;
                     border-radius: 12px;
                     display: flex; align-items: center; justify-content: center;
-                    transition: all 0.3s ease;
+                    transition: all 0.2s ease;
                 }
                 .twenty-card:hover .kpi-icon-wrapper {
-                    transform: scale(1.1);
+                    transform: scale(1.05);
                 }
                 .recharts-default-tooltip {
                     border-radius: 12px !important;
@@ -162,7 +162,7 @@ export default function Dashboard({ metrics }) {
                     box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1) !important;
                 }
                 .gradient-text {
-                    background: linear-gradient(135deg, #007BFF 0%, #0056B3 100%);
+                    background: linear-gradient(135deg, #00B4FF 0%, #009BE0 100%);
                     -webkit-background-clip: text;
                     -webkit-text-fill-color: transparent;
                 }
@@ -170,23 +170,22 @@ export default function Dashboard({ metrics }) {
                     display: inline-flex;
                     align-items: center;
                     gap: 8px;
-                    padding: 8px 16px;
+                    padding: 10px 16px;
                     background: #ffffff;
                     border: 1px solid #E2E8F0;
                     border-radius: 8px;
-                    color: #1E293B;
-                    font-weight: 500;
-                    font-size: 14px;
+                    color: #475569;
+                    font-weight: 600;
+                    font-size: 13px;
                     text-decoration: none;
                     transition: all 0.2s ease;
-                    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+                    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
                 }
                 .btn-volver:hover, .btn-volver:focus {
-                    background: #f8fafc;
-                    border-color: #007BFF;
-                    color: #007BFF;
-                    transform: translateY(-2px);
-                    box-shadow: 0 4px 6px -1px rgba(0, 123, 255, 0.15);
+                    background: #F1F5F9;
+                    color: #1E293B;
+                    border-color: #94A3B8;
+                    transform: translateY(-1px);
                     outline: none;
                 }
             `}</style>
@@ -207,59 +206,41 @@ export default function Dashboard({ metrics }) {
                         ...fadeUpStyle(0),
                         display: 'flex',
                         justifyContent: 'space-between',
-                        alignItems: 'flex-end',
+                        alignItems: 'center',
                         borderBottom: '1px solid #E2E8F0',
                         paddingBottom: '24px',
                     }}
                 >
-                    <div>
-                        <div
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '10px',
-                                marginBottom: '6px',
-                            }}
-                        >
-                            <Activity size={24} color="#007BFF" />
-                            <h2
-                                style={{ fontSize: '28px', fontWeight: 800, margin: 0, color: '#1E293B' }}
-                                className="gradient-text"
-                            >
-                                Rendimiento General
-                            </h2>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div style={{ padding: '8px', backgroundColor: '#F0F9FF', borderRadius: '10px', color: '#00B4FF' }}>
+                            <Activity size={24} />
                         </div>
-                        <p
-                            style={{
-                                margin: 0,
-                                color: '#64748B',
-                                fontSize: '15px',
-                            }}
+                        <h2
+                            style={{ fontSize: '24px', fontWeight: 700, margin: 0, color: '#1E293B', letterSpacing: '-0.02em' }}
                         >
-                            Métricas en tiempo real y proyecciones de ventas basadas en IA.
-                        </p>
+                            Visión General
+                        </h2>
                     </div>
                     <div style={{ display: 'flex', gap: '12px' }}>
                         <a
                             href="/admin/crm/export?type=dashboard"
                             className="btn-volver"
                         >
-                            Exportar Reporte
+                            Exportar
                         </a>
                         <button
                             onClick={handleRefresh}
-                            className="twenty-btn twenty-btn-primary"
                             style={{
-                                display: 'flex', alignItems: 'center', gap: '6px',
-                                background: '#007BFF', color: '#fff', border: 'none',
-                                borderRadius: '8px', padding: '8px 16px', fontWeight: 500,
-                                cursor: 'pointer', boxShadow: '0 4px 6px -1px rgba(0, 123, 255, 0.3)',
+                                display: 'flex', alignItems: 'center', gap: '8px',
+                                background: '#00B4FF', color: '#fff', border: 'none',
+                                borderRadius: '8px', padding: '10px 16px', fontWeight: 600, fontSize: '13px',
+                                cursor: 'pointer', boxShadow: '0 2px 4px rgba(0, 180, 255, 0.2)',
                                 transition: 'all 0.2s ease'
                             }}
-                            onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 8px -1px rgba(0, 123, 255, 0.4)'; }}
-                            onMouseOut={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 123, 255, 0.3)'; }}
+                            onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 180, 255, 0.3)'; e.currentTarget.style.backgroundColor = '#009BE0'; }}
+                            onMouseOut={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 180, 255, 0.2)'; e.currentTarget.style.backgroundColor = '#00B4FF'; }}
                         >
-                            <Zap size={16} /> Actualizar Datos
+                            <Zap size={16} /> Actualizar
                         </button>
                     </div>
                 </div>
@@ -280,7 +261,7 @@ export default function Dashboard({ metrics }) {
                         >
                             <div
                                 className="kpi-icon-wrapper"
-                                style={{ background: 'rgba(0, 86, 179, 0.1)', color: '#0056B3' }}
+                                style={{ background: 'rgba(0, 180, 255, 0.1)', color: '#00B4FF' }}
                             >
                                 <DollarSign size={20} />
                             </div>
@@ -289,10 +270,10 @@ export default function Dashboard({ metrics }) {
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '4px',
-                                    color: '#007BFF',
+                                    color: '#00B4FF',
                                     fontSize: '12px',
                                     fontWeight: 600,
-                                    background: 'rgba(0, 123, 255, 0.1)',
+                                    background: 'rgba(0, 180, 255, 0.1)',
                                     padding: '4px 8px',
                                     borderRadius: '12px',
                                 }}
@@ -302,19 +283,19 @@ export default function Dashboard({ metrics }) {
                         </div>
                         <div
                             style={{
-                                fontSize: '14px',
-                                color: 'var(--twenty-text-muted)',
-                                fontWeight: 500,
+                                fontSize: '13px',
+                                color: '#64748B',
+                                fontWeight: 600,
                                 marginBottom: '4px',
                             }}
                         >
-                            Ingresos Totales (Cerrados)
+                            Ingresos Totales
                         </div>
                         <div
                             style={{
-                                fontSize: '28px',
+                                fontSize: '24px',
                                 fontWeight: 700,
-                                color: 'var(--twenty-text-main)',
+                                color: '#1E293B',
                                 letterSpacing: '-0.5px',
                             }}
                         >
@@ -334,7 +315,7 @@ export default function Dashboard({ metrics }) {
                         >
                             <div
                                 className="kpi-icon-wrapper"
-                                style={{ background: 'rgba(0, 123, 255, 0.1)', color: '#007BFF' }}
+                                style={{ background: 'rgba(0, 180, 255, 0.1)', color: '#00B4FF' }}
                             >
                                 <Target size={20} />
                             </div>
@@ -343,10 +324,10 @@ export default function Dashboard({ metrics }) {
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '4px',
-                                    color: '#007BFF',
+                                    color: '#00B4FF',
                                     fontSize: '12px',
                                     fontWeight: 600,
-                                    background: 'rgba(0, 123, 255, 0.1)',
+                                    background: 'rgba(0, 180, 255, 0.1)',
                                     padding: '4px 8px',
                                     borderRadius: '12px',
                                 }}
@@ -356,19 +337,19 @@ export default function Dashboard({ metrics }) {
                         </div>
                         <div
                             style={{
-                                fontSize: '14px',
-                                color: 'var(--twenty-text-muted)',
-                                fontWeight: 500,
+                                fontSize: '13px',
+                                color: '#64748B',
+                                fontWeight: 600,
                                 marginBottom: '4px',
                             }}
                         >
-                            Tasa de Éxito (Win Rate)
+                            Tasa de Éxito
                         </div>
                         <div
                             style={{
-                                fontSize: '28px',
+                                fontSize: '24px',
                                 fontWeight: 700,
-                                color: 'var(--twenty-text-main)',
+                                color: '#1E293B',
                                 letterSpacing: '-0.5px',
                             }}
                         >
@@ -388,26 +369,26 @@ export default function Dashboard({ metrics }) {
                         >
                             <div
                                 className="kpi-icon-wrapper"
-                                style={{ background: 'rgba(77, 156, 255, 0.1)', color: '#4D9CFF' }}
+                                style={{ background: 'rgba(0, 180, 255, 0.1)', color: '#00B4FF' }}
                             >
                                 <Users size={20} />
                             </div>
                         </div>
                         <div
                             style={{
-                                fontSize: '14px',
-                                color: 'var(--twenty-text-muted)',
-                                fontWeight: 500,
+                                fontSize: '13px',
+                                color: '#64748B',
+                                fontWeight: 600,
                                 marginBottom: '4px',
                             }}
                         >
-                            Ticket Promedio (LTV)
+                            Ticket Promedio
                         </div>
                         <div
                             style={{
-                                fontSize: '28px',
+                                fontSize: '24px',
                                 fontWeight: 700,
-                                color: 'var(--twenty-text-main)',
+                                color: '#1E293B',
                                 letterSpacing: '-0.5px',
                             }}
                         >
@@ -427,7 +408,7 @@ export default function Dashboard({ metrics }) {
                         >
                             <div
                                 className="kpi-icon-wrapper"
-                                style={{ background: 'rgba(140, 191, 255, 0.1)', color: '#8CBFFF' }}
+                                style={{ background: 'rgba(0, 180, 255, 0.1)', color: '#00B4FF' }}
                             >
                                 <Clock size={20} />
                             </div>
@@ -436,10 +417,10 @@ export default function Dashboard({ metrics }) {
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '4px',
-                                    color: '#0056B3',
+                                    color: '#00B4FF',
                                     fontSize: '12px',
                                     fontWeight: 600,
-                                    background: 'rgba(0, 86, 179, 0.1)',
+                                    background: 'rgba(0, 180, 255, 0.1)',
                                     padding: '4px 8px',
                                     borderRadius: '12px',
                                 }}
@@ -449,27 +430,27 @@ export default function Dashboard({ metrics }) {
                         </div>
                         <div
                             style={{
-                                fontSize: '14px',
-                                color: 'var(--twenty-text-muted)',
-                                fontWeight: 500,
+                                fontSize: '13px',
+                                color: '#64748B',
+                                fontWeight: 600,
                                 marginBottom: '4px',
                             }}
                         >
-                            Velocidad Promedio (Cierre)
+                            Velocidad Promedio
                         </div>
                         <div
                             style={{
-                                fontSize: '28px',
+                                fontSize: '24px',
                                 fontWeight: 700,
-                                color: 'var(--twenty-text-main)',
+                                color: '#1E293B',
                                 letterSpacing: '-0.5px',
                             }}
                         >
                             {kpis?.deal_velocity || 0}{' '}
                             <span
                                 style={{
-                                    fontSize: '16px',
-                                    color: 'var(--twenty-text-muted)',
+                                    fontSize: '14px',
+                                    color: '#64748B',
                                     fontWeight: 500,
                                 }}
                             >
@@ -496,21 +477,12 @@ export default function Dashboard({ metrics }) {
                                     style={{
                                         margin: 0,
                                         fontSize: '16px',
-                                        fontWeight: 600,
-                                        color: 'var(--twenty-text-main)',
+                                        fontWeight: 700,
+                                        color: '#1E293B',
                                     }}
                                 >
-                                    Ingresos Generados (Últimos 6 meses)
+                                    Ingresos Generados
                                 </h3>
-                                <p
-                                    style={{
-                                        margin: '4px 0 0',
-                                        fontSize: '13px',
-                                        color: 'var(--twenty-text-muted)',
-                                    }}
-                                >
-                                    Crecimiento constante impulsado por ventas cerradas.
-                                </p>
                             </div>
                         </div>
                         <div style={{ height: '320px', width: '100%' }}>
@@ -529,12 +501,12 @@ export default function Dashboard({ metrics }) {
                                         >
                                             <stop
                                                 offset="5%"
-                                                stopColor="#3b82f6"
+                                                stopColor="#00B4FF"
                                                 stopOpacity={0.3}
                                             />
                                             <stop
                                                 offset="95%"
-                                                stopColor="#3b82f6"
+                                                stopColor="#00B4FF"
                                                 stopOpacity={0}
                                             />
                                         </linearGradient>
@@ -542,19 +514,19 @@ export default function Dashboard({ metrics }) {
                                     <CartesianGrid
                                         strokeDasharray="3 3"
                                         vertical={false}
-                                        stroke="var(--twenty-border)"
+                                        stroke="#E2E8F0"
                                     />
                                     <XAxis
                                         dataKey="name"
                                         axisLine={false}
                                         tickLine={false}
-                                        tick={{ fontSize: 12, fill: 'var(--twenty-text-muted)' }}
+                                        tick={{ fontSize: 12, fill: '#64748B' }}
                                         dy={10}
                                     />
                                     <YAxis
                                         axisLine={false}
                                         tickLine={false}
-                                        tick={{ fontSize: 12, fill: 'var(--twenty-text-muted)' }}
+                                        tick={{ fontSize: 12, fill: '#64748B' }}
                                         tickFormatter={(value) => `S/${value / 1000}k`}
                                         dx={-10}
                                     />
@@ -562,7 +534,7 @@ export default function Dashboard({ metrics }) {
                                     <Area
                                         type="monotone"
                                         dataKey="Ventas"
-                                        stroke="#3b82f6"
+                                        stroke="#00B4FF"
                                         strokeWidth={3}
                                         fillOpacity={1}
                                         fill="url(#colorRevenue)"
@@ -588,21 +560,12 @@ export default function Dashboard({ metrics }) {
                                 style={{
                                     margin: 0,
                                     fontSize: '16px',
-                                    fontWeight: 600,
-                                    color: 'var(--twenty-text-main)',
+                                    fontWeight: 700,
+                                    color: '#1E293B',
                                 }}
                             >
                                 Estado del Pipeline
                             </h3>
-                            <p
-                                style={{
-                                    margin: '4px 0 0',
-                                    fontSize: '13px',
-                                    color: 'var(--twenty-text-muted)',
-                                }}
-                            >
-                                Distribución de oportunidades
-                            </p>
                         </div>
                         <div
                             style={{
@@ -646,15 +609,15 @@ export default function Dashboard({ metrics }) {
                                     style={{
                                         fontSize: '24px',
                                         fontWeight: 700,
-                                        color: 'var(--twenty-text-main)',
+                                        color: '#1E293B',
                                     }}
                                 >
                                     {kpis?.total_deals || 0}
                                 </div>
                                 <div
-                                    style={{ fontSize: '12px', color: 'var(--twenty-text-muted)' }}
+                                    style={{ fontSize: '12px', color: '#64748B', fontWeight: 600 }}
                                 >
-                                    Total Deals
+                                    Deals
                                 </div>
                             </div>
                         </div>
@@ -703,11 +666,11 @@ export default function Dashboard({ metrics }) {
                                 style={{
                                     margin: 0,
                                     fontSize: '16px',
-                                    fontWeight: 600,
-                                    color: 'var(--twenty-text-main)',
+                                    fontWeight: 700,
+                                    color: '#1E293B',
                                 }}
                             >
-                                Embudo de Conversión (Funnel)
+                                Embudo de Conversión
                             </h3>
                         </div>
                         <div style={{ height: '300px' }}>
@@ -721,7 +684,7 @@ export default function Dashboard({ metrics }) {
                                         strokeDasharray="3 3"
                                         horizontal={true}
                                         vertical={false}
-                                        stroke="var(--twenty-border)"
+                                        stroke="#E2E8F0"
                                     />
                                     <XAxis type="number" hide />
                                     <YAxis
@@ -731,17 +694,17 @@ export default function Dashboard({ metrics }) {
                                         tickLine={false}
                                         tick={{
                                             fontSize: 13,
-                                            fill: 'var(--twenty-text-main)',
-                                            fontWeight: 500,
+                                            fill: '#64748B',
+                                            fontWeight: 600,
                                         }}
                                     />
                                     <RechartsTooltip
-                                        cursor={{ fill: 'var(--twenty-bg-hover)' }}
+                                        cursor={{ fill: '#F8FAFC' }}
                                         content={<CustomTooltip />}
                                     />
                                     <Bar
                                         dataKey="value"
-                                        fill="#007BFF"
+                                        fill="#00B4FF"
                                         radius={[0, 6, 6, 0]}
                                         barSize={36}
                                         animationDuration={1500}
@@ -749,7 +712,7 @@ export default function Dashboard({ metrics }) {
                                         {funnel.map((entry, index) => (
                                             <Cell
                                                 key={`cell-${index}`}
-                                                fill={`rgba(0, 123, 255, ${1 - index * 0.18})`}
+                                                fill={`rgba(0, 180, 255, ${1 - index * 0.18})`}
                                             />
                                         ))}
                                     </Bar>
@@ -772,28 +735,19 @@ export default function Dashboard({ metrics }) {
                         <div
                             style={{
                                 padding: '20px',
-                                borderBottom: '1px solid var(--twenty-border)',
+                                borderBottom: '1px solid #E2E8F0',
                             }}
                         >
                             <h3
                                 style={{
                                     margin: 0,
                                     fontSize: '16px',
-                                    fontWeight: 600,
-                                    color: 'var(--twenty-text-main)',
+                                    fontWeight: 700,
+                                    color: '#1E293B',
                                 }}
                             >
-                                Top Oportunidades Abiertas
+                                Top Oportunidades
                             </h3>
-                            <p
-                                style={{
-                                    margin: '4px 0 0',
-                                    fontSize: '13px',
-                                    color: 'var(--twenty-text-muted)',
-                                }}
-                            >
-                                Cierres potenciales de mayor impacto.
-                            </p>
                         </div>
                         <div style={{ flex: 1, overflowY: 'auto' }}>
                             {top_deals.map((deal, index) => (

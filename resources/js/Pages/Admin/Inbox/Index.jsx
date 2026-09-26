@@ -7,7 +7,8 @@ import {
     Smile, Plus, MoreVertical, Image as ImageIcon,
     Inbox, Zap, StickyNote, RefreshCw, ArrowRightLeft,
     FileText, Video, X, AlertCircle, Loader2,
-    MessageCircle, Hash
+    MessageCircle, Hash, Ticket, Shield, Users,
+    PhoneForwarded, XCircle, Activity, Timer, Tag
 } from 'lucide-react';
 import '../../../../css/admin/admin.css';
 import '../../../../css/admin/inbox.css';
@@ -251,6 +252,307 @@ class ErrorBoundary extends React.Component {
     }
 }
 
+// ─── Transfer Form Component ─────────────────────────────────
+function TransferForm({ agents, onTransfer, onCancel }) {
+    const [selectedAgent, setSelectedAgent] = useState('');
+    const [reason, setReason] = useState('');
+    
+    const getStatusDot = (status) => {
+        const colors = { online: '#22c55e', busy: '#f59e0b', away: '#eab308', offline: '#ef4444' };
+        return <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: colors[status] || '#6b7280', marginRight: 6 }} />;
+    };
+
+    return (
+        <div style={{ padding: '16px' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: '#b0b3c6' }}>
+                Seleccionar Asesor
+            </label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '200px', overflowY: 'auto', marginBottom: '12px' }}>
+                {agents.length === 0 ? (
+                    <div style={{ padding: '12px', textAlign: 'center', color: '#8b8fa3', fontSize: '13px' }}>No hay asesores disponibles</div>
+                ) : agents.map(agent => (
+                    <button
+                        key={agent.id}
+                        onClick={() => setSelectedAgent(agent.id)}
+                        style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                            padding: '10px 12px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+                            background: selectedAgent === agent.id ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.05)',
+                            color: '#e0e0e0', fontSize: '13px', textAlign: 'left'
+                        }}
+                    >
+                        <span>{getStatusDot(agent.status)} {agent.name}</span>
+                        <span style={{ fontSize: '11px', color: '#8b8fa3' }}>{agent.activeChats}/{agent.maxChats}</span>
+                    </button>
+                ))}
+            </div>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px', color: '#b0b3c6' }}>
+                Motivo (opcional)
+            </label>
+            <textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Ej: El cliente necesita soporte técnico..."
+                rows={2}
+                style={{
+                    width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '8px', padding: '10px', color: '#e0e0e0', fontSize: '13px', resize: 'none', outline: 'none'
+                }}
+            />
+            <div style={{ display: 'flex', gap: '8px', marginTop: '14px', justifyContent: 'flex-end' }}>
+                <button onClick={onCancel} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: '#b0b3c6', cursor: 'pointer', fontSize: '13px' }}>Cancelar</button>
+                <button
+                    onClick={() => selectedAgent && onTransfer(selectedAgent, reason)}
+                    disabled={!selectedAgent}
+                    style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: selectedAgent ? '#3b82f6' : '#374151', color: 'white', cursor: selectedAgent ? 'pointer' : 'not-allowed', fontSize: '13px', fontWeight: 600 }}
+                >Transferir</button>
+            </div>
+        </div>
+    );
+}
+
+// ─── Close Reason Form Component ─────────────────────────────
+function CloseReasonForm({ onClose, onCancel }) {
+    const [reason, setReason] = useState('');
+    const reasons = [
+        'Consulta resuelta',
+        'Compra realizada',
+        'Cliente no interesado',
+        'Derivado a otra área',
+        'Inactividad del cliente',
+    ];
+
+    return (
+        <div style={{ padding: '16px' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: '#b0b3c6' }}>
+                Motivo del cierre
+            </label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '12px' }}>
+                {reasons.map(r => (
+                    <button
+                        key={r}
+                        onClick={() => setReason(r)}
+                        style={{
+                            display: 'flex', alignItems: 'center', gap: '8px',
+                            padding: '10px 12px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+                            background: reason === r ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.05)',
+                            color: '#e0e0e0', fontSize: '13px', textAlign: 'left'
+                        }}
+                    >
+                        <span style={{ width: 16, height: 16, borderRadius: '50%', border: `2px solid ${reason === r ? '#3b82f6' : '#555'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {reason === r && <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#3b82f6' }} />}
+                        </span>
+                        {r}
+                    </button>
+                ))}
+            </div>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px', color: '#b0b3c6' }}>
+                O escribe un motivo personalizado
+            </label>
+            <input
+                type="text"
+                value={reasons.includes(reason) ? '' : reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Motivo personalizado..."
+                style={{
+                    width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '8px', padding: '10px', color: '#e0e0e0', fontSize: '13px', outline: 'none'
+                }}
+            />
+            <div style={{ display: 'flex', gap: '8px', marginTop: '14px', justifyContent: 'flex-end' }}>
+                <button onClick={onCancel} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: '#b0b3c6', cursor: 'pointer', fontSize: '13px' }}>Cancelar</button>
+                <button
+                    onClick={() => reason && onClose(reason)}
+                    disabled={!reason}
+                    style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: reason ? '#ef4444' : '#374151', color: 'white', cursor: reason ? 'pointer' : 'not-allowed', fontSize: '13px', fontWeight: 600 }}
+                >Cerrar Conversación</button>
+            </div>
+        </div>
+    );
+}
+
+// ─── Supervisor Panel Component ──────────────────────────────
+function SupervisorPanel({ data, onRefresh }) {
+    if (!data) return <div style={{ padding: '24px', textAlign: 'center', color: '#8b8fa3' }}><Loader2 size={24} className="animate-spin" /> Cargando...</div>;
+
+    const getStatusDot = (status) => {
+        const colors = { online: '#22c55e', busy: '#f59e0b', away: '#eab308', offline: '#ef4444' };
+        return <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', background: colors[status] || '#6b7280' }} />;
+    };
+
+    return (
+        <div style={{ padding: '16px' }}>
+            {/* Metrics Row */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }}>
+                {[
+                    { label: 'Chats Activos', value: data.metrics.activeConversations, color: '#3b82f6' },
+                    { label: 'En Bot', value: data.metrics.botConversations, color: '#a855f7' },
+                    { label: 'En Cola', value: data.metrics.queueCount, color: '#f59e0b' },
+                    { label: 'Cerrados Hoy', value: data.metrics.closedToday, color: '#22c55e' },
+                ].map((m, i) => (
+                    <div key={i} style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '12px', padding: '14px', textAlign: 'center' }}>
+                        <div style={{ fontSize: '28px', fontWeight: 800, color: m.color }}>{m.value}</div>
+                        <div style={{ fontSize: '11px', color: '#8b8fa3', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{m.label}</div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Agents Table */}
+            <div style={{ marginBottom: '16px' }}>
+                <div style={{ fontSize: '14px', fontWeight: 700, color: '#e0e0e0', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Users size={16} /> Asesores
+                </div>
+                <div style={{ borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                        <thead>
+                            <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
+                                <th style={{ padding: '10px 14px', textAlign: 'left', color: '#8b8fa3', fontWeight: 600 }}>Asesor</th>
+                                <th style={{ padding: '10px 14px', textAlign: 'center', color: '#8b8fa3', fontWeight: 600 }}>Estado</th>
+                                <th style={{ padding: '10px 14px', textAlign: 'center', color: '#8b8fa3', fontWeight: 600 }}>Chats</th>
+                                <th style={{ padding: '10px 14px', textAlign: 'center', color: '#8b8fa3', fontWeight: 600 }}>Resueltos Hoy</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {data.agents.map(agent => (
+                                <tr key={agent.id} style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <td style={{ padding: '10px 14px', color: '#e0e0e0' }}>{agent.name}</td>
+                                    <td style={{ padding: '10px 14px', textAlign: 'center' }}>
+                                        {getStatusDot(agent.status)}
+                                        <span style={{ marginLeft: '4px', fontSize: '11px', textTransform: 'uppercase', color: '#b0b3c6' }}>{agent.status}</span>
+                                    </td>
+                                    <td style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 700, color: agent.activeChats >= agent.maxChats ? '#ef4444' : '#e0e0e0' }}>
+                                        {agent.activeChats}/{agent.maxChats}
+                                    </td>
+                                    <td style={{ padding: '10px 14px', textAlign: 'center', color: '#22c55e' }}>{agent.resolvedToday}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {/* Queue */}
+            {data.queue.count > 0 && (
+                <div>
+                    <div style={{ fontSize: '14px', fontWeight: 700, color: '#f59e0b', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Clock size={16} /> Cola de Espera ({data.queue.count})
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        {data.queue.items.map(item => (
+                            <div key={item.id} style={{
+                                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                padding: '10px 14px', borderRadius: '8px', background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.15)'
+                            }}>
+                                <div>
+                                    <span style={{ color: '#e0e0e0', fontSize: '13px', fontWeight: 600 }}>{item.contactName}</span>
+                                    <span style={{ color: '#8b8fa3', fontSize: '11px', marginLeft: '8px' }}>{item.channel}</span>
+                                </div>
+                                <div style={{ fontSize: '12px', color: item.waitingMinutes > 5 ? '#ef4444' : '#f59e0b', fontWeight: 600 }}>
+                                    {item.waitingTime}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '16px' }}>
+                <button onClick={onRefresh} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: '#b0b3c6', cursor: 'pointer', fontSize: '13px' }}>
+                    <RefreshCw size={14} /> Actualizar
+                </button>
+            </div>
+        </div>
+    );
+}
+
+// ─── Agent Status Custom Dropdown ────────────────────────────
+function AgentStatusDropdown({ status, onChange }) {
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        const handler = (e) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setIsOpen(false);
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    const statuses = [
+        { value: 'online', label: 'Online', color: '#10b981' },
+        { value: 'busy', label: 'Ocupado', color: '#f59e0b' },
+        { value: 'away', label: 'Ausente', color: '#eab308' },
+        { value: 'offline', label: 'Offline', color: '#ef4444' }
+    ];
+
+    const currentStatus = statuses.find(s => s.value === status) || statuses[3];
+
+    return (
+        <div style={{ position: 'relative' }} ref={dropdownRef}>
+            <button 
+                onClick={() => setIsOpen(!isOpen)}
+                style={{
+                    display: 'flex', alignItems: 'center', gap: '8px',
+                    background: '#ffffff',
+                    border: '1px solid #E2E8F0',
+                    borderRadius: '20px',
+                    padding: '6px 12px',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
+                    transition: 'all 0.2s ease',
+                    fontWeight: 700, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px',
+                    color: '#1E293B'
+                }}
+                onMouseOver={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-1px)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)';
+                    e.currentTarget.style.borderColor = 'rgba(0, 180, 255, 0.3)';
+                }}
+                onMouseOut={(e) => {
+                    e.currentTarget.style.transform = 'none';
+                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.02)';
+                    e.currentTarget.style.borderColor = '#E2E8F0';
+                }}
+            >
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: currentStatus.color, boxShadow: `0 0 8px ${currentStatus.color}` }} />
+                <span style={{ color: currentStatus.color }}>{currentStatus.label}</span>
+            </button>
+            {isOpen && (
+                <div style={{
+                    position: 'absolute', top: '100%', right: 0, marginTop: '8px',
+                    background: '#ffffff', borderRadius: '12px', border: '1px solid #E2E8F0',
+                    boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)', overflow: 'hidden', minWidth: '140px',
+                    zIndex: 100, animation: 'fadeInDown 0.15s ease', padding: '6px'
+                }}>
+                    {statuses.map(s => (
+                        <button
+                            key={s.value}
+                            onClick={() => { onChange(s.value); setIsOpen(false); }}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '10px',
+                                width: '100%', padding: '10px 14px', border: 'none', background: 'transparent',
+                                cursor: 'pointer', fontSize: '12px', fontWeight: 600, color: '#1E293B',
+                                textAlign: 'left', transition: 'all 0.15s ease', borderRadius: '8px'
+                            }}
+                            onMouseOver={(e) => {
+                                e.currentTarget.style.background = '#F8FAFC';
+                                e.currentTarget.style.color = s.color;
+                            }}
+                            onMouseOut={(e) => {
+                                e.currentTarget.style.background = 'transparent';
+                                e.currentTarget.style.color = '#1E293B';
+                            }}
+                        >
+                            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: s.color }} />
+                            {s.label}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
 export default function InboxIndexWrapper() {
     return (
         <ErrorBoundary>
@@ -279,6 +581,16 @@ function InboxIndex() {
     const [showActionsMenu, setShowActionsMenu] = useState(false);
     const [toast, setToast] = useState(null);
 
+    // Enterprise state
+    const [agentStatus, setAgentStatus] = useState('offline');
+    const [agentActiveChats, setAgentActiveChats] = useState(0);
+    const [agentMaxChats, setAgentMaxChats] = useState(5);
+    const [showTransferModal, setShowTransferModal] = useState(false);
+    const [showCloseModal, setShowCloseModal] = useState(false);
+    const [availableAgents, setAvailableAgents] = useState([]);
+    const [supervisorData, setSupervisorData] = useState(null);
+    const [showSupervisorPanel, setShowSupervisorPanel] = useState(false);
+
     const messagesEndRef = useRef(null);
     const searchTimeoutRef = useRef(null);
     const actionsMenuRef = useRef(null);
@@ -293,6 +605,7 @@ function InboxIndex() {
     // ─── Efecto inicial ───────────────────────────────────────
     useEffect(() => {
         fetchConversations();
+        fetchAgentStatus();
 
         // Escuchar eventos de broadcasting
         if (window.Echo) {
@@ -633,6 +946,134 @@ function InboxIndex() {
         setShowActionsMenu(false);
     };
 
+    // ─── Enterprise handlers ─────────────────────────────────
+    const fetchAgentStatus = async () => {
+        try {
+            const res = await fetch('/admin/api/omnichannel/agent-status');
+            if (res.ok) {
+                const data = await res.json();
+                setAgentStatus(data.status);
+                setAgentActiveChats(data.activeChats);
+                setAgentMaxChats(data.maxChats);
+            }
+        } catch (e) { console.warn('Error fetching agent status:', e); }
+    };
+
+    const handleChangeAgentStatus = async (newStatus) => {
+        try {
+            const res = await fetch('/admin/api/omnichannel/agent-status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                },
+                body: JSON.stringify({ status: newStatus })
+            });
+            if (res.ok) {
+                setAgentStatus(newStatus);
+                showToast(`Estado cambiado a ${newStatus.toUpperCase()}`, 'success');
+            }
+        } catch (e) { showToast('Error al cambiar estado', 'error'); }
+    };
+
+    const handleTransfer = async (toUserId, reason) => {
+        if (!activeConv) return;
+        try {
+            const res = await fetch(`/admin/api/omnichannel/conversations/${activeConv.id}/transfer`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                },
+                body: JSON.stringify({ to_user_id: toUserId, reason })
+            });
+            if (res.ok) {
+                showToast('Conversación transferida exitosamente', 'success');
+                setShowTransferModal(false);
+                setShowActionsMenu(false);
+                fetchConversations();
+                fetchAgentStatus();
+            }
+        } catch (e) { showToast('Error al transferir conversación', 'error'); }
+    };
+
+    const handleCloseWithReason = async (reason) => {
+        if (!activeConv) return;
+        try {
+            const res = await fetch(`/admin/api/omnichannel/conversations/${activeConv.id}/close`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                },
+                body: JSON.stringify({ reason })
+            });
+            if (res.ok) {
+                showToast('Conversación cerrada', 'success');
+                setShowCloseModal(false);
+                setShowActionsMenu(false);
+                fetchConversations();
+                fetchAgentStatus();
+            }
+        } catch (e) { showToast('Error al cerrar conversación', 'error'); }
+    };
+
+    const fetchAvailableAgents = async () => {
+        try {
+            const res = await fetch('/admin/api/omnichannel/available-agents');
+            if (res.ok) {
+                const data = await res.json();
+                setAvailableAgents(data);
+            }
+        } catch (e) { console.warn('Error fetching agents:', e); }
+    };
+
+    const fetchSupervisorDashboard = async () => {
+        try {
+            const res = await fetch('/admin/api/omnichannel/supervisor/dashboard');
+            if (res.ok) {
+                const data = await res.json();
+                setSupervisorData(data);
+            }
+        } catch (e) { console.warn('Error fetching supervisor data:', e); }
+    };
+
+    const openTransferModal = () => {
+        fetchAvailableAgents();
+        setShowTransferModal(true);
+        setShowActionsMenu(false);
+    };
+
+    const openCloseModal = () => {
+        setShowCloseModal(true);
+        setShowActionsMenu(false);
+    };
+
+    const openSupervisorPanel = () => {
+        fetchSupervisorDashboard();
+        setShowSupervisorPanel(true);
+    };
+
+    const getStatusColor = (status) => {
+        switch (status) {
+            case 'online': return '#22c55e';
+            case 'busy': return '#f59e0b';
+            case 'away': return '#eab308';
+            case 'offline': return '#ef4444';
+            default: return '#6b7280';
+        }
+    };
+
+    const getPriorityBadge = (priority) => {
+        const map = {
+            urgent: { label: 'URGENTE', color: '#ef4444' },
+            high: { label: 'ALTA', color: '#f97316' },
+            normal: { label: 'NORMAL', color: '#6b7280' },
+            low: { label: 'BAJA', color: '#22c55e' },
+        };
+        return map[priority] || map.normal;
+    };
+
     // ─── Helpers ──────────────────────────────────────────────
     const showToast = (message, type = 'error') => {
         setToast({ message, type });
@@ -695,10 +1136,20 @@ function InboxIndex() {
             {/* ─── COLUMNA 1: LISTA DE CHATS ─── */}
             <div className="inbox-sidebar">
                 <div className="inbox-sidebar__header">
-                    <div className="inbox-sidebar__title">Mensajes</div>
-                    <button className="inbox-sidebar__refresh-btn" onClick={fetchConversations} title="Actualizar">
-                        <RefreshCw size={16} />
-                    </button>
+                    <div className="inbox-sidebar__title">
+                        Mensajes
+                        <span style={{ fontSize: '11px', opacity: 0.7, marginLeft: '6px' }}>{agentActiveChats}/{agentMaxChats}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        {/* Agent Status Selector */}
+                        <AgentStatusDropdown status={agentStatus} onChange={handleChangeAgentStatus} />
+                        <button className="inbox-sidebar__refresh-btn" onClick={openSupervisorPanel} title="Supervisor Dashboard">
+                            <Activity size={16} />
+                        </button>
+                        <button className="inbox-sidebar__refresh-btn" onClick={fetchConversations} title="Actualizar">
+                            <RefreshCw size={16} />
+                        </button>
+                    </div>
                 </div>
 
                 <div className="inbox-sidebar__tabs">
@@ -766,16 +1217,43 @@ function InboxIndex() {
                                     </div>
                                 </div>
                                 <div className="inbox-conv__info">
-                                    <div className="inbox-conv__name">{conv.contactName}</div>
+                                    <div className="inbox-conv__name">
+                                        {conv.contactName}
+                                        {conv.priority && conv.priority !== 'normal' && (
+                                            <span style={{
+                                                display: 'inline-block',
+                                                fontSize: '9px',
+                                                fontWeight: 700,
+                                                padding: '1px 5px',
+                                                borderRadius: '4px',
+                                                marginLeft: '6px',
+                                                background: getPriorityBadge(conv.priority).color + '22',
+                                                color: getPriorityBadge(conv.priority).color,
+                                                verticalAlign: 'middle'
+                                            }}>
+                                                {getPriorityBadge(conv.priority).label}
+                                            </span>
+                                        )}
+                                    </div>
                                     <div className="inbox-conv__preview">
                                         {conv.isBotActive && <Bot size={12} className="inline mr-1 opacity-70" />}
+                                        {conv.status === 'waiting' && <Timer size={12} className="inline mr-1" style={{ color: '#f59e0b' }} />}
                                         {conv.lastMessagePreview || 'Sin mensajes'}
                                     </div>
+                                    {conv.agentName && (
+                                        <div style={{ fontSize: '10px', color: '#8b8fa3', marginTop: '2px' }}>
+                                            <User size={10} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '3px' }} />
+                                            {conv.agentName}
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="inbox-conv__meta">
                                     <div className="inbox-conv__time">{conv.lastMessageTime || conv.lastMessageDate}</div>
                                     {conv.unreadCount > 0 && (
                                         <div className="inbox-conv__badge">{conv.unreadCount}</div>
+                                    )}
+                                    {conv.status === 'waiting' && (
+                                        <div className="inbox-conv__badge" style={{ background: '#f59e0b' }}>⏳</div>
                                     )}
                                     {['resolved', 'closed'].includes(conv.status) && (
                                         <div className="inbox-conv__resolved-badge"><CheckCircle2 size={10} /></div>
@@ -833,11 +1311,17 @@ function InboxIndex() {
                                             <button onClick={handleAddNote}>
                                                 <StickyNote size={14} /> Añadir Nota Interna
                                             </button>
+                                            <button onClick={openTransferModal}>
+                                                <PhoneForwarded size={14} /> Transferir a Asesor
+                                            </button>
                                             {!activeConv.isBotActive && (
                                                 <button onClick={handleTransferToBot}>
                                                     <Bot size={14} /> Transferir a IA
                                                 </button>
                                             )}
+                                            <button onClick={openCloseModal} style={{ color: '#ef4444' }}>
+                                                <XCircle size={14} /> Cerrar Conversación
+                                            </button>
                                         </div>
                                     )}
                                 </div>
@@ -983,6 +1467,32 @@ function InboxIndex() {
                                     <span className="inbox-detail__info-value font-semibold text-blue-600">{contactProfile.conversation.subject}</span>
                                 </div>
                             )}
+                            {contactProfile.activeCase && (
+                                <div className="inbox-detail__info-row" style={{ marginTop: '12px' }}>
+                                    <a 
+                                        href={`/admin/crm/cases/${contactProfile.activeCase.id}`} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        style={{
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '6px',
+                                            background: 'var(--twenty-primary)',
+                                            color: 'white',
+                                            padding: '8px 12px',
+                                            borderRadius: '8px',
+                                            fontSize: '13px',
+                                            fontWeight: 600,
+                                            textDecoration: 'none',
+                                            width: '100%',
+                                            justifyContent: 'center'
+                                        }}
+                                    >
+                                        <Ticket size={16} />
+                                        Ver Caso Asociado (#{contactProfile.activeCase.id})
+                                    </a>
+                                </div>
+                            )}
                         </div>
 
                         <div className="inbox-detail__section">
@@ -1018,6 +1528,48 @@ function InboxIndex() {
                     </div>
                 )}
             </div>
+
+            {/* ─── MODAL: TRANSFERIR CONVERSACIÓN ─── */}
+            {showTransferModal && (
+                <div className="inbox-modal-overlay" onClick={() => setShowTransferModal(false)}>
+                    <div className="inbox-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="inbox-modal__header">
+                            <PhoneForwarded size={18} />
+                            <span>Transferir Conversación</span>
+                            <button onClick={() => setShowTransferModal(false)}><X size={18} /></button>
+                        </div>
+                        <TransferForm agents={availableAgents} onTransfer={handleTransfer} onCancel={() => setShowTransferModal(false)} />
+                    </div>
+                </div>
+            )}
+
+            {/* ─── MODAL: CERRAR CON MOTIVO ─── */}
+            {showCloseModal && (
+                <div className="inbox-modal-overlay" onClick={() => setShowCloseModal(false)}>
+                    <div className="inbox-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="inbox-modal__header">
+                            <XCircle size={18} />
+                            <span>Cerrar Conversación</span>
+                            <button onClick={() => setShowCloseModal(false)}><X size={18} /></button>
+                        </div>
+                        <CloseReasonForm onClose={handleCloseWithReason} onCancel={() => setShowCloseModal(false)} />
+                    </div>
+                </div>
+            )}
+
+            {/* ─── MODAL: SUPERVISOR DASHBOARD ─── */}
+            {showSupervisorPanel && (
+                <div className="inbox-modal-overlay" onClick={() => setShowSupervisorPanel(false)}>
+                    <div className="inbox-modal inbox-modal--wide" onClick={(e) => e.stopPropagation()}>
+                        <div className="inbox-modal__header">
+                            <Activity size={18} />
+                            <span>Panel del Supervisor</span>
+                            <button onClick={() => setShowSupervisorPanel(false)}><X size={18} /></button>
+                        </div>
+                        <SupervisorPanel data={supervisorData} onRefresh={fetchSupervisorDashboard} />
+                    </div>
+                </div>
+            )}
         </div>
         </TwentyCrmLayout>
     );

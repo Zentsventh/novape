@@ -348,6 +348,11 @@ class ConversationApiController extends Controller
             'totalMessages' => OmnichannelMessage::where('contact_id', $contact->id)->count(),
         ];
 
+        // Buscar caso de CRM vinculado a la conversación
+        $activeCase = \App\Models\CrmCase::where('omnichannel_conversation_id', $conversation->id)
+            ->whereIn('estado', ['abierto', 'en_progreso'])
+            ->first(['id', 'titulo', 'estado']);
+
         return response()->json([
             'contact' => [
                 'id' => $contact->id,
@@ -375,6 +380,7 @@ class ConversationApiController extends Controller
                 'fecha' => $lastOrder->created_at->format('d/m/Y'),
             ] : null,
             'stats' => $stats,
+            'activeCase' => $activeCase,
         ]);
     }
 
@@ -510,5 +516,201 @@ class ConversationApiController extends Controller
             return ['success' => false, 'data' => ['error' => 'Sin ID de Instagram']];
         }
         return $instagram->sendTextMessage($recipientId, $content);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // ENTERPRISE ENDPOINTS
+    // ═══════════════════════════════════════════════════════════════
+
+    /**
+     * Transferir conversación a otro asesor.
+     */
+    public function transferConversation(Request $request, OmnichannelConversation $conversation)
+    {
+        $request->validate([
+            'to_user_id' => 'required|integer|exists:usuario,id',
+            'reason' => 'nullable|string|max:500',
+        ]);
+
+        $fromUser = auth()->user();
+        $toUser = \App\Models\Usuario::findOrFail($request->input('to_user_id'));
+
+        app(TicketAssignmentService::class)->transferConversation(
+            $conversation, $toUser, $fromUser, $request->input('reason', '')
+        );
+
+        OmnichannelMessage::create([
+            'conversation_id' => $conversation->id,
+            'contact_id' => $conversation->contact_id,
+            'user_id' => $fromUser->id,
+            'channel' => $conversation->channel,
+            'direction' => 'outbound',
+            'message_type' => 'text',
+            'content' => "📋 Transferido de {$fromUser->nombre_completo} a {$toUser->nombre_completo}. Motivo: " . ($request->input('reason') ?: 'N/A'),
+            'is_internal_note' => true,
+            'status' => 'sent',
+        ]);
+
+        broadcast(new ConversationUpdated($conversation->refresh()))->toOthers();
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Cerrar conversación con motivo.
+     */
+    public function closeConversation(Request $request, OmnichannelConversation $conversation)
+    {
+        $request->validate([
+            'reason' => 'required|string|max:500',
+        ]);
+
+        app(TicketAssignmentService::class)->closeConversation(
+            $conversation, auth()->user(), $request->input('reason')
+        );
+
+        broadcast(new ConversationUpdated($conversation->refresh()))->toOthers();
+        return response()->json(['success' => true]);
+    }
+
+    /**
+     * Cambiar estado del asesor actual (online/busy/away/offline).
+     */
+    public function updateAgentStatus(Request $request)
+    {
+        $request->validate([
+            'status' => 'required|in:online,busy,away,offline',
+        ]);
+
+        $config = \App\Models\Omnichannel\OmnichannelAgentConfig::firstOrCreate(
+            ['usuario_id' => auth()->id()],
+            ['max_chats' => 5]
+        );
+
+        $config->update(['status' => $request->input('status')]);
+
+        // Si cambió a online, procesar la cola
+        if ($request->input('status') === 'online') {
+            app(TicketAssignmentService::class)->processQueueForAgent(auth()->user());
+        }
+
+        return response()->json(['success' => true, 'status' => $config->status]);
+    }
+
+    /**
+     * Obtener estado actual del asesor.
+     */
+    public function getAgentStatus()
+    {
+        $config = \App\Models\Omnichannel\OmnichannelAgentConfig::firstOrCreate(
+            ['usuario_id' => auth()->id()],
+            ['max_chats' => 5, 'status' => 'offline']
+        );
+
+        $activeChats = OmnichannelConversation::where('assigned_user_id', auth()->id())
+            ->whereIn('status', ['open', 'human_active', 'waiting', 'bot_active'])
+            ->count();
+
+        return response()->json([
+            'status' => $config->status,
+            'maxChats' => $config->max_chats,
+            'activeChats' => $activeChats,
+            'skills' => $config->skills ?? [],
+        ]);
+    }
+
+    /**
+     * Dashboard del supervisor: métricas en tiempo real.
+     */
+    public function supervisorDashboard()
+    {
+        // 1. Agentes y su carga
+        $agents = \App\Models\Usuario::whereHas('roles', function ($q) {
+                $q->whereIn('rol.id', [1, 2]);
+            })
+            ->with('omnichannelConfig')
+            ->withCount(['omnichannelConversations as active_chats' => function ($q) {
+                $q->whereIn('status', ['open', 'human_active', 'waiting']);
+            }])
+            ->withCount(['omnichannelConversations as resolved_today' => function ($q) {
+                $q->whereIn('status', ['resolved', 'closed'])
+                  ->whereDate('closed_at', today());
+            }])
+            ->get()
+            ->map(function ($agent) {
+                return [
+                    'id' => $agent->id,
+                    'name' => $agent->nombre_completo,
+                    'status' => $agent->omnichannelConfig?->status ?? 'offline',
+                    'maxChats' => $agent->omnichannelConfig?->max_chats ?? 5,
+                    'activeChats' => $agent->active_chats,
+                    'resolvedToday' => $agent->resolved_today,
+                    'skills' => $agent->omnichannelConfig?->skills ?? [],
+                ];
+            });
+
+        // 2. Cola de espera
+        $queueCount = \App\Models\Omnichannel\OmnichannelQueue::count();
+        $queueItems = \App\Models\Omnichannel\OmnichannelQueue::with('conversation.contact')
+            ->orderBy('queued_at', 'asc')
+            ->limit(20)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'conversationId' => $item->conversation_id,
+                    'contactName' => $item->conversation?->contact?->name ?? 'Desconocido',
+                    'channel' => $item->conversation?->channel,
+                    'priority' => $item->priority,
+                    'waitingTime' => $item->queued_at ? $item->queued_at->diffForHumans() : 'N/A',
+                    'waitingMinutes' => $item->queued_at ? now()->diffInMinutes($item->queued_at) : 0,
+                ];
+            });
+
+        // 3. Métricas globales
+        $activeConversations = OmnichannelConversation::whereIn('status', ['open', 'human_active', 'waiting'])->count();
+        $botConversations = OmnichannelConversation::where('status', 'bot_active')->count();
+        $closedToday = OmnichannelConversation::whereIn('status', ['resolved', 'closed'])
+            ->whereDate('closed_at', today())
+            ->count();
+
+        return response()->json([
+            'agents' => $agents,
+            'queue' => [
+                'count' => $queueCount,
+                'items' => $queueItems,
+            ],
+            'metrics' => [
+                'activeConversations' => $activeConversations,
+                'botConversations' => $botConversations,
+                'closedToday' => $closedToday,
+                'queueCount' => $queueCount,
+            ],
+        ]);
+    }
+
+    /**
+     * Listar asesores disponibles para transferencia.
+     */
+    public function availableAgents()
+    {
+        $agents = \App\Models\Usuario::whereHas('roles', function ($q) {
+                $q->whereIn('rol.id', [1, 2]);
+            })
+            ->with('omnichannelConfig')
+            ->withCount(['omnichannelConversations as active_chats' => function ($q) {
+                $q->whereIn('status', ['open', 'human_active', 'waiting']);
+            }])
+            ->get()
+            ->map(function ($agent) {
+                return [
+                    'id' => $agent->id,
+                    'name' => $agent->nombre_completo,
+                    'status' => $agent->omnichannelConfig?->status ?? 'offline',
+                    'activeChats' => $agent->active_chats,
+                    'maxChats' => $agent->omnichannelConfig?->max_chats ?? 5,
+                ];
+            });
+
+        return response()->json($agents);
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Profile;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Password;
 
 class UpdatePasswordRequest extends FormRequest
 {
@@ -16,15 +17,7 @@ class UpdatePasswordRequest extends FormRequest
     public function rules(): array
     {
         $rules = [
-            'password' => [
-                'required',
-                'min:8',
-                'regex:/[a-z]/',
-                'regex:/[A-Z]/',
-                'regex:/[0-9]/',
-                'regex:/[@$!%*#?&]/',
-                'confirmed'
-            ],
+            'password' => ['required', Password::min(12)->mixedCase()->numbers()->symbols()->uncompromised(), 'confirmed'],
         ];
 
         if ($this->user()->has_set_password) {

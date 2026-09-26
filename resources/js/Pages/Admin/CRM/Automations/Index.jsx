@@ -52,45 +52,46 @@ export default function Index({ automations = [] }) {
                 .auto-card {
                     background: #ffffff;
                     border: 1px solid #E2E8F0;
-                    border-radius: 12px;
+                    border-radius: 16px;
                     padding: 24px;
-                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+                    transition: all 0.2s ease;
                     display: flex;
                     flex-direction: column;
                     gap: 16px;
                 }
                 .auto-card:hover {
-                    box-shadow: 0 10px 15px -3px rgba(0, 123, 255, 0.1), 0 4px 6px -2px rgba(0, 123, 255, 0.05);
-                    transform: translateY(-4px);
-                    border-color: #007BFF;
+                    box-shadow: 0 10px 25px -5px rgba(0, 180, 255, 0.15);
+                    transform: translateY(-3px);
+                    border-color: rgba(0, 180, 255, 0.3);
                 }
                 .btn-primary-custom {
                     display: inline-flex;
                     align-items: center;
                     gap: 8px;
                     padding: 10px 20px;
-                    background: #007BFF;
+                    background: #00B4FF;
                     color: #ffffff;
                     border: none;
-                    border-radius: 8px;
-                    font-weight: 500;
+                    border-radius: 10px;
+                    font-weight: 600;
                     font-size: 14px;
                     cursor: pointer;
                     transition: all 0.2s ease;
-                    box-shadow: 0 4px 6px -1px rgba(0, 123, 255, 0.3);
+                    box-shadow: 0 2px 4px rgba(0, 180, 255, 0.2);
                 }
                 .btn-primary-custom:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 6px 8px -1px rgba(0, 123, 255, 0.4);
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 12px rgba(0, 180, 255, 0.3);
+                    background: #009BE0;
                 }
                 .btn-icon-danger {
-                    background: none;
+                    background: transparent;
                     border: none;
                     color: #94A3B8;
                     cursor: pointer;
                     padding: 6px;
-                    border-radius: 6px;
+                    border-radius: 8px;
                     transition: all 0.2s ease;
                 }
                 .btn-icon-danger:hover {
@@ -101,18 +102,18 @@ export default function Index({ automations = [] }) {
                     padding: 16px;
                     background: #F8FAFC;
                     border: 1px solid #E2E8F0;
-                    border-radius: 8px;
+                    border-radius: 10px;
                     font-size: 13px;
                     transition: all 0.2s ease;
                 }
                 .auto-card:hover .flow-step {
-                    border-color: rgba(0, 123, 255, 0.2);
-                    background: #F0F7FF;
+                    border-color: rgba(0, 180, 255, 0.3);
+                    background: #F0F9FF;
                 }
                 .flow-step-title {
                     font-weight: 600;
                     color: #1E293B;
-                    margin-bottom: 6px;
+                    margin-bottom: 8px;
                     display: flex;
                     align-items: center;
                     gap: 8px;
@@ -126,7 +127,7 @@ export default function Index({ automations = [] }) {
                     text-align: center;
                     background: #ffffff;
                     border: 1px dashed #CBD5E1;
-                    border-radius: 12px;
+                    border-radius: 16px;
                     color: #64748B;
                 }
                 /* Drawer Form Styles */
@@ -142,15 +143,17 @@ export default function Index({ automations = [] }) {
                     gap: 8px;
                 }
                 .drawer-label {
-                    font-size: 14px;
+                    font-size: 13px;
                     font-weight: 600;
-                    color: #1E293B;
+                    color: #64748B;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
                 }
                 .drawer-input {
                     width: 100%;
                     padding: 12px 16px;
                     border: 1px solid #E2E8F0;
-                    border-radius: 8px;
+                    border-radius: 10px;
                     font-size: 14px;
                     color: #1E293B;
                     background: #F8FAFC;
@@ -160,8 +163,8 @@ export default function Index({ automations = [] }) {
                 }
                 .drawer-input:focus {
                     background: #ffffff;
-                    border-color: #007BFF;
-                    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.1);
+                    border-color: #00B4FF;
+                    box-shadow: 0 0 0 4px rgba(0, 180, 255, 0.1);
                 }
                 .drawer-input::placeholder {
                     color: #94A3B8;
@@ -177,16 +180,17 @@ export default function Index({ automations = [] }) {
                     background: #ffffff;
                     color: #475569;
                     border: 1px solid #E2E8F0;
-                    border-radius: 8px;
-                    font-weight: 500;
+                    border-radius: 10px;
+                    font-weight: 600;
                     font-size: 14px;
                     cursor: pointer;
                     transition: all 0.2s ease;
+                    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
                 }
                 .btn-secondary-custom:hover {
-                    background: #F8FAFC;
+                    background: #F1F5F9;
                     color: #1E293B;
-                    border-color: #CBD5E1;
+                    border-color: #94A3B8;
                 }
                 .drawer-footer {
                     margin-top: 16px;
@@ -198,17 +202,16 @@ export default function Index({ automations = [] }) {
                 }
             `}</style>
 
-            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F4F7F6' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#F8FAFC' }}>
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '32px', borderBottom: '1px solid #E2E8F0', background: '#ffffff' }}>
                     <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                            <div style={{ background: 'rgba(0, 123, 255, 0.1)', padding: '8px', borderRadius: '10px', color: '#007BFF' }}>
-                                <Zap size={20} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                            <div style={{ background: '#F0F9FF', padding: '8px', borderRadius: '10px', color: '#00B4FF' }}>
+                                <Zap size={24} />
                             </div>
-                            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 800, color: '#1E293B' }}>Automatizaciones</h1>
+                            <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: '#1E293B', letterSpacing: '-0.02em' }}>Automatizaciones</h1>
                         </div>
-                        <p style={{ margin: 0, fontSize: '15px', color: '#64748B' }}>Configura flujos de trabajo visuales y webhooks para responder a eventos del CRM.</p>
                     </div>
                     <button className="btn-primary-custom" onClick={() => setDrawerOpen(true)}>
                         <Plus size={18} />
@@ -220,8 +223,8 @@ export default function Index({ automations = [] }) {
                 <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
                     {automations.length === 0 ? (
                         <div className="empty-state">
-                            <div style={{ width: '64px', height: '64px', borderRadius: '16px', background: 'rgba(0, 123, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px' }}>
-                                <Zap size={32} color="#007BFF" />
+                            <div style={{ width: '64px', height: '64px', borderRadius: '16px', background: 'rgba(0, 180, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px' }}>
+                                <Zap size={32} color="#00B4FF" />
                             </div>
                             <h3 style={{ margin: '0 0 8px 0', color: '#1E293B', fontSize: '18px', fontWeight: 600 }}>No hay automatizaciones</h3>
                             <p style={{ margin: '0 0 24px 0', fontSize: '15px' }}>Crea tu primera automatización para optimizar tus flujos de trabajo.</p>
@@ -236,14 +239,14 @@ export default function Index({ automations = [] }) {
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                             <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: auto.activo ? '#10b981' : '#94A3B8', boxShadow: auto.activo ? '0 0 10px rgba(16, 185, 129, 0.4)' : 'none' }} />
-                                            <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 600, color: '#1E293B' }}>{auto.nombre}</h3>
+                                            <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 700, color: '#1E293B' }}>{auto.nombre}</h3>
                                         </div>
                                         <button 
                                             onClick={() => handleDelete(auto.id)}
                                             className="btn-icon-danger"
                                             title="Eliminar automatización"
                                         >
-                                            <Trash2 size={16} />
+                                            <Trash2 size={18} />
                                         </button>
                                     </div>
                                     
@@ -252,8 +255,8 @@ export default function Index({ automations = [] }) {
                                             <div style={{ background: '#E2E8F0', color: '#475569', padding: '4px 8px', borderRadius: '6px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 700 }}>Trigger</div>
                                             Cuándo
                                         </div>
-                                        <div style={{ color: '#475569', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '8px' }}>
-                                            <Zap size={14} color="#94A3B8" />
+                                        <div style={{ color: '#475569', display: 'flex', alignItems: 'center', gap: '8px', marginTop: '12px', fontWeight: 500 }}>
+                                            <Zap size={16} color="#94A3B8" />
                                             {auto.trigger_type === 'deal_created' && 'Se crea una nueva oportunidad'}
                                             {auto.trigger_type === 'deal_moved' && 'Una oportunidad cambia de etapa'}
                                             {auto.trigger_type === 'company_created' && 'Se registra una nueva empresa'}
@@ -268,15 +271,15 @@ export default function Index({ automations = [] }) {
 
                                     <div className="flow-step">
                                         <div className="flow-step-title">
-                                            <div style={{ background: 'rgba(0, 123, 255, 0.1)', color: '#007BFF', padding: '4px 8px', borderRadius: '6px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 700 }}>Action</div>
+                                            <div style={{ background: 'rgba(0, 180, 255, 0.1)', color: '#00B4FF', padding: '4px 8px', borderRadius: '6px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 700 }}>Action</div>
                                             Entonces
                                         </div>
                                         {auto.acciones.map((acc, i) => (
-                                            <div key={i} style={{ color: '#475569', display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
+                                            <div key={i} style={{ color: '#475569', display: 'flex', alignItems: 'center', gap: '10px', marginTop: '12px', fontWeight: 500 }}>
                                                 {acc.type === 'webhook' && (
                                                     <>
                                                         <div style={{ background: '#1E293B', color: '#fff', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', fontWeight: 700 }}>POST</div>
-                                                        <span style={{ fontFamily: 'monospace', background: '#F1F5F9', padding: '2px 8px', borderRadius: '4px', border: '1px solid #E2E8F0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '12px' }}>{acc.url}</span>
+                                                        <span style={{ fontFamily: 'monospace', background: '#ffffff', padding: '4px 8px', borderRadius: '6px', border: '1px solid #E2E8F0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '12px', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.02)', flex: 1 }}>{acc.url}</span>
                                                     </>
                                                 )}
                                                 {acc.type === 'send_email' && <span>Enviar Correo: {acc.message}</span>}

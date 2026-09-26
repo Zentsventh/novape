@@ -10,6 +10,7 @@ use App\Services\Shipping\ShippingCalculationService;
 use App\Models\Pedido;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Log;
 
 class ShippingController extends Controller
 {
@@ -19,6 +20,8 @@ class ShippingController extends Controller
 
     public function calculate(CalculateShippingRequest $request)
     {
+        Log::info('Shipping calculate called', ['user_id' => auth()->id(), 'cart' => $request->input('cart')]);
+
         $cart = $request->input('cart');
         if (!$cart || empty($cart)) {
             $cart = session()->get('cart', []);
@@ -37,6 +40,8 @@ class ShippingController extends Controller
 
     public function trackPage(Request $request)
     {
+        Log::info('Tracking page accessed', ['user_id' => auth()->id(), 'query' => $request->query()]);
+
         $codigo = $request->query('codigo');
         if (!$codigo) {
             return redirect('/perfil')->withErrors(['error' => 'Código de pedido no proporcionado.']);

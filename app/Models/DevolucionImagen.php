@@ -8,5 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class DevolucionImagen extends Model
 {
+    protected $guarded = [];
+
     //
 }

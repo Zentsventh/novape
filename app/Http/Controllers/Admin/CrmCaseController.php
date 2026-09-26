@@ -55,7 +55,9 @@ class CrmCaseController extends Controller
             'deal_id' => 'nullable|exists:crm_deals,id',
         ]);
 
-        CrmCase::create($validated);
+        $crmCase = CrmCase::create($validated);
+
+        \App\Services\Admin\Crm\AutomationEngineService::trigger('case_created', $crmCase);
 
         return redirect()->back()->with('success', 'Caso creado exitosamente');
     }
@@ -67,6 +69,7 @@ class CrmCaseController extends Controller
             'asignadoA', 
             'pedido', 
             'deal',
+            'omnichannelConversation',
             'notas' => function ($query) {
                 $query->with('autor');
             },

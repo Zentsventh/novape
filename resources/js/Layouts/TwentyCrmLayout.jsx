@@ -4,7 +4,7 @@ import { AnimatePresence } from 'framer-motion';
 import PageTransition from '@/Components/Animations/PageTransition';
 import { 
     Search, Home, Target, Users, Building, 
-    CheckSquare, Settings, Zap, Bell, ChevronLeft, ChevronRight, Menu, Ticket, Calendar
+    CheckSquare, Settings, Zap, Bell, ChevronLeft, ChevronRight, Menu, Ticket, Calendar, LayoutDashboard
 } from 'lucide-react';
 import '../../css/admin/twenty.css'; // The new CSS file
 import '../../css/admin/crm-design.css'; // Enterprise CRM Design System
@@ -92,9 +92,26 @@ export default function TwentyCrmLayout({ children, title, headerActions }) {
                         )}
                     </div>
                 </div>
+                
+                <div style={{ padding: '0 12px 12px 12px', borderBottom: '1px solid rgba(255,255,255,0.05)', marginBottom: '12px' }}>
+                    <Link href="/admin" style={{
+                        display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px',
+                        background: 'rgba(255,255,255,0.04)', borderRadius: '8px', color: '#94a3b8',
+                        textDecoration: 'none', fontSize: '13px', fontWeight: '600', transition: 'all 0.2s',
+                        justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+                        border: '1px solid rgba(255,255,255,0.05)'
+                    }}
+                    onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; }}
+                    onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'; }}
+                    title={sidebarCollapsed ? "Volver a Plataforma Principal" : ""}
+                    >
+                        <LayoutDashboard size={18} />
+                        {!sidebarCollapsed && <span>Plataforma (ERP)</span>}
+                    </Link>
+                </div>
 
                 <nav className="twenty-nav">
-                    {!sidebarCollapsed && <div className="twenty-nav-group-title">Vistas</div>}
+                    {!sidebarCollapsed && <div className="twenty-nav-group-title">Vistas CRM</div>}
                     {navItems.map((item) => (
                         <Link
                             key={item.href}

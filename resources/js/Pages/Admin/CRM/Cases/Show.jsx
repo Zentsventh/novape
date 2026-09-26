@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import TwentyCrmLayout from '../../../../Layouts/TwentyCrmLayout';
-import { Ticket, User, Package, Clock, CheckCircle, ChevronLeft, Save, Calendar, MessageSquare, Send, CalendarClock } from 'lucide-react';
+import { Ticket, User, Package, CheckCircle, ChevronLeft, Calendar, MessageSquare, Send, CalendarClock } from 'lucide-react';
 import Swal from 'sweetalert2';
 
 export default function Show({ crmCase = {} }) {
@@ -10,16 +10,7 @@ export default function Show({ crmCase = {} }) {
     });
 
     const [isSavingStatus, setIsSavingStatus] = useState(false);
-
-    const getPriorityColor = (prioridad) => {
-        switch(prioridad) {
-            case 'urgente': return 'bg-red-100 text-red-700';
-            case 'alta': return 'bg-orange-100 text-orange-700';
-            case 'media': return 'bg-yellow-100 text-yellow-700';
-            case 'baja': return 'bg-green-100 text-green-700';
-            default: return 'bg-gray-100 text-gray-700';
-        }
-    };
+    const [slaDate, setSlaDate] = useState(crmCase.fecha_vencimiento ? new Date(crmCase.fecha_vencimiento).toISOString().slice(0, 16) : '');
 
     const handleQuickUpdate = (field, value) => {
         setIsSavingStatus(true);
@@ -71,97 +62,158 @@ export default function Show({ crmCase = {} }) {
         <TwentyCrmLayout title={`Caso #${crmCase.id}`}>
             <Head title={`Caso #${crmCase.id} - CRM`} />
 
-            <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
+            <div style={{ display: 'flex', height: '100%', overflow: 'hidden', backgroundColor: '#F8FAFC', fontFamily: "'Inter', -apple-system, sans-serif" }}>
                 {/* Left Sidebar (Static Details) */}
-                <div style={{ width: '320px', borderRight: '1px solid var(--twenty-border)', background: 'var(--twenty-bg-surface)', padding: '24px', overflowY: 'auto' }}>
-                    <Link href="/admin/crm/cases" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: 'var(--twenty-text-muted)', textDecoration: 'none', marginBottom: '24px', fontSize: '14px', fontWeight: 500 }}>
+                <div style={{ 
+                    width: '340px', 
+                    borderRight: '1px solid #E2E8F0', 
+                    background: '#ffffff', 
+                    padding: '32px 24px', 
+                    overflowY: 'auto',
+                    boxShadow: '4px 0 24px rgba(0,0,0,0.02)',
+                    zIndex: 10
+                }}>
+                    <Link 
+                        href="/admin/crm/cases" 
+                        style={{ 
+                            display: 'inline-flex', alignItems: 'center', gap: '8px', 
+                            color: '#64748B', textDecoration: 'none', marginBottom: '32px', 
+                            fontSize: '13px', fontWeight: 600, transition: 'all 0.2s ease',
+                            padding: '8px 12px', borderRadius: '8px', marginLeft: '-12px'
+                        }}
+                        onMouseOver={(e) => { e.currentTarget.style.color = '#00B4FF'; e.currentTarget.style.backgroundColor = '#F1F5F9'; }}
+                        onMouseOut={(e) => { e.currentTarget.style.color = '#64748B'; e.currentTarget.style.backgroundColor = 'transparent'; }}
+                    >
                         <ChevronLeft size={16} />
                         Volver a Casos
                     </Link>
 
-                    <div style={{ marginBottom: '32px' }}>
-                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '16px' }}>
-                            <div style={{ width: 48, height: 48, background: 'var(--twenty-primary-bg)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--twenty-primary)' }}>
-                                <Ticket size={24} />
+                    <div style={{ marginBottom: '40px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                            <div style={{ width: '40px', height: '40px', background: 'linear-gradient(135deg, #00B4FF, #009BE0)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', boxShadow: '0 4px 12px rgba(0, 180, 255, 0.3)' }}>
+                                <Ticket size={20} />
                             </div>
-                            <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--twenty-text-muted)' }}>#{crmCase.id}</span>
+                            <span style={{ fontSize: '13px', fontWeight: 700, color: '#00B4FF', letterSpacing: '0.5px' }}>CASO #{crmCase.id}</span>
                         </div>
-                        <h2 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--twenty-text-main)', marginBottom: '16px', lineHeight: 1.3 }}>
+                        <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#1E293B', marginBottom: '8px', lineHeight: 1.3, letterSpacing: '-0.3px' }}>
                             {crmCase.titulo}
                         </h2>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
                         
                         {/* Quick Controls */}
-                        <div style={{ background: 'var(--twenty-background)', padding: '16px', borderRadius: '12px', border: '1px solid var(--twenty-border)' }}>
-                            <div style={{ marginBottom: '16px' }}>
-                                <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--twenty-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px', display: 'block' }}>Estado del Ticket</label>
-                                <select 
-                                    className="twenty-input" 
-                                    style={{ width: '100%', cursor: 'pointer', background: crmCase.estado === 'resuelto' ? '#f0fdf4' : 'var(--twenty-bg-surface)' }} 
-                                    value={crmCase.estado} 
-                                    onChange={(e) => handleQuickUpdate('estado', e.target.value)}
-                                    disabled={isSavingStatus}
-                                >
-                                    <option value="abierto">Abierto</option>
-                                    <option value="en_progreso">En Progreso</option>
-                                    <option value="resuelto">Resuelto</option>
-                                    <option value="cerrado">Cerrado</option>
-                                </select>
+                        <div style={{ background: '#ffffff', padding: '24px', borderRadius: '16px', border: '1px solid #E2E8F0', boxShadow: '0 4px 20px -2px rgba(0,0,0,0.03)' }}>
+                            <div style={{ marginBottom: '20px' }}>
+                                <label style={{ fontSize: '12px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px', display: 'block' }}>Estado del Ticket</label>
+                                <div style={{ position: 'relative' }}>
+                                    <select 
+                                        style={{ 
+                                            width: '100%', cursor: 'pointer', background: crmCase.estado === 'resuelto' ? '#F0FDF4' : '#F8FAFC',
+                                            border: crmCase.estado === 'resuelto' ? '1px solid #BBF7D0' : '1px solid #E2E8F0',
+                                            padding: '10px 14px', borderRadius: '10px', fontSize: '14px', fontWeight: 600, color: '#1E293B',
+                                            outline: 'none', transition: 'all 0.2s', appearance: 'none',
+                                            boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
+                                        }} 
+                                        value={crmCase.estado} 
+                                        onChange={(e) => handleQuickUpdate('estado', e.target.value)}
+                                        disabled={isSavingStatus}
+                                        onFocus={e => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 4px rgba(0, 180, 255, 0.1)'; }}
+                                        onBlur={e => { e.target.style.borderColor = crmCase.estado === 'resuelto' ? '#BBF7D0' : '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; }}
+                                    >
+                                        <option value="abierto">Abierto</option>
+                                        <option value="en_progreso">En Progreso</option>
+                                        <option value="resuelto">Resuelto</option>
+                                        <option value="cerrado">Cerrado</option>
+                                    </select>
+                                    <div style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#94A3B8' }}>
+                                        <ChevronLeft size={16} style={{ transform: 'rotate(-90deg)' }} />
+                                    </div>
+                                </div>
                             </div>
                             
-                            <div style={{ marginBottom: '16px' }}>
-                                <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--twenty-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px', display: 'block' }}>Prioridad</label>
-                                <select 
-                                    className="twenty-input" 
-                                    style={{ width: '100%', cursor: 'pointer' }} 
-                                    value={crmCase.prioridad} 
-                                    onChange={(e) => handleQuickUpdate('prioridad', e.target.value)}
-                                    disabled={isSavingStatus}
-                                >
-                                    <option value="baja">Baja</option>
-                                    <option value="media">Media</option>
-                                    <option value="alta">Alta</option>
-                                    <option value="urgente">Urgente</option>
-                                </select>
+                            <div style={{ marginBottom: '20px' }}>
+                                <label style={{ fontSize: '12px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px', display: 'block' }}>Prioridad</label>
+                                <div style={{ position: 'relative' }}>
+                                    <select 
+                                        style={{ 
+                                            width: '100%', cursor: 'pointer', background: '#F8FAFC', border: '1px solid #E2E8F0',
+                                            padding: '10px 14px', borderRadius: '10px', fontSize: '14px', fontWeight: 600, color: '#1E293B',
+                                            outline: 'none', transition: 'all 0.2s', appearance: 'none',
+                                            boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
+                                        }} 
+                                        value={crmCase.prioridad} 
+                                        onChange={(e) => handleQuickUpdate('prioridad', e.target.value)}
+                                        disabled={isSavingStatus}
+                                        onFocus={e => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 4px rgba(0, 180, 255, 0.1)'; }}
+                                        onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; }}
+                                    >
+                                        <option value="baja">Baja</option>
+                                        <option value="media">Media</option>
+                                        <option value="alta">Alta</option>
+                                        <option value="urgente">Urgente</option>
+                                    </select>
+                                    <div style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#94A3B8' }}>
+                                        <ChevronLeft size={16} style={{ transform: 'rotate(-90deg)' }} />
+                                    </div>
+                                </div>
                             </div>
 
                             <div>
-                                <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--twenty-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px', display: 'block' }}>Vencimiento SLA</label>
+                                <label style={{ fontSize: '12px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px', display: 'block' }}>Vencimiento SLA</label>
                                 <input 
                                     type="datetime-local" 
-                                    className="twenty-input" 
-                                    style={{ width: '100%', cursor: 'pointer' }} 
-                                    value={crmCase.fecha_vencimiento ? new Date(crmCase.fecha_vencimiento).toISOString().slice(0, 16) : ''}
-                                    onChange={(e) => handleQuickUpdate('fecha_vencimiento', e.target.value)}
+                                    style={{ 
+                                        width: '100%', cursor: 'pointer', background: '#F8FAFC', border: '1px solid #E2E8F0',
+                                        padding: '10px 14px', borderRadius: '10px', fontSize: '14px', fontWeight: 500, color: '#1E293B',
+                                        outline: 'none', transition: 'all 0.2s',
+                                        boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
+                                    }} 
+                                    value={slaDate}
+                                    onChange={(e) => setSlaDate(e.target.value)}
                                     disabled={isSavingStatus}
+                                    onFocus={e => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 4px rgba(0, 180, 255, 0.1)'; }}
+                                    onBlur={e => { 
+                                        e.target.style.borderColor = '#E2E8F0'; 
+                                        e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)';
+                                        const originalDate = crmCase.fecha_vencimiento ? new Date(crmCase.fecha_vencimiento).toISOString().slice(0, 16) : '';
+                                        if (e.target.value !== originalDate) {
+                                            handleQuickUpdate('fecha_vencimiento', e.target.value);
+                                        }
+                                    }}
                                 />
                             </div>
                         </div>
 
                         {/* Customer Info */}
                         <div>
-                            <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--twenty-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px', display: 'block' }}>Cliente</label>
+                            <label style={{ fontSize: '12px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px', display: 'block' }}>Cliente</label>
                             {crmCase.cliente ? (
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--twenty-background)', padding: '12px', borderRadius: '12px', border: '1px solid var(--twenty-border)' }}>
-                                    <div className="crm-avatar" style={{ width: 36, height: 36, fontSize: '14px' }}>
+                                <div style={{ 
+                                    display: 'flex', alignItems: 'center', gap: '12px', background: '#ffffff', 
+                                    padding: '16px', borderRadius: '16px', border: '1px solid #E2E8F0',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.02)', transition: 'transform 0.2s ease', cursor: 'pointer'
+                                }}
+                                onMouseOver={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+                                onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}
+                                >
+                                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg, #E0F2FE, #BAE6FD)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0369A1', fontWeight: 800, fontSize: '16px', flexShrink: 0 }}>
                                         {crmCase.cliente.nombres?.charAt(0) || 'C'}
                                     </div>
                                     <div style={{ overflow: 'hidden' }}>
-                                        <div style={{ fontWeight: 600, color: 'var(--twenty-text-main)', fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{crmCase.cliente.nombres} {crmCase.cliente.apellidos}</div>
-                                        <div style={{ fontSize: '12px', color: 'var(--twenty-text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{crmCase.cliente.email}</div>
+                                        <div style={{ fontWeight: 700, color: '#1E293B', fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{crmCase.cliente.nombres} {crmCase.cliente.apellidos}</div>
+                                        <div style={{ fontSize: '12px', color: '#64748B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '2px' }}>{crmCase.cliente.email}</div>
                                     </div>
                                 </div>
                             ) : (
-                                <span style={{ color: 'var(--twenty-text-muted)', fontSize: '14px' }}>Sin asignar</span>
+                                <span style={{ color: '#94A3B8', fontSize: '14px', fontStyle: 'italic' }}>Sin asignar</span>
                             )}
                         </div>
 
                         {crmCase.pedido_id && (
                             <div>
-                                <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--twenty-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px', display: 'block' }}>Pedido Relacionado</label>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: 'var(--twenty-primary)', fontWeight: 500 }}>
+                                <label style={{ fontSize: '12px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px', display: 'block' }}>Pedido Relacionado</label>
+                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#00B4FF', fontWeight: 600, background: '#E0F2FE', padding: '8px 16px', borderRadius: '8px' }}>
                                     <Package size={16} />
                                     Pedido #{crmCase.pedido_id}
                                 </div>
@@ -169,53 +221,77 @@ export default function Show({ crmCase = {} }) {
                         )}
 
                         <div>
-                            <label style={{ fontSize: '12px', fontWeight: 600, color: 'var(--twenty-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px', display: 'block' }}>Agente Asignado</label>
+                            <label style={{ fontSize: '12px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px', display: 'block' }}>Agente Asignado</label>
                             {crmCase.asignadoA ? (
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 500, color: 'var(--twenty-text-main)' }}>
-                                    <User size={16} style={{ color: 'var(--twenty-text-muted)' }} />
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 600, color: '#1E293B', background: '#F8FAFC', padding: '10px 16px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
+                                    <User size={16} style={{ color: '#00B4FF' }} />
                                     {crmCase.asignadoA.nombres}
                                 </div>
                             ) : (
-                                <span style={{ color: 'var(--twenty-text-muted)', fontSize: '14px' }}>Sin agente asignado</span>
+                                <span style={{ color: '#94A3B8', fontSize: '14px', fontStyle: 'italic' }}>Sin agente asignado</span>
                             )}
                         </div>
                     </div>
                 </div>
 
                 {/* Main Content (Timeline & Chat) */}
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--twenty-background)' }}>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#F8FAFC' }}>
                     
                     {/* Header Info */}
-                    <div style={{ padding: '24px 32px', borderBottom: '1px solid var(--twenty-border)', background: 'var(--twenty-bg-surface)', display: 'flex', alignItems: 'center', gap: '24px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--twenty-text-muted)', fontSize: '13px' }}>
-                            <Calendar size={14} />
-                            Reportado: {new Date(crmCase.created_at).toLocaleString()}
+                    <div style={{ 
+                        padding: '24px 40px', borderBottom: '1px solid #E2E8F0', background: 'rgba(255, 255, 255, 0.8)', 
+                        backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', gap: '32px', zIndex: 5 
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748B', fontSize: '13px', fontWeight: 500 }}>
+                            <Calendar size={16} />
+                            Reportado: <span style={{ color: '#1E293B', fontWeight: 600 }}>{new Date(crmCase.created_at).toLocaleString()}</span>
                         </div>
                         {crmCase.fecha_vencimiento && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: new Date(crmCase.fecha_vencimiento) < new Date() ? 'var(--twenty-danger)' : 'var(--twenty-primary)', fontSize: '13px', fontWeight: 600 }}>
-                                <CalendarClock size={14} />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: new Date(crmCase.fecha_vencimiento) < new Date() ? '#EF4444' : '#00B4FF', fontSize: '13px', fontWeight: 600 }}>
+                                <CalendarClock size={16} />
                                 Vence: {new Date(crmCase.fecha_vencimiento).toLocaleString()}
                             </div>
                         )}
-                        <span style={{ background: 'var(--twenty-bg-hover)', color: 'var(--twenty-text-secondary)', padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 600, textTransform: 'capitalize', marginLeft: 'auto' }}>
-                            Caso tipo: {crmCase.tipo}
+                        <span style={{ background: '#E2E8F0', color: '#475569', padding: '6px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginLeft: 'auto' }}>
+                            {crmCase.tipo}
                         </span>
+                        {crmCase.omnichannel_conversation_id && (
+                            <Link href="/admin/inbox" style={{
+                                display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#10b981', color: 'white',
+                                padding: '8px 16px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, textDecoration: 'none',
+                                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)', transition: 'all 0.2s ease'
+                            }}
+                            onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(16, 185, 129, 0.4)'; }}
+                            onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)'; }}
+                            >
+                                <MessageSquare size={16} />
+                                Abrir en Inbox
+                            </Link>
+                        )}
                     </div>
 
                     {/* Timeline (Scrollable) */}
-                    <div style={{ flex: 1, padding: '32px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                    <div style={{ flex: 1, padding: '40px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '32px' }}>
                         {/* Initial Description */}
-                        <div style={{ display: 'flex', gap: '16px' }}>
-                            <div className="crm-avatar" style={{ width: 40, height: 40, fontSize: '14px', flexShrink: 0 }}>
+                        <div style={{ display: 'flex', gap: '20px', maxWidth: '85%' }}>
+                            <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'linear-gradient(135deg, #00B4FF, #009BE0)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', fontWeight: 800, fontSize: '18px', flexShrink: 0, boxShadow: '0 4px 12px rgba(0, 180, 255, 0.2)' }}>
                                 {crmCase.cliente?.nombres?.charAt(0) || 'C'}
                             </div>
                             <div style={{ flex: 1 }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                                    <span style={{ fontWeight: 600, fontSize: '14px', color: 'var(--twenty-text-main)' }}>{crmCase.cliente?.nombres || 'Cliente'}</span>
-                                    <span style={{ fontSize: '12px', color: 'var(--twenty-text-muted)' }}>{new Date(crmCase.created_at).toLocaleString()}</span>
+                                <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '6px' }}>
+                                    <span style={{ fontWeight: 700, fontSize: '15px', color: '#1E293B' }}>{crmCase.cliente?.nombres || 'Cliente'}</span>
+                                    <span style={{ fontSize: '12px', color: '#94A3B8', fontWeight: 500 }}>{new Date(crmCase.created_at).toLocaleString()}</span>
                                 </div>
-                                <div style={{ background: 'var(--twenty-bg-surface)', padding: '16px', borderRadius: '0px 12px 12px 12px', border: '1px solid var(--twenty-border)', fontSize: '14px', lineHeight: 1.6, color: 'var(--twenty-text-main)', whiteSpace: 'pre-wrap' }}>
-                                    {crmCase.descripcion || <span style={{ color: 'var(--twenty-text-muted)', fontStyle: 'italic' }}>Sin descripción adicional provista por el cliente.</span>}
+                                <div style={{ 
+                                    background: '#ffffff', padding: '20px', borderRadius: '4px 20px 20px 20px', 
+                                    border: '1px solid #E2E8F0', fontSize: '14px', lineHeight: 1.6, color: '#334155', 
+                                    whiteSpace: 'pre-wrap', boxShadow: '0 4px 16px -4px rgba(0,0,0,0.03)',
+                                    transition: 'transform 0.2s', cursor: 'default'
+                                }}
+                                onMouseOver={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+                                onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}
+                                >
+                                    {crmCase.descripcion || <span style={{ color: '#94A3B8', fontStyle: 'italic' }}>Sin descripción adicional provista por el cliente.</span>}
                                 </div>
                             </div>
                         </div>
@@ -225,10 +301,10 @@ export default function Show({ crmCase = {} }) {
                             const isActivity = !!item.event_type;
                             if (isActivity) {
                                 return (
-                                    <div key={`act-${item.id}`} style={{ display: 'flex', justifyContent: 'center', margin: '8px 0' }}>
-                                        <div style={{ background: 'var(--twenty-bg-hover)', padding: '4px 16px', borderRadius: '16px', fontSize: '12px', color: 'var(--twenty-text-muted)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <CheckCircle size={12} />
-                                            {item.descripcion} - {new Date(item.created_at).toLocaleTimeString()}
+                                    <div key={`act-${item.id}`} style={{ display: 'flex', justifyContent: 'center', margin: '16px 0' }}>
+                                        <div style={{ background: '#ffffff', padding: '8px 20px', borderRadius: '24px', fontSize: '12px', color: '#64748B', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 2px 8px rgba(0,0,0,0.03)', border: '1px solid #E2E8F0' }}>
+                                            <CheckCircle size={14} color="#10b981" />
+                                            {item.descripcion} <span style={{ opacity: 0.5 }}>•</span> {new Date(item.created_at).toLocaleTimeString()}
                                         </div>
                                     </div>
                                 );
@@ -236,16 +312,24 @@ export default function Show({ crmCase = {} }) {
 
                             // It's a note
                             return (
-                                <div key={`note-${item.id}`} style={{ display: 'flex', gap: '16px', flexDirection: 'row-reverse' }}>
-                                    <div className="crm-avatar" style={{ width: 40, height: 40, fontSize: '14px', flexShrink: 0, background: 'var(--twenty-primary)', color: 'white' }}>
+                                <div key={`note-${item.id}`} style={{ display: 'flex', gap: '20px', flexDirection: 'row-reverse', maxWidth: '85%', alignSelf: 'flex-end' }}>
+                                    <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B', fontWeight: 800, fontSize: '18px', flexShrink: 0, border: '1px solid #E2E8F0' }}>
                                         {item.autor?.nombres?.charAt(0) || 'A'}
                                     </div>
                                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px', flexDirection: 'row-reverse' }}>
-                                            <span style={{ fontWeight: 600, fontSize: '14px', color: 'var(--twenty-text-main)' }}>{item.autor?.nombres || 'Agente'}</span>
-                                            <span style={{ fontSize: '12px', color: 'var(--twenty-text-muted)' }}>{new Date(item.created_at).toLocaleString()}</span>
+                                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '6px', flexDirection: 'row-reverse' }}>
+                                            <span style={{ fontWeight: 700, fontSize: '15px', color: '#1E293B' }}>{item.autor?.nombres || 'Agente'}</span>
+                                            <span style={{ fontSize: '12px', color: '#94A3B8', fontWeight: 500 }}>{new Date(item.created_at).toLocaleString()}</span>
                                         </div>
-                                        <div style={{ background: 'var(--twenty-primary-bg)', color: 'var(--twenty-primary)', padding: '16px', borderRadius: '12px 0px 12px 12px', fontSize: '14px', lineHeight: 1.6, whiteSpace: 'pre-wrap', textAlign: 'right', maxWidth: '85%' }}>
+                                        <div style={{ 
+                                            background: '#F1F5F9', color: '#334155', padding: '20px', 
+                                            borderRadius: '20px 4px 20px 20px', border: '1px solid #E2E8F0',
+                                            fontSize: '14px', lineHeight: 1.6, whiteSpace: 'pre-wrap', textAlign: 'right', 
+                                            boxShadow: '0 4px 16px -4px rgba(0,0,0,0.03)', transition: 'transform 0.2s', cursor: 'default'
+                                        }}
+                                        onMouseOver={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+                                        onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}
+                                        >
                                             {item.contenido}
                                         </div>
                                     </div>
@@ -255,28 +339,41 @@ export default function Show({ crmCase = {} }) {
                     </div>
 
                     {/* Input Area (Bottom) */}
-                    <div style={{ padding: '24px 32px', borderTop: '1px solid var(--twenty-border)', background: 'var(--twenty-bg-surface)' }}>
-                        <form onSubmit={handleAddNote} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--twenty-text-main)', fontWeight: 600, fontSize: '14px' }}>
-                                <MessageSquare size={16} /> Añadir Nota Interna
+                    <div style={{ padding: '32px 40px', borderTop: '1px solid #E2E8F0', background: '#ffffff', zIndex: 10, boxShadow: '0 -4px 24px rgba(0,0,0,0.02)' }}>
+                        <form onSubmit={handleAddNote} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#1E293B', fontWeight: 700, fontSize: '15px' }}>
+                                <MessageSquare size={18} color="#00B4FF" /> Añadir Nota Interna
                             </div>
                             <div style={{ position: 'relative' }}>
                                 <textarea 
-                                    className="twenty-input" 
-                                    style={{ width: '100%', minHeight: '100px', paddingBottom: '48px', resize: 'vertical' }} 
-                                    placeholder="Escribe una actualización o nota sobre este caso..."
+                                    style={{ 
+                                        width: '100%', minHeight: '120px', padding: '20px', paddingBottom: '64px', resize: 'none',
+                                        borderRadius: '16px', border: '1px solid #E2E8F0', background: '#F8FAFC',
+                                        fontSize: '15px', color: '#1E293B', outline: 'none', transition: 'all 0.2s ease',
+                                        boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
+                                    }} 
+                                    placeholder="Escribe una actualización o nota interna sobre este caso (sólo visible para agentes)..."
                                     value={data.contenido}
                                     onChange={e => setData('contenido', e.target.value)}
                                     disabled={processing}
+                                    onFocus={e => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 4px rgba(0, 180, 255, 0.1)'; e.target.style.background = '#ffffff'; }}
+                                    onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.background = '#F8FAFC'; }}
                                 />
-                                <div style={{ position: 'absolute', bottom: '12px', right: '12px' }}>
+                                <div style={{ position: 'absolute', bottom: '16px', right: '16px' }}>
                                     <button 
                                         type="submit" 
-                                        className="twenty-btn-primary" 
                                         disabled={processing || !data.contenido.trim()}
-                                        style={{ padding: '8px 16px' }}
+                                        style={{ 
+                                            display: 'flex', alignItems: 'center', gap: '8px',
+                                            background: (processing || !data.contenido.trim()) ? '#CBD5E1' : '#00B4FF', 
+                                            color: '#ffffff', border: 'none', padding: '10px 20px', borderRadius: '12px',
+                                            fontSize: '14px', fontWeight: 600, cursor: (processing || !data.contenido.trim()) ? 'not-allowed' : 'pointer',
+                                            transition: 'all 0.2s', boxShadow: (processing || !data.contenido.trim()) ? 'none' : '0 4px 14px rgba(0, 180, 255, 0.3)'
+                                        }}
+                                        onMouseOver={e => { if(!processing && data.contenido.trim()) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 180, 255, 0.4)'; } }}
+                                        onMouseOut={e => { if(!processing && data.contenido.trim()) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 180, 255, 0.3)'; } }}
                                     >
-                                        <Send size={16} /> Enviar Nota
+                                        <Send size={16} /> {processing ? 'Enviando...' : 'Enviar Nota'}
                                     </button>
                                 </div>
                             </div>

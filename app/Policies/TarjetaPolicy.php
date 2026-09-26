@@ -12,4 +12,13 @@ class TarjetaPolicy
     {
         return $user->id === $tarjeta->usuario_id;
     }
+    public function view(Usuario $user, Tarjeta $tarjeta): bool
+    {
+        return $user->id === $tarjeta->usuario_id;
+    }
+
+    public function update(Usuario $user, Tarjeta $tarjeta): bool
+    {
+        return $user->id === $tarjeta->usuario_id;
+    }
 }
