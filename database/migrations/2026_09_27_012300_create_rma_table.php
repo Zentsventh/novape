@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('rma', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('pedido_item_id');
+            $table->bigInteger('pedido_item_id');
             $table->foreign('pedido_item_id')
                   ->references('id')
                   ->on('pedido_item')
