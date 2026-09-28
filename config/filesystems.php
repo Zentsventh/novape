@@ -60,6 +60,17 @@ return [
             'report' => false,
         ],
 
+        'azure' => [
+            'driver' => 'azure',
+            'name' => env('AZURE_STORAGE_NAME'),
+            'key' => env('AZURE_STORAGE_KEY'),
+            'container' => env('AZURE_STORAGE_CONTAINER', 'novape-uploads'),
+            'connection_string' => env('AZURE_STORAGE_CONNECTION_STRING'),
+            'url' => env('AZURE_STORAGE_URL'),
+            'prefix' => env('AZURE_STORAGE_PREFIX', ''),
+            'is_public' => env('AZURE_STORAGE_IS_PUBLIC', true),
+        ],
+
     ],
 
     /*

@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         // 1. Tabla de configuración de asesores (estado, límites, skills)
-        Schema::create('omnichannel_agent_configs', function (Blueprint $table) {
+        if (!Schema::hasTable('omnichannel_agent_configs')) {
+            Schema::create('omnichannel_agent_configs', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('usuario_id');
             $table->foreign('usuario_id')->references('id')->on('usuario')->onDelete('cascade');
@@ -21,9 +22,11 @@ return new class extends Migration
             $table->json('skills')->nullable(); // Ej: ["ventas", "soporte"]
             $table->timestamps();
         });
+        }
 
         // 2. Tabla de cola de espera (Queue)
-        Schema::create('omnichannel_queues', function (Blueprint $table) {
+        if (!Schema::hasTable('omnichannel_queues')) {
+            Schema::create('omnichannel_queues', function (Blueprint $table) {
             $table->id();
             $table->foreignId('conversation_id')->constrained('omnichannel_conversations')->onDelete('cascade');
             $table->string('priority')->default('normal'); // urgente, alta, normal, baja
@@ -31,6 +34,8 @@ return new class extends Migration
             $table->timestamp('queued_at')->useCurrent();
             $table->timestamps();
         });
+        }
+
 
         // 3. Mejoras a la tabla conversations
         Schema::table('omnichannel_conversations', function (Blueprint $table) {
@@ -40,11 +45,13 @@ return new class extends Migration
             // Para simplificar, priority ya fue agregada en la migración base de conversations. (Checkeado: linea 17: priority low, normal, high, urgent).
             // Entonces priority no lo agregaremos de nuevo, solo lo modificaremos si es necesario.
             // PERO en este proyecto ya había una priority.
+            if (!Schema::hasColumn('omnichannel_conversations', 'waiting_since')) {
             $table->timestamp('waiting_since')->nullable()->after('bot_paused_at');
-            $table->timestamp('closed_at')->nullable()->after('waiting_since');
-            $table->bigInteger('closed_by')->nullable()->after('closed_at');
-            $table->foreign('closed_by')->references('id')->on('usuario')->onDelete('set null');
-            $table->string('close_reason')->nullable()->after('closed_by');
+        }
+            if (!Schema::hasColumn('omnichannel_conversations', 'closed_at')) { $table->timestamp('closed_at')->nullable()->after('waiting_since'); }
+            if (!Schema::hasColumn('omnichannel_conversations', 'closed_by')) { $table->bigInteger('closed_by')->nullable()->after('closed_at'); }
+            if (!Schema::hasColumn('omnichannel_conversations', 'closed_by')) { $table->foreign('closed_by')->references('id')->on('usuario')->onDelete('set null'); }
+            if (!Schema::hasColumn('omnichannel_conversations', 'close_reason')) { $table->string('close_reason')->nullable()->after('closed_by'); }
         });
         
         // 4. Mejoras a la tabla messages
@@ -78,7 +85,7 @@ return new class extends Migration
 
         Schema::table('omnichannel_conversations', function (Blueprint $table) {
             $table->dropForeign(['closed_by']);
-            $table->dropColumn(['priority', 'waiting_since', 'closed_at', 'closed_by', 'close_reason']);
+            $table->dropColumn(['waiting_since', 'closed_at', 'closed_by', 'close_reason']);
         });
 
         Schema::dropIfExists('omnichannel_queues');

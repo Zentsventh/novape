@@ -22,13 +22,18 @@ class ImageUploadService
         $image = $this->manager->read($imageFile->getPathname());
         $encoded = $image->toWebp(80);
         
-        Storage::disk('public')->put('productos/' . $filename, $encoded->toString());
+        $disk = config('filesystems.default', 'public');
+        Storage::disk($disk)->put('productos/' . $filename, $encoded->toString());
         
         return 'productos/' . $filename;
     }
     
     public function formatExistingImageUrl(string $imageUrl): string
     {
+        if (str_starts_with($imageUrl, 'http://') || str_starts_with($imageUrl, 'https://')) {
+            $parsed = parse_url($imageUrl, PHP_URL_PATH);
+            return ltrim($parsed ?? $imageUrl, '/');
+        }
         return str_replace('/storage/', '', $imageUrl);
     }
 }

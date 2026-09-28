@@ -128,12 +128,12 @@ export default function Home({ appName, categoriaProductos = [], mejorSemana = [
 
             {/* Cintillo 1: Envío Gratis (inmediatamente debajo del navbar) */}
             <FadeIn delay={0.2}>
-                <div style={{ width: '100%', backgroundColor: '#002951', display: 'flex', justifyContent: 'center', padding: '10px 0' }}>
+                <div className="efe-cintillo-top">
                     <Link href="/catalogo?categoria=Cyber+Bombas">
                         <img 
                             src="/images/cintillo1.webp" 
                             alt="Envío Gratis a todo el Perú" 
-                            style={{ height: '50px', width: 'auto', display: 'block', objectFit: 'contain' }} 
+                            className="efe-cintillo-top-img"
                         />
                     </Link>
                 </div>
@@ -195,12 +195,12 @@ export default function Home({ appName, categoriaProductos = [], mejorSemana = [
             />
 
             {/* Cintillo 2: Fijo inferior (Fixed bottom) */}
-            <div style={{ position: 'fixed', bottom: 0, left: 0, width: '100%', backgroundColor: '#004797', zIndex: 9000, display: 'flex', justifyContent: 'center' }}>
-                <Link href="/catalogo?categoria=Retiro+Inmediato" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+            <div className="efe-cintillo-bottom">
+                <Link href="/catalogo?categoria=Retiro+Inmediato" className="efe-cintillo-bottom-link">
                     <img 
                         src="/images/cintillo2.webp" 
                         alt="Compra hoy, recógelo hoy" 
-                        style={{ width: '100%', maxWidth: '1400px', height: 'auto', display: 'block', objectFit: 'cover' }} 
+                        className="efe-cintillo-bottom-img"
                     />
                 </Link>
             </div>

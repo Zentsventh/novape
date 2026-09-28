@@ -316,35 +316,119 @@
         flex-direction: row;
         width: 100%;
         overflow-x: auto;
-    }
-
-    .efe-thumb-img {
-        width: 70px;
-    }
-}
-
-@media (max-width: 768px) {
-    .efe-producto-main {
-        padding: 16px;
-        gap: 16px;
-    }
-
-    .efe-thumb-img {
-        width: 60px;
-    }
-
-    .efe-producto-thumbnails {
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
-        gap: 6px;
     }
 
     .efe-producto-thumbnails::-webkit-scrollbar {
         display: none;
     }
+
+    .efe-thumb-img {
+        width: 70px;
+        flex-shrink: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .efe-producto-container {
+        padding: 12px;
+    }
+
+    .efe-producto-main {
+        padding: 16px;
+        gap: 16px;
+        border-radius: 10px;
+    }
+
+    .efe-producto-title {
+        font-size: clamp(18px, 5vw, 24px);
+        margin-bottom: 10px;
+    }
+
+    .efe-producto-price {
+        font-size: clamp(22px, 6vw, 28px);
+        margin-bottom: 16px;
+    }
+
+    .efe-thumb-img {
+        width: 60px;
+        height: 60px;
+    }
+
+    .efe-producto-thumbnails {
+        gap: 6px;
+    }
+
+    .efe-producto-add-btn {
+        padding: 14px;
+        font-size: 15px;
+        min-height: 48px;
+        border-radius: 12px;
+    }
+
+    .efe-producto-quantity input {
+        font-size: 16px; /* Prevents iOS zoom */
+        min-height: 44px;
+    }
+
+    .efe-breadcrumb {
+        font-size: 12px;
+        overflow-x: auto;
+        white-space: nowrap;
+        scrollbar-width: none;
+    }
+
+    .efe-breadcrumb::-webkit-scrollbar {
+        display: none;
+    }
+
+    .efe-producto-sections {
+        padding: 16px;
+        border-radius: 10px;
+    }
+
+    .efe-accordion-header {
+        font-size: 15px;
+        padding: 16px 0;
+        min-height: 44px;
+    }
+
+    .efe-accordion-content {
+        font-size: 13px;
+    }
+
+    .efe-specs-table td {
+        padding: 12px 14px;
+        font-size: 13px;
+    }
+
+    .efe-specs-table td:first-child {
+        width: 40%;
+    }
+
+    .efe-producto-delivery {
+        padding: 12px;
+    }
+
+    .efe-delivery-promo {
+        font-size: 12px;
+    }
+
+    .efe-producto-brand {
+        font-size: 11px;
+    }
+
+    .efe-producto-image-hint {
+        font-size: 11px;
+    }
 }
 
 @media (max-width: 480px) {
+    .efe-producto-container {
+        padding: 8px;
+    }
+
     .efe-producto-main {
         padding: 10px;
         gap: 12px;
@@ -352,9 +436,66 @@
 
     .efe-thumb-img {
         width: 50px;
+        height: 50px;
     }
 
     .efe-producto-info {
         padding: 0;
+    }
+
+    .efe-producto-title {
+        font-size: 17px;
+    }
+
+    .efe-producto-price {
+        font-size: 22px;
+    }
+
+    .efe-producto-sections {
+        padding: 12px;
+    }
+
+    .efe-accordion-header {
+        font-size: 14px;
+    }
+
+    .efe-specs-table td {
+        padding: 10px;
+        font-size: 12px;
+    }
+
+    .efe-specs-table td:first-child {
+        width: 45%;
+    }
+}
+
+@media (max-width: 360px) {
+    .efe-producto-title {
+        font-size: 15px;
+    }
+
+    .efe-producto-price {
+        font-size: 20px;
+    }
+
+    .efe-producto-add-btn {
+        font-size: 14px;
+        padding: 12px;
+    }
+}
+
+/* Touch optimizations */
+@media (pointer: coarse) {
+    .efe-producto-add-btn {
+        min-height: 48px;
+    }
+
+    .efe-thumb-img {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .efe-accordion-header {
+        min-height: 44px;
     }
 }

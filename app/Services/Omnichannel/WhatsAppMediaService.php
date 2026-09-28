@@ -37,9 +37,10 @@ class WhatsAppMediaService
             $extension = $this->getExtensionFromMime($mimeType);
             $filename = 'omnichannel/media/' . date('Y/m/') . Str::uuid() . '.' . $extension;
 
-            Storage::disk('public')->put($filename, $fileResponse->body());
+            $disk = config('filesystems.default', 'public');
+            Storage::disk($disk)->put($filename, $fileResponse->body());
 
-            return '/storage/' . $filename;
+            return Storage::disk($disk)->url($filename);
         } catch (\Exception $e) {
             Log::error('WA_MEDIA_EXCEPTION', ['media_id' => $mediaId, 'error' => $e->getMessage()]);
             return null;

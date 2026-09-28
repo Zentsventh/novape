@@ -224,7 +224,7 @@ export default function Catalogo({
                     ></div>
                 )}
                 <aside
-                    className={`catalogo-sidebar ${isMobile && isFilterOpen ? 'bottom-sheet-mobile' : ''} ${isMobile && !isFilterOpen ? 'hide-mobile' : ''}`}
+                    className={`catalogo-sidebar ${isMobile && isFilterOpen ? 'bottom-sheet-mobile open' : ''} ${isMobile && !isFilterOpen ? 'hide-mobile' : ''}`}
                     style={
                         isMobile && isFilterOpen
                             ? {

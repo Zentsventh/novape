@@ -37,5 +37,27 @@ class AppServiceProvider extends ServiceProvider
         }
 
         \App\Models\Pedido::observe(\App\Observers\PedidoObserver::class);
+
+        \Illuminate\Support\Facades\Storage::extend('azure', function ($app, $config) {
+            $client = !empty($config['connection_string'])
+                ? \AzureOss\Storage\Blob\BlobServiceClient::fromConnectionString($config['connection_string'])
+                : \AzureOss\Storage\Blob\BlobServiceClient::fromSharedKey(
+                    (string) ($config['name'] ?? ''),
+                    (string) ($config['key'] ?? '')
+                );
+
+            $containerClient = $client->getContainerClient((string) ($config['container'] ?? 'novape-uploads'));
+            $adapter = new \AzureOss\Storage\BlobFlysystem\AzureBlobStorageAdapter(
+                containerClient: $containerClient,
+                prefix: (string) ($config['prefix'] ?? ''),
+                isPublicContainer: (bool) ($config['is_public'] ?? true)
+            );
+
+            return new \Illuminate\Filesystem\FilesystemAdapter(
+                new \League\Flysystem\Filesystem($adapter, $config),
+                $adapter,
+                $config
+            );
+        });
     }
 }

@@ -21,12 +21,18 @@ class MarketingService
         $imagenUrl = '';
         if ($imagen) {
             $filename = time() . '_' . $imagen->getClientOriginalName();
-            $path = public_path('images/banners');
-            if (!File::exists($path)) {
-                File::makeDirectory($path, 0755, true);
+            $disk = config('filesystems.default', 'public');
+            if ($disk === 'azure') {
+                $path = \Illuminate\Support\Facades\Storage::disk('azure')->putFileAs('banners', $imagen, $filename);
+                $imagenUrl = \Illuminate\Support\Facades\Storage::disk('azure')->url($path);
+            } else {
+                $path = public_path('images/banners');
+                if (!File::exists($path)) {
+                    File::makeDirectory($path, 0755, true);
+                }
+                $imagen->move($path, $filename);
+                $imagenUrl = '/images/banners/' . $filename;
             }
-            $imagen->move($path, $filename);
-            $imagenUrl = '/images/banners/' . $filename;
         }
 
         $orden = DB::table('banners')->where('posicion', 'hero')->max('orden') + 1;
@@ -67,12 +73,18 @@ class MarketingService
 
         if ($imagen) {
             $filename = time() . '_' . $imagen->getClientOriginalName();
-            $path = public_path('images/banners');
-            if (!File::exists($path)) {
-                File::makeDirectory($path, 0755, true);
+            $disk = config('filesystems.default', 'public');
+            if ($disk === 'azure') {
+                $path = \Illuminate\Support\Facades\Storage::disk('azure')->putFileAs('banners', $imagen, $filename);
+                $updateData['imagen_url'] = \Illuminate\Support\Facades\Storage::disk('azure')->url($path);
+            } else {
+                $path = public_path('images/banners');
+                if (!File::exists($path)) {
+                    File::makeDirectory($path, 0755, true);
+                }
+                $imagen->move($path, $filename);
+                $updateData['imagen_url'] = '/images/banners/' . $filename;
             }
-            $imagen->move($path, $filename);
-            $updateData['imagen_url'] = '/images/banners/' . $filename;
         }
 
         DB::table('banners')->where('id', $id)->update($updateData);

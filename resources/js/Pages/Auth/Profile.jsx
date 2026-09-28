@@ -14,6 +14,7 @@ import '../../../css/home/cart-drawer.css';
 import '../../../css/home/footer.css';
 import ubigeoData from 'ubigeo-peru';
 import { useConfirm } from '@/Contexts/ConfirmContext';
+import { Star } from 'lucide-react';
 
 
 const ubigeo = ubigeoData.reniec;
@@ -876,8 +877,6 @@ export default function Profile({ usuario = {}, pedidos = [], direcciones = [], 
                     </div>
                 </div>
             </div>
-            
-            <Footer />
 
             <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} cart={cart} />
             <CategoryDrawer isOpen={isCatOpen} onClose={() => setIsCatOpen(false)} categorias={categoriaProductos} />

@@ -6,6 +6,7 @@ parameters:
     excludePaths:
         - vendor/**
         - tests/**
-    memoryLimit: 1024M
+
 includes:
+    - vendor/larastan/larastan/extension.neon
     - phpstan-baseline.neon

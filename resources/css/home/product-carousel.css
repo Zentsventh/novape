@@ -105,26 +105,50 @@
     box-shadow: 0 2px 6px rgba(0, 123, 255, 0.3);
 }
 
-@media (max-width: 768px) {
-    .efe-carousel-arrow {
-        width: 36px;
-        height: 36px;
-        background: rgba(255, 255, 255, 0.9);
+@media (max-width: 1023px) {
+    .efe-section-carousel {
+        padding: 0 32px;
     }
+}
+
+@media (max-width: 768px) {
+    .efe-section-carousel {
+        padding: 0 8px;
+    }
+
+    .efe-carousel-track {
+        gap: 10px;
+    }
+
+    .efe-carousel-arrow {
+        width: 30px;
+        height: 50px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
     .efe-carousel-arrow svg {
-        width: 18px;
-        height: 18px;
+        width: 16px;
+        height: 16px;
     }
 
     .efe-carousel-dots {
         gap: 6px;
+        padding: 16px 0 4px;
     }
 }
 
 @media (max-width: 480px) {
+    .efe-section-carousel {
+        padding: 0 4px;
+    }
+
+    .efe-carousel-track {
+        gap: 8px;
+    }
+
     .efe-carousel-arrow {
-        width: 32px;
-        height: 32px;
+        width: 26px;
+        height: 44px;
     }
 
     .efe-carousel-arrow svg {

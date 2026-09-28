@@ -213,7 +213,7 @@ export default function ObjectsSettings({ fields = [], flash, errors }) {
                                         <td style={{ padding: '20px 24px', fontSize: '14px', fontWeight: 600, color: '#1E293B' }}>
                                             {field.label}
                                         </td>
-                                        <td style={{ padding: '20px 24px', fontSize: '13px', color: '#64748B', fontFamily: 'monospace', background: '#F1F5F9', borderRadius: '4px', padding: '4px 8px', margin: '16px 24px', display: 'inline-block', fontWeight: 500 }}>
+                                        <td style={{ fontSize: '13px', color: '#64748B', fontFamily: 'monospace', background: '#F1F5F9', borderRadius: '4px', padding: '4px 8px', margin: '16px 24px', display: 'inline-block', fontWeight: 500 }}>
                                             {field.name}
                                         </td>
                                         <td style={{ padding: '20px 24px', fontSize: '14px', color: '#475569', fontWeight: 500 }}>

@@ -15,6 +15,7 @@ use App\Http\Requests\Profile\StoreDireccionRequest;
 use App\Http\Requests\Profile\StoreTarjetaRequest;
 use App\Http\Requests\Profile\DeleteAccountRequest;
 use Illuminate\Support\Facades\Log;
+use App\Services\User\UserProfileService;
 
 class ProfileController extends Controller
 {

@@ -39,10 +39,11 @@ class RmaRequestController extends Controller
             ->firstOrFail();
 
         $imagePaths = [];
+        $disk = config('filesystems.default', 'public');
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
-                $path = $image->store('rma_images', 'public');
-                $imagePaths[] = '/storage/' . $path;
+                $path = $image->store('rma_images', $disk);
+                $imagePaths[] = \Illuminate\Support\Facades\Storage::disk($disk)->url($path);
             }
         }
 

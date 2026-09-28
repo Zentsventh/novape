@@ -872,16 +872,72 @@ body {
 @media (max-width: 768px) {
     .efe-checkout-container {
         flex-direction: column;
-        margin: 24px auto;
+        margin: 16px auto;
+        padding: 0 16px;
+        gap: 16px;
     }
+
     .efe-checkout-sidebar {
         width: 100%;
         position: static;
     }
+
     .efe-checkout-step-content {
         padding-left: 0;
     }
+
     .efe-form-grid-modern {
         grid-template-columns: 1fr;
+    }
+
+    .efe-checkout-step-header h2 {
+        font-size: 16px;
+    }
+
+    /* Touch-friendly inputs: prevent iOS zoom */
+    .efe-checkout-page input[type="text"],
+    .efe-checkout-page input[type="email"],
+    .efe-checkout-page input[type="tel"],
+    .efe-checkout-page input[type="number"],
+    .efe-checkout-page select,
+    .efe-checkout-page textarea {
+        font-size: 16px !important;
+        min-height: 44px;
+    }
+
+    /* Touch-friendly buttons */
+    .efe-checkout-page button {
+        min-height: 44px;
+    }
+}
+
+@media (max-width: 480px) {
+    .efe-checkout-container {
+        padding: 0 10px;
+        margin: 10px auto;
+        gap: 12px;
+    }
+
+    .efe-checkout-page {
+        padding-bottom: 120px; /* Space for fixed bottom bar */
+    }
+
+    .efe-checkout-step-header h2 {
+        font-size: 15px;
+    }
+
+    .efe-checkout-step-number {
+        width: 24px;
+        height: 24px;
+        font-size: 12px;
+    }
+}
+
+/* Safe area for iPhone notch/bottom bar */
+@supports (padding: max(0px)) {
+    @media (max-width: 767px) {
+        .efe-checkout-page {
+            padding-bottom: max(80px, calc(80px + env(safe-area-inset-bottom)));
+        }
     }
 }
