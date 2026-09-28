@@ -7,7 +7,7 @@ WORKDIR /app
 
 # Cache node dependencies
 COPY package*.json ./
-RUN npm ci
+RUN npm install --legacy-peer-deps
 
 # Copy project files needed for compilation
 COPY resources ./resources
