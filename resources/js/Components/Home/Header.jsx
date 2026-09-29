@@ -494,7 +494,7 @@ export default function Header({
                         </div>
                     )}
 
-                    {!isMobile && (
+                    {!isMobile && !isTablet && (
                         <div
                             className={
                                 minimal
@@ -596,9 +596,12 @@ export default function Header({
                                                     <circle cx="12" cy="7" r="4" />
                                                 </svg>
                                             </div>
-                                            <span className="efe-header-icon-text">
-                                                {user.nombres.split(' ')[0]}
-                                            </span>
+                                            <div className="efe-header-icon-text" style={{textAlign: 'left', lineHeight: '1.2', paddingLeft: '4px'}}>
+                                                <span style={{fontSize: '11px', fontWeight: '400', display: 'block', textTransform: 'none'}}>Hola,</span>
+                                                <span style={{fontSize: '13px', fontWeight: '700', display: 'block'}}>
+                                                    {user.nombres.split(' ')[0]}
+                                                </span>
+                                            </div>
                                         </button>
                                     )}
                                     <div className="efe-dropdown-menu" role="menu">
@@ -655,7 +658,10 @@ export default function Header({
                                                 <circle cx="12" cy="7" r="4" />
                                             </svg>
                                         </div>
-                                        <span className="efe-header-icon-text">Cuenta</span>
+                                        <div className="efe-header-icon-text" style={{textAlign: 'left', lineHeight: '1.2', paddingLeft: '4px'}}>
+                                            <span style={{fontSize: '11px', fontWeight: '400', display: 'block', textTransform: 'none'}}>Hola, Inicia sesión</span>
+                                            <span style={{fontSize: '13px', fontWeight: '700', display: 'block'}}>Mi cuenta</span>
+                                        </div>
                                     </button>
                                     <div
                                         className="efe-dropdown-menu efe-dropdown-mega"

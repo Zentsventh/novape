@@ -64,8 +64,13 @@ export default function Catalogo({
 
     useEffect(() => {
         const handleOpenCart = () => setIsCartOpen(true);
+        const handleOpenCategories = () => setIsCatOpen(true);
         window.addEventListener('open-cart', handleOpenCart);
-        return () => window.removeEventListener('open-cart', handleOpenCart);
+        window.addEventListener('open-categories', handleOpenCategories);
+        return () => {
+            window.removeEventListener('open-cart', handleOpenCart);
+            window.removeEventListener('open-categories', handleOpenCategories);
+        };
     }, []);
 
     const activeCategoryParams = useMemo(() => {

@@ -40,7 +40,9 @@ export default function Producto() {
 
     useEffect(() => {
         const handleOpenCart = () => setIsCartOpen(true);
+        const handleOpenCategories = () => setIsCatOpen(true);
         window.addEventListener('open-cart', handleOpenCart);
+        window.addEventListener('open-categories', handleOpenCategories);
 
         // Track recently viewed products
         if (producto?.id) {
@@ -63,7 +65,10 @@ export default function Producto() {
             }
         }
 
-        return () => window.removeEventListener('open-cart', handleOpenCart);
+        return () => {
+            window.removeEventListener('open-cart', handleOpenCart);
+            window.removeEventListener('open-categories', handleOpenCategories);
+        };
     }, [producto]);
 
     // Producto

@@ -52,6 +52,7 @@ export default function Home({ appName, categoriaProductos = [], mejorSemana = [
 
     useEffect(() => {
         const handleOpenCart = () => setIsCartOpen(true);
+        const handleOpenCategories = () => setIsCatOpen(true);
         const handleOpenQuickView = (e) => {
             setQuickViewProduct(e.detail);
             setIsQuickViewOpen(true);
@@ -62,11 +63,13 @@ export default function Home({ appName, categoriaProductos = [], mejorSemana = [
         };
         
         window.addEventListener('open-cart', handleOpenCart);
+        window.addEventListener('open-categories', handleOpenCategories);
         window.addEventListener('open-quick-view', handleOpenQuickView);
         window.addEventListener('open-list-modal', handleOpenListModal);
         
         return () => {
             window.removeEventListener('open-cart', handleOpenCart);
+            window.removeEventListener('open-categories', handleOpenCategories);
             window.removeEventListener('open-quick-view', handleOpenQuickView);
             window.removeEventListener('open-list-modal', handleOpenListModal);
         };
