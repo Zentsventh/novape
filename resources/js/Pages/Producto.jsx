@@ -229,6 +229,296 @@ export default function Producto() {
             />
 
             <div className="efe-producto-container">
+                <style>{`
+                    .premium-product-main {
+                        display: grid;
+                        grid-template-columns: 1fr;
+                        gap: 48px;
+                        background: #ffffff;
+                        border-radius: 24px;
+                        padding: 32px;
+                        box-shadow: 0 4px 20px -2px rgba(0,0,0,0.03);
+                        margin-bottom: 40px;
+                        border: 1px solid #f1f5f9;
+                    }
+                    @media (min-width: 992px) {
+                        .premium-product-main {
+                            grid-template-columns: 50% 50%;
+                            padding: 40px;
+                        }
+                    }
+                    .premium-gallery-container {
+                        display: flex;
+                        gap: 24px;
+                        height: 540px;
+                    }
+                    .premium-thumbs {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 16px;
+                        width: 88px;
+                        overflow-y: auto;
+                        padding-right: 4px;
+                    }
+                    .premium-thumb {
+                        width: 100%;
+                        height: 88px;
+                        border-radius: 14px;
+                        border: 2px solid transparent;
+                        cursor: pointer;
+                        transition: all 0.25s ease;
+                        object-fit: contain;
+                        padding: 8px;
+                        background: #f8fafc;
+                        opacity: 0.6;
+                    }
+                    .premium-thumb:hover {
+                        opacity: 1;
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+                    }
+                    .premium-thumb.is-active {
+                        border-color: #00B4FF;
+                        opacity: 1;
+                        background: #ffffff;
+                        box-shadow: 0 4px 12px rgba(0, 180, 255, 0.15);
+                    }
+                    .premium-main-img {
+                        flex: 1;
+                        border-radius: 20px;
+                        background: #f8fafc;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        overflow: hidden;
+                        position: relative;
+                        border: 1px solid #e2e8f0;
+                    }
+                    .premium-product-info {
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                    }
+                    .premium-brand {
+                        font-size: 13px;
+                        font-weight: 700;
+                        color: #00B4FF;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                        margin-bottom: 12px;
+                    }
+                    .premium-title {
+                        font-size: 32px;
+                        font-weight: 800;
+                        color: #0f172a;
+                        line-height: 1.2;
+                        margin: 0 0 16px 0;
+                        letter-spacing: -0.5px;
+                    }
+                    .premium-price {
+                        font-size: 36px;
+                        font-weight: 800;
+                        color: #0f172a;
+                        margin-bottom: 32px;
+                        display: flex;
+                        align-items: center;
+                        gap: 16px;
+                    }
+                    .premium-price span {
+                        font-size: 18px;
+                        font-weight: 600;
+                        color: #94a3b8;
+                        text-decoration: line-through;
+                    }
+                    .premium-qty-wrapper {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 12px;
+                        margin-bottom: 32px;
+                    }
+                    .premium-qty-label {
+                        font-size: 14px;
+                        font-weight: 600;
+                        color: #64748b;
+                    }
+                    .premium-qty-box {
+                        display: flex;
+                        align-items: center;
+                        background: #f8fafc;
+                        border: 1px solid #e2e8f0;
+                        border-radius: 12px;
+                        width: fit-content;
+                        padding: 4px;
+                        transition: all 0.2s;
+                    }
+                    .premium-qty-box:focus-within {
+                        border-color: #00B4FF;
+                        box-shadow: 0 0 0 3px rgba(0, 180, 255, 0.15);
+                    }
+                    .premium-qty-btn {
+                        width: 40px;
+                        height: 40px;
+                        border-radius: 8px;
+                        border: none;
+                        background: transparent;
+                        color: #64748b;
+                        font-size: 20px;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                    .premium-qty-btn:hover:not(:disabled) {
+                        background: #ffffff;
+                        color: #0f172a;
+                        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+                    }
+                    .premium-qty-btn:disabled {
+                        opacity: 0.4;
+                        cursor: not-allowed;
+                    }
+                    .premium-qty-val {
+                        width: 48px;
+                        text-align: center;
+                        font-weight: 700;
+                        font-size: 16px;
+                        color: #0f172a;
+                    }
+                    .premium-actions {
+                        display: flex;
+                        gap: 16px;
+                        margin-bottom: 32px;
+                    }
+                    .premium-btn-cart {
+                        flex: 1;
+                        background: #f8fafc;
+                        color: #0f172a;
+                        border: 1px solid #e2e8f0;
+                        border-radius: 14px;
+                        padding: 16px;
+                        font-size: 16px;
+                        font-weight: 700;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 10px;
+                    }
+                    .premium-btn-cart:hover:not(:disabled) {
+                        border-color: #cbd5e1;
+                        background: #f1f5f9;
+                        transform: translateY(-2px);
+                    }
+                    .premium-btn-buy {
+                        flex: 1;
+                        background: #00B4FF;
+                        color: #ffffff;
+                        border: none;
+                        border-radius: 14px;
+                        padding: 16px;
+                        font-size: 16px;
+                        font-weight: 700;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                        box-shadow: 0 4px 14px rgba(0, 180, 255, 0.3);
+                    }
+                    .premium-btn-buy:hover:not(:disabled) {
+                        background: #009ce0;
+                        box-shadow: 0 6px 20px rgba(0, 180, 255, 0.4);
+                        transform: translateY(-2px);
+                    }
+                    .premium-delivery-card {
+                        background: #ffffff;
+                        border: 1px solid #e2e8f0;
+                        border-radius: 16px;
+                        padding: 24px;
+                    }
+                    .premium-delivery-title {
+                        font-size: 15px;
+                        font-weight: 700;
+                        color: #0f172a;
+                        margin-bottom: 20px;
+                    }
+                    .premium-delivery-item {
+                        display: flex;
+                        align-items: flex-start;
+                        gap: 16px;
+                        margin-bottom: 20px;
+                    }
+                    .premium-delivery-item:last-child {
+                        margin-bottom: 0;
+                    }
+                    .premium-delivery-icon {
+                        background: #f8fafc;
+                        width: 44px;
+                        height: 44px;
+                        border-radius: 12px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: #64748b;
+                        flex-shrink: 0;
+                        border: 1px solid #f1f5f9;
+                    }
+                    .premium-delivery-content {
+                        flex: 1;
+                    }
+                    .premium-delivery-name {
+                        font-size: 15px;
+                        font-weight: 600;
+                        color: #0f172a;
+                        margin-bottom: 6px;
+                    }
+                    .premium-delivery-status {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 6px;
+                        font-size: 13px;
+                        font-weight: 600;
+                        padding: 4px 10px;
+                        border-radius: 20px;
+                    }
+                    .status-ok { background: #dcfce7; color: #166534; }
+                    .status-no { background: #fee2e2; color: #991b1b; }
+                    
+                    .premium-tabs-container {
+                        margin-top: 48px;
+                        border-radius: 20px;
+                        background: #ffffff;
+                        box-shadow: 0 4px 20px -2px rgba(0,0,0,0.03);
+                        overflow: hidden;
+                        border: 1px solid #e2e8f0;
+                    }
+                    .premium-tabs-header {
+                        display: flex;
+                        border-bottom: 1px solid #e2e8f0;
+                        background: #f8fafc;
+                        padding: 0 24px;
+                    }
+                    .premium-tab-btn {
+                        padding: 24px 32px;
+                        background: transparent;
+                        border: none;
+                        font-size: 14px;
+                        font-weight: 700;
+                        color: #64748b;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                        border-bottom: 3px solid transparent;
+                        margin-bottom: -1px;
+                        letter-spacing: 0.5px;
+                    }
+                    .premium-tab-btn:hover {
+                        color: #0f172a;
+                    }
+                    .premium-tab-btn.is-active {
+                        color: #00B4FF;
+                        border-bottom-color: #00B4FF;
+                        background: #ffffff;
+                    }
+                `}</style>
                 <div className="efe-breadcrumb">
                     <Link href="/">Inicio</Link>
                     <span>&gt;</span>
@@ -241,20 +531,20 @@ export default function Producto() {
                     <span>{producto?.nombre}</span>
                 </div>
 
-                <div className="efe-producto-main">
-                    <div className="efe-producto-gallery">
-                        <div className="efe-producto-thumbnails">
+                <div className="premium-product-main">
+                    <div className="premium-gallery-container">
+                        <div className="premium-thumbs">
                             {images.map((imgUrl, idx) => (
                                 <img
                                     key={idx}
                                     src={imgUrl}
                                     alt={`Thumb ${idx}`}
-                                    className={`efe-thumb-img ${activeImage === imgUrl ? 'is-active' : ''}`}
+                                    className={`premium-thumb ${activeImage === imgUrl ? 'is-active' : ''}`}
                                     onClick={() => setActiveImage(imgUrl)}
                                 />
                             ))}
                         </div>
-                        <div className="efe-producto-image-main">
+                        <div className="premium-main-img">
                             <div
                                 className="efe-zoom-container"
                                 onMouseMove={handleMouseMove}
@@ -262,18 +552,17 @@ export default function Producto() {
                                 onMouseLeave={() => setIsZooming(false)}
                                 style={{
                                     width: '100%',
-                                    height: '500px',
+                                    height: '100%',
                                     position: 'relative',
                                     backgroundImage: `url(${activeImage || DEFAULT_IMAGE})`,
                                     backgroundPosition: isZooming
                                         ? `${zoomPos.x}% ${zoomPos.y}%`
                                         : 'center',
-                                    backgroundSize: isZooming ? '140%' : 'contain',
+                                    backgroundSize: isZooming ? '150%' : 'contain',
                                     backgroundRepeat: 'no-repeat',
-                                    cursor: 'crosshair',
-                                    borderRadius: '12px',
+                                    cursor: 'zoom-in',
                                     transition:
-                                        'background-size 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                                        'background-size 0.3s ease-out',
                                 }}
                             >
                                 <img
@@ -283,453 +572,152 @@ export default function Producto() {
                                         width: '100%',
                                         height: '100%',
                                         objectFit: 'contain',
+                                        padding: '24px',
                                         opacity: isZooming ? 0 : 1,
-                                        transition: 'opacity 0.4s ease',
+                                        transition: 'opacity 0.2s ease',
                                     }}
                                 />
-                            </div>
-                            <div className="efe-producto-image-hint" style={{ marginTop: '10px' }}>
-                                Pase el cursor sobre la imagen para ampliarla
-                            </div>
-                            <div className="efe-producto-share">
-                                Comparte:
-                                <span style={{ fontWeight: 'bold', cursor: 'pointer' }}>f</span>
-                                <span style={{ fontWeight: 'bold', cursor: 'pointer' }}>X</span>
-                                <span style={{ fontWeight: 'bold', cursor: 'pointer' }}>G+</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Información y Compra */}
-                    <div className="efe-producto-info">
-                        <div className="efe-producto-brand">{producto?.marca || 'Generico'}</div>
-                        <h1 className="efe-producto-title">{producto?.nombre}</h1>
-                        <div className="efe-producto-price">
+                    <div className="premium-product-info">
+                        <div className="premium-brand">{producto?.marca || 'Generico'}</div>
+                        <h1 className="premium-title">{producto?.nombre}</h1>
+                        <div className="premium-price">
                             S/ {formatPrice(producto?.precio_actual || 0)}
+                            {producto?.precio_anterior && (
+                                <span>S/ {formatPrice(producto.precio_anterior)}</span>
+                            )}
                         </div>
 
                         {flash?.error && (
-                            <div
-                                style={{
-                                    color: '#dc2626',
-                                    backgroundColor: '#fef2f2',
-                                    border: '1px solid #f87171',
-                                    padding: '10px',
-                                    borderRadius: '4px',
-                                    marginBottom: '15px',
-                                    fontSize: '14px',
-                                }}
-                            >
+                            <div style={{ color: '#991b1b', backgroundColor: '#fef2f2', border: '1px solid #fecaca', padding: '12px 16px', borderRadius: '12px', marginBottom: '24px', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                                 {flash.error}
                             </div>
                         )}
 
                         {/* Neuromarketing: Indicador de Urgencia */}
                         {producto?.stock > 0 && producto?.stock <= 5 && (
-                            <div
-                                className="efe-urgency-indicator"
-                                style={{
-                                    backgroundColor: '#fff7ed',
-                                    border: '1px solid #fdba74',
-                                    color: '#ea580c',
-                                    padding: '10px 15px',
-                                    borderRadius: '6px',
-                                    marginBottom: '20px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '10px',
-                                    fontWeight: '600',
-                                    fontSize: '14px',
-                                    animation: 'pulse-urgency 2s infinite',
-                                }}
-                            >
-                                <svg
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
-                                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                                    <line x1="12" y1="9" x2="12" y2="13" />
-                                    <line x1="12" y1="17" x2="12.01" y2="17" />
-                                </svg>
-                                <span>
-                                    ¡Date prisa! Solo quedan {producto.stock} unidades disponibles.
-                                </span>
+                            <div style={{ backgroundColor: '#fff7ed', border: '1px solid #fdba74', color: '#ea580c', padding: '12px 16px', borderRadius: '12px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px', fontWeight: '600', fontSize: '14px', animation: 'pulse-urgency 2s infinite' }}>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
+                                <span>¡Date prisa! Solo quedan {producto.stock} unidades disponibles.</span>
                             </div>
                         )}
 
-                        <div
-                            className="efe-producto-quantity"
-                            style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}
-                        >
-                            <label>Cantidad (Máx. {maxPermitido})</label>
-                            <div
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    border: '1px solid #e5e7eb',
-                                    borderRadius: '4px',
-                                    width: 'fit-content',
-                                    overflow: 'hidden',
-                                }}
-                            >
-                                <button
-                                    className="efe-qty-btn"
-                                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                    disabled={quantity <= 1 || isAdding || addSuccess}
-                                    style={{
-                                        padding: '8px 12px',
-                                        background: '#f9fafb',
-                                        border: 'none',
-                                        borderRight: '1px solid #e5e7eb',
-                                        cursor:
-                                            quantity <= 1 || isAdding ? 'not-allowed' : 'pointer',
-                                        fontSize: '16px',
-                                    }}
-                                >
-                                    -
-                                </button>
-                                <span
-                                    style={{
-                                        width: '40px',
-                                        textAlign: 'center',
-                                        fontWeight: 'bold',
-                                    }}
-                                >
-                                    {quantity}
-                                </span>
-                                <button
-                                    className="efe-qty-btn"
-                                    onClick={() =>
-                                        setQuantity(Math.min(maxPermitido, quantity + 1))
-                                    }
-                                    disabled={quantity >= maxPermitido || isAdding || addSuccess}
-                                    style={{
-                                        padding: '8px 12px',
-                                        background: '#f9fafb',
-                                        border: 'none',
-                                        borderLeft: '1px solid #e5e7eb',
-                                        cursor:
-                                            quantity >= maxPermitido || isAdding
-                                                ? 'not-allowed'
-                                                : 'pointer',
-                                        fontSize: '16px',
-                                    }}
-                                >
-                                    +
-                                </button>
+                        <div className="premium-qty-wrapper">
+                            <label className="premium-qty-label">Cantidad (Máx. {maxPermitido})</label>
+                            <div className="premium-qty-box">
+                                <button className="premium-qty-btn" onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={quantity <= 1 || isAdding || addSuccess}>-</button>
+                                <span className="premium-qty-val">{quantity}</span>
+                                <button className="premium-qty-btn" onClick={() => setQuantity(Math.min(maxPermitido, quantity + 1))} disabled={quantity >= maxPermitido || isAdding || addSuccess}>+</button>
                             </div>
                         </div>
 
                         {producto.stock > 0 ? (
-                            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                                <button
-                                    className={`efe-producto-add-btn ${addSuccess ? 'btn-success-anim' : ''}`}
-                                    onClick={(e) => handleBuyNow(e)}
-                                    disabled={isAdding || addSuccess}
-                                    style={{
-                                        flex: 1,
-                                        backgroundColor: addSuccess ? '#10b981' : '#f3f4f6',
-                                        color: addSuccess ? 'white' : '#111827',
-                                        border: '1px solid #d1d5db',
-                                    }}
-                                >
+                            <div className="premium-actions">
+                                <button className="premium-btn-cart" onClick={(e) => handleBuyNow(e)} disabled={isAdding || addSuccess}>
                                     {isAdding ? (
-                                        <div
-                                            style={{
-                                                width: '20px',
-                                                height: '20px',
-                                                border: '3px solid rgba(0,0,0,0.1)',
-                                                borderTop: '3px solid #111827',
-                                                borderRadius: '50%',
-                                                animation: 'spin 1s linear infinite',
-                                            }}
-                                        ></div>
+                                        <div style={{ width: '20px', height: '20px', border: '3px solid rgba(0,0,0,0.1)', borderTop: '3px solid #111827', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
                                     ) : addSuccess ? (
                                         <>
-                                            <svg
-                                                width="24"
-                                                height="24"
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                strokeWidth="2.5"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                            >
-                                                <polyline points="20 6 9 17 4 12"></polyline>
-                                            </svg>
-                                            ¡Añadido!
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                            <span style={{ color: '#10b981' }}>¡Añadido!</span>
                                         </>
                                     ) : (
                                         <>
                                             Al carrito
-                                            <svg
-                                                width="20"
-                                                height="20"
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                strokeWidth="2"
-                                                strokeLinecap="round"
-                                            >
-                                                <circle cx="9" cy="21" r="1" />
-                                                <circle cx="20" cy="21" r="1" />
-                                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-                                            </svg>
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" /></svg>
                                         </>
                                     )}
                                 </button>
-                                <button
-                                    className="efe-producto-add-btn"
-                                    onClick={handleQuickBuy}
-                                    disabled={isAdding || addSuccess}
-                                    style={{
-                                        flex: 1,
-                                        backgroundColor: 'var(--color-primary)',
-                                        color: 'white',
-                                    }}
-                                >
+                                <button className="premium-btn-buy" onClick={handleQuickBuy} disabled={isAdding || addSuccess}>
                                     Comprar Ahora
                                 </button>
                             </div>
                         ) : (
-                            <button
-                                className="efe-producto-add-btn"
-                                disabled
-                                style={{ backgroundColor: '#d1d5db', cursor: 'not-allowed' }}
-                            >
-                                Sin stock
-                            </button>
+                            <div className="premium-actions">
+                                <button className="premium-btn-cart" disabled style={{ opacity: 0.5, cursor: 'not-allowed', width: '100%' }}>Sin stock</button>
+                            </div>
                         )}
 
-                        <div style={{ marginTop: '15px' }}>
-                            <button
-                                onClick={() => {
-                                    if (auth?.user) {
-                                        setIsListModalOpen(true);
-                                    } else {
-                                        router.get('/login');
-                                    }
-                                }}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '8px',
-                                    background: 'none',
-                                    border: 'none',
-                                    color: '#64748b',
-                                    fontSize: '14px',
-                                    fontWeight: '500',
-                                    cursor: 'pointer',
-                                    padding: '5px 0',
-                                }}
-                            >
-                                <svg
-                                    width="18"
-                                    height="18"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
-                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                                </svg>
+                        <div style={{ marginBottom: '24px' }}>
+                            <button onClick={() => { if (auth?.user) { setIsListModalOpen(true); } else { router.get('/login'); } }} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'transparent', border: 'none', color: '#64748b', fontSize: '14px', fontWeight: '600', cursor: 'pointer', padding: '8px 12px', borderRadius: '8px', transition: 'all 0.2s' }} onMouseOver={(e) => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.color = '#00B4FF'; }} onMouseOut={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                                 Agregar a Mis listas
                             </button>
                         </div>
 
-                        <div className="efe-producto-delivery">
-                            <div className="efe-delivery-types">
-                                <h4>Tipo de entrega</h4>
-                                <div className="efe-delivery-option">
-                                    <svg
-                                        width="20"
-                                        height="20"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="#666"
-                                        strokeWidth="1.5"
-                                    >
-                                        <rect x="1" y="3" width="15" height="13" rx="2" />
-                                        <path d="M16 8h4l3 3v5h-7V8z" />
-                                        <circle cx="5.5" cy="18.5" r="2.5" />
-                                        <circle cx="18.5" cy="18.5" r="2.5" />
-                                    </svg>
-                                    Envío a domicilio
+                        <div className="premium-delivery-card">
+                            <h4 className="premium-delivery-title">Opciones de entrega</h4>
+                            <div className="premium-delivery-item">
+                                <div className="premium-delivery-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="1" y="3" width="15" height="13" rx="2" /><path d="M16 8h4l3 3v5h-7V8z" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" /></svg>
+                                </div>
+                                <div className="premium-delivery-content">
+                                    <div className="premium-delivery-name">Envío a domicilio</div>
                                     {producto?.envio_domicilio ? (
-                                        <svg
-                                            className="efe-delivery-check"
-                                            width="16"
-                                            height="16"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            strokeWidth="3"
-                                        >
-                                            <polyline points="20 6 9 17 4 12" />
-                                        </svg>
+                                        <div className="premium-delivery-status status-ok">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+                                            Disponible
+                                        </div>
                                     ) : (
-                                        <svg
-                                            width="16"
-                                            height="16"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="#ef4444"
-                                            strokeWidth="3"
-                                            style={{ marginLeft: 'auto' }}
-                                        >
-                                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                                        </svg>
+                                        <div className="premium-delivery-status status-no">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                            No disponible
+                                        </div>
                                     )}
                                 </div>
-                                <div
-                                    style={{
-                                        fontSize: '11px',
-                                        color: producto?.envio_domicilio ? '#22c55e' : '#ef4444',
-                                        marginLeft: '30px',
-                                        marginBottom: '10px',
-                                    }}
-                                >
-                                    {producto?.envio_domicilio ? 'Disponible' : 'No disponible'}
-                                </div>
+                            </div>
 
-                                <div className="efe-delivery-option">
-                                    <svg
-                                        width="20"
-                                        height="20"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="#666"
-                                        strokeWidth="1.5"
-                                    >
-                                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                                        <polyline points="9 22 9 12 15 12 15 22" />
-                                    </svg>
-                                    Retiro en tienda
-                                    {producto?.retiro_tienda ? (
-                                        <svg
-                                            className="efe-delivery-check"
-                                            width="16"
-                                            height="16"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            strokeWidth="3"
-                                        >
-                                            <polyline points="20 6 9 17 4 12" />
-                                        </svg>
-                                    ) : (
-                                        <svg
-                                            width="16"
-                                            height="16"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="#ef4444"
-                                            strokeWidth="3"
-                                            style={{ marginLeft: 'auto' }}
-                                        >
-                                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                                        </svg>
-                                    )}
+                            <div className="premium-delivery-item">
+                                <div className="premium-delivery-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
                                 </div>
-                                <div
-                                    style={{
-                                        fontSize: '11px',
-                                        color: producto?.retiro_tienda ? '#22c55e' : '#ef4444',
-                                        marginLeft: '30px',
-                                    }}
-                                >
-                                    {producto?.retiro_tienda ? 'Disponible' : 'No disponible'}
+                                <div className="premium-delivery-content">
+                                    <div className="premium-delivery-name">Retiro en tienda</div>
+                                    {producto?.retiro_tienda ? (
+                                        <div className="premium-delivery-status status-ok">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
+                                            Disponible
+                                        </div>
+                                    ) : (
+                                        <div className="premium-delivery-status status-no">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                            No disponible
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Secciones inferiores - TABS */}
-                <div
-                    className="efe-producto-sections"
-                    style={{
-                        marginTop: '40px',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '8px',
-                        overflow: 'hidden',
-                    }}
-                >
-                    {/* Tab Header */}
-                    <div style={{ display: 'flex', backgroundColor: '#002f5a', color: 'white' }}>
-                        <button
-                            onClick={() => setActiveTab('desc')}
-                            style={{
-                                flex: 1,
-                                padding: '16px',
-                                fontWeight: 'bold',
-                                fontSize: '14px',
-                                backgroundColor: activeTab === 'desc' ? '#001a35' : 'transparent',
-                                color: 'white',
-                                border: 'none',
-                                cursor: 'pointer',
-                                borderBottom:
-                                    activeTab === 'desc'
-                                        ? '4px solid #00a4e4'
-                                        : '4px solid transparent',
-                                transition: 'all 0.2s',
-                            }}
-                        >
-                            DESCRIPCIÓN DEL PRODUCTO
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('specs')}
-                            style={{
-                                flex: 1,
-                                padding: '16px',
-                                fontWeight: 'bold',
-                                fontSize: '14px',
-                                backgroundColor: activeTab === 'specs' ? '#001a35' : 'transparent',
-                                color: 'white',
-                                border: 'none',
-                                cursor: 'pointer',
-                                borderBottom:
-                                    activeTab === 'specs'
-                                        ? '4px solid #00a4e4'
-                                        : '4px solid transparent',
-                                transition: 'all 0.2s',
-                            }}
-                        >
-                            ESPECIFICACIONES
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('warranty')}
-                            style={{
-                                flex: 1,
-                                padding: '16px',
-                                fontWeight: 'bold',
-                                fontSize: '14px',
-                                backgroundColor:
-                                    activeTab === 'warranty' ? '#001a35' : 'transparent',
-                                color: 'white',
-                                border: 'none',
-                                cursor: 'pointer',
-                                borderBottom:
-                                    activeTab === 'warranty'
-                                        ? '4px solid #00a4e4'
-                                        : '4px solid transparent',
-                                transition: 'all 0.2s',
-                            }}
-                        >
-                            CAMBIOS Y DEVOLUCIONES
-                        </button>
-                    </div>
+                    {/* Secciones inferiores - TABS */}
+                    <div className="premium-tabs-container">
+                        {/* Tab Header */}
+                        <div className="premium-tabs-header">
+                            <button
+                                onClick={() => setActiveTab('desc')}
+                                className={`premium-tab-btn ${activeTab === 'desc' ? 'is-active' : ''}`}
+                            >
+                                DESCRIPCIÓN DEL PRODUCTO
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('specs')}
+                                className={`premium-tab-btn ${activeTab === 'specs' ? 'is-active' : ''}`}
+                            >
+                                ESPECIFICACIONES
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('warranty')}
+                                className={`premium-tab-btn ${activeTab === 'warranty' ? 'is-active' : ''}`}
+                            >
+                                CAMBIOS Y DEVOLUCIONES
+                            </button>
+                        </div>
 
                     {/* Tab Content */}
                     <div style={{ padding: '30px', backgroundColor: 'white' }}>

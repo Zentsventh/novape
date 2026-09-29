@@ -54,32 +54,120 @@ export default function CategoryDrawer({ isOpen, onClose, categorias = [] }) {
 
     return (
         <>
+            <style>{`
+                .premium-cat-item {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    width: 100%;
+                    padding: 12px 16px;
+                    background: transparent;
+                    color: #1E293B;
+                    border: none;
+                    border-radius: 8px;
+                    font-weight: 500;
+                    font-size: 14px;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    margin-bottom: 6px;
+                    text-align: left;
+                }
+                .premium-cat-item:hover {
+                    background: #f8fafc;
+                    color: #00B4FF;
+                    transform: translateX(4px);
+                }
+                .premium-cat-item.is-active {
+                    background: rgba(0, 180, 255, 0.08);
+                    color: #00B4FF;
+                    font-weight: 700;
+                }
+                .premium-sub-item {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    background: #ffffff;
+                    border: 1px solid #e2e8f0;
+                    border-radius: 12px;
+                    text-align: left;
+                    padding: 14px 16px;
+                    font-size: 13px;
+                    font-weight: 600;
+                    color: #1E293B;
+                    cursor: pointer;
+                    width: 100%;
+                    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+                }
+                .premium-sub-item:hover {
+                    border-color: #00B4FF;
+                    box-shadow: 0 8px 16px rgba(0, 180, 255, 0.12);
+                    transform: translateY(-3px);
+                    color: #00B4FF;
+                }
+                .premium-sub-item:hover svg {
+                    stroke: #00B4FF;
+                    transform: translateX(3px);
+                }
+                .premium-sub-item svg {
+                    transition: all 0.2s ease;
+                }
+                .premium-btn-outline {
+                    font-size: 12px;
+                    font-weight: 600;
+                    color: #00B4FF;
+                    background: rgba(0, 180, 255, 0.05);
+                    padding: 6px 16px;
+                    border-radius: 20px;
+                    border: 1px solid rgba(0, 180, 255, 0.2);
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                }
+                .premium-btn-outline:hover {
+                    background: #00B4FF;
+                    color: #ffffff;
+                    box-shadow: 0 4px 12px rgba(0, 180, 255, 0.3);
+                    border-color: #00B4FF;
+                    transform: translateY(-1px);
+                }
+            `}</style>
+
             {/* Overlay */}
             <div
                 className={`efe-cat-drawer-overlay ${isOpen ? 'is-open' : ''}`}
                 onClick={onClose}
+                style={{ backdropFilter: 'blur(4px)', transition: 'all 0.3s ease' }}
             />
 
             {/* Drawer */}
             <div
                 className={`efe-cat-drawer ${isOpen ? 'is-open' : ''} ${isMobile && activeId ? 'show-right' : ''}`}
+                style={{ boxShadow: '20px 0 25px -5px rgba(0, 0, 0, 0.1), 8px 0 10px -6px rgba(0, 0, 0, 0.1)' }}
             >
                 {/* Panel Izquierdo - Categorías Padre */}
-                <div className="efe-cat-drawer-left">
-                    <div className="efe-cat-drawer-header">
-                        <h3>
+                <div className="efe-cat-drawer-left" style={{ borderRight: '1px solid #f1f5f9', background: '#ffffff' }}>
+                    <div className="efe-cat-drawer-header" style={{ background: '#ffffff', borderBottom: '1px solid #f1f5f9', paddingBottom: '20px', paddingTop: '20px', marginBottom: '16px', paddingLeft: '20px', paddingRight: '20px' }}>
+                        <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#0f172a', margin: 0 }}>
                             {user?.nombres ? `¡Hola, ${user.nombres.split(' ')[0]}!` : '¡Hola!'}
                         </h3>
-                        <button className="efe-cat-drawer-close" onClick={onClose}>
-                            <svg
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2.5"
-                                strokeLinecap="round"
-                            >
+                        <button 
+                            className="efe-cat-drawer-close" 
+                            onClick={onClose}
+                            style={{ 
+                                background: 'transparent', 
+                                border: 'none', 
+                                padding: '4px', 
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                color: '#94a3b8',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                            onMouseOver={(e) => { e.currentTarget.style.color = '#0f172a'; e.currentTarget.style.transform = 'rotate(90deg)'; }}
+                            onMouseOut={(e) => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.transform = 'rotate(0deg)'; }}
+                        >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <line x1="18" y1="6" x2="6" y2="18" />
                                 <line x1="6" y1="6" x2="18" y2="18" />
                             </svg>
@@ -90,21 +178,12 @@ export default function CategoryDrawer({ isOpen, onClose, categorias = [] }) {
                         {categorias.map((cat) => (
                             <button
                                 key={cat.id}
-                                className={`efe-cat-drawer-item ${activeId === cat.id ? 'is-active' : ''}`}
+                                className={`premium-cat-item ${activeId === cat.id ? 'is-active' : ''}`}
                                 onMouseEnter={() => handleCatHover(cat.id)}
                                 onClick={() => handleCatClick(cat)}
                             >
-                                {cat.nombre}
-                                <svg
-                                    width="16"
-                                    height="16"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2.5"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
+                                <span>{cat.nombre}</span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                     <polyline points="9 18 15 12 9 6" />
                                 </svg>
                             </button>
@@ -113,7 +192,7 @@ export default function CategoryDrawer({ isOpen, onClose, categorias = [] }) {
                 </div>
 
                 {/* Panel Derecho - Subcategorías */}
-                <div className="efe-cat-drawer-right">
+                <div className="efe-cat-drawer-right" style={{ background: '#f8fafc', padding: '32px' }}>
                     {activeCat ? (
                         <>
                             <div
@@ -122,9 +201,9 @@ export default function CategoryDrawer({ isOpen, onClose, categorias = [] }) {
                                     display: 'flex',
                                     flexDirection: 'column',
                                     gap: '15px',
-                                    marginBottom: '20px',
-                                    borderBottom: '2px solid #f1f5f9',
-                                    paddingBottom: '15px',
+                                    marginBottom: '24px',
+                                    borderBottom: '1px solid #e2e8f0',
+                                    paddingBottom: '20px',
                                 }}
                             >
                                 {isMobile && (
@@ -132,28 +211,22 @@ export default function CategoryDrawer({ isOpen, onClose, categorias = [] }) {
                                         onClick={handleBack}
                                         style={{
                                             alignSelf: 'flex-start',
-                                            background: 'transparent',
-                                            border: 'none',
+                                            background: '#ffffff',
+                                            border: '1px solid #e2e8f0',
+                                            borderRadius: '8px',
                                             color: '#64748b',
-                                            fontSize: '14px',
+                                            fontSize: '13px',
                                             display: 'flex',
                                             alignItems: 'center',
-                                            gap: '5px',
+                                            gap: '6px',
                                             cursor: 'pointer',
-                                            padding: 0,
-                                            fontWeight: 'bold',
+                                            padding: '8px 12px',
+                                            fontWeight: '600',
+                                            boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                                            transition: 'all 0.2s'
                                         }}
                                     >
-                                        <svg
-                                            width="16"
-                                            height="16"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            strokeWidth="2.5"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                        >
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                             <line x1="19" y1="12" x2="5" y2="12" />
                                             <polyline points="12 19 5 12 12 5" />
                                         </svg>
@@ -171,10 +244,9 @@ export default function CategoryDrawer({ isOpen, onClose, categorias = [] }) {
                                 >
                                     <h4
                                         style={{
-                                            fontSize: '20px',
-                                            fontWeight: '900',
+                                            fontSize: '22px',
+                                            fontWeight: '800',
                                             color: '#0f172a',
-                                            textTransform: 'uppercase',
                                             position: 'relative',
                                             margin: 0,
                                             letterSpacing: '-0.5px',
@@ -184,9 +256,9 @@ export default function CategoryDrawer({ isOpen, onClose, categorias = [] }) {
                                         <span
                                             style={{
                                                 position: 'absolute',
-                                                bottom: '-17px',
+                                                bottom: '-22px',
                                                 left: 0,
-                                                width: '40px',
+                                                width: '48px',
                                                 height: '4px',
                                                 background: '#00B4FF',
                                                 borderRadius: '4px',
@@ -195,22 +267,9 @@ export default function CategoryDrawer({ isOpen, onClose, categorias = [] }) {
                                     </h4>
                                     <button
                                         onClick={() => handleVerTodo(activeCat.nombre)}
-                                        style={{
-                                            fontSize: '12px',
-                                            fontWeight: 'bold',
-                                            color: '#00B4FF',
-                                            background: 'rgba(0,180,255,0.1)',
-                                            padding: '6px 14px',
-                                            borderRadius: '20px',
-                                            border: 'none',
-                                            cursor: 'pointer',
-                                            transition: 'all 0.2s',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '6px',
-                                        }}
+                                        className="premium-btn-outline"
                                     >
-                                        Ver todo
+                                        Explorar todo
                                     </button>
                                 </div>
                             </div>
@@ -219,9 +278,9 @@ export default function CategoryDrawer({ isOpen, onClose, categorias = [] }) {
                                 className="efe-cat-drawer-sub-list"
                                 style={{
                                     display: 'grid',
-                                    gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
-                                    gap: '12px',
-                                    marginTop: '10px',
+                                    gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
+                                    gap: '16px',
+                                    marginTop: '24px',
                                     overflowY: 'auto',
                                     paddingBottom: '20px',
                                 }}
@@ -230,39 +289,12 @@ export default function CategoryDrawer({ isOpen, onClose, categorias = [] }) {
                                     activeCat.subcategorias.map((sub) => (
                                         <button
                                             key={sub.id}
-                                            className="efe-cat-drawer-sub-item-link"
+                                            className="premium-sub-item"
                                             type="button"
                                             onClick={() => handleSubClick(sub.nombre)}
-                                            style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'space-between',
-                                                background: '#f8fafc',
-                                                border: '1px solid #e2e8f0',
-                                                borderRadius: '10px',
-                                                textAlign: 'left',
-                                                padding: '10px 12px',
-                                                fontSize: '12px',
-                                                fontWeight: '600',
-                                                color: '#334155',
-                                                cursor: 'pointer',
-                                                width: '100%',
-                                                transition: 'all 0.2s ease',
-                                                wordBreak: 'break-word',
-                                            }}
                                         >
                                             <span>{sub.nombre}</span>
-                                            <svg
-                                                width="14"
-                                                height="14"
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                stroke="#94a3b8"
-                                                strokeWidth="2.5"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                style={{ flexShrink: 0 }}
-                                            >
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
                                                 <polyline points="9 18 15 12 9 6" />
                                             </svg>
                                         </button>
@@ -271,21 +303,15 @@ export default function CategoryDrawer({ isOpen, onClose, categorias = [] }) {
                                     <div
                                         style={{
                                             gridColumn: '1 / -1',
-                                            background: '#f8fafc',
+                                            background: '#ffffff',
                                             borderRadius: '12px',
-                                            padding: '30px',
+                                            padding: '40px 30px',
                                             border: '1px dashed #cbd5e1',
                                             textAlign: 'center',
                                         }}
                                     >
-                                        <div
-                                            style={{
-                                                color: '#64748b',
-                                                fontWeight: '500',
-                                                fontSize: '13px',
-                                            }}
-                                        >
-                                            Sin subcategorías
+                                        <div style={{ color: '#64748b', fontWeight: '500', fontSize: '14px' }}>
+                                            No hay subcategorías disponibles.
                                         </div>
                                     </div>
                                 )}
@@ -300,28 +326,24 @@ export default function CategoryDrawer({ isOpen, onClose, categorias = [] }) {
                                 alignItems: 'center',
                                 justifyContent: 'center',
                                 height: '100%',
-                                color: '#9ca3af',
-                                gap: '12px',
-                                fontSize: '14px',
+                                color: '#94a3b8',
+                                gap: '16px',
+                                fontSize: '15px',
                                 textAlign: 'center',
                                 padding: '40px',
+                                fontWeight: '500'
                             }}
                         >
-                            <svg
-                                width="48"
-                                height="48"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="#d1d5db"
-                                strokeWidth="1.5"
-                            >
-                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                                <polyline points="22,6 12,13 2,6" />
-                            </svg>
+                            <div style={{ background: '#ffffff', padding: '20px', borderRadius: '50%', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" strokeWidth="2">
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                    <polyline points="22,6 12,13 2,6" />
+                                </svg>
+                            </div>
                             <span>
-                                Pasa el cursor por una categoría
+                                Desliza el cursor sobre una categoría
                                 <br />
-                                para ver sus subcategorías
+                                para explorar sus opciones
                             </span>
                         </div>
                     )}
