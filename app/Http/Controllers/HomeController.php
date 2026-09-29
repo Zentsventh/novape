@@ -37,11 +37,17 @@ class HomeController extends Controller
     public function catalogo(Request $request): Response
     {
         $filters = $request->only(['categoria', 'subcategoria', 'marca', 'precio_min', 'precio_max', 'q', 'sort']);
-        $data = $this->catalogQueryService->getCatalogData($filters);
+        $page = $request->query('page', 1);
+
+        $cacheKey = 'catalogo_' . md5(json_encode($filters) . '_page_' . $page);
+
+        $data = \Illuminate\Support\Facades\Cache::remember($cacheKey, 3600, function () use ($filters) {
+            return $this->catalogQueryService->getCatalogData($filters);
+        });
 
         return Inertia::render('Catalogo', array_merge($data, [
             'filtros' => $filters,
-            'totalProductos' => count($data['productos']),
+            'totalProductos' => isset($data['productos']['data']) ? count($data['productos']['data']) : 0,
             'logoUrl' => ConfiguracionSitio::obtener('logo_url'),
         ]));
     }
@@ -61,7 +67,11 @@ class HomeController extends Controller
 
     public function producto(string $slugOrId): Response
     {
-        $data = $this->catalogQueryService->getProductData($slugOrId);
+        $cacheKey = 'producto_' . $slugOrId;
+
+        $data = \Illuminate\Support\Facades\Cache::remember($cacheKey, 3600, function () use ($slugOrId) {
+            return $this->catalogQueryService->getProductData($slugOrId);
+        });
 
         return Inertia::render('Producto', array_merge($data, [
             'reviews' => [],
