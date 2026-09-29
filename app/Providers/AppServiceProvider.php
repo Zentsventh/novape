@@ -41,9 +41,12 @@ class AppServiceProvider extends ServiceProvider
         \Illuminate\Support\Facades\Storage::extend('azure', function ($app, $config) {
             $client = !empty($config['connection_string'])
                 ? \AzureOss\Storage\Blob\BlobServiceClient::fromConnectionString($config['connection_string'])
-                : \AzureOss\Storage\Blob\BlobServiceClient::fromSharedKey(
-                    (string) ($config['name'] ?? ''),
-                    (string) ($config['key'] ?? '')
+                : \AzureOss\Storage\Blob\BlobServiceClient::fromConnectionString(
+                    sprintf(
+                        'DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s;EndpointSuffix=core.windows.net',
+                        (string) ($config['name'] ?? ''),
+                        (string) ($config['key'] ?? '')
+                    )
                 );
 
             $containerClient = $client->getContainerClient((string) ($config['container'] ?? 'novape-uploads'));

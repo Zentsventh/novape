@@ -30,6 +30,9 @@ class CatalogQueryService
                 }])
                 ->get();
 
+            $varianteIds = $categorias->pluck('productos')->flatten()->map(fn($p) => $p->variantes->first()?->id)->filter()->toArray();
+            $this->preloadStocks($varianteIds);
+
             return $categorias->map(function ($cat) {
                 return [
                     'id' => $cat->id,
@@ -42,12 +45,16 @@ class CatalogQueryService
         });
 
         $mejorSemana = Cache::remember('home_mejor_semana', 3600, function () {
-            return Producto::where('activo', 1)
+            $productos = Producto::where('activo', 1)
                 ->with(['marca', 'variantes', 'imagenes'])
                 ->orderBy('created_at', 'desc')
                 ->take(10)
-                ->get()
-                ->map(fn($prod) => $this->formatProducto($prod));
+                ->get();
+                
+            $varianteIds = $productos->map(fn($p) => $p->variantes->first()?->id)->filter()->toArray();
+            $this->preloadStocks($varianteIds);
+
+            return $productos->map(fn($prod) => $this->formatProducto($prod));
         });
 
         $banners = Cache::remember('home_banners', 3600, function () {
@@ -221,6 +228,10 @@ class CatalogQueryService
         $this->applySmartSearch($query, $q);
 
         $productos = $query->limit(40)->get();
+        
+        $varianteIds = $productos->take(6)->map(fn($p) => $p->variantes->first()?->id)->filter()->toArray();
+        $this->preloadStocks($varianteIds);
+
         $formateados = $productos->take(6)->map(fn($p) => $this->formatProducto($p));
 
         $marcas = $productos->pluck('marca.nombre')->filter()->unique()->values();
@@ -297,6 +308,10 @@ class CatalogQueryService
             })
             ->with('subcategorias')
             ->get();
+
+        $varianteIds = collect([$producto])->merge($recomendadosQuery ?? collect())
+            ->map(fn($p) => $p->variantes->first()?->id)->filter()->toArray();
+        $this->preloadStocks($varianteIds);
 
         return [
             'producto' => $this->formatProducto($producto),

@@ -18,8 +18,10 @@ class ConfiguracionSitio extends Model
      */
     public static function obtener($clave, $default = null)
     {
-        $config = static::where('clave', $clave)->first();
-        return $config ? $config->valor : $default;
+        return \Illuminate\Support\Facades\Cache::rememberForever("config_{$clave}", function() use ($clave, $default) {
+            $config = static::where('clave', $clave)->first();
+            return $config ? $config->valor : $default;
+        });
     }
 
     /**
@@ -27,6 +29,7 @@ class ConfiguracionSitio extends Model
      */
     public static function establecer($clave, $valor)
     {
+        \Illuminate\Support\Facades\Cache::forget("config_{$clave}");
         return static::updateOrCreate(
             ['clave' => $clave],
             ['valor' => $valor]
