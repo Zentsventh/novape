@@ -41,7 +41,7 @@ class ErrorBoundary extends React.Component {
 }
 
 /* Wrapper global que muestra el ChatBot en páginas públicas (no admin). */
-function GlobalLayout({ children, pageName = '', serverHints = {}, user = null }) {
+function GlobalLayout({ children, pageName = '', serverHints = {}, user = null, cart = null }) {
     const isAdmin = typeof pageName === 'string' && (pageName.startsWith('Admin/') || pageName.startsWith('Auth/'));
     const isCheckoutFlow = typeof pageName === 'string' && pageName.startsWith('Checkout');
 
@@ -49,7 +49,7 @@ function GlobalLayout({ children, pageName = '', serverHints = {}, user = null }
         <DeviceProvider serverHints={serverHints}>
             <ConfirmProvider>
                 {children}
-                {!isAdmin && !isCheckoutFlow && <MobileBottomNav user={user} />}
+                {!isAdmin && !isCheckoutFlow && <MobileBottomNav user={user} cart={cart} />}
                 {!isAdmin && !isCheckoutFlow && <ChatBot user={user} />}
             </ConfirmProvider>
         </DeviceProvider>
@@ -66,6 +66,7 @@ createInertiaApp({
                     pageName={props?.initialPage?.component || ''} 
                     serverHints={props?.initialPage?.props?.device || {}}
                     user={props?.initialPage?.props?.auth?.user}
+                    cart={props?.initialPage?.props?.cart}
                 >
                     <App {...props} />
                 </GlobalLayout>

@@ -1,12 +1,11 @@
 import React from 'react';
-import { Link, usePage } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
 import { useDeviceContext } from '@/Contexts/DeviceContext';
 import { Home, Search, ShoppingCart, User, Menu } from 'lucide-react';
 import '../../../css/home/mobile-nav.css';
 
-export default function MobileBottomNav({ user }) {
+export default function MobileBottomNav({ user, cart }) {
     const { isMobile, isTablet } = useDeviceContext();
-    const { cart } = usePage().props;
     const cartCount = cart?.count || 0;
 
     if (!isMobile && !isTablet) return null;

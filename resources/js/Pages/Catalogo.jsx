@@ -62,6 +62,10 @@ export default function Catalogo({
     const [quickViewProduct, setQuickViewProduct] = useState(null);
     const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
 
+    // Compatibilidad con paginación
+    const productList = Array.isArray(productos) ? productos : (productos?.data || []);
+    const totalCount = !Array.isArray(productos) && productos?.total !== undefined ? productos.total : totalProductos;
+
     useEffect(() => {
         const handleOpenCart = () => setIsCartOpen(true);
         const handleOpenCategories = () => setIsCatOpen(true);
@@ -509,11 +513,11 @@ export default function Catalogo({
                             </select>
                         </div>
                         <div className="catalogo-results-count hide-mobile">
-                            {totalProductos} resultados
+                            {totalCount} resultados
                         </div>
                     </div>
 
-                    {productos.length === 0 && !isLoadingFilters ? (
+                    {productList.length === 0 && !isLoadingFilters ? (
                         <div
                             className="catalogo-empty"
                             style={{
@@ -533,7 +537,7 @@ export default function Catalogo({
                                           className="catalogo-product-card"
                                       />
                                   ))
-                                : productos.map((product) => (
+                                : productList.map((product) => (
                                       <div
                                           key={product.id}
                                           className="catalogo-product-card efe-spotlight-card"

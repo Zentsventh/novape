@@ -166,30 +166,37 @@ class CatalogQueryService
             $query->whereHas('marca', fn($q) => $q->where('nombre', $marcaFilter));
         }
 
-        $productos = $query->get();
-        $varianteIds = $productos->map(fn($p) => $p->variantes->first()?->id)->filter()->toArray();
-        $this->preloadStocks($varianteIds);
-
-        $productosFormateados = $productos->map(fn($prod) => $this->formatProducto($prod));
-
         if ($precioMin !== null && $precioMin !== '') {
-            $productosFormateados = $productosFormateados->filter(fn($p) => $p->precio_actual >= (float)$precioMin);
+            $query->whereHas('variantes', fn($q) => $q->where('precio', '>=', (float)$precioMin));
         }
         if ($precioMax !== null && $precioMax !== '') {
-            $productosFormateados = $productosFormateados->filter(fn($p) => $p->precio_actual <= (float)$precioMax);
+            $query->whereHas('variantes', fn($q) => $q->where('precio', '<=', (float)$precioMax));
         }
 
-        if ($sort === 'precio_asc') {
-            $productosFormateados = $productosFormateados->sortBy('precio_actual');
-        } elseif ($sort === 'precio_desc') {
-            $productosFormateados = $productosFormateados->sortByDesc('precio_actual');
+        if ($sort === 'precio_asc' || $sort === 'precio_desc') {
+            $direction = $sort === 'precio_asc' ? 'asc' : 'desc';
+            $query->orderBy(
+                \App\Models\Variante::select('precio')
+                    ->whereColumn('producto_id', 'producto.id')
+                    ->orderBy('precio', 'asc')
+                    ->limit(1),
+                $direction
+            );
         } elseif ($sort === 'descuento') {
-            $productosFormateados = $productosFormateados->sortByDesc('descuento');
+            $query->orderBy('id', 'desc');
         } else {
             if (!$searchQuery) {
-                $productosFormateados = $productosFormateados->sortByDesc('id');
+                $query->orderBy('id', 'desc');
             }
         }
+
+        $paginator = $query->paginate(24)->withQueryString();
+        $productosModelos = collect($paginator->items());
+
+        $varianteIds = $productosModelos->map(fn($p) => $p->variantes->first()?->id)->filter()->toArray();
+        $this->preloadStocks($varianteIds);
+
+        $productosFormateados = $productosModelos->map(fn($prod) => $this->formatProducto($prod))->values();
 
         $now = now()->toDateTimeString();
         $lateralBanners = DB::table('banners')
@@ -205,7 +212,13 @@ class CatalogQueryService
             ->get();
 
         return [
-            'productos' => $productosFormateados->values(),
+            'productos' => [
+                'data' => $productosFormateados,
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'total' => $paginator->total(),
+                'links' => $paginator->linkCollection()->toArray()
+            ],
             'categorias' => $categorias->map(fn($cat) => [
                 'id' => $cat->id,
                 'nombre' => $cat->nombre,
