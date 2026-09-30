@@ -14,14 +14,34 @@ class ConfiguracionSitio extends Model
     protected $fillable = ['clave', 'valor', 'descripcion'];
 
     /**
-     * Get a config value by key
+     * In-memory cache of all config values (loaded once per request).
+     */
+    private static ?array $allConfigsMemo = null;
+
+    /**
+     * Load ALL config values in a single query and cache them.
+     * Reduces N queries (one per key) to 1 query total.
+     */
+    private static function loadAll(): array
+    {
+        if (self::$allConfigsMemo !== null) {
+            return self::$allConfigsMemo;
+        }
+
+        self::$allConfigsMemo = \Illuminate\Support\Facades\Cache::rememberForever('config_all_values', function () {
+            return static::pluck('valor', 'clave')->toArray();
+        });
+
+        return self::$allConfigsMemo;
+    }
+
+    /**
+     * Get a config value by key — uses batch-loaded cache (1 query for ALL keys).
      */
     public static function obtener($clave, $default = null)
     {
-        return \Illuminate\Support\Facades\Cache::rememberForever("config_{$clave}", function() use ($clave, $default) {
-            $config = static::where('clave', $clave)->first();
-            return $config ? $config->valor : $default;
-        });
+        $all = self::loadAll();
+        return $all[$clave] ?? $default;
     }
 
     /**
@@ -29,10 +49,22 @@ class ConfiguracionSitio extends Model
      */
     public static function establecer($clave, $valor)
     {
+        // Invalidate both the old individual cache and the batch cache
         \Illuminate\Support\Facades\Cache::forget("config_{$clave}");
+        \Illuminate\Support\Facades\Cache::forget('config_all_values');
+        self::$allConfigsMemo = null;
+
         return static::updateOrCreate(
             ['clave' => $clave],
             ['valor' => $valor]
         );
+    }
+
+    /**
+     * Clear the in-memory memo (useful for testing).
+     */
+    public static function clearMemo(): void
+    {
+        self::$allConfigsMemo = null;
     }
 }

@@ -24,22 +24,31 @@ class CatalogQueryService
                 ->where(function ($q) {
                     $q->whereNotIn('slug', ['cyber-bombas', 'retiro-inmediato'])->orWhereNull('slug');
                 })
-                ->with(['subcategorias', 'productos' => function ($query) {
-                    $query->where('producto.activo', 1)
-                          ->with(['marca', 'variantes', 'imagenes']);
-                }])
+                ->with('subcategorias')
                 ->get();
 
-            $varianteIds = $categorias->pluck('productos')->flatten()->map(fn($p) => $p->variantes->first()?->id)->filter()->toArray();
-            $this->preloadStocks($varianteIds);
+            // Cargar solo 10 productos por categoría (no todos)
+            $catIds = $categorias->pluck('id')->toArray();
+            $productosPorCat = [];
+            foreach ($catIds as $catId) {
+                $productosPorCat[$catId] = Producto::where('activo', 1)
+                    ->whereHas('categorias', fn($q) => $q->where('categoria.id', $catId))
+                    ->with(['marca', 'variantes', 'imagenes', 'categorias'])
+                    ->limit(10)
+                    ->get();
+            }
 
-            return $categorias->map(function ($cat) {
+            $allVarianteIds = collect($productosPorCat)->flatten()->map(fn($p) => $p->variantes->first()?->id)->filter()->toArray();
+            $this->preloadStocks($allVarianteIds);
+
+            return $categorias->map(function ($cat) use ($productosPorCat) {
+                $prods = $productosPorCat[$cat->id] ?? collect();
                 return [
                     'id' => $cat->id,
                     'nombre' => $cat->nombre,
                     'descripcion' => $cat->descripcion,
                     'subcategorias' => $cat->subcategorias->map(fn($sub) => ['id' => $sub->id, 'nombre' => $sub->nombre]),
-                    'productos' => $cat->productos->take(10)->map(fn($prod) => $this->formatProducto($prod)),
+                    'productos' => $prods->map(fn($prod) => $this->formatProducto($prod)),
                 ];
             });
         });
@@ -89,24 +98,18 @@ class CatalogQueryService
         $searchQuery = $filters['q'] ?? null;
         $sort = $filters['sort'] ?? 'relevancia';
 
-        $categorias = Cache::remember('catalog_categorias_base', 3600, function () {
-            return Categoria::whereNull('categoria_padre_id')
-                ->where(function ($q) {
-                    $q->whereNotIn('slug', ['cyber-bombas', 'retiro-inmediato'])->orWhereNull('slug');
-                })
-                ->with('subcategorias')
-                ->get();
-        });
+        $categorias = $this->getCachedBaseCategories();
 
         $query = Producto::where('activo', 1)->with(['marca', 'variantes', 'imagenes', 'categorias']);
 
         $categoriaActiva = null;
         $subcategoriaActiva = null;
 
+        // Resolver categorías usando las ya cacheadas (0 queries extra)
         if ($subcategoriaParam && $categoriaParam) {
-            $catPadre = Categoria::where('nombre', $categoriaParam)->whereNull('categoria_padre_id')->first();
+            $catPadre = $categorias->first(fn($c) => $c->nombre === $categoriaParam);
             if ($catPadre) {
-                $subcat = Categoria::where('nombre', $subcategoriaParam)->where('categoria_padre_id', $catPadre->id)->first();
+                $subcat = $catPadre->subcategorias->first(fn($s) => $s->nombre === $subcategoriaParam);
                 if ($subcat) {
                     $subcategoriaActiva = $subcat;
                     $categoriaActiva = $catPadre;
@@ -114,14 +117,17 @@ class CatalogQueryService
                 }
             }
         } elseif ($subcategoriaParam) {
-            $subcat = Categoria::where('nombre', $subcategoriaParam)->first();
-            if ($subcat) {
-                $subcategoriaActiva = $subcat;
-                $categoriaActiva = $subcat->padre;
-                $query->whereHas('categorias', fn($q) => $q->where('categoria.id', $subcat->id));
+            foreach ($categorias as $cat) {
+                $subcat = $cat->subcategorias->first(fn($s) => $s->nombre === $subcategoriaParam);
+                if ($subcat) {
+                    $subcategoriaActiva = $subcat;
+                    $categoriaActiva = $cat;
+                    $query->whereHas('categorias', fn($q) => $q->where('categoria.id', $subcat->id));
+                    break;
+                }
             }
         } elseif ($categoriaParam) {
-            $cat = Categoria::where('nombre', $categoriaParam)->whereNull('categoria_padre_id')->first();
+            $cat = $categorias->first(fn($c) => $c->nombre === $categoriaParam);
             if ($cat) {
                 $categoriaActiva = $cat;
                 $catIds = $cat->subcategorias->pluck('id')->push($cat->id)->toArray();
@@ -240,7 +246,7 @@ class CatalogQueryService
         $query = Producto::where('activo', 1)->with(['marca', 'variantes', 'imagenes', 'categorias']);
         $this->applySmartSearch($query, $q);
 
-        $productos = $query->limit(40)->get();
+        $productos = $query->limit(8)->get();
         
         $varianteIds = $productos->take(6)->map(fn($p) => $p->variantes->first()?->id)->filter()->toArray();
         $this->preloadStocks($varianteIds);
@@ -315,12 +321,7 @@ class CatalogQueryService
             $recomendados = $recomendadosQuery->map(fn($p) => $this->formatProducto($p));
         }
 
-        $categorias = Categoria::whereNull('categoria_padre_id')
-            ->where(function ($q) {
-                $q->whereNotIn('slug', ['cyber-bombas', 'retiro-inmediato'])->orWhereNull('slug');
-            })
-            ->with('subcategorias')
-            ->get();
+        $categorias = $this->getCachedBaseCategories();
 
         $varianteIds = collect([$producto])->merge($recomendadosQuery ?? collect())
             ->map(fn($p) => $p->variantes->first()?->id)->filter()->toArray();
@@ -419,6 +420,21 @@ class CatalogQueryService
         return $query;
     }
 
+    /**
+     * Categorías base cacheadas — reutilizadas por Catálogo, Producto y Home.
+     */
+    private function getCachedBaseCategories(): Collection
+    {
+        return Cache::remember('catalog_categorias_base', 3600, function () {
+            return Categoria::whereNull('categoria_padre_id')
+                ->where(function ($q) {
+                    $q->whereNotIn('slug', ['cyber-bombas', 'retiro-inmediato'])->orWhereNull('slug');
+                })
+                ->with('subcategorias')
+                ->get();
+        });
+    }
+
     private function preloadStocks(array $varianteIds): void
     {
         if (self::$almacenEcommerceIdMemo === null) {
@@ -457,14 +473,11 @@ class CatalogQueryService
         $stock = 0;
         if ($variante) {
             $vId = $variante->id;
-            if (self::$almacenEcommerceIdMemo === null) {
-                self::$almacenEcommerceIdMemo = (int) ConfiguracionSitio::obtener('almacen_ecommerce_id', 1);
+            // Usar solo el memo precargado por preloadStocks(); si no está, asumir 0
+            // en lugar de hacer una query individual (eliminando N+1)
+            if (array_key_exists($vId, self::$ecommerceStocksMemo)) {
+                $stock = self::$ecommerceStocksMemo[$vId];
             }
-            if (!array_key_exists($vId, self::$ecommerceStocksMemo)) {
-                $stockRow = DB::table('stock_almacen')->where('almacen_id', self::$almacenEcommerceIdMemo)->where('variante_id', $vId)->first();
-                self::$ecommerceStocksMemo[$vId] = $stockRow ? (int)$stockRow->cantidad : 0;
-            }
-            $stock = self::$ecommerceStocksMemo[$vId];
         }
 
         return (object)[
