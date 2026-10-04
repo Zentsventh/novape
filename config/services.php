@@ -41,9 +41,6 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI'),
     ],
 
-    'stripe' => [
-        'secret' => env('STRIPE_SECRET'),
-    ],
     'niubiz' => [
         'user' => env('NIUBIZ_USER'),
         'password' => env('NIUBIZ_PASSWORD'),
