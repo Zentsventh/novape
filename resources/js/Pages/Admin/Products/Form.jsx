@@ -356,7 +356,7 @@ export default function Form({ producto, marcas, categorias, proveedores, listaE
                         <div style={{ background: 'var(--admin-bg-panel)', padding: '20px', borderRadius: '12px', border: '1px solid var(--admin-border)' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                                 <label style={{ display: 'block', margin: 0, fontWeight: 'bold', color: 'var(--admin-text-main)' }}>Categorías del Producto</label>
-                                <button type="button" onClick={() => setShowCatModal(true)} style={{ background: 'var(--admin-bg-body)', color: '#00B4FF', border: '1px solid #00B4FF', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>+ Nueva Categoría</button>
+                                <button type="button" onClick={() => setShowCatModal(true)} style={{ background: 'var(--admin-bg-body)', color: '#004797', border: '1px solid #004797', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>+ Nueva Categoría</button>
                             </div>
                             
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
@@ -386,14 +386,14 @@ export default function Form({ producto, marcas, categorias, proveedores, listaE
                                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', maxHeight: '150px', overflowY: 'auto', padding: '5px' }}>
                                             {localCategorias.filter(c => c.categoria_padre_id == selectedMainCategory).length > 0 ? (
                                                 localCategorias.filter(c => c.categoria_padre_id == selectedMainCategory).map(cat => (
-                                                    <label key={cat.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--admin-bg-body)', padding: '6px 12px', borderRadius: '20px', cursor: 'pointer', border: data.categorias.includes(cat.id) ? '1px solid #00B4FF' : '1px solid var(--admin-border)' }}>
+                                                    <label key={cat.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--admin-bg-body)', padding: '6px 12px', borderRadius: '20px', cursor: 'pointer', border: data.categorias.includes(cat.id) ? '1px solid #004797' : '1px solid var(--admin-border)' }}>
                                                         <input 
                                                             type="checkbox" 
                                                             checked={data.categorias.includes(cat.id)}
                                                             onChange={() => handleCategoryToggle(cat.id)}
                                                             style={{ display: 'none' }}
                                                         />
-                                                        <span style={{ fontSize: '12px', color: data.categorias.includes(cat.id) ? '#00B4FF' : 'var(--admin-text-main)', fontWeight: data.categorias.includes(cat.id) ? 'bold' : 'normal' }}>{cat.nombre}</span>
+                                                        <span style={{ fontSize: '12px', color: data.categorias.includes(cat.id) ? '#004797' : 'var(--admin-text-main)', fontWeight: data.categorias.includes(cat.id) ? 'bold' : 'normal' }}>{cat.nombre}</span>
                                                     </label>
                                                 ))
                                             ) : (
@@ -412,7 +412,7 @@ export default function Form({ producto, marcas, categorias, proveedores, listaE
                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
                                         {data.categorias.map(id => {
                                             const c = localCategorias.find(cat => cat.id === id);
-                                            return c ? <span key={id} style={{ background: 'rgba(0, 180, 255, 0.1)', color: '#00B4FF', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold' }}>{c.nombre} <button type="button" onClick={() => handleCategoryToggle(id)} style={{ background:'none',border:'none',color:'#00B4FF',cursor:'pointer',marginLeft:'5px',padding:0 }}>×</button></span> : null;
+                                            return c ? <span key={id} style={{ background: 'rgba(0, 71, 151, 0.1)', color: '#004797', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 'bold' }}>{c.nombre} <button type="button" onClick={() => handleCategoryToggle(id)} style={{ background:'none',border:'none',color:'#004797',cursor:'pointer',marginLeft:'5px',padding:0 }}>×</button></span> : null;
                                         })}
                                     </div>
                                 </div>
@@ -468,7 +468,7 @@ export default function Form({ producto, marcas, categorias, proveedores, listaE
                             </div>
                             <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
                                 <button type="button" onClick={() => setShowCatModal(false)} style={{ flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid #ccc', background: 'transparent', cursor: 'pointer' }}>Cancelar</button>
-                                <button type="submit" disabled={isSavingCat} style={{ flex: 1, padding: '10px', borderRadius: '6px', border: 'none', background: '#00B4FF', color: 'white', fontWeight: 'bold', cursor: 'pointer' }}>
+                                <button type="submit" disabled={isSavingCat} style={{ flex: 1, padding: '10px', borderRadius: '6px', border: 'none', background: '#004797', color: 'white', fontWeight: 'bold', cursor: 'pointer' }}>
                                     {isSavingCat ? 'Guardando...' : 'Guardar'}
                                 </button>
                             </div>

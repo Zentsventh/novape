@@ -110,8 +110,8 @@ export default function CartDrawer({ cart, isOpen, onClose }) {
                     position: relative;
                 }
                 .premium-cart-item:hover {
-                    border-color: #00B4FF;
-                    box-shadow: 0 8px 20px rgba(0, 180, 255, 0.08);
+                    border-color: #004797;
+                    box-shadow: 0 8px 20px rgba(0, 71, 151, 0.08);
                     transform: translateY(-2px);
                 }
                 .premium-cart-img-container {
@@ -183,7 +183,7 @@ export default function CartDrawer({ cart, isOpen, onClose }) {
                     transition: color 0.2s;
                 }
                 .premium-qty-btn:hover {
-                    color: #00B4FF;
+                    color: #004797;
                 }
                 .premium-qty-val {
                     font-size: 14px;
@@ -231,7 +231,7 @@ export default function CartDrawer({ cart, isOpen, onClose }) {
                     color: #0f172a;
                 }
                 .premium-btn-primary {
-                    background: #00B4FF;
+                    background: #004797;
                     color: #ffffff;
                     border: none;
                     padding: 14px 20px;
@@ -240,7 +240,7 @@ export default function CartDrawer({ cart, isOpen, onClose }) {
                     font-weight: 700;
                     cursor: pointer;
                     transition: all 0.2s ease;
-                    box-shadow: 0 4px 12px rgba(0, 180, 255, 0.25);
+                    box-shadow: 0 4px 12px rgba(0, 71, 151, 0.25);
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -248,7 +248,7 @@ export default function CartDrawer({ cart, isOpen, onClose }) {
                 }
                 .premium-btn-primary:hover {
                     background: #009ce0;
-                    box-shadow: 0 6px 16px rgba(0, 180, 255, 0.35);
+                    box-shadow: 0 6px 16px rgba(0, 71, 151, 0.35);
                     transform: translateY(-2px);
                 }
                 .premium-btn-secondary {

@@ -249,7 +249,7 @@ export default function Tasks({ tasks = [], deals = [] }) {
                     letter-spacing: 0.05em;
                 }
                 .premium-section-title.overdue { color: #EF4444; }
-                .premium-section-title.today { color: #00B4FF; }
+                .premium-section-title.today { color: #004797; }
                 .premium-section-title.upcoming { color: #475569; }
                 .premium-section-title.completed { color: #94A3B8; }
                 
@@ -297,11 +297,11 @@ export default function Tasks({ tasks = [], deals = [] }) {
                     transition: all 0.2s ease;
                 }
                 .premium-checkbox-btn:hover:not(:disabled) {
-                    color: #00B4FF;
+                    color: #004797;
                     transform: scale(1.1);
                 }
                 .premium-checkbox-btn.checked {
-                    color: #00B4FF;
+                    color: #004797;
                 }
                 .premium-checkbox-btn:disabled {
                     opacity: 0.5;
@@ -353,15 +353,15 @@ export default function Tasks({ tasks = [], deals = [] }) {
                 .premium-task-deal {
                     font-size: 12px;
                     font-weight: 600;
-                    color: #00B4FF;
-                    background: rgba(0, 180, 255, 0.1);
+                    color: #004797;
+                    background: rgba(0, 71, 151, 0.1);
                     padding: 4px 10px;
                     border-radius: 6px;
                     text-decoration: none;
                     transition: all 0.2s ease;
                 }
                 .premium-task-deal:hover {
-                    background: rgba(0, 180, 255, 0.15);
+                    background: rgba(0, 71, 151, 0.15);
                     transform: scale(1.02);
                 }
                 
@@ -377,7 +377,7 @@ export default function Tasks({ tasks = [], deals = [] }) {
                     color: #EF4444;
                 }
                 .premium-task-date.today {
-                    color: #00B4FF;
+                    color: #004797;
                 }
 
                 .premium-empty-state {
@@ -429,8 +429,8 @@ export default function Tasks({ tasks = [], deals = [] }) {
                     box-shadow: 0 1px 2px rgba(0,0,0,0.02);
                 }
                 .premium-search-box input:focus {
-                    border-color: #00B4FF;
-                    box-shadow: 0 0 0 3px rgba(0, 180, 255, 0.1);
+                    border-color: #004797;
+                    box-shadow: 0 0 0 3px rgba(0, 71, 151, 0.1);
                 }
                 .premium-filters {
                     display: flex;
@@ -556,7 +556,7 @@ export default function Tasks({ tasks = [], deals = [] }) {
                     display: flex;
                     align-items: center;
                     gap: 8px;
-                    background: #00B4FF;
+                    background: #004797;
                     color: white;
                     border: none;
                     padding: 10px 20px;
@@ -565,16 +565,16 @@ export default function Tasks({ tasks = [], deals = [] }) {
                     font-weight: 600;
                     cursor: pointer;
                     transition: all 0.2s;
-                    box-shadow: 0 4px 6px -1px rgba(0, 180, 255, 0.2);
+                    box-shadow: 0 4px 6px -1px rgba(0, 71, 151, 0.2);
                 }
                 .premium-create-btn:hover {
                     background: #009be5;
                     transform: translateY(-1px);
-                    box-shadow: 0 6px 8px -1px rgba(0, 180, 255, 0.3);
+                    box-shadow: 0 6px 8px -1px rgba(0, 71, 151, 0.3);
                 }
                 .premium-action-btn.edit:hover {
                     background: #EFF6FF;
-                    color: #00B4FF;
+                    color: #004797;
                 }
                 /* Drawer Form Premium Styles */
                 .premium-form-container {
@@ -612,8 +612,8 @@ export default function Tasks({ tasks = [], deals = [] }) {
                     color: #94A3B8;
                 }
                 .premium-input:focus {
-                    border-color: #00B4FF;
-                    box-shadow: 0 0 0 3px rgba(0, 180, 255, 0.15);
+                    border-color: #004797;
+                    box-shadow: 0 0 0 3px rgba(0, 71, 151, 0.15);
                     background: #FFFFFF;
                 }
                 textarea.premium-input {
@@ -656,18 +656,18 @@ export default function Tasks({ tasks = [], deals = [] }) {
                     padding: 10px 24px;
                     border-radius: 10px;
                     border: none;
-                    background: #00B4FF;
+                    background: #004797;
                     font-weight: 600;
                     font-size: 14px;
                     color: #FFFFFF;
                     cursor: pointer;
                     transition: all 0.2s ease;
-                    box-shadow: 0 4px 6px -1px rgba(0, 180, 255, 0.2), 0 2px 4px -1px rgba(0, 180, 255, 0.1);
+                    box-shadow: 0 4px 6px -1px rgba(0, 71, 151, 0.2), 0 2px 4px -1px rgba(0, 71, 151, 0.1);
                 }
                 .premium-btn-primary:hover {
                     background: #009be5;
                     transform: translateY(-1px);
-                    box-shadow: 0 6px 10px -1px rgba(0, 180, 255, 0.3), 0 2px 4px -1px rgba(0, 180, 255, 0.1);
+                    box-shadow: 0 6px 10px -1px rgba(0, 71, 151, 0.3), 0 2px 4px -1px rgba(0, 71, 151, 0.1);
                 }
             `}</style>
 
@@ -759,7 +759,7 @@ export default function Tasks({ tasks = [], deals = [] }) {
                 isOpen={drawerOpen}
                 onClose={closeDrawer}
                 title={data.id ? 'Editar Tarea' : 'Nueva Tarea'}
-                icon={<Calendar size={20} style={{ color: '#00B4FF' }} />}
+                icon={<Calendar size={20} style={{ color: '#004797' }} />}
             >
                 <form onSubmit={submitTask} className="premium-form-container">
                     <div className="premium-form-group">

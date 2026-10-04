@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, router } from '@inertiajs/react';
 import { useDeviceContext } from '@/Contexts/DeviceContext';
+import { useLocation } from '@/Contexts/LocationContext';
 
 const CategoryIcon = ({ name }) => {
     const icons = {
@@ -167,8 +168,9 @@ const CategoryIcon = ({ name }) => {
     );
 };
 
-export default function CategoryNavBar({ categorias, onOpenCategories, onSelectCategory }) {
+export default function CategoryNavBar({ categorias = [], onOpenCategories, onSelectCategory }) {
     const { isMobile } = useDeviceContext();
+    const { location } = useLocation();
     const [activeId, setActiveId] = useState(null);
     const [hoverId, setHoverId] = useState(null);
     const barRef = useRef(null);
@@ -213,6 +215,17 @@ export default function CategoryNavBar({ categorias, onOpenCategories, onSelectC
     return (
         <nav ref={barRef} className={`efe-category-bar ${isStuck ? 'is-stuck' : ''}`}>
             <div className="efe-category-bar-inner">
+                <button className="efe-nav-location-btn" onClick={() => window.dispatchEvent(new CustomEvent('open-location-modal'))}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    <span>{location.distrito ? `${location.distrito}, ${location.departamento}` : 'Ingresa tu ubicación'}</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
+                <span className="efe-cat-nav-sep" style={{ marginRight: '10px' }} />
                 <button className="efe-cat-nav-all" onClick={onOpenCategories}>
                     <svg
                         width="18"

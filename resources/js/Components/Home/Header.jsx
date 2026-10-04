@@ -2,8 +2,10 @@ import { useEffect, useState, useRef } from 'react';
 import { Link, usePage, router } from '@inertiajs/react';
 import { LOGO } from './constants';
 import LoginModal from './LoginModal';
+import LocationModal from './LocationModal';
 import Swal from 'sweetalert2';
 import { useDeviceContext } from '@/Contexts/DeviceContext';
+import { useLocation } from '@/Contexts/LocationContext';
 
 /* Renderiza la cabecera principal con logo, buscador y acciones. */
 export default function Header({
@@ -18,7 +20,9 @@ export default function Header({
     const { auth } = usePage().props;
     const user = auth?.user;
     const { isMobile, isTablet, isDesktop } = useDeviceContext();
+    const { location, setLocation } = useLocation();
     const [isLoginOpen, setIsLoginOpen] = useState(false);
+    const [isLocationOpen, setIsLocationOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState(searchQuery || '');
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
@@ -43,6 +47,11 @@ export default function Header({
             // Clean up the URL so it doesn't stay there if they refresh
             window.history.replaceState({}, document.title, window.location.pathname);
         }
+
+        // Listen for custom event to open location modal from other components
+        const handleOpenLocationModal = () => setIsLocationOpen(true);
+        window.addEventListener('open-location-modal', handleOpenLocationModal);
+        return () => window.removeEventListener('open-location-modal', handleOpenLocationModal);
     }, []);
     useEffect(() => {
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -72,19 +81,19 @@ export default function Header({
                     Swal.fire({
                         text: 'Permiso de micrófono denegado. Permite el acceso al micrófono en la barra de direcciones.',
                         icon: 'warning',
-                        confirmButtonColor: '#00B4FF',
+                        confirmButtonColor: '#004797',
                     });
                 } else if (event.error === 'network') {
                     Swal.fire({
                         text: 'Error de red: Tu navegador (como Brave) o tu Antivirus/Adblocker está bloqueando la conexión al servidor de reconocimiento de voz. Usa Chrome/Edge o desactiva los escudos de privacidad para esta función.',
                         icon: 'error',
-                        confirmButtonColor: '#00B4FF',
+                        confirmButtonColor: '#004797',
                     });
                 } else {
                     Swal.fire({
                         text: `El reconocimiento de voz se detuvo: ${event.error}`,
                         icon: 'info',
-                        confirmButtonColor: '#00B4FF',
+                        confirmButtonColor: '#004797',
                     });
                 }
                 setIsListening(false);
@@ -330,7 +339,7 @@ export default function Header({
                                     ></div>
                                     <div className="efe-search-dropdown efe-megamenu">
                                         {liveResults?.productos?.length > 0 ||
-                                        liveResults?.sugerencias?.length > 0 ? (
+                                            liveResults?.sugerencias?.length > 0 ? (
                                             <div className="efe-megamenu-container">
                                                 <div className="efe-megamenu-sidebar">
                                                     {liveResults?.sugerencias?.length > 0 && (
@@ -433,10 +442,10 @@ export default function Header({
                                                             ];
                                                             const randomLabel =
                                                                 offerLabels[
-                                                                    Math.floor(
-                                                                        Math.random() *
-                                                                            offerLabels.length
-                                                                    )
+                                                                Math.floor(
+                                                                    Math.random() *
+                                                                    offerLabels.length
+                                                                )
                                                                 ];
                                                             return (
                                                                 <Link
@@ -503,25 +512,28 @@ export default function Header({
                             }
                         >
                             {!minimal && (
-                                <Link href="/seguimiento" className="efe-header-action-link">
-                                    <div className="efe-header-action-icon">
-                                        <svg
-                                            width="26"
-                                            height="26"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="white"
-                                            strokeWidth="2"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                        >
-                                            <path d="M3 6h18v4a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0V6z" />
-                                            <path d="M4 10v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10" />
-                                            <path d="M12 14v8" />
-                                        </svg>
-                                    </div>
-                                    <span className="efe-header-icon-text">Sigue tu pedido</span>
-                                </Link>
+                                <>
+
+                                    <Link href="/seguimiento" className="efe-header-action-link">
+                                        <div className="efe-header-action-icon">
+                                            <svg
+                                                width="26"
+                                                height="26"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                stroke="white"
+                                                strokeWidth="2"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                            >
+                                                <path d="M3 6h18v4a3 3 0 0 1-6 0 3 3 0 0 1-6 0 3 3 0 0 1-6 0V6z" />
+                                                <path d="M4 10v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10" />
+                                                <path d="M12 14v8" />
+                                            </svg>
+                                        </div>
+                                        <span className="efe-header-icon-text">Sigue tu pedido</span>
+                                    </Link>
+                                </>
                             )}
 
                             {user ? (
@@ -698,9 +710,8 @@ export default function Header({
                             )}
 
                             {!minimal && (
-                                <button
-                                    type="button"
-                                    onClick={onOpenCart}
+                                <Link
+                                    href="/carrito"
                                     className="efe-header-action-link efe-header-action-btn efe-cart-btn-anim"
                                 >
                                     <div className="efe-header-action-icon">
@@ -721,13 +732,13 @@ export default function Header({
                                         <span className="efe-cart-badge-new">{cartCount}</span>
                                     </div>
                                     <span className="efe-header-icon-text">Carrito</span>
-                                </button>
+                                </Link>
                             )}
                         </div>
                     )}
 
                     {!minimal && (
-                        <button className="efe-header-cart efe-mobile-only" onClick={onOpenCart}>
+                        <Link href="/carrito" className="efe-header-cart efe-mobile-only">
                             <svg
                                 width="24"
                                 height="24"
@@ -743,12 +754,17 @@ export default function Header({
                                 <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
                             </svg>
                             {cartCount > 0 && <span className="efe-cart-badge">{cartCount}</span>}
-                        </button>
+                        </Link>
                     )}
                 </div>
             </div>
 
             <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
+            <LocationModal
+                isOpen={isLocationOpen}
+                onClose={() => setIsLocationOpen(false)}
+                onLocationSelect={(loc) => setLocation(loc)}
+            />
         </header>
     );
 }

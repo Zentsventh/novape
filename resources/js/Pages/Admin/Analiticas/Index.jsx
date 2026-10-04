@@ -10,9 +10,9 @@ import {
    DESIGN TOKENS — Premium SaaS palette
    ═══════════════════════════════════════════════ */
 const T = {
-    primary:    '#00B4FF',
-    primaryDim: 'rgba(0, 180, 255, 0.12)',
-    primaryGlow:'rgba(0, 180, 255, 0.25)',
+    primary:    '#004797',
+    primaryDim: 'rgba(0, 71, 151, 0.12)',
+    primaryGlow:'rgba(0, 71, 151, 0.25)',
     accent:     '#6366F1',
     accentDim:  'rgba(99, 102, 241, 0.12)',
     success:    '#10B981',
@@ -34,7 +34,7 @@ const T = {
     tooltipBg:  'rgba(15, 23, 42, 0.95)',
 };
 
-const CHART_COLORS = ['#00B4FF', '#6366F1', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
+const CHART_COLORS = ['#004797', '#6366F1', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
 
 /* ═══════════════════════════════════════════════
    Reusable micro-components
@@ -228,7 +228,7 @@ export default function Index({
         { name: 'POS', value: safeChannel.pos.total, pct: safeChannel.pos.pct },
     ];
 
-    const medalColors = ['#00B4FF', '#94A3B8', '#D97706'];
+    const medalColors = ['#004797', '#94A3B8', '#D97706'];
 
     // Peak hours — compute max for heat intensity
     const allHourCounts = Object.values(peakHoursHeatmap || {}).flat();
@@ -613,7 +613,7 @@ export default function Index({
                                             <td key={h} style={{
                                                 padding: '4px 2px', fontSize: '10px',
                                                 background: intensity > 0
-                                                    ? `rgba(0, 180, 255, ${0.08 + intensity * 0.55})`
+                                                    ? `rgba(0, 71, 151, ${0.08 + intensity * 0.55})`
                                                     : 'rgba(255,255,255,0.02)',
                                                 borderRadius: '4px',
                                                 color: intensity > 0.5 ? '#fff' : intensity > 0 ? T.primary : T.textMuted,

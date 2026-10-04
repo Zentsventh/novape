@@ -71,7 +71,7 @@ export default function AlmacenesIndex({ almacenes, productos, categorias, marca
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
                 <h1 style={{ fontSize: '24px', margin: 0, fontWeight: '700', color: '#1E293B', display: 'flex', alignItems: 'center', gap: '12px', letterSpacing: '-0.02em' }}>
-                    <div style={{ padding: '8px', backgroundColor: '#F0F9FF', borderRadius: '10px', color: '#00B4FF' }}>
+                    <div style={{ padding: '8px', backgroundColor: '#F0F9FF', borderRadius: '10px', color: '#004797' }}>
                         <Building2 size={24} />
                     </div>
                     <div>
@@ -94,9 +94,9 @@ export default function AlmacenesIndex({ almacenes, productos, categorias, marca
                     </button>
                     <button 
                         onClick={() => setShowModal(true)} 
-                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#009BE0'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 180, 255, 0.3)'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#00B4FF'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 180, 255, 0.2)'; }}
-                        style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#00B4FF', color: 'white', border: 'none', padding: '10px 16px', borderRadius: '8px', fontWeight: '600', fontSize: '13px', transition: 'all 0.2s ease', boxShadow: '0 2px 4px rgba(0, 180, 255, 0.2)', cursor: 'pointer' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#009BE0'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 71, 151, 0.3)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#004797'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 71, 151, 0.2)'; }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#004797', color: 'white', border: 'none', padding: '10px 16px', borderRadius: '8px', fontWeight: '600', fontSize: '13px', transition: 'all 0.2s ease', boxShadow: '0 2px 4px rgba(0, 71, 151, 0.2)', cursor: 'pointer' }}
                     >
                         <Plus size={16} />
                         Nuevo Almacén
@@ -125,7 +125,7 @@ export default function AlmacenesIndex({ almacenes, productos, categorias, marca
                                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
                             >
                                 <td style={{ padding: '16px 24px', fontWeight: '700', color: '#1E293B', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <Building2 size={16} style={{ color: '#00B4FF' }} /> {a.nombre}
+                                    <Building2 size={16} style={{ color: '#004797' }} /> {a.nombre}
                                 </td>
                                 <td style={{ padding: '16px 24px', color: '#64748B', fontSize: '13px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -135,7 +135,7 @@ export default function AlmacenesIndex({ almacenes, productos, categorias, marca
                                 </td>
                                 <td style={{ padding: '16px 24px', color: '#1E293B', fontWeight: '700', fontSize: '14px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <Package size={14} style={{ color: '#00B4FF' }} />
+                                        <Package size={14} style={{ color: '#004797' }} />
                                         {a.total_unidades} <span style={{ color: '#94A3B8', fontSize: '11px' }}>u.</span>
                                     </div>
                                 </td>
@@ -152,8 +152,8 @@ export default function AlmacenesIndex({ almacenes, productos, categorias, marca
                                             href={`/admin/almacenes/${a.id}/kardex`} 
                                             title="Kardex (Movimientos)" 
                                             onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F0F9FF'; e.currentTarget.style.color = '#009BE0'; }}
-                                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#00B4FF'; }}
-                                            style={{ color: '#00B4FF', background: 'transparent', textDecoration: 'none', padding: '8px', borderRadius: '8px', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#004797'; }}
+                                            style={{ color: '#004797', background: 'transparent', textDecoration: 'none', padding: '8px', borderRadius: '8px', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                         >
                                             <ClipboardList size={18} />
                                         </Link>
@@ -179,7 +179,7 @@ export default function AlmacenesIndex({ almacenes, productos, categorias, marca
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
                     <div style={{ background: '#ffffff', padding: '32px', borderRadius: '16px', width: '100%', maxWidth: '420px', boxShadow: '0 20px 40px -10px rgba(0,0,0,0.1)', border: '1px solid #E2E8F0' }}>
                         <h2 style={{ margin: '0 0 24px 0', fontSize: '20px', fontWeight: '800', color: '#1E293B', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Building2 size={20} style={{ color: '#00B4FF' }} />
+                            <Building2 size={20} style={{ color: '#004797' }} />
                             Nuevo Almacén
                         </h2>
                         <form onSubmit={submitAlmacen} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -191,7 +191,7 @@ export default function AlmacenesIndex({ almacenes, productos, categorias, marca
                                     onChange={e => setDataA('nombre', e.target.value)} 
                                     placeholder="Ej. Tienda Miraflores"
                                     style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: '8px', border: '1px solid #E2E8F0', background: '#F8FAFC', color: '#1E293B', outline: 'none', transition: 'all 0.2s', fontSize: '14px', fontFamily: 'inherit' }}
-                                    onFocus={(e) => { e.currentTarget.style.borderColor = '#00B4FF'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.1)'; }}
+                                    onFocus={(e) => { e.currentTarget.style.borderColor = '#004797'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.1)'; }}
                                     onBlur={(e) => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.boxShadow = 'none'; }}
                                     required 
                                 />
@@ -204,7 +204,7 @@ export default function AlmacenesIndex({ almacenes, productos, categorias, marca
                                     onChange={e => setDataA('direccion', e.target.value)} 
                                     placeholder="Av. Larco 123..."
                                     style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: '8px', border: '1px solid #E2E8F0', background: '#F8FAFC', color: '#1E293B', outline: 'none', transition: 'all 0.2s', fontSize: '14px', fontFamily: 'inherit' }}
-                                    onFocus={(e) => { e.currentTarget.style.borderColor = '#00B4FF'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.1)'; }}
+                                    onFocus={(e) => { e.currentTarget.style.borderColor = '#004797'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.1)'; }}
                                     onBlur={(e) => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.boxShadow = 'none'; }}
                                 />
                             </div>
@@ -222,8 +222,8 @@ export default function AlmacenesIndex({ almacenes, productos, categorias, marca
                                     type="submit" 
                                     disabled={procA} 
                                     onMouseEnter={(e) => { if(!procA) e.currentTarget.style.backgroundColor = '#009BE0'; }}
-                                    onMouseLeave={(e) => { if(!procA) e.currentTarget.style.backgroundColor = '#00B4FF'; }}
-                                    style={{ flex: 1, padding: '12px', borderRadius: '8px', border: 'none', background: '#00B4FF', color: 'white', fontWeight: '600', cursor: procA ? 'not-allowed' : 'pointer', fontSize: '14px', opacity: procA ? 0.7 : 1, transition: 'all 0.2s' }}
+                                    onMouseLeave={(e) => { if(!procA) e.currentTarget.style.backgroundColor = '#004797'; }}
+                                    style={{ flex: 1, padding: '12px', borderRadius: '8px', border: 'none', background: '#004797', color: 'white', fontWeight: '600', cursor: procA ? 'not-allowed' : 'pointer', fontSize: '14px', opacity: procA ? 0.7 : 1, transition: 'all 0.2s' }}
                                 >
                                     {procA ? 'Guardando...' : 'Crear Almacén'}
                                 </button>
@@ -238,7 +238,7 @@ export default function AlmacenesIndex({ almacenes, productos, categorias, marca
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
                     <div style={{ background: '#ffffff', padding: '32px', borderRadius: '16px', width: '100%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 40px -10px rgba(0,0,0,0.1)', border: '1px solid #E2E8F0' }}>
                         <h2 style={{ margin: '0 0 24px 0', fontSize: '20px', fontWeight: '800', color: '#1E293B', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid #E2E8F0', paddingBottom: '16px' }}>
-                            <ArrowRightLeft size={20} style={{ color: '#00B4FF' }} />
+                            <ArrowRightLeft size={20} style={{ color: '#004797' }} />
                             Transferencia de Stock Inter-Almacén
                         </h2>
                         <form onSubmit={submitTransfer} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -307,7 +307,7 @@ export default function AlmacenesIndex({ almacenes, productos, categorias, marca
                                 <select 
                                     value={dataT.variante_id} 
                                     onChange={e => setDataT('variante_id', e.target.value)} 
-                                    style={{ width: '100%', boxSizing: 'border-box', padding: '12px', borderRadius: '8px', border: '2px solid #00B4FF', fontWeight: '600', color: '#1E293B', outline: 'none', cursor: 'pointer', background: '#F0F9FF' }} 
+                                    style={{ width: '100%', boxSizing: 'border-box', padding: '12px', borderRadius: '8px', border: '2px solid #004797', fontWeight: '600', color: '#1E293B', outline: 'none', cursor: 'pointer', background: '#F0F9FF' }} 
                                     required
                                 >
                                     <option value="">-- Seleccione el producto ({filteredProductos.length} encontrados) --</option>
@@ -320,7 +320,7 @@ export default function AlmacenesIndex({ almacenes, productos, categorias, marca
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '13px', color: '#64748B' }}>Stock Disponible (Origen)</label>
-                                    <div style={{ padding: '12px', borderRadius: '8px', background: maxAvailable > 0 ? '#F0F9FF' : '#F8FAFC', fontWeight: '700', color: maxAvailable > 0 ? '#00B4FF' : '#94A3B8', border: `1px solid ${maxAvailable > 0 ? '#00B4FF' : '#E2E8F0'}`, textAlign: 'center', fontSize: '18px' }}>
+                                    <div style={{ padding: '12px', borderRadius: '8px', background: maxAvailable > 0 ? '#F0F9FF' : '#F8FAFC', fontWeight: '700', color: maxAvailable > 0 ? '#004797' : '#94A3B8', border: `1px solid ${maxAvailable > 0 ? '#004797' : '#E2E8F0'}`, textAlign: 'center', fontSize: '18px' }}>
                                         {maxAvailable !== null ? `${maxAvailable} unidades` : 'Seleccione origen y producto'}
                                     </div>
                                 </div>
@@ -339,7 +339,7 @@ export default function AlmacenesIndex({ almacenes, productos, categorias, marca
                                             setDataT('cantidad', val);
                                         }} 
                                         style={{ width: '100%', boxSizing: 'border-box', padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '16px', fontWeight: '600', color: '#1E293B', outline: 'none', fontFamily: 'inherit' }} 
-                                        onFocus={(e) => { e.currentTarget.style.borderColor = '#00B4FF'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.1)'; }}
+                                        onFocus={(e) => { e.currentTarget.style.borderColor = '#004797'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.1)'; }}
                                         onBlur={(e) => { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.boxShadow = 'none'; }}
                                         required 
                                     />
@@ -354,7 +354,7 @@ export default function AlmacenesIndex({ almacenes, productos, categorias, marca
                                     onChange={e => setDataT('referencia', e.target.value)} 
                                     style={{ width: '100%', boxSizing: 'border-box', padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '14px', outline: 'none', fontFamily: 'inherit' }} 
                                     placeholder="Ej: Reposición de inventario para campaña, etc." 
-                                    onFocus={(e) => { e.currentTarget.style.borderColor = '#00B4FF'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.1)'; }}
+                                    onFocus={(e) => { e.currentTarget.style.borderColor = '#004797'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.1)'; }}
                                     onBlur={(e) => { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.boxShadow = 'none'; }}
                                 />
                             </div>
@@ -373,8 +373,8 @@ export default function AlmacenesIndex({ almacenes, productos, categorias, marca
                                     type="submit" 
                                     disabled={procT || maxAvailable === 0 || maxAvailable === null || dataT.cantidad > maxAvailable || dataT.cantidad < 1} 
                                     onMouseEnter={(e) => { if(!(procT || maxAvailable === 0 || maxAvailable === null || dataT.cantidad > maxAvailable || dataT.cantidad < 1)) e.currentTarget.style.backgroundColor = '#009BE0'; }}
-                                    onMouseLeave={(e) => { if(!(procT || maxAvailable === 0 || maxAvailable === null || dataT.cantidad > maxAvailable || dataT.cantidad < 1)) e.currentTarget.style.backgroundColor = '#00B4FF'; }}
-                                    style={{ flex: 1, padding: '14px', borderRadius: '8px', border: 'none', background: '#00B4FF', color: 'white', fontWeight: '600', cursor: (procT || maxAvailable === 0 || maxAvailable === null || dataT.cantidad > maxAvailable || dataT.cantidad < 1) ? 'not-allowed' : 'pointer', opacity: (procT || maxAvailable === 0 || maxAvailable === null || dataT.cantidad > maxAvailable || dataT.cantidad < 1) ? 0.6 : 1, fontSize: '14px', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                                    onMouseLeave={(e) => { if(!(procT || maxAvailable === 0 || maxAvailable === null || dataT.cantidad > maxAvailable || dataT.cantidad < 1)) e.currentTarget.style.backgroundColor = '#004797'; }}
+                                    style={{ flex: 1, padding: '14px', borderRadius: '8px', border: 'none', background: '#004797', color: 'white', fontWeight: '600', cursor: (procT || maxAvailable === 0 || maxAvailable === null || dataT.cantidad > maxAvailable || dataT.cantidad < 1) ? 'not-allowed' : 'pointer', opacity: (procT || maxAvailable === 0 || maxAvailable === null || dataT.cantidad > maxAvailable || dataT.cantidad < 1) ? 0.6 : 1, fontSize: '14px', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                                 >
                                     {procT ? 'Procesando...' : <><ArrowRightLeft size={16} /> Confirmar Transferencia</>}
                                 </button>

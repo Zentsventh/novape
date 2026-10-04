@@ -16,7 +16,7 @@ use Illuminate\Support\Collection;
 use Spatie\SchemalessAttributes\Casts\SchemalessAttributes;
 use Spatie\SchemalessAttributes\SchemalessAttributesTrait;
 use App\Models\CrmCompany;
-use App\Models\Crm\CrmCase;
+use App\Models\CrmCase;
 use OwenIt\Auditing\Contracts\Auditable;
 
 class Usuario extends Authenticatable implements Auditable

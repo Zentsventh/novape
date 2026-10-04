@@ -24,10 +24,15 @@ class AdminAuthController extends Controller
         $credentials = $request->validated();
 
         if (Auth::guard('admin')->attempt(['email' => $credentials['email'], 'password' => $credentials['password'], 'estado' => 'activo'])) {
+            $user = Auth::guard('admin')->user();
+            if (!$user->roles()->where('nombre', '!=', 'cliente')->exists() || 
+                Illuminate\Support\Facades\Hash::check('12345678', $user->password_hash)) {
+                Auth::guard('admin')->logout();
+                return back()->withErrors(['email' => 'Acceso administrativo no autorizado.'])->onlyInput('email');
+            }
+
             $request->session()->regenerate();
             
-            $user = Auth::guard('admin')->user();
-
             // Desloguear a este usuario de cualquier otra computadora/sesión activa
             DB::table('sessions')
                 ->where('user_id', $user->id)

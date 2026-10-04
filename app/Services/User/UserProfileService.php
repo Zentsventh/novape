@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\User;
 
-use App\Models\User;
+use App\Models\Usuario;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Mail;
@@ -13,7 +13,7 @@ use App\Mail\VerificarCelularMail;
 
 class UserProfileService
 {
-    public function updateProfile(User $usuario, array $data): void
+    public function updateProfile(Usuario $usuario, array $data): void
     {
         $usuario->update([
             'nombres' => $data['nombres'],
@@ -22,7 +22,7 @@ class UserProfileService
         ]);
     }
 
-    public function requestPhoneOtp(User $usuario, string $telefono): void
+    public function requestPhoneOtp(Usuario $usuario, string $telefono): void
     {
         $codigo = (string) random_int(100000, 999999);
         
@@ -33,7 +33,7 @@ class UserProfileService
         Mail::to($usuario->email)->send(new VerificarCelularMail($usuario, $codigo));
     }
 
-    public function verifyPhoneOtp(User $usuario, string $codigo): void
+    public function verifyPhoneOtp(Usuario $usuario, string $codigo): void
     {
         $codigoGuardado = Session::get('phone_update_otp');
         $expiraEn = Session::get('phone_update_expires_at');
@@ -52,7 +52,7 @@ class UserProfileService
         Session::forget(['phone_update_otp', 'phone_update_new_number', 'phone_update_expires_at']);
     }
 
-    public function updatePassword(User $usuario, string $newPassword, ?string $currentPassword = null): void
+    public function updatePassword(Usuario $usuario, string $newPassword, ?string $currentPassword = null): void
     {
         if ($usuario->has_set_password && !Hash::check($currentPassword, $usuario->password_hash)) {
             throw new \Exception('La contraseña actual no es correcta.');
@@ -64,7 +64,7 @@ class UserProfileService
         ]);
     }
 
-    public function addAddress(User $usuario, array $data, bool $isPrincipal): void
+    public function addAddress(Usuario $usuario, array $data, bool $isPrincipal): void
     {
         if ($isPrincipal) {
             $usuario->direcciones()->update(['principal' => false]);
@@ -72,7 +72,7 @@ class UserProfileService
         $usuario->direcciones()->create($data);
     }
 
-    public function setPrincipalAddress(User $usuario, int $addressId): void
+    public function setPrincipalAddress(Usuario $usuario, int $addressId): void
     {
         $usuario->direcciones()->update(['principal' => false]);
         $direccion = $usuario->direcciones()->findOrFail($addressId);
@@ -80,12 +80,12 @@ class UserProfileService
         $direccion->save();
     }
 
-    public function deleteAddress(User $usuario, int $addressId): void
+    public function deleteAddress(Usuario $usuario, int $addressId): void
     {
         $usuario->direcciones()->findOrFail($addressId)->delete();
     }
 
-    public function addCard(User $usuario, array $data): void
+    public function addCard(Usuario $usuario, array $data): void
     {
         $ultimos = substr($data['numero_tarjeta'], -4);
         $marca = str_starts_with($data['numero_tarjeta'], '4') ? 'Visa' : (str_starts_with($data['numero_tarjeta'], '5') ? 'Mastercard' : 'Amex');
@@ -98,12 +98,12 @@ class UserProfileService
         ]);
     }
 
-    public function deleteCard(User $usuario, int $cardId): void
+    public function deleteCard(Usuario $usuario, int $cardId): void
     {
         $usuario->tarjetas()->findOrFail($cardId)->delete();
     }
 
-    public function updateRefundData(User $usuario, array $data): void
+    public function updateRefundData(Usuario $usuario, array $data): void
     {
         $datos = $usuario->datosReembolso()->first();
         if ($datos) {
@@ -113,12 +113,12 @@ class UserProfileService
         }
     }
 
-    public function deleteSession(User $usuario, string $sessionId): void
+    public function deleteSession(Usuario $usuario, string $sessionId): void
     {
         DB::table('sessions')->where('id', $sessionId)->where('user_id', $usuario->id)->delete();
     }
 
-    public function deleteAccount(User $usuario, string $password): void
+    public function deleteAccount(Usuario $usuario, string $password): void
     {
         if (!Hash::check($password, $usuario->password_hash)) {
             throw new \Exception('La contraseña no es correcta.');

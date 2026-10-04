@@ -109,8 +109,8 @@
 .efe-cat-drawer-item:hover,
 .efe-cat-drawer-item.is-active {
     background: #E6F7FF;
-    color: #00B4FF;
-    border-left-color: #00B4FF;
+    color: #004797;
+    border-left-color: #004797;
 }
 
 .efe-cat-drawer-item svg {

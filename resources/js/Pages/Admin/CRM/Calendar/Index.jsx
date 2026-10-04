@@ -50,10 +50,10 @@ export default function CalendarIndex() {
                         --fc-button-hover-bg-color: #F8FAFC; 
                         --fc-button-hover-border-color: #94A3B8; 
                         --fc-button-active-bg-color: #F1F5F9; 
-                        --fc-button-active-border-color: #00B4FF; 
-                        --fc-today-bg-color: rgba(0, 180, 255, 0.04); 
-                        --fc-event-bg-color: #00B4FF;
-                        --fc-event-border-color: #00B4FF;
+                        --fc-button-active-border-color: #004797; 
+                        --fc-today-bg-color: rgba(0, 71, 151, 0.04); 
+                        --fc-event-bg-color: #004797;
+                        --fc-event-border-color: #004797;
                         font-family: inherit;
                     }
                     .fc .fc-button-primary {
@@ -68,8 +68,8 @@ export default function CalendarIndex() {
                     .fc .fc-button-primary:not(:disabled):active, 
                     .fc .fc-button-primary:not(:disabled).fc-button-active {
                         background-color: #F0F9FF;
-                        border-color: #00B4FF;
-                        color: #00B4FF;
+                        border-color: #004797;
+                        color: #004797;
                     }
                     .fc .fc-button-primary:disabled { 
                         background-color: #F8FAFC; 
@@ -89,12 +89,12 @@ export default function CalendarIndex() {
                         font-size: 11px; 
                         font-weight: 600; 
                         cursor: pointer; 
-                        box-shadow: 0 2px 4px rgba(0,180,255,0.2); 
+                        box-shadow: 0 2px 4px rgba(0, 71, 151,0.2); 
                         transition: transform 0.2s ease, box-shadow 0.2s ease;
                     }
                     .fc-event:hover {
                         transform: translateY(-1px);
-                        box-shadow: 0 4px 6px rgba(0,180,255,0.3);
+                        box-shadow: 0 4px 6px rgba(0, 71, 151,0.3);
                     }
                     .fc-daygrid-day-number { 
                         color: #1E293B; 
@@ -192,7 +192,7 @@ export default function CalendarIndex() {
                             
                             <div style={{ marginBottom: '20px' }}>
                                 <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#64748B', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tipo de Actividad</label>
-                                <div style={{ fontSize: '15px', textTransform: 'capitalize', color: '#00B4FF', fontWeight: 600, display: 'inline-flex', padding: '4px 10px', background: '#F0F9FF', borderRadius: '8px' }}>
+                                <div style={{ fontSize: '15px', textTransform: 'capitalize', color: '#004797', fontWeight: 600, display: 'inline-flex', padding: '4px 10px', background: '#F0F9FF', borderRadius: '8px' }}>
                                     {selectedEvent.extendedProps?.tipo || 'Desconocido'}
                                 </div>
                             </div>

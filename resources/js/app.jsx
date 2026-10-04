@@ -6,6 +6,8 @@ import ChatBot from './Components/Home/ChatBot';
 import MobileBottomNav from './Components/Home/MobileBottomNav';
 import { ConfirmProvider } from '@/Contexts/ConfirmContext';
 import { DeviceProvider, useDeviceContext } from '@/Contexts/DeviceContext';
+import { LocationProvider } from '@/Contexts/LocationContext';
+import { ShippingProvider } from '@/Contexts/ShippingContext';
 import '../css/home/chatbot.css';
 import '../css/home/responsive.css';
 import './echo';
@@ -47,11 +49,15 @@ function GlobalLayout({ children, pageName = '', serverHints = {}, user = null, 
 
     return (
         <DeviceProvider serverHints={serverHints}>
-            <ConfirmProvider>
-                {children}
-                {!isAdmin && !isCheckoutFlow && <MobileBottomNav user={user} cart={cart} />}
-                {!isAdmin && !isCheckoutFlow && <ChatBot user={user} />}
-            </ConfirmProvider>
+            <LocationProvider>
+                <ShippingProvider>
+                    <ConfirmProvider>
+                        {children}
+                        {!isAdmin && !isCheckoutFlow && <MobileBottomNav user={user} cart={cart} />}
+                        {!isAdmin && !isCheckoutFlow && <ChatBot user={user} />}
+                    </ConfirmProvider>
+                </ShippingProvider>
+            </LocationProvider>
         </DeviceProvider>
     );
 }

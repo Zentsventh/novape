@@ -61,16 +61,16 @@ export default function Index({ automations = [] }) {
                     gap: 16px;
                 }
                 .auto-card:hover {
-                    box-shadow: 0 10px 25px -5px rgba(0, 180, 255, 0.15);
+                    box-shadow: 0 10px 25px -5px rgba(0, 71, 151, 0.15);
                     transform: translateY(-3px);
-                    border-color: rgba(0, 180, 255, 0.3);
+                    border-color: rgba(0, 71, 151, 0.3);
                 }
                 .btn-primary-custom {
                     display: inline-flex;
                     align-items: center;
                     gap: 8px;
                     padding: 10px 20px;
-                    background: #00B4FF;
+                    background: #004797;
                     color: #ffffff;
                     border: none;
                     border-radius: 10px;
@@ -78,11 +78,11 @@ export default function Index({ automations = [] }) {
                     font-size: 14px;
                     cursor: pointer;
                     transition: all 0.2s ease;
-                    box-shadow: 0 2px 4px rgba(0, 180, 255, 0.2);
+                    box-shadow: 0 2px 4px rgba(0, 71, 151, 0.2);
                 }
                 .btn-primary-custom:hover {
                     transform: translateY(-1px);
-                    box-shadow: 0 4px 12px rgba(0, 180, 255, 0.3);
+                    box-shadow: 0 4px 12px rgba(0, 71, 151, 0.3);
                     background: #009BE0;
                 }
                 .btn-icon-danger {
@@ -107,7 +107,7 @@ export default function Index({ automations = [] }) {
                     transition: all 0.2s ease;
                 }
                 .auto-card:hover .flow-step {
-                    border-color: rgba(0, 180, 255, 0.3);
+                    border-color: rgba(0, 71, 151, 0.3);
                     background: #F0F9FF;
                 }
                 .flow-step-title {
@@ -163,8 +163,8 @@ export default function Index({ automations = [] }) {
                 }
                 .drawer-input:focus {
                     background: #ffffff;
-                    border-color: #00B4FF;
-                    box-shadow: 0 0 0 4px rgba(0, 180, 255, 0.1);
+                    border-color: #004797;
+                    box-shadow: 0 0 0 4px rgba(0, 71, 151, 0.1);
                 }
                 .drawer-input::placeholder {
                     color: #94A3B8;
@@ -207,7 +207,7 @@ export default function Index({ automations = [] }) {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '32px', borderBottom: '1px solid #E2E8F0', background: '#ffffff' }}>
                     <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                            <div style={{ background: '#F0F9FF', padding: '8px', borderRadius: '10px', color: '#00B4FF' }}>
+                            <div style={{ background: '#F0F9FF', padding: '8px', borderRadius: '10px', color: '#004797' }}>
                                 <Zap size={24} />
                             </div>
                             <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: '#1E293B', letterSpacing: '-0.02em' }}>Automatizaciones</h1>
@@ -223,8 +223,8 @@ export default function Index({ automations = [] }) {
                 <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
                     {automations.length === 0 ? (
                         <div className="empty-state">
-                            <div style={{ width: '64px', height: '64px', borderRadius: '16px', background: 'rgba(0, 180, 255, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px' }}>
-                                <Zap size={32} color="#00B4FF" />
+                            <div style={{ width: '64px', height: '64px', borderRadius: '16px', background: 'rgba(0, 71, 151, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '20px' }}>
+                                <Zap size={32} color="#004797" />
                             </div>
                             <h3 style={{ margin: '0 0 8px 0', color: '#1E293B', fontSize: '18px', fontWeight: 600 }}>No hay automatizaciones</h3>
                             <p style={{ margin: '0 0 24px 0', fontSize: '15px' }}>Crea tu primera automatización para optimizar tus flujos de trabajo.</p>
@@ -271,7 +271,7 @@ export default function Index({ automations = [] }) {
 
                                     <div className="flow-step">
                                         <div className="flow-step-title">
-                                            <div style={{ background: 'rgba(0, 180, 255, 0.1)', color: '#00B4FF', padding: '4px 8px', borderRadius: '6px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 700 }}>Action</div>
+                                            <div style={{ background: 'rgba(0, 71, 151, 0.1)', color: '#004797', padding: '4px 8px', borderRadius: '6px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 700 }}>Action</div>
                                             Entonces
                                         </div>
                                         {auto.acciones.map((acc, i) => (

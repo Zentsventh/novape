@@ -103,6 +103,9 @@ Route::controller(CartController::class)->prefix('cart')->group(function () {
     Route::post('/clear', 'clear')->middleware('throttle:5,1')->name('cart.clear');
 });
 
+Route::get('/carrito', fn () => Inertia::render('Cart'))->name('cart.page');
+
+
 Route::controller(ShippingController::class)->prefix('api/shipping')->group(function () {
     Route::post('/calculate', 'calculate')->middleware('throttle:10,1')->name('shipping.calculate');
     Route::post('/validate-address', 'validateAddress')->name('shipping.validate-address');
@@ -187,7 +190,7 @@ Route::controller(AdminAuthController::class)->prefix('admin')->group(function (
     Route::any('/logout', 'logout')->name('admin.logout')->middleware('auth:admin');
 });
 
-Route::prefix('admin')->middleware(['auth:admin','throttle:60,1'])->group(function () {
+Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'])->group(function () {
 
     Route::controller(DashboardController::class)->group(function () {
         Route::get('/', 'dashboard')->name('admin.dashboard')->middleware('permiso:ver_dashboard');

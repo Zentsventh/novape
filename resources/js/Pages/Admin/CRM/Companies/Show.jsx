@@ -69,7 +69,7 @@ export default function Show({ company = {}, evidenceLedger = [], customFieldsSc
                     transition: color 0.2s ease;
                 }
                 .premium-company-domain:hover {
-                    color: #00B4FF;
+                    color: #004797;
                 }
                 .premium-avatar-container {
                     width: 56px;
@@ -98,7 +98,7 @@ export default function Show({ company = {}, evidenceLedger = [], customFieldsSc
                     position: relative;
                 }
                 .premium-tab-btn.active {
-                    color: #00B4FF;
+                    color: #004797;
                     font-weight: 600;
                 }
                 .premium-tab-btn:not(.active) {
@@ -115,7 +115,7 @@ export default function Show({ company = {}, evidenceLedger = [], customFieldsSc
                     left: 0;
                     right: 0;
                     height: 2px;
-                    background: #00B4FF;
+                    background: #004797;
                     border-radius: 2px 2px 0 0;
                 }
                 .premium-content-area {
@@ -202,12 +202,12 @@ export default function Show({ company = {}, evidenceLedger = [], customFieldsSc
                     border: none;
                 }
                 .premium-btn-primary {
-                    background: #00B4FF;
+                    background: #004797;
                     color: #FFFFFF;
                 }
                 .premium-btn-primary:hover {
                     background: #00A2E8;
-                    box-shadow: 0 2px 4px rgba(0, 180, 255, 0.2);
+                    box-shadow: 0 2px 4px rgba(0, 71, 151, 0.2);
                 }
                 .premium-btn-secondary {
                     background: #FFFFFF;
@@ -458,8 +458,8 @@ export default function Show({ company = {}, evidenceLedger = [], customFieldsSc
                 {/* Right Sidebar - Agent Tab & Activity */}
                 <div className="premium-sidebar">
                     <div className="premium-sidebar-header">
-                        <div style={{ background: 'rgba(0, 180, 255, 0.1)', padding: '6px', borderRadius: '8px', display: 'flex' }}>
-                            <Sparkles size={16} color="#00B4FF" />
+                        <div style={{ background: 'rgba(0, 71, 151, 0.1)', padding: '6px', borderRadius: '8px', display: 'flex' }}>
+                            <Sparkles size={16} color="#004797" />
                         </div>
                         <span style={{ fontWeight: 600, color: '#1E293B', fontSize: '15px' }}>CompAI Agent</span>
                     </div>

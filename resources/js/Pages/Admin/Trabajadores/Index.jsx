@@ -40,7 +40,7 @@ export default function TrabajadoresIndex() {
     };
     
     const inputFocusStyle = {
-        borderColor: '#00B4FF', boxShadow: '0 0 0 4px rgba(0, 180, 255, 0.1)', backgroundColor: '#ffffff'
+        borderColor: '#004797', boxShadow: '0 0 0 4px rgba(0, 71, 151, 0.1)', backgroundColor: '#ffffff'
     };
 
     return (
@@ -53,7 +53,7 @@ export default function TrabajadoresIndex() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
                     <div>
                         <h1 style={{ fontSize: '28px', margin: '0 0 8px 0', fontWeight: 800, color: '#1E293B', letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ background: '#E0F2FE', padding: '10px', borderRadius: '12px', color: '#00B4FF', display: 'flex' }}>
+                            <div style={{ background: '#E0F2FE', padding: '10px', borderRadius: '12px', color: '#004797', display: 'flex' }}>
                                 <Users size={24} />
                             </div>
                             Directorio de Trabajadores
@@ -81,11 +81,11 @@ export default function TrabajadoresIndex() {
                             href="/admin/trabajadores/create" 
                             style={{ 
                                 display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 20px', borderRadius: '12px', 
-                                border: 'none', background: '#00B4FF', color: '#ffffff', fontWeight: 700, fontSize: '14px', 
-                                textDecoration: 'none', transition: 'all 0.2s', boxShadow: '0 4px 14px rgba(0, 180, 255, 0.3)'
+                                border: 'none', background: '#004797', color: '#ffffff', fontWeight: 700, fontSize: '14px', 
+                                textDecoration: 'none', transition: 'all 0.2s', boxShadow: '0 4px 14px rgba(0, 71, 151, 0.3)'
                             }}
-                            onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 180, 255, 0.4)'; }}
-                            onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 180, 255, 0.3)'; }}
+                            onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 71, 151, 0.4)'; }}
+                            onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 71, 151, 0.3)'; }}
                         >
                             <UserPlus size={18} /> Nuevo Trabajador
                         </Link>
@@ -156,7 +156,7 @@ export default function TrabajadoresIndex() {
                                     }} onMouseOver={e => { if(!isBloqueado) e.currentTarget.style.backgroundColor = '#F8FAFC'; }} onMouseOut={e => { if(!isBloqueado) e.currentTarget.style.backgroundColor = 'transparent'; }}>
                                         <td style={{ padding: '24px 32px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: isBloqueado ? '#FECACA' : '#E0F2FE', color: isBloqueado ? '#DC2626' : '#00B4FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: isBloqueado ? '#FECACA' : '#E0F2FE', color: isBloqueado ? '#DC2626' : '#004797', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                     <UserCircle2 size={20} />
                                                 </div>
                                                 <div>
@@ -196,10 +196,10 @@ export default function TrabajadoresIndex() {
                                         </td>
                                         <td style={{ padding: '24px 32px', textAlign: 'right' }}>
                                             <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
-                                                <Link href={`/admin/trabajadores/${trabajador.id}`} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: '#F1F5F9', color: '#475569', borderRadius: '10px', textDecoration: 'none', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.background = '#E0F2FE'; e.currentTarget.style.color = '#00B4FF'; }} onMouseOut={e => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#475569'; }} title="Ver Detalle">
+                                                <Link href={`/admin/trabajadores/${trabajador.id}`} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: '#F1F5F9', color: '#475569', borderRadius: '10px', textDecoration: 'none', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.background = '#E0F2FE'; e.currentTarget.style.color = '#004797'; }} onMouseOut={e => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#475569'; }} title="Ver Detalle">
                                                     <Eye size={16} />
                                                 </Link>
-                                                <Link href={`/admin/trabajadores/${trabajador.id}/edit`} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: '#F1F5F9', color: '#475569', borderRadius: '10px', textDecoration: 'none', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.background = '#E0F2FE'; e.currentTarget.style.color = '#00B4FF'; }} onMouseOut={e => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#475569'; }} title="Editar">
+                                                <Link href={`/admin/trabajadores/${trabajador.id}/edit`} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: '#F1F5F9', color: '#475569', borderRadius: '10px', textDecoration: 'none', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.background = '#E0F2FE'; e.currentTarget.style.color = '#004797'; }} onMouseOut={e => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#475569'; }} title="Editar">
                                                     <Edit2 size={16} />
                                                 </Link>
                                                 <button onClick={() => resetPassword(trabajador.id)} style={{ border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: '#F1F5F9', color: '#475569', borderRadius: '10px', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.background = '#FFFBEB'; e.currentTarget.style.color = '#D97706'; }} onMouseOut={e => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#475569'; }} title="Resetear Contraseña">
@@ -262,9 +262,9 @@ export default function TrabajadoresIndex() {
                                     href={link.url}
                                     style={{
                                         display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '40px', height: '40px', padding: '0 12px',
-                                        background: link.active ? '#00B4FF' : '#ffffff', border: link.active ? 'none' : '1px solid #E2E8F0',
+                                        background: link.active ? '#004797' : '#ffffff', border: link.active ? 'none' : '1px solid #E2E8F0',
                                         color: link.active ? '#ffffff' : '#475569', borderRadius: '10px', fontSize: '14px', fontWeight: link.active ? 800 : 600, textDecoration: 'none',
-                                        boxShadow: link.active ? '0 4px 12px rgba(0, 180, 255, 0.3)' : '0 2px 4px rgba(0,0,0,0.02)', transition: 'all 0.2s'
+                                        boxShadow: link.active ? '0 4px 12px rgba(0, 71, 151, 0.3)' : '0 2px 4px rgba(0,0,0,0.02)', transition: 'all 0.2s'
                                     }}
                                     onMouseOver={e => { if(!link.active) { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.color = '#1E293B'; e.currentTarget.style.transform = 'translateY(-1px)'; } }}
                                     onMouseOut={e => { if(!link.active) { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.color = '#475569'; e.currentTarget.style.transform = 'none'; } }}

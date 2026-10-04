@@ -36,7 +36,7 @@ export default function Index({ audits }) {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
                     <div>
                         <h1 style={{ fontSize: '28px', margin: '0 0 8px 0', fontWeight: 800, color: '#1E293B', letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ background: '#E0F2FE', padding: '10px', borderRadius: '12px', color: '#00B4FF', display: 'flex' }}>
+                            <div style={{ background: '#E0F2FE', padding: '10px', borderRadius: '12px', color: '#004797', display: 'flex' }}>
                                 <History size={24} />
                             </div>
                             Registro de Auditoría
@@ -67,7 +67,7 @@ export default function Index({ audits }) {
                                         {/* Usuario */}
                                         <td style={{ padding: '20px 32px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: audit.user ? '#F0F9FF' : '#F1F5F9', color: audit.user ? '#00B4FF' : '#94A3B8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: audit.user ? '#F0F9FF' : '#F1F5F9', color: audit.user ? '#004797' : '#94A3B8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                                     {audit.user ? <User size={18} /> : <Fingerprint size={18} />}
                                                 </div>
                                                 <div>

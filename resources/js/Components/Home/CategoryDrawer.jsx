@@ -74,12 +74,12 @@ export default function CategoryDrawer({ isOpen, onClose, categorias = [] }) {
                 }
                 .premium-cat-item:hover {
                     background: #f8fafc;
-                    color: #00B4FF;
+                    color: #004797;
                     transform: translateX(4px);
                 }
                 .premium-cat-item.is-active {
-                    background: rgba(0, 180, 255, 0.08);
-                    color: #00B4FF;
+                    background: rgba(0, 71, 151, 0.08);
+                    color: #004797;
                     font-weight: 700;
                 }
                 .premium-sub-item {
@@ -100,13 +100,13 @@ export default function CategoryDrawer({ isOpen, onClose, categorias = [] }) {
                     box-shadow: 0 1px 3px rgba(0,0,0,0.02);
                 }
                 .premium-sub-item:hover {
-                    border-color: #00B4FF;
-                    box-shadow: 0 8px 16px rgba(0, 180, 255, 0.12);
+                    border-color: #004797;
+                    box-shadow: 0 8px 16px rgba(0, 71, 151, 0.12);
                     transform: translateY(-3px);
-                    color: #00B4FF;
+                    color: #004797;
                 }
                 .premium-sub-item:hover svg {
-                    stroke: #00B4FF;
+                    stroke: #004797;
                     transform: translateX(3px);
                 }
                 .premium-sub-item svg {
@@ -115,19 +115,19 @@ export default function CategoryDrawer({ isOpen, onClose, categorias = [] }) {
                 .premium-btn-outline {
                     font-size: 12px;
                     font-weight: 600;
-                    color: #00B4FF;
-                    background: rgba(0, 180, 255, 0.05);
+                    color: #004797;
+                    background: rgba(0, 71, 151, 0.05);
                     padding: 6px 16px;
                     border-radius: 20px;
-                    border: 1px solid rgba(0, 180, 255, 0.2);
+                    border: 1px solid rgba(0, 71, 151, 0.2);
                     cursor: pointer;
                     transition: all 0.2s ease;
                 }
                 .premium-btn-outline:hover {
-                    background: #00B4FF;
+                    background: #004797;
                     color: #ffffff;
-                    box-shadow: 0 4px 12px rgba(0, 180, 255, 0.3);
-                    border-color: #00B4FF;
+                    box-shadow: 0 4px 12px rgba(0, 71, 151, 0.3);
+                    border-color: #004797;
                     transform: translateY(-1px);
                 }
             `}</style>
@@ -260,7 +260,7 @@ export default function CategoryDrawer({ isOpen, onClose, categorias = [] }) {
                                                 left: 0,
                                                 width: '48px',
                                                 height: '4px',
-                                                background: '#00B4FF',
+                                                background: '#004797',
                                                 borderRadius: '4px',
                                             }}
                                         ></span>

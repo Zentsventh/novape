@@ -47,12 +47,12 @@ export default function Create() {
                     height: 48px;
                     border-radius: 12px;
                     background: #F0F9FF;
-                    color: #00B4FF;
+                    color: #004797;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     border: 1px solid #E0F2FE;
-                    box-shadow: 0 2px 4px rgba(0, 180, 255, 0.05);
+                    box-shadow: 0 2px 4px rgba(0, 71, 151, 0.05);
                 }
                 .premium-title {
                     font-size: 28px;
@@ -112,9 +112,9 @@ export default function Create() {
                     box-sizing: border-box;
                 }
                 .premium-input:focus {
-                    border-color: #00B4FF;
+                    border-color: #004797;
                     background: #FFFFFF;
-                    box-shadow: 0 0 0 3px rgba(0, 180, 255, 0.15);
+                    box-shadow: 0 0 0 3px rgba(0, 71, 151, 0.15);
                 }
                 .premium-input::placeholder {
                     color: #94A3B8;
@@ -168,14 +168,14 @@ export default function Create() {
                     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04);
                 }
                 .premium-btn-primary {
-                    background: #00B4FF;
+                    background: #004797;
                     color: #FFFFFF;
-                    box-shadow: 0 2px 4px rgba(0, 180, 255, 0.2);
+                    box-shadow: 0 2px 4px rgba(0, 71, 151, 0.2);
                 }
                 .premium-btn-primary:hover:not(:disabled) {
                     background: #00A2E8;
                     transform: translateY(-1px);
-                    box-shadow: 0 4px 10px rgba(0, 180, 255, 0.3);
+                    box-shadow: 0 4px 10px rgba(0, 71, 151, 0.3);
                 }
                 .premium-btn-primary:disabled {
                     background: #94A3B8;

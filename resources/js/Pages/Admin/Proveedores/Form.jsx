@@ -33,7 +33,7 @@ export default function ProveedorForm({ proveedor }) {
     };
     
     const inputFocusStyle = {
-        borderColor: '#00B4FF', boxShadow: '0 0 0 4px rgba(0, 180, 255, 0.1)', backgroundColor: '#ffffff'
+        borderColor: '#004797', boxShadow: '0 0 0 4px rgba(0, 71, 151, 0.1)', backgroundColor: '#ffffff'
     };
 
     const labelStyle = {
@@ -64,7 +64,7 @@ export default function ProveedorForm({ proveedor }) {
                             display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#64748B', 
                             textDecoration: 'none', fontWeight: 600, fontSize: '14px', transition: 'color 0.2s'
                         }}
-                        onMouseOver={e => e.currentTarget.style.color = '#00B4FF'}
+                        onMouseOver={e => e.currentTarget.style.color = '#004797'}
                         onMouseOut={e => e.currentTarget.style.color = '#64748B'}
                     >
                         <ArrowLeft size={16} /> Volver al Directorio
@@ -76,7 +76,7 @@ export default function ProveedorForm({ proveedor }) {
                         
                         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
                             <div>
-                                <label style={labelStyle}>Nombre / Razón Social <span style={{ color: '#00B4FF' }}>*</span></label>
+                                <label style={labelStyle}>Nombre / Razón Social <span style={{ color: '#004797' }}>*</span></label>
                                 <div style={{ position: 'relative' }}>
                                     <Building2 size={18} style={iconStyle} />
                                     <input 
@@ -201,13 +201,13 @@ export default function ProveedorForm({ proveedor }) {
                                 type="submit" 
                                 disabled={processing}
                                 style={{ 
-                                    padding: '14px 28px', borderRadius: '12px', border: 'none', background: '#00B4FF', color: 'white', 
+                                    padding: '14px 28px', borderRadius: '12px', border: 'none', background: '#004797', color: 'white', 
                                     fontWeight: 600, cursor: processing ? 'not-allowed' : 'pointer', opacity: processing ? 0.7 : 1, 
-                                    display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 4px 14px rgba(0, 180, 255, 0.3)', transition: 'all 0.2s ease',
+                                    display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 4px 14px rgba(0, 71, 151, 0.3)', transition: 'all 0.2s ease',
                                     fontSize: '15px'
                                 }}
-                                onMouseOver={e => { if(!processing) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 180, 255, 0.4)'; } }}
-                                onMouseOut={e => { if(!processing) { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 180, 255, 0.3)'; } }}
+                                onMouseOver={e => { if(!processing) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 71, 151, 0.4)'; } }}
+                                onMouseOut={e => { if(!processing) { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 71, 151, 0.3)'; } }}
                             >
                                 {processing ? (
                                     <>Guardando...</>

@@ -2,18 +2,18 @@
 
 namespace App\Policies;
 
-use App\Models\Direccion;
+use App\Models\DireccionUsuario;
 use App\Models\Usuario;
 use Illuminate\Auth\Access\Response;
 
 class DireccionPolicy
 {
-    public function update(Usuario $user, Direccion $direccion): bool
+    public function update(Usuario $user, DireccionUsuario $direccion): bool
     {
         return $user->id === $direccion->usuario_id;
     }
 
-    public function delete(Usuario $user, Direccion $direccion): bool
+    public function delete(Usuario $user, DireccionUsuario $direccion): bool
     {
         return $user->id === $direccion->usuario_id;
     }

@@ -143,9 +143,9 @@ export default function Dashboard({ metrics }) {
                     transition: all 0.2s ease;
                 }
                 .twenty-card:hover {
-                    box-shadow: 0 10px 25px -5px rgba(0, 180, 255, 0.15);
+                    box-shadow: 0 10px 25px -5px rgba(0, 71, 151, 0.15);
                     transform: translateY(-2px);
-                    border-color: rgba(0, 180, 255, 0.3);
+                    border-color: rgba(0, 71, 151, 0.3);
                 }
                 .kpi-icon-wrapper {
                     width: 48px; height: 48px;
@@ -162,7 +162,7 @@ export default function Dashboard({ metrics }) {
                     box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1) !important;
                 }
                 .gradient-text {
-                    background: linear-gradient(135deg, #00B4FF 0%, #009BE0 100%);
+                    background: linear-gradient(135deg, #004797 0%, #009BE0 100%);
                     -webkit-background-clip: text;
                     -webkit-text-fill-color: transparent;
                 }
@@ -212,7 +212,7 @@ export default function Dashboard({ metrics }) {
                     }}
                 >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{ padding: '8px', backgroundColor: '#F0F9FF', borderRadius: '10px', color: '#00B4FF' }}>
+                        <div style={{ padding: '8px', backgroundColor: '#F0F9FF', borderRadius: '10px', color: '#004797' }}>
                             <Activity size={24} />
                         </div>
                         <h2
@@ -232,13 +232,13 @@ export default function Dashboard({ metrics }) {
                             onClick={handleRefresh}
                             style={{
                                 display: 'flex', alignItems: 'center', gap: '8px',
-                                background: '#00B4FF', color: '#fff', border: 'none',
+                                background: '#004797', color: '#fff', border: 'none',
                                 borderRadius: '8px', padding: '10px 16px', fontWeight: 600, fontSize: '13px',
-                                cursor: 'pointer', boxShadow: '0 2px 4px rgba(0, 180, 255, 0.2)',
+                                cursor: 'pointer', boxShadow: '0 2px 4px rgba(0, 71, 151, 0.2)',
                                 transition: 'all 0.2s ease'
                             }}
-                            onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 180, 255, 0.3)'; e.currentTarget.style.backgroundColor = '#009BE0'; }}
-                            onMouseOut={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 180, 255, 0.2)'; e.currentTarget.style.backgroundColor = '#00B4FF'; }}
+                            onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 71, 151, 0.3)'; e.currentTarget.style.backgroundColor = '#009BE0'; }}
+                            onMouseOut={(e) => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 71, 151, 0.2)'; e.currentTarget.style.backgroundColor = '#004797'; }}
                         >
                             <Zap size={16} /> Actualizar
                         </button>
@@ -261,7 +261,7 @@ export default function Dashboard({ metrics }) {
                         >
                             <div
                                 className="kpi-icon-wrapper"
-                                style={{ background: 'rgba(0, 180, 255, 0.1)', color: '#00B4FF' }}
+                                style={{ background: 'rgba(0, 71, 151, 0.1)', color: '#004797' }}
                             >
                                 <DollarSign size={20} />
                             </div>
@@ -270,10 +270,10 @@ export default function Dashboard({ metrics }) {
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '4px',
-                                    color: '#00B4FF',
+                                    color: '#004797',
                                     fontSize: '12px',
                                     fontWeight: 600,
-                                    background: 'rgba(0, 180, 255, 0.1)',
+                                    background: 'rgba(0, 71, 151, 0.1)',
                                     padding: '4px 8px',
                                     borderRadius: '12px',
                                 }}
@@ -315,7 +315,7 @@ export default function Dashboard({ metrics }) {
                         >
                             <div
                                 className="kpi-icon-wrapper"
-                                style={{ background: 'rgba(0, 180, 255, 0.1)', color: '#00B4FF' }}
+                                style={{ background: 'rgba(0, 71, 151, 0.1)', color: '#004797' }}
                             >
                                 <Target size={20} />
                             </div>
@@ -324,10 +324,10 @@ export default function Dashboard({ metrics }) {
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '4px',
-                                    color: '#00B4FF',
+                                    color: '#004797',
                                     fontSize: '12px',
                                     fontWeight: 600,
-                                    background: 'rgba(0, 180, 255, 0.1)',
+                                    background: 'rgba(0, 71, 151, 0.1)',
                                     padding: '4px 8px',
                                     borderRadius: '12px',
                                 }}
@@ -369,7 +369,7 @@ export default function Dashboard({ metrics }) {
                         >
                             <div
                                 className="kpi-icon-wrapper"
-                                style={{ background: 'rgba(0, 180, 255, 0.1)', color: '#00B4FF' }}
+                                style={{ background: 'rgba(0, 71, 151, 0.1)', color: '#004797' }}
                             >
                                 <Users size={20} />
                             </div>
@@ -408,7 +408,7 @@ export default function Dashboard({ metrics }) {
                         >
                             <div
                                 className="kpi-icon-wrapper"
-                                style={{ background: 'rgba(0, 180, 255, 0.1)', color: '#00B4FF' }}
+                                style={{ background: 'rgba(0, 71, 151, 0.1)', color: '#004797' }}
                             >
                                 <Clock size={20} />
                             </div>
@@ -417,10 +417,10 @@ export default function Dashboard({ metrics }) {
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '4px',
-                                    color: '#00B4FF',
+                                    color: '#004797',
                                     fontSize: '12px',
                                     fontWeight: 600,
-                                    background: 'rgba(0, 180, 255, 0.1)',
+                                    background: 'rgba(0, 71, 151, 0.1)',
                                     padding: '4px 8px',
                                     borderRadius: '12px',
                                 }}
@@ -501,12 +501,12 @@ export default function Dashboard({ metrics }) {
                                         >
                                             <stop
                                                 offset="5%"
-                                                stopColor="#00B4FF"
+                                                stopColor="#004797"
                                                 stopOpacity={0.3}
                                             />
                                             <stop
                                                 offset="95%"
-                                                stopColor="#00B4FF"
+                                                stopColor="#004797"
                                                 stopOpacity={0}
                                             />
                                         </linearGradient>
@@ -534,7 +534,7 @@ export default function Dashboard({ metrics }) {
                                     <Area
                                         type="monotone"
                                         dataKey="Ventas"
-                                        stroke="#00B4FF"
+                                        stroke="#004797"
                                         strokeWidth={3}
                                         fillOpacity={1}
                                         fill="url(#colorRevenue)"
@@ -704,7 +704,7 @@ export default function Dashboard({ metrics }) {
                                     />
                                     <Bar
                                         dataKey="value"
-                                        fill="#00B4FF"
+                                        fill="#004797"
                                         radius={[0, 6, 6, 0]}
                                         barSize={36}
                                         animationDuration={1500}
@@ -712,7 +712,7 @@ export default function Dashboard({ metrics }) {
                                         {funnel.map((entry, index) => (
                                             <Cell
                                                 key={`cell-${index}`}
-                                                fill={`rgba(0, 180, 255, ${1 - index * 0.18})`}
+                                                fill={`rgba(0, 71, 151, ${1 - index * 0.18})`}
                                             />
                                         ))}
                                     </Bar>

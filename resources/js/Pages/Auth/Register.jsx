@@ -58,10 +58,10 @@ export default function Register({ errors }) {
                     }));
                 }
             } else {
-                Swal.fire({text: 'No se pudo encontrar el documento.', icon: 'error', confirmButtonColor: '#00B4FF'});
+                Swal.fire({text: 'No se pudo encontrar el documento.', icon: 'error', confirmButtonColor: '#004797'});
             }
         } catch (err) {
-            Swal.fire({text: 'Error de conexión.', icon: 'error', confirmButtonColor: '#00B4FF'});
+            Swal.fire({text: 'Error de conexión.', icon: 'error', confirmButtonColor: '#004797'});
         } finally {
             setLoadingApi(false);
         }

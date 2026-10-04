@@ -22,7 +22,7 @@ class Pedido extends Model implements Auditable
         'usuario_id', 'codigo', 'subtotal', 'descuento', 'costo_envio', 
         'total', 'estado', 'tracking_number', 'courier_name', 'tipo_comprobante', 
         'documento_cliente', 'nombre_facturacion', 'direccion_facturacion', 
-        'direccion_envio_snapshot', 'cupon_id'
+        'direccion_envio_snapshot', 'cupon_id', 'puntos_usados'
     ];
 
     protected $casts = [

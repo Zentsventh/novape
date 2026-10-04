@@ -506,7 +506,7 @@ function AgentStatusDropdown({ status, onChange }) {
                 onMouseOver={(e) => {
                     e.currentTarget.style.transform = 'translateY(-1px)';
                     e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)';
-                    e.currentTarget.style.borderColor = 'rgba(0, 180, 255, 0.3)';
+                    e.currentTarget.style.borderColor = 'rgba(0, 71, 151, 0.3)';
                 }}
                 onMouseOut={(e) => {
                     e.currentTarget.style.transform = 'none';

@@ -88,7 +88,7 @@ export default function Dashboard({
             
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
                 <h1 style={{ fontSize: '24px', margin: 0, fontWeight: '700', color: '#1E293B', display: 'flex', alignItems: 'center', gap: '12px', letterSpacing: '-0.02em' }}>
-                    <div style={{ padding: '8px', backgroundColor: '#F0F9FF', borderRadius: '10px', color: '#00B4FF' }}>
+                    <div style={{ padding: '8px', backgroundColor: '#F0F9FF', borderRadius: '10px', color: '#004797' }}>
                         <Activity size={24} />
                     </div>
                     Visión General
@@ -120,7 +120,7 @@ export default function Dashboard({
                             onClick={applyFilters} 
                             onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F1F5F9'; }}
                             onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
-                            style={{ background: 'transparent', color: '#00B4FF', border: 'none', borderRadius: '6px', padding: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s ease' }}
+                            style={{ background: 'transparent', color: '#004797', border: 'none', borderRadius: '6px', padding: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s ease' }}
                             title="Aplicar filtros"
                         >
                             <Filter size={16} />
@@ -140,9 +140,9 @@ export default function Dashboard({
 
                     <Link 
                         href="/admin/pedidos" 
-                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#009BE0'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 180, 255, 0.3)'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#00B4FF'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 180, 255, 0.2)'; }}
-                        style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#00B4FF', color: 'white', textDecoration: 'none', padding: '10px 16px', borderRadius: '8px', fontWeight: '600', fontSize: '13px', transition: 'all 0.2s ease', boxShadow: '0 2px 4px rgba(0, 180, 255, 0.2)' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#009BE0'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 71, 151, 0.3)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#004797'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 71, 151, 0.2)'; }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#004797', color: 'white', textDecoration: 'none', padding: '10px 16px', borderRadius: '8px', fontWeight: '600', fontSize: '13px', transition: 'all 0.2s ease', boxShadow: '0 2px 4px rgba(0, 71, 151, 0.2)' }}
                     >
                         <ShoppingCart size={16} />
                         Gestionar Pedidos
@@ -184,7 +184,7 @@ export default function Dashboard({
                     onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px -2px rgba(0, 0, 0, 0.05)'; }}
                     style={{ background: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.3s ease' }}
                 >
-                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#F0F9FF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00B4FF', flexShrink: 0 }}>
+                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#F0F9FF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#004797', flexShrink: 0 }}>
                         <DollarSign size={24} />
                     </div>
                     <div>
@@ -269,8 +269,8 @@ export default function Dashboard({
                                 <AreaChart data={chartVentasSemana} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                                     <defs>
                                         <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#00B4FF" stopOpacity={0.4}/>
-                                            <stop offset="95%" stopColor="#00B4FF" stopOpacity={0}/>
+                                            <stop offset="5%" stopColor="#004797" stopOpacity={0.4}/>
+                                            <stop offset="95%" stopColor="#004797" stopOpacity={0}/>
                                         </linearGradient>
                                     </defs>
                                     <CartesianGrid strokeDasharray="4 4" stroke="#E2E8F0" vertical={false} />
@@ -278,11 +278,11 @@ export default function Dashboard({
                                     <YAxis stroke="#94A3B8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `S/${val}`} dx={-10} />
                                     <Tooltip 
                                         contentStyle={{ background: '#1E293B', border: 'none', borderRadius: '8px', color: '#ffffff', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
-                                        itemStyle={{ color: '#00B4FF', fontWeight: 'bold' }}
+                                        itemStyle={{ color: '#004797', fontWeight: 'bold' }}
                                         cursor={{fill: '#F8FAFC'}}
                                         formatter={(value) => [`S/ ${value}`, 'Total']}
                                     />
-                                    <Area type="monotone" dataKey="total" stroke="#00B4FF" strokeWidth={3} fillOpacity={1} fill="url(#colorTotal)" activeDot={{ r: 6, fill: '#00B4FF', stroke: '#ffffff', strokeWidth: 2 }} />
+                                    <Area type="monotone" dataKey="total" stroke="#004797" strokeWidth={3} fillOpacity={1} fill="url(#colorTotal)" activeDot={{ r: 6, fill: '#004797', stroke: '#ffffff', strokeWidth: 2 }} />
                                 </AreaChart>
                             </ResponsiveContainer>
                         )}
@@ -347,7 +347,7 @@ export default function Dashboard({
                                     style={{ border: 'none', background: 'transparent', outline: 'none', fontSize: '13px', padding: '0 0 0 8px', color: '#1E293B', width: '130px', fontFamily: 'inherit' }}
                                 />
                             </div>
-                            <Link href="/admin/pedidos" style={{ color: '#00B4FF', fontSize: '13px', textDecoration: 'none', fontWeight: '600', transition: 'color 0.2s ease' }} onMouseEnter={e => e.target.style.color = '#009BE0'} onMouseLeave={e => e.target.style.color = '#00B4FF'}>
+                            <Link href="/admin/pedidos" style={{ color: '#004797', fontSize: '13px', textDecoration: 'none', fontWeight: '600', transition: 'color 0.2s ease' }} onMouseEnter={e => e.target.style.color = '#009BE0'} onMouseLeave={e => e.target.style.color = '#004797'}>
                                 Ver todos
                             </Link>
                         </div>
@@ -426,7 +426,7 @@ export default function Dashboard({
                             safeTopProductosVendidos.map((prod, index) => (
                                 <div key={index} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '12px', borderBottom: '1px solid #E2E8F0' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                        <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: index === 0 ? '#00B4FF' : '#F1F5F9', color: index === 0 ? 'white' : '#64748B', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '12px', boxShadow: index === 0 ? '0 2px 8px rgba(0, 180, 255, 0.3)' : 'none' }}>
+                                        <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: index === 0 ? '#004797' : '#F1F5F9', color: index === 0 ? 'white' : '#64748B', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '12px', boxShadow: index === 0 ? '0 2px 8px rgba(0, 71, 151, 0.3)' : 'none' }}>
                                             {index + 1}
                                         </div>
                                         <div style={{ fontSize: '13px', fontWeight: '600', color: '#1E293B', maxWidth: '170px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>

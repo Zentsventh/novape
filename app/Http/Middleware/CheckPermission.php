@@ -15,13 +15,16 @@ class CheckPermission
      */
     public function handle(Request $request, Closure $next, $permiso)
     {
-        if (!auth()->check()) {
-            return $request->expectsJson() 
+        $guard = $request->is('admin', 'admin/*') ? 'admin' : config('auth.defaults.guard', 'web');
+        $user = auth()->guard($guard)->user();
+
+        if (!$user) {
+            return $request->expectsJson()
                 ? response()->json(['error' => 'No autorizado'], 401)
-                : redirect('/login');
+                : redirect($guard === 'admin' ? route('admin.login') : route('login'));
         }
 
-        if (!auth()->user()->tienePermiso($permiso)) {
+        if (!$user->tienePermiso($permiso)) {
             abort(403, 'NO TIENES PERMISO PARA ACCEDER A ESTA SECCIÓN.');
         }
 

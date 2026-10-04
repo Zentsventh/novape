@@ -131,7 +131,7 @@ export default function Dashboard({ logoUrl, productos, categorias, demandaRaw, 
             datasets: [{
                 label: 'Costo Total',
                 data: sorted.map(i => i[1]),
-                backgroundColor: '#00B4FF'
+                backgroundColor: '#004797'
             }]
         };
     }, [filteredProductos, selectedCategoria, selectedMarca, categorias, marcasDisponibles, productosDisponibles]);
@@ -200,7 +200,7 @@ export default function Dashboard({ logoUrl, productos, categorias, demandaRaw, 
                 label: 'Demanda',
                 data: aggregatedDemand,
                 borderColor: '#0082B8', 
-                backgroundColor: 'rgba(0, 180, 255, 0.2)',
+                backgroundColor: 'rgba(0, 71, 151, 0.2)',
                 fill: true,
                 tension: 0.4
             }]
@@ -249,7 +249,7 @@ export default function Dashboard({ logoUrl, productos, categorias, demandaRaw, 
                     backgroundColor: sorted.map(i => {
                         // Si no hay minimo definido (0), gris neutral. Si esta ok, cyan. Si bajo, azul claro.
                         if (i[1].minimo === 0) return '#A0AEC0'; 
-                        return i[1].actual > i[1].minimo ? '#00B4FF' : '#B3E9FF';
+                        return i[1].actual > i[1].minimo ? '#004797' : '#B3E9FF';
                     }),
                 }
             ]
@@ -385,7 +385,7 @@ export default function Dashboard({ logoUrl, productos, categorias, demandaRaw, 
                     </div>
                     {/* Stock Disponible */}
                     <div style={{ background: 'white', borderRadius: '8px', display: 'flex', border: '1px solid #E2E8F0', overflow: 'hidden' }}>
-                        <div style={{ background: '#00B4FF', padding: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ background: '#004797', padding: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
                         </div>
                         <div style={{ padding: '15px', flex: 1, textAlign: 'center' }}>
@@ -405,8 +405,8 @@ export default function Dashboard({ logoUrl, productos, categorias, demandaRaw, 
                     <div style={{ background: 'white', borderRadius: '8px', padding: '15px', border: '1px solid #E2E8F0', textAlign: 'center', position: 'relative' }}>
                         <div style={{ fontSize: '12px', color: '#718096', marginBottom: '10px' }}>Unidades Vendidas</div>
                         <div style={{ height: '70px', position: 'relative' }}>
-                            <Doughnut data={{ datasets: [{ data: [viewKpis.unidades_vendidas, viewKpis.unidades_compradas], backgroundColor: ['#00B4FF', '#E2E8F0'], borderWidth: 0 }] }} options={halfDoughnutOptions} />
-                            <div style={{ position: 'absolute', bottom: '0', left: '0', right: '0', textAlign: 'center', fontSize: '16px', fontWeight: 'bold', color: '#00B4FF' }}>{formatShort(viewKpis.unidades_vendidas)}</div>
+                            <Doughnut data={{ datasets: [{ data: [viewKpis.unidades_vendidas, viewKpis.unidades_compradas], backgroundColor: ['#004797', '#E2E8F0'], borderWidth: 0 }] }} options={halfDoughnutOptions} />
+                            <div style={{ position: 'absolute', bottom: '0', left: '0', right: '0', textAlign: 'center', fontSize: '16px', fontWeight: 'bold', color: '#004797' }}>{formatShort(viewKpis.unidades_vendidas)}</div>
                         </div>
                     </div>
                     {/* Unidades Compradas */}
@@ -456,7 +456,7 @@ export default function Dashboard({ logoUrl, productos, categorias, demandaRaw, 
                     <div style={{ background: 'white', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '15px', gridRow: 'span 2', display: 'flex', flexDirection: 'column' }}>
                         <h3 style={{ fontSize: '13px', color: '#4A5568', margin: '0 0 5px 0' }}>Inventario Óptimo por {getGroupLabel()}</h3>
                         <div style={{ display: 'flex', gap: '10px', fontSize: '11px', color: '#718096', marginBottom: '15px' }}>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width: '8px', height: '8px', background: '#00B4FF', borderRadius: '50%' }}></div> Stock Actual (Bueno)</span>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width: '8px', height: '8px', background: '#004797', borderRadius: '50%' }}></div> Stock Actual (Bueno)</span>
                             <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width: '8px', height: '8px', background: '#B3E9FF', borderRadius: '50%' }}></div> Stock Bajo</span>
                             <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width: '8px', height: '8px', background: '#A0AEC0', borderRadius: '50%' }}></div> Sin Mínimo</span>
                             <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><div style={{ width: '8px', height: '8px', background: '#003A66', borderRadius: '50%' }}></div> Stock Mínimo</span>
@@ -492,11 +492,11 @@ export default function Dashboard({ logoUrl, productos, categorias, demandaRaw, 
                     {/* Bottom Center: Stock Optimo Grid */}
                     <div style={{ background: 'white', border: '1px solid #E2E8F0', borderRadius: '8px', padding: '15px', display: 'flex', flexDirection: 'column' }}>
                         <h3 style={{ fontSize: '14px', color: '#4A5568', margin: '0 0 15px 0', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                            <div style={{ width: '12px', height: '12px', background: '#00B4FF', borderRadius: '50%' }}></div> Stock Óptimo
+                            <div style={{ width: '12px', height: '12px', background: '#004797', borderRadius: '50%' }}></div> Stock Óptimo
                         </h3>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', flex: 1 }}>
                             <div style={{ border: '1px solid #E2E8F0', borderRadius: '6px', overflow: 'hidden', textAlign: 'center', display: 'flex', flexDirection: 'column' }}>
-                                <div style={{ background: '#00B4FF', color: 'white', fontSize: '11px', padding: '5px' }}>Inv. Disponible</div>
+                                <div style={{ background: '#004797', color: 'white', fontSize: '11px', padding: '5px' }}>Inv. Disponible</div>
                                 <div style={{ padding: '10px', fontSize: '16px', fontWeight: 'bold' }}>{Number(opt_disp).toLocaleString('es-PE')}</div>
                             </div>
                             <div style={{ border: '1px solid #E2E8F0', borderRadius: '6px', overflow: 'hidden', textAlign: 'center', display: 'flex', flexDirection: 'column' }}>

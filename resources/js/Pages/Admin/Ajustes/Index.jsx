@@ -43,7 +43,7 @@ export default function Index({ configuraciones }) {
     };
     
     const inputFocusStyle = {
-        borderColor: '#00B4FF', boxShadow: '0 0 0 4px rgba(0, 180, 255, 0.1)', backgroundColor: '#ffffff'
+        borderColor: '#004797', boxShadow: '0 0 0 4px rgba(0, 71, 151, 0.1)', backgroundColor: '#ffffff'
     };
 
     const labelStyle = {
@@ -64,7 +64,7 @@ export default function Index({ configuraciones }) {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
                     <div>
                         <h1 style={{ fontSize: '28px', margin: '0 0 8px 0', fontWeight: 800, color: '#1E293B', letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ background: '#E0F2FE', padding: '10px', borderRadius: '12px', color: '#00B4FF', display: 'flex' }}>
+                            <div style={{ background: '#E0F2FE', padding: '10px', borderRadius: '12px', color: '#004797', display: 'flex' }}>
                                 <Settings size={24} />
                             </div>
                             Ajustes del Sistema
@@ -107,12 +107,12 @@ export default function Index({ configuraciones }) {
                                 color: activeTab === 'general' ? '#0284C7' : '#475569', 
                                 cursor: 'pointer', fontWeight: 700, fontSize: '15px',
                                 display: 'flex', alignItems: 'center', gap: '12px', transition: 'all 0.2s',
-                                boxShadow: activeTab === 'general' ? 'inset 2px 0 0 0 #00B4FF' : 'none'
+                                boxShadow: activeTab === 'general' ? 'inset 2px 0 0 0 #004797' : 'none'
                             }}
                             onMouseOver={e => { if (activeTab !== 'general') { e.currentTarget.style.background = '#F8FAFC'; e.currentTarget.style.color = '#1E293B'; } }}
                             onMouseOut={e => { if (activeTab !== 'general') { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#475569'; } }}
                         >
-                            <Store size={18} color={activeTab === 'general' ? '#00B4FF' : '#94A3B8'} /> Configuración General
+                            <Store size={18} color={activeTab === 'general' ? '#004797' : '#94A3B8'} /> Configuración General
                         </button>
                         <button 
                             onClick={() => setActiveTab('omnichannel')}
@@ -122,12 +122,12 @@ export default function Index({ configuraciones }) {
                                 color: activeTab === 'omnichannel' ? '#0284C7' : '#475569', 
                                 cursor: 'pointer', fontWeight: 700, fontSize: '15px',
                                 display: 'flex', alignItems: 'center', gap: '12px', transition: 'all 0.2s',
-                                boxShadow: activeTab === 'omnichannel' ? 'inset 2px 0 0 0 #00B4FF' : 'none'
+                                boxShadow: activeTab === 'omnichannel' ? 'inset 2px 0 0 0 #004797' : 'none'
                             }}
                             onMouseOver={e => { if (activeTab !== 'omnichannel') { e.currentTarget.style.background = '#F8FAFC'; e.currentTarget.style.color = '#1E293B'; } }}
                             onMouseOut={e => { if (activeTab !== 'omnichannel') { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#475569'; } }}
                         >
-                            <MessageCircle size={18} color={activeTab === 'omnichannel' ? '#00B4FF' : '#94A3B8'} /> Omnichannel (API)
+                            <MessageCircle size={18} color={activeTab === 'omnichannel' ? '#004797' : '#94A3B8'} /> Omnichannel (API)
                         </button>
                     </div>
 
@@ -201,15 +201,15 @@ export default function Index({ configuraciones }) {
                                         
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                                             <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '16px', borderRadius: '16px', border: '1px solid #E2E8F0', background: '#F8FAFC', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.background = '#ffffff'; }} onMouseOut={e => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.background = '#F8FAFC'; }}>
-                                                <input type="checkbox" defaultChecked style={{ width: '20px', height: '20px', accentColor: '#00B4FF' }} />
+                                                <input type="checkbox" defaultChecked style={{ width: '20px', height: '20px', accentColor: '#004797' }} />
                                                 <span style={{ color: '#1E293B', fontWeight: 600, fontSize: '15px' }}>Activar Punto de Venta (POS) Físico</span>
                                             </label>
                                             <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '16px', borderRadius: '16px', border: '1px solid #E2E8F0', background: '#F8FAFC', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.background = '#ffffff'; }} onMouseOut={e => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.background = '#F8FAFC'; }}>
-                                                <input type="checkbox" defaultChecked style={{ width: '20px', height: '20px', accentColor: '#00B4FF' }} />
+                                                <input type="checkbox" defaultChecked style={{ width: '20px', height: '20px', accentColor: '#004797' }} />
                                                 <span style={{ color: '#1E293B', fontWeight: 600, fontSize: '15px' }}>Emitir Facturación Electrónica Automática (SUNAT)</span>
                                             </label>
                                             <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '16px', borderRadius: '16px', border: '1px solid #E2E8F0', background: '#F8FAFC', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.background = '#ffffff'; }} onMouseOut={e => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.background = '#F8FAFC'; }}>
-                                                <input type="checkbox" defaultChecked style={{ width: '20px', height: '20px', accentColor: '#00B4FF' }} />
+                                                <input type="checkbox" defaultChecked style={{ width: '20px', height: '20px', accentColor: '#004797' }} />
                                                 <span style={{ color: '#1E293B', fontWeight: 600, fontSize: '15px' }}>Notificar al Administrador sobre Stock Bajo</span>
                                             </label>
                                         </div>
@@ -304,7 +304,7 @@ export default function Index({ configuraciones }) {
                                     type="submit"
                                     disabled={processing}
                                     style={{
-                                        background: '#00B4FF',
+                                        background: '#004797',
                                         color: 'white',
                                         border: 'none',
                                         padding: '14px 32px',
@@ -313,14 +313,14 @@ export default function Index({ configuraciones }) {
                                         fontSize: '15px',
                                         cursor: processing ? 'not-allowed' : 'pointer',
                                         opacity: processing ? 0.7 : 1,
-                                        boxShadow: '0 4px 14px rgba(0, 180, 255, 0.3)',
+                                        boxShadow: '0 4px 14px rgba(0, 71, 151, 0.3)',
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: '8px',
                                         transition: 'all 0.2s'
                                     }}
-                                    onMouseOver={e => { if(!processing) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 180, 255, 0.4)'; } }}
-                                    onMouseOut={e => { if(!processing) { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 180, 255, 0.3)'; } }}
+                                    onMouseOver={e => { if(!processing) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 71, 151, 0.4)'; } }}
+                                    onMouseOut={e => { if(!processing) { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 71, 151, 0.3)'; } }}
                                 >
                                     <Save size={18} />
                                     {processing ? 'Guardando...' : 'Guardar Cambios'}

@@ -114,11 +114,11 @@ export default function TwentyKanban({ stages = [], deals, onDragEnd, onDealClic
                 .premium-kanban-card:hover {
                     transform: translateY(-2px);
                     box-shadow: 0 12px 20px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
-                    border-color: #00B4FF;
+                    border-color: #004797;
                 }
                 .premium-kanban-card.is-dragging {
-                    box-shadow: 0 20px 25px -5px rgba(0, 180, 255, 0.15), 0 8px 10px -6px rgba(0, 180, 255, 0.1);
-                    border-color: #00B4FF;
+                    box-shadow: 0 20px 25px -5px rgba(0, 71, 151, 0.15), 0 8px 10px -6px rgba(0, 71, 151, 0.1);
+                    border-color: #004797;
                     transform: scale(1.02) rotate(2deg);
                     z-index: 999;
                 }
@@ -158,7 +158,7 @@ export default function TwentyKanban({ stages = [], deals, onDragEnd, onDealClic
                     height: 28px;
                     border-radius: 50%;
                     background-color: #F0F9FF;
-                    color: #00B4FF;
+                    color: #004797;
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -233,7 +233,7 @@ export default function TwentyKanban({ stages = [], deals, onDragEnd, onDealClic
                             {/* Column Header */}
                             <div className="premium-column-header">
                                 <div className="premium-column-title">
-                                    <div className="premium-column-indicator" style={{ backgroundColor: stage.color || '#00B4FF' }}></div>
+                                    <div className="premium-column-indicator" style={{ backgroundColor: stage.color || '#004797' }}></div>
                                     {stage.nombre}
                                     <span className="premium-column-count">
                                         {groupedDeals[stage.id]?.length || 0}

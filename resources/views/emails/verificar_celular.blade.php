@@ -8,7 +8,7 @@
 <body style="font-family: 'Inter', Helvetica, Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 40px 0;">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
         <tr>
-            <td style="background-color: #00B4FF; text-align: center; padding: 30px 20px;">
+            <td style="background-color: #004797; text-align: center; padding: 30px 20px;">
                 <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold; letter-spacing: 1px;">NOVAPE</h1>
             </td>
         </tr>
@@ -20,7 +20,7 @@
                     Hemos recibido una solicitud para actualizar tu número de celular asociado a tu cuenta de Novape. Para continuar con este proceso y por medidas de seguridad, por favor ingresa el siguiente código de verificación:
                 </p>
                 <div style="text-align: center; margin: 35px 0;">
-                    <span style="display: inline-block; background-color: #f1f8ff; color: #00B4FF; font-size: 36px; font-weight: bold; padding: 15px 40px; border-radius: 8px; letter-spacing: 5px; border: 2px dashed #00B4FF;">
+                    <span style="display: inline-block; background-color: #f1f8ff; color: #004797; font-size: 36px; font-weight: bold; padding: 15px 40px; border-radius: 8px; letter-spacing: 5px; border: 2px dashed #004797;">
                         {{ $codigo }}
                     </span>
                 </div>

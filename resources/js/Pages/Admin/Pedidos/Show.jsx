@@ -35,7 +35,7 @@ export default function Show({ pedido }) {
                     </Link>
                     <div>
                         <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#1E293B', margin: 0, display: 'flex', alignItems: 'center', gap: '8px', letterSpacing: '-0.02em' }}>
-                            Pedido <span style={{ color: '#00B4FF' }}>#{pedido.codigo}</span>
+                            Pedido <span style={{ color: '#004797' }}>#{pedido.codigo}</span>
                         </h1>
                         <p style={{ color: '#64748B', margin: '4px 0 0 0', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}>
                             <Calendar size={14} /> {new Date(pedido.created_at).toLocaleString('es-PE')}
@@ -47,9 +47,9 @@ export default function Show({ pedido }) {
                         href={`/admin/pedidos/${pedido.id}/factura`} 
                         target="_blank" 
                         rel="noreferrer" 
-                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#009BE0'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 180, 255, 0.3)'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#00B4FF'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 180, 255, 0.2)'; }}
-                        style={{ background: '#00B4FF', color: 'white', textDecoration: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: '600', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s ease', boxShadow: '0 2px 4px rgba(0, 180, 255, 0.2)' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#009BE0'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 71, 151, 0.3)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#004797'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 71, 151, 0.2)'; }}
+                        style={{ background: '#004797', color: 'white', textDecoration: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: '600', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s ease', boxShadow: '0 2px 4px rgba(0, 71, 151, 0.2)' }}
                     >
                         <FileText size={16} />
                         Ver Factura
@@ -69,7 +69,7 @@ export default function Show({ pedido }) {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                     <div style={{ background: '#ffffff', borderRadius: '12px', padding: '24px', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0' }}>
                         <h2 style={{ fontSize: '16px', fontWeight: '700', color: '#1E293B', borderBottom: '1px solid #E2E8F0', paddingBottom: '16px', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Package size={18} style={{ color: '#00B4FF' }} /> Artículos del Pedido
+                            <Package size={18} style={{ color: '#004797' }} /> Artículos del Pedido
                         </h2>
                         
                         <div style={{ overflowX: 'auto' }}>
@@ -116,7 +116,7 @@ export default function Show({ pedido }) {
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', width: '250px', fontWeight: '800', color: '#1E293B', fontSize: '18px', borderTop: '1px solid #E2E8F0', paddingTop: '12px' }}>
                                 <span>Total:</span>
-                                <span style={{ color: '#00B4FF' }}>S/ {pedido.total}</span>
+                                <span style={{ color: '#004797' }}>S/ {pedido.total}</span>
                             </div>
                         </div>
                     </div>
@@ -128,7 +128,7 @@ export default function Show({ pedido }) {
                     {/* Actualizar Estado */}
                     <div style={{ background: '#ffffff', borderRadius: '12px', padding: '24px', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0' }}>
                         <h2 style={{ fontSize: '16px', fontWeight: '700', color: '#1E293B', borderBottom: '1px solid #E2E8F0', paddingBottom: '16px', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <RefreshCw size={18} style={{ color: '#00B4FF' }} /> Actualizar Estado
+                            <RefreshCw size={18} style={{ color: '#004797' }} /> Actualizar Estado
                         </h2>
                         
                         <form onSubmit={updateStatus}>
@@ -137,7 +137,7 @@ export default function Show({ pedido }) {
                                 <select 
                                     value={data.estado} 
                                     onChange={e => setData('estado', e.target.value)}
-                                    onFocus={(e) => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.1)'; e.target.style.backgroundColor = '#ffffff'; }}
+                                    onFocus={(e) => { e.target.style.borderColor = '#004797'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.1)'; e.target.style.backgroundColor = '#ffffff'; }}
                                     onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; e.target.style.backgroundColor = '#F8FAFC'; }}
                                     style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #E2E8F0', background: '#F8FAFC', color: '#1E293B', fontSize: '14px', outline: 'none', transition: 'all 0.2s ease', cursor: 'pointer' }}
                                 >
@@ -156,7 +156,7 @@ export default function Show({ pedido }) {
                                     value={data.tracking}
                                     onChange={e => setData('tracking', e.target.value)}
                                     placeholder="Ej: SHP-12345"
-                                    onFocus={(e) => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.1)'; e.target.style.backgroundColor = '#ffffff'; }}
+                                    onFocus={(e) => { e.target.style.borderColor = '#004797'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.1)'; e.target.style.backgroundColor = '#ffffff'; }}
                                     onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; e.target.style.backgroundColor = '#F8FAFC'; }}
                                     style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #E2E8F0', background: '#F8FAFC', color: '#1E293B', fontSize: '14px', outline: 'none', transition: 'all 0.2s ease', boxSizing: 'border-box' }}
                                 />
@@ -167,7 +167,7 @@ export default function Show({ pedido }) {
                                 <select 
                                     value={data.estado_envio} 
                                     onChange={e => setData('estado_envio', e.target.value)}
-                                    onFocus={(e) => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.1)'; e.target.style.backgroundColor = '#ffffff'; }}
+                                    onFocus={(e) => { e.target.style.borderColor = '#004797'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.1)'; e.target.style.backgroundColor = '#ffffff'; }}
                                     onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; e.target.style.backgroundColor = '#F8FAFC'; }}
                                     style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #E2E8F0', background: '#F8FAFC', color: '#1E293B', fontSize: '14px', outline: 'none', transition: 'all 0.2s ease', cursor: 'pointer' }}
                                 >
@@ -194,7 +194,7 @@ export default function Show({ pedido }) {
                     {/* Información del Cliente */}
                     <div style={{ background: '#ffffff', borderRadius: '12px', padding: '24px', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0' }}>
                         <h2 style={{ fontSize: '16px', fontWeight: '700', color: '#1E293B', borderBottom: '1px solid #E2E8F0', paddingBottom: '16px', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <User size={18} style={{ color: '#00B4FF' }} /> Información del Cliente
+                            <User size={18} style={{ color: '#004797' }} /> Información del Cliente
                         </h2>
                         {pedido.usuario ? (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -219,7 +219,7 @@ export default function Show({ pedido }) {
                     {/* Acciones de Pago */}
                     <div style={{ background: '#ffffff', borderRadius: '12px', padding: '24px', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0' }}>
                         <h2 style={{ fontSize: '16px', fontWeight: '700', color: '#1E293B', borderBottom: '1px solid #E2E8F0', paddingBottom: '16px', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <CreditCard size={18} style={{ color: '#00B4FF' }} /> Acciones de Pago
+                            <CreditCard size={18} style={{ color: '#004797' }} /> Acciones de Pago
                         </h2>
                         <div style={{ background: '#F8FAFC', padding: '16px', borderRadius: '8px', border: '1px solid #E2E8F0', marginBottom: '20px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', marginBottom: '8px' }}>

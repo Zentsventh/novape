@@ -11,6 +11,8 @@ import HeroCarousel from '../Components/Home/HeroCarousel';
 import MejorSemanaSection from '../Components/Home/MejorSemanaSection';
 import CategorySection from '../Components/Home/CategorySection';
 import Footer from '../Components/Home/Footer';
+import GsapCanvas from '../Components/Home/GsapCanvas';
+import { useLocation } from '@/Contexts/LocationContext';
 
 import CartDrawer from '../Components/Home/CartDrawer';
 import Toast from '../Components/Home/Toast';
@@ -46,6 +48,7 @@ export default function Home({ appName, categoriaProductos = [], mejorSemana = [
     const [listModalProduct, setListModalProduct] = useState(null);
 
     const { cart, flash } = usePage().props;
+    const { location } = useLocation();
     const hasCategorias = Array.isArray(categoriaProductos) && categoriaProductos.length > 0;
     const hasBanners = Array.isArray(banners) && banners.length > 0;
     const hasMejorSemana = Array.isArray(mejorSemana) && mejorSemana.length > 0;
@@ -150,9 +153,8 @@ export default function Home({ appName, categoriaProductos = [], mejorSemana = [
                 <div className="efe-empty-state">No hay banners activos.</div>
             )}
 
-            <SlideUp delay={0.4}>
-                <RecentlyViewed />
-            </SlideUp>
+            {/* Animación GSAP Debajo del Banner */}
+            <GsapCanvas />
 
             {hasMejorSemana ? (
                 <SlideUp delay={0.5}>
@@ -172,6 +174,9 @@ export default function Home({ appName, categoriaProductos = [], mejorSemana = [
                 <div className="efe-empty-state">No hay categorias para mostrar.</div>
             )}
 
+            <SlideUp delay={0.6}>
+                <RecentlyViewed />
+            </SlideUp>
 
             <FadeIn delay={0.8}>
                 <Footer />

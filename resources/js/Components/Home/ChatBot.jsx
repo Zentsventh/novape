@@ -420,7 +420,7 @@ export default function ChatBot({ user }) {
                             {messages.map((m, i) => (
                                 <div key={m.id || `msg-${i}`} style={{
                                     alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start',
-                                    background: m.role === 'user' ? '#00B4FF' : '#ffffff',
+                                    background: m.role === 'user' ? '#004797' : '#ffffff',
                                     color: m.role === 'user' ? '#FFFFFF' : '#1E293B',
                                     padding: '12px 16px',
                                     borderRadius: '16px',
@@ -429,7 +429,7 @@ export default function ChatBot({ user }) {
                                     maxWidth: '85%',
                                     fontSize: '14px',
                                     lineHeight: '1.5',
-                                    boxShadow: m.role === 'user' ? '0 4px 12px rgba(0,180,255,0.2)' : '0 2px 8px rgba(0,0,0,0.04)',
+                                    boxShadow: m.role === 'user' ? '0 4px 12px rgba(0, 71, 151,0.2)' : '0 2px 8px rgba(0,0,0,0.04)',
                                     border: m.role === 'bot' ? '1px solid #E2E8F0' : 'none'
                                 }}>
                                     {m.is_human && (
@@ -479,7 +479,7 @@ export default function ChatBot({ user }) {
                                 <p style={{ margin: '0 0 8px 0' }}>Esta conversación ha finalizado.</p>
                                 <button 
                                     onClick={handleEndConversation}
-                                    style={{ background: '#00B4FF', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}
+                                    style={{ background: '#004797', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontWeight: '500' }}
                                 >
                                     Iniciar nuevo chat
                                 </button>

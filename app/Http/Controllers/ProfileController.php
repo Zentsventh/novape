@@ -95,7 +95,7 @@ class ProfileController extends Controller
 
     public function verifyPhoneUpdateOtp(VerifyPhoneOtpRequest $request)
     {
-        Log::info('Verify phone OTP', ['user_id'=>Auth::id(), 'code'=>$request->codigo]);
+        Log::info('Verify phone OTP', ['user_id' => Auth::id()]);
 
 
         try {
@@ -147,7 +147,7 @@ class ProfileController extends Controller
 
     public function storeTarjeta(StoreTarjetaRequest $request)
     {
-        Log::info('Store card', ['user_id'=>Auth::id(), 'data'=>$request->all()]);
+        Log::info('Store card', ['user_id' => Auth::id()]);
 
 
         $this->profileService->addCard(Auth::user(), $request->all());
@@ -164,7 +164,7 @@ class ProfileController extends Controller
 
     public function updateDatosReembolso(Request $request)
     {
-        Log::info('Update refund data', ['user_id'=>Auth::id(), 'data'=>$request->all()]);
+        Log::info('Update refund data', ['user_id' => Auth::id()]);
 
         $validated = $request->validate([
             'tipo_documento' => 'required|string',

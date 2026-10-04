@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\Pedido;
 use Illuminate\Support\Str;
 use App\Services\Checkout\CheckoutService;
+use App\Services\Shipping\ShippingCalculationService;
 
 class NiubizController extends Controller
 {
@@ -16,10 +17,12 @@ class NiubizController extends Controller
     private $user;
     private $password;
     private $checkoutService;
+    private ShippingCalculationService $shippingCalculationService;
 
-    public function __construct(CheckoutService $checkoutService)
+    public function __construct(CheckoutService $checkoutService, ShippingCalculationService $shippingCalculationService)
     {
         $this->checkoutService = $checkoutService;
+        $this->shippingCalculationService = $shippingCalculationService;
         $env = config('services.niubiz.env', 'sandbox');
         $this->baseUrl = $env === 'production' 
             ? 'https://apiprod.vnforapps.com' 
@@ -33,8 +36,7 @@ class NiubizController extends Controller
     private function generateToken()
     {
         $response = Http::withBasicAuth($this->user, $this->password)
-            ->withOptions(['verify' => false])
-            ->get("{$this->baseUrl}/api.security/v1/security");
+                        ->get("{$this->baseUrl}/api.security/v1/security");
 
         if ($response->successful()) {
             return $response->body(); 
@@ -50,17 +52,29 @@ class NiubizController extends Controller
             $items = session('cart', []);
             
             $couponCode = $request->input('coupon', null);
-            $shippingCost = (float) $request->input('shippingCost', 0);
+            $shippingAddress = $request->validate([
+                'deliveryType' => ['required', 'in:domicilio,tienda'],
+                'shippingAddress' => ['required', 'array'],
+                'shippingAddress.direccion' => ['required_if:deliveryType,domicilio', 'string', 'max:255'],
+                'shippingAddress.distrito' => ['required_if:deliveryType,domicilio', 'string', 'max:100'],
+            ])['shippingAddress'];
+            $deliveryType = $request->input('deliveryType');
+            $shippingCost = $deliveryType === 'tienda' ? 0.0 : (float) $this->shippingCalculationService->calculateCost($items, [
+                'departamento' => 'LIMA',
+                'provincia' => 'LIMA',
+                'distrito' => $shippingAddress['distrito'],
+                'codigo_postal' => '',
+            ])['costo'];
             $usePoints = filter_var($request->input('usePoints', false), FILTER_VALIDATE_BOOLEAN);
             
             // Usar CheckoutService para calcular total exacto aplicando descuentos
             $checkoutData = $this->checkoutService->validateAndCalculateTotal($items, $couponCode, $shippingCost, $usePoints);
             $montoTotal = $checkoutData['totalConDescuento'];
 
+            $this->checkoutService->reserveStock($items, session()->getId());
+
             // Preparar datos para crear el pedido pendiente
             $facturacion = $request->input('facturacion', []);
-            $shippingAddress = $request->input('shippingAddress', []);
-            
             $tipoComprobante = $facturacion['comprobante'] ?? 'Boleta';
             $documentoCliente = $tipoComprobante === 'Factura' ? ($facturacion['ruc'] ?? null) : ($facturacion['dni'] ?? null);
             $nombreFacturacion = $tipoComprobante === 'Factura' ? ($facturacion['razonSocial'] ?? null) : ($facturacion['nombres'] ?? null);
@@ -77,20 +91,15 @@ class NiubizController extends Controller
                 $shippingCost
             );
 
-            // Reservar Stock para esta sesión
-            $sessionId = session()->getId();
-            $this->checkoutService->reserveStock($items, $sessionId);
-
             // Generar Token de Seguridad Niubiz
             $securityToken = $this->generateToken();
 
             // Número de compra: max 9-12 dígitos
-            $purchaseNumber = substr(preg_replace('/[^0-9]/', '', $pedido->codigo) . time(), -9);
+            $purchaseNumber = str_pad((string) $pedido->id, 9, '0', STR_PAD_LEFT);
 
             // Crear la Sesión
             $response = Http::withHeaders(['Authorization' => $securityToken])
-                ->withOptions(['verify' => false])
-                ->post("{$this->baseUrl}/api.ecommerce/v2/ecommerce/token/session/{$this->merchantId}", [
+                                ->post("{$this->baseUrl}/api.ecommerce/v2/ecommerce/token/session/{$this->merchantId}", [
                     'channel' => 'web',
                     'amount' => (float) round($montoTotal, 2),
                     'antifraud' => [
@@ -145,8 +154,7 @@ class NiubizController extends Controller
             $securityToken = $this->generateToken();
 
             $response = Http::withHeaders(['Authorization' => $securityToken])
-                ->withOptions(['verify' => false])
-                ->post("{$this->baseUrl}/api.authorization/v3/authorization/ecommerce/{$this->merchantId}", [
+                                ->post("{$this->baseUrl}/api.authorization/v3/authorization/ecommerce/{$this->merchantId}", [
                     'channel' => 'web',
                     'captureType' => 'manual',
                     'countable' => true,
@@ -159,10 +167,13 @@ class NiubizController extends Controller
                 ]);
 
             $authData = $response->json();
-            Log::info('Niubiz Auth Response: ', (array) $authData);
+            Log::info('Niubiz authorization result', ['purchase_number' => $purchaseNumber, 'action_code' => $authData['dataMap']['ACTION_CODE'] ?? null]);
             
             if (isset($authData['dataMap']['ACTION_CODE']) && $authData['dataMap']['ACTION_CODE'] === '000') {
-                $this->checkoutService->processSuccessfulPayment($codigoPedido, $amount, $transactionToken, 'niubiz');
+                if (!$this->checkoutService->processSuccessfulPayment($codigoPedido, $amount, $transactionToken, 'niubiz')) {
+                    throw new \RuntimeException('El pedido no está pendiente de pago.');
+                }
+                \App\Models\ReservaStock::where('session_id', session()->getId())->delete();
                 
                 $correoDestino = auth()->check() ? auth()->user()->email : ($request->input('customerEmail') ?? null);
                 $this->checkoutService->finalizeSuccessAction($codigoPedido, $correoDestino);

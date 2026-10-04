@@ -113,7 +113,7 @@ export default function GastosIndex({ gastos, totalGastos, logoUrl, filters = {}
     };
     
     const inputFocusStyle = {
-        borderColor: '#00B4FF', boxShadow: '0 0 0 4px rgba(0, 180, 255, 0.1)', backgroundColor: '#ffffff'
+        borderColor: '#004797', boxShadow: '0 0 0 4px rgba(0, 71, 151, 0.1)', backgroundColor: '#ffffff'
     };
 
     return (
@@ -130,12 +130,12 @@ export default function GastosIndex({ gastos, totalGastos, logoUrl, filters = {}
                     <button 
                         onClick={openCreateModal}
                         style={{ 
-                            display: 'flex', alignItems: 'center', gap: '8px', background: '#00B4FF', color: 'white', border: 'none', cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', gap: '8px', background: '#004797', color: 'white', border: 'none', cursor: 'pointer',
                             padding: '12px 24px', borderRadius: '12px', textDecoration: 'none', fontWeight: 600, fontSize: '14px',
-                            boxShadow: '0 4px 14px rgba(0, 180, 255, 0.3)', transition: 'all 0.2s ease'
+                            boxShadow: '0 4px 14px rgba(0, 71, 151, 0.3)', transition: 'all 0.2s ease'
                         }}
-                        onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 180, 255, 0.4)'; }}
-                        onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 180, 255, 0.3)'; }}
+                        onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 71, 151, 0.4)'; }}
+                        onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 71, 151, 0.3)'; }}
                     >
                         <Plus size={18} /> Nuevo Gasto
                     </button>
@@ -156,7 +156,7 @@ export default function GastosIndex({ gastos, totalGastos, logoUrl, filters = {}
                                     background: '#F8FAFC', color: '#1E293B', fontSize: '14px', outline: 'none', transition: 'all 0.2s',
                                     boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
                                 }}
-                                onFocus={e => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 4px rgba(0, 180, 255, 0.1)'; e.target.style.backgroundColor = '#ffffff'; }}
+                                onFocus={e => { e.target.style.borderColor = '#004797'; e.target.style.boxShadow = '0 0 0 4px rgba(0, 71, 151, 0.1)'; e.target.style.backgroundColor = '#ffffff'; }}
                                 onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }}
                             />
                             <button type="submit" style={{ display: 'none' }}>Buscar</button>
@@ -223,7 +223,7 @@ export default function GastosIndex({ gastos, totalGastos, logoUrl, filters = {}
 
                     <div style={{ background: 'linear-gradient(135deg, #ffffff, #F8FAFC)', padding: '24px', borderRadius: '20px', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.01)', border: '1px solid #E2E8F0', minWidth: '300px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <div style={{ background: '#E0F2FE', color: '#00B4FF', padding: '8px', borderRadius: '10px' }}><Wallet size={20} /></div>
+                            <div style={{ background: '#E0F2FE', color: '#004797', padding: '8px', borderRadius: '10px' }}><Wallet size={20} /></div>
                             <div style={{ fontSize: '13px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Gastos Totales</div>
                         </div>
                         <div style={{ fontSize: '36px', fontWeight: 800, color: '#1E293B', letterSpacing: '-1px', display: 'flex', alignItems: 'baseline', gap: '4px' }}>
@@ -273,11 +273,11 @@ export default function GastosIndex({ gastos, totalGastos, logoUrl, filters = {}
                                                 <button 
                                                     onClick={() => openEditModal(g)} 
                                                     style={{ 
-                                                        color: '#00B4FF', background: '#E0F2FE', padding: '8px', borderRadius: '8px', 
+                                                        color: '#004797', background: '#E0F2FE', padding: '8px', borderRadius: '8px', 
                                                         display: 'inline-flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', border: 'none', cursor: 'pointer'
                                                     }}
-                                                    onMouseOver={e => { e.currentTarget.style.backgroundColor = '#00B4FF'; e.currentTarget.style.color = '#ffffff'; e.currentTarget.style.transform = 'scale(1.05)'; }}
-                                                    onMouseOut={e => { e.currentTarget.style.backgroundColor = '#E0F2FE'; e.currentTarget.style.color = '#00B4FF'; e.currentTarget.style.transform = 'scale(1)'; }}
+                                                    onMouseOver={e => { e.currentTarget.style.backgroundColor = '#004797'; e.currentTarget.style.color = '#ffffff'; e.currentTarget.style.transform = 'scale(1.05)'; }}
+                                                    onMouseOut={e => { e.currentTarget.style.backgroundColor = '#E0F2FE'; e.currentTarget.style.color = '#004797'; e.currentTarget.style.transform = 'scale(1)'; }}
                                                     title="Editar"
                                                 >
                                                     <Edit2 size={18} />
@@ -307,9 +307,9 @@ export default function GastosIndex({ gastos, totalGastos, logoUrl, filters = {}
                                                 <p style={{ margin: 0, color: '#64748B', fontSize: '15px', fontWeight: 500 }}>No hay gastos registrados para estos filtros.</p>
                                                 <button 
                                                     onClick={openCreateModal}
-                                                    style={{ background: 'transparent', border: '1px solid #00B4FF', color: '#00B4FF', padding: '8px 16px', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', marginTop: '8px' }}
-                                                    onMouseOver={(e) => { e.currentTarget.style.background = '#00B4FF'; e.currentTarget.style.color = '#fff'; }}
-                                                    onMouseOut={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#00B4FF'; }}
+                                                    style={{ background: 'transparent', border: '1px solid #004797', color: '#004797', padding: '8px 16px', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', marginTop: '8px' }}
+                                                    onMouseOver={(e) => { e.currentTarget.style.background = '#004797'; e.currentTarget.style.color = '#fff'; }}
+                                                    onMouseOut={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#004797'; }}
                                                 >
                                                     Registrar Primer Gasto
                                                 </button>
@@ -407,9 +407,9 @@ export default function GastosIndex({ gastos, totalGastos, logoUrl, filters = {}
                             </button>
                             <button 
                                 type="submit" form="gasto-form" disabled={processing}
-                                style={{ padding: '12px 24px', borderRadius: '12px', border: 'none', background: '#00B4FF', color: '#ffffff', fontWeight: 600, cursor: processing ? 'not-allowed' : 'pointer', transition: 'all 0.2s', fontSize: '14px', boxShadow: '0 4px 12px rgba(0, 180, 255, 0.3)' }}
-                                onMouseOver={(e) => { if(!processing) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 180, 255, 0.4)'; } }}
-                                onMouseOut={(e) => { if(!processing) { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 180, 255, 0.3)'; } }}
+                                style={{ padding: '12px 24px', borderRadius: '12px', border: 'none', background: '#004797', color: '#ffffff', fontWeight: 600, cursor: processing ? 'not-allowed' : 'pointer', transition: 'all 0.2s', fontSize: '14px', boxShadow: '0 4px 12px rgba(0, 71, 151, 0.3)' }}
+                                onMouseOver={(e) => { if(!processing) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 71, 151, 0.4)'; } }}
+                                onMouseOut={(e) => { if(!processing) { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 71, 151, 0.3)'; } }}
                             >
                                 {processing ? 'Guardando...' : 'Guardar Gasto'}
                             </button>

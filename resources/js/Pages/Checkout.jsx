@@ -106,7 +106,7 @@ const COSTOS_ENVIO = {
 };
 
 export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
-    const { auth, flash } = usePage().props;
+    const { auth, flash, globalConfig } = usePage().props;
     const user = auth?.user;
 
     // Si no hay items en props directos, usamos el formato de estructura del array
@@ -124,7 +124,7 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
                 title: 'Atención',
                 text: flash.error,
                 icon: 'error',
-                confirmButtonColor: '#00B4FF'
+                confirmButtonColor: '#004797'
             });
         }
     }, [flash]);
@@ -209,11 +209,11 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
                 Swal.fire({
                     text: 'No se pudo encontrar el documento.',
                     icon: 'error',
-                    confirmButtonColor: '#00B4FF',
+                    confirmButtonColor: '#004797',
                 });
             }
         } catch (err) {
-            Swal.fire({ text: 'Error de conexión.', icon: 'error', confirmButtonColor: '#00B4FF' });
+            Swal.fire({ text: 'Error de conexión.', icon: 'error', confirmButtonColor: '#004797' });
         } finally {
             setLoadingApiDoc(false);
         }
@@ -382,7 +382,7 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
             Swal.fire({
                 text: 'Por favor completa todos los campos obligatorios (*).',
                 icon: 'warning',
-                confirmButtonColor: '#00B4FF',
+                confirmButtonColor: '#004797',
             });
             return;
         }
@@ -402,7 +402,7 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
                 Swal.fire({
                     text: 'Shippo Validación: ' + msg,
                     icon: 'error',
-                    confirmButtonColor: '#00B4FF',
+                    confirmButtonColor: '#004797',
                 });
                 setIsCreating(false);
                 return; // Detener si la dirección es inválida
@@ -464,7 +464,7 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
             expirationminutes: '20',
             timeouturl: 'about:blank',
             merchantlogo: 'https://novape.pe/images/logo.png',
-            formbuttoncolor: '#00B4FF',
+            formbuttoncolor: '#004797',
             action: window.location.origin + '/api/checkout/niubiz/authorize',
             complete: function(params) {
                 // Not strictly needed if action URL is set, the form will auto-submit
@@ -601,49 +601,64 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
     return (
         <div className="efe-checkout-page">
             <Head title="Checkout" />
-            <Header
-                cartCount={cartItems.length}
-                onOpenCart={() => {}}
-                onOpenCategories={() => {}}
-                minimal={true}
-            />
+            {/* HEADER EXACTLY LIKE REFERENCE */}
+            <header style={{ background: '#fff', borderBottom: '1px solid #E8ECF0', padding: '16px 0', position: 'sticky', top: 0, zIndex: 50 }}>
+                <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', position: 'relative' }}>
+                    
+                    {/* LOGO */}
+                    <Link href="/" style={{ textDecoration: 'none', position: 'relative', zIndex: 2 }}>
+                        {globalConfig?.logo_url ? (
+                            <img src={globalConfig.logo_url} alt="NovaPe" style={{ height: '40px' }} />
+                        ) : (
+                            <div style={{ background: '#004797', color: '#fff', padding: '8px 16px', borderRadius: '50px', fontWeight: '800', fontSize: '20px', letterSpacing: '-0.5px' }}>
+                                NovaPe<span style={{ color: '#E0F7FF' }}>.</span>
+                            </div>
+                        )}
+                    </Link>
+
+                    {/* Stepper Center (Absolute to ensure perfect centering) */}
+                    <div style={{ position: 'absolute', left: 0, right: 0, display: 'flex', justifyContent: 'center', zIndex: 1 }}>
+                        <div style={{ position: 'relative', width: '380px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingTop: '4px' }}>
+                            
+                            {/* Dotted line behind circles */}
+                            <div style={{ position: 'absolute', top: '12px', left: '20px', right: '20px', borderBottom: '2px dotted #004797', zIndex: -1 }}></div>
+
+                            {/* Carrito */}
+                            <Link href="/carrito" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', background: '#fff', padding: '0 10px' }}>
+                                <div style={{ width: '18px', height: '18px', borderRadius: '50%', border: '2px solid #004797', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>
+                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#004797' }}></div>
+                                </div>
+                                <span style={{ fontSize: '13px', color: '#004797', fontWeight: '500' }}>Carrito</span>
+                            </Link>
+
+                            {/* Entrega */}
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', background: '#fff', padding: '0 10px' }}>
+                                <div style={{ width: '18px', height: '18px', borderRadius: '50%', border: `2px solid ${step < 3 ? '#004797' : '#94A3B8'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>
+                                    {step >= 1 && step < 3 && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#004797' }}></div>}
+                                </div>
+                                <span style={{ fontSize: '13px', color: step < 3 ? '#004797' : '#94A3B8', fontWeight: step < 3 ? '500' : '400' }}>Entrega</span>
+                            </div>
+
+                            {/* Pago */}
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', background: '#fff', padding: '0 10px' }}>
+                                <div style={{ width: '18px', height: '18px', borderRadius: '50%', border: `2px solid ${step === 3 ? '#004797' : '#94A3B8'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff' }}>
+                                    {step === 3 && <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#004797' }}></div>}
+                                </div>
+                                <span style={{ fontSize: '13px', color: step === 3 ? '#004797' : '#94A3B8', fontWeight: step === 3 ? '500' : '400' }}>Pago</span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </header>
 
             <div className="efe-checkout-container">
                 {/* Columna Stepper */}
                 <div className="efe-checkout-main">
                     {/* PASO 1: DIRECCIÓN */}
                     <div className="efe-checkout-step">
-                        <div className="efe-checkout-step-header">
-                            <div
-                                className={`efe-checkout-step-number ${step < 1 ? 'inactive' : ''}`}
-                            >
-                                1
-                            </div>
-                            <h2>Dirección</h2>
-                            {addressSaved && (
-                                <button
-                                    className="efe-checkout-edit-top-btn"
-                                    onClick={() => {
-                                        setAddressSaved(false);
-                                        setStep(1);
-                                    }}
-                                >
-                                    Editar dirección
-                                    <svg
-                                        width="14"
-                                        height="14"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                    >
-                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                    </svg>
-                                </button>
-                            )}
-                        </div>
+                        {/* Header removido para diseño limpio */}
 
                         {(step === 1 || !addressSaved) && (
                             <div className="efe-checkout-step-content">
@@ -882,89 +897,29 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
                                                 </div>
                                             )}
 
-                                            <div
-                                                style={{
-                                                    marginTop: '25px',
-                                                    borderTop: '1px solid #f3f4f6',
-                                                    paddingTop: '25px',
-                                                }}
-                                            >
-                                                <div
-                                                    style={{
-                                                        display: 'flex',
-                                                        justifyContent: 'space-between',
-                                                        alignItems: 'center',
-                                                        marginBottom: '15px',
-                                                    }}
-                                                >
-                                                    <h3
-                                                        style={{
-                                                            fontSize: '14px',
-                                                            fontWeight: 'bold',
-                                                            margin: 0,
-                                                        }}
-                                                    >
+                                            <div style={{ marginTop: '28px', borderTop: '1px solid #E8ECF0', paddingTop: '24px' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                                                    <h3 style={{ fontSize: '13px', fontWeight: '700', margin: 0, color: '#0F172A', textTransform: 'uppercase', letterSpacing: '.04em' }}>
                                                         Ubicación en el Mapa
                                                     </h3>
-                                                    <div style={{ display: 'flex', gap: '10px' }}>
+                                                    <div style={{ display: 'flex', gap: '8px' }}>
                                                         <button
                                                             className="efe-btn-outline"
                                                             onClick={buscarEnMapa}
-                                                            style={{
-                                                                padding: '6px 12px',
-                                                                fontSize: '12px',
-                                                                borderRadius: '20px',
-                                                            }}
+                                                            style={{ padding: '6px 14px', fontSize: '12px', fontWeight: '600' }}
                                                         >
-                                                            <svg
-                                                                width="12"
-                                                                height="12"
-                                                                viewBox="0 0 24 24"
-                                                                fill="none"
-                                                                stroke="currentColor"
-                                                                strokeWidth="2"
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                style={{ marginRight: '5px' }}
-                                                            >
-                                                                <circle
-                                                                    cx="11"
-                                                                    cy="11"
-                                                                    r="8"
-                                                                ></circle>
-                                                                <line
-                                                                    x1="21"
-                                                                    y1="21"
-                                                                    x2="16.65"
-                                                                    y2="16.65"
-                                                                ></line>
+                                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                                <circle cx="11" cy="11" r="8"></circle>
+                                                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                                                             </svg>
                                                             Buscar
                                                         </button>
                                                         <button
-                                                            className="efe-btn-outline"
                                                             onClick={usarGPS}
                                                             disabled={loadingGps}
-                                                            style={{
-                                                                padding: '6px 12px',
-                                                                fontSize: '12px',
-                                                                background: '#e0f2fe',
-                                                                color: '#0369a1',
-                                                                borderColor: '#bae6fd',
-                                                                borderRadius: '20px',
-                                                            }}
+                                                            style={{ padding: '6px 14px', fontSize: '12px', fontWeight: '600', background: '#F0F9FF', color: '#0369A1', border: '1.5px solid #BAE6FD', borderRadius: '10px', cursor: loadingGps ? 'not-allowed' : 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', transition: 'all .2s ease', opacity: loadingGps ? .6 : 1 }}
                                                         >
-                                                            <svg
-                                                                width="12"
-                                                                height="12"
-                                                                viewBox="0 0 24 24"
-                                                                fill="none"
-                                                                stroke="currentColor"
-                                                                strokeWidth="2"
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                style={{ marginRight: '5px' }}
-                                                            >
+                                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                                                 <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
                                                             </svg>
                                                             {loadingGps ? 'Ubicando...' : 'GPS'}
@@ -973,37 +928,18 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
                                                 </div>
 
                                                 {mapError && (
-                                                    <p
-                                                        style={{
-                                                            color: '#ef4444',
-                                                            fontSize: '12px',
-                                                            marginBottom: '10px',
-                                                        }}
-                                                    >
-                                                        {mapError}
-                                                    </p>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 14px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '8px', marginBottom: '12px' }}>
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                                                        <p style={{ color: '#EF4444', fontSize: '12px', margin: 0, fontWeight: '500' }}>{mapError}</p>
+                                                    </div>
                                                 )}
 
-                                                <div
-                                                    style={{
-                                                        height: '200px',
-                                                        width: '100%',
-                                                        borderRadius: '8px',
-                                                        overflow: 'hidden',
-                                                        border: '1px solid #d1d5db',
-                                                        marginBottom: '5px',
-                                                    }}
-                                                >
+                                                <div style={{ height: '200px', width: '100%', borderRadius: '10px', overflow: 'hidden', border: '1.5px solid #E8ECF0', marginBottom: '8px', boxShadow: '0 1px 4px rgba(0,0,0,.06)' }}>
                                                     <APIProvider apiKey="AIzaSyCqF7-TBcJND7uC63s0qbd0PWU9ZEdE7q8">
                                                         <Map
-                                                            style={{
-                                                                width: '100%',
-                                                                height: '100%',
-                                                            }}
+                                                            style={{ width: '100%', height: '100%' }}
                                                             center={mapCenter}
-                                                            onCenterChanged={(e) =>
-                                                                setMapCenter(e.detail.center)
-                                                            }
+                                                            onCenterChanged={(e) => setMapCenter(e.detail.center)}
                                                             zoom={16}
                                                             disableDefaultUI={true}
                                                         >
@@ -1012,38 +948,22 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
                                                                 draggable={true}
                                                                 onDragEnd={(e) => {
                                                                     if (e.latLng) {
-                                                                        setMapCenter({
-                                                                            lat: e.latLng.lat(),
-                                                                            lng: e.latLng.lng(),
-                                                                        });
+                                                                        setMapCenter({ lat: e.latLng.lat(), lng: e.latLng.lng() });
                                                                     }
                                                                 }}
                                                             />
                                                         </Map>
                                                     </APIProvider>
                                                 </div>
-                                                <p
-                                                    style={{
-                                                        fontSize: '12px',
-                                                        color: '#6b7280',
-                                                        textAlign: 'center',
-                                                    }}
-                                                >
-                                                    Mueve el pin rojo para ajustar tu ubicación
-                                                    exacta.
+                                                <p style={{ fontSize: '12px', color: '#94A3B8', textAlign: 'center', margin: '0 0 4px' }}>
+                                                    Arrastra el pin para ajustar tu ubicación exacta
                                                 </p>
                                             </div>
 
-                                            <div
-                                                style={{
-                                                    marginTop: '20px',
-                                                    display: 'flex',
-                                                    justifyContent: 'flex-end',
-                                                }}
-                                            >
+                                            <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end' }}>
                                                 <button
                                                     className="efe-btn-primary"
-                                                    style={{ padding: '10px 25px' }}
+                                                    style={{ padding: '12px 28px', fontSize: '14px' }}
                                                     onClick={handleAddressSubmit}
                                                 >
                                                     Confirmar Dirección
@@ -1051,31 +971,22 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="efe-address-card">
-                                            <div className="efe-address-card-icon">
-                                                <svg
-                                                    width="20"
-                                                    height="20"
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    strokeWidth="2"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                >
-                                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                                                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                                                </svg>
+                                        <div className="efe-address-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                                <div className="efe-address-card-icon">
+                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                                    </svg>
+                                                </div>
+                                                <div className="efe-address-card-info">
+                                                    <h4 className="efe-address-card-title">{addressData.tipo}</h4>
+                                                    <p className="efe-address-card-text">{addressData.direccion}, {addressData.distrito}, LIMA, LIMA</p>
+                                                </div>
                                             </div>
-                                            <div className="efe-address-card-info">
-                                                <h4 className="efe-address-card-title">
-                                                    {addressData.tipo}
-                                                </h4>
-                                                <p className="efe-address-card-text">
-                                                    {addressData.direccion}, {addressData.distrito},
-                                                    LIMA, LIMA
-                                                </p>
-                                            </div>
+                                            <button className="efe-checkout-edit-top-btn" onClick={() => { setAddressSaved(false); setStep(1); }}>
+                                                Editar
+                                            </button>
                                         </div>
                                     )}
                                 </div>
@@ -1085,14 +996,7 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
 
                     {/* PASO 2: TIPO DE ENTREGA */}
                     <div className="efe-checkout-step">
-                        <div className="efe-checkout-step-header">
-                            <div
-                                className={`efe-checkout-step-number ${step < 2 ? 'inactive' : ''}`}
-                            >
-                                2
-                            </div>
-                            <h2>Tipo de Entrega</h2>
-                        </div>
+                        {/* Header removido */}
 
                         {step === 2 && addressSaved && (
                             <div className="efe-checkout-step-content">
@@ -1223,39 +1127,16 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
 
                     {/* PASO 3: MÉTODO DE PAGO */}
                     <div className="efe-checkout-step">
-                        <div className="efe-checkout-step-header">
-                            <div
-                                className={`efe-checkout-step-number ${step < 3 ? 'inactive' : ''}`}
-                            >
-                                3
-                            </div>
-                            <h2>Método de pago</h2>
-                        </div>
+                        {/* Header removido */}
 
                         {step === 3 && (
                             <div className="efe-checkout-step-content">
                                 {isFetchingNiubiz ? (
-                                    <div
-                                        style={{
-                                            padding: '40px',
-                                            textAlign: 'center',
-                                            color: '#6b7280',
-                                        }}
-                                    >
-                                        <div
-                                            style={{
-                                                width: '40px',
-                                                height: '40px',
-                                                border: '3px solid #f3f3f3',
-                                                borderTop: '3px solid #2563eb',
-                                                borderRadius: '50%',
-                                                animation: 'spin 1s linear infinite',
-                                                margin: '0 auto 15px',
-                                            }}
-                                        ></div>
-                                        <p style={{ fontWeight: 'bold' }}>
-                                            Cargando pasarela de pago segura...
-                                        </p>
+                                    <div style={{ padding: '48px 24px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+                                        <div style={{ width: '44px', height: '44px', border: '3px solid #E8ECF0', borderTop: '3px solid #004797', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }}></div>
+                                        <p style={{ fontWeight: '600', color: '#0F172A', margin: 0, fontSize: '15px' }}>Preparando pago seguro...</p>
+                                        <p style={{ color: '#94A3B8', fontSize: '13px', margin: 0 }}>Conectando con la pasarela de pagos</p>
+                                        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
                                     </div>
                                 ) : niubizError ? (
                                     <div
@@ -1282,289 +1163,135 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
                                     </div>
                                 ) : (true) ? (
                                     <div className="efe-checkout-box">
-                                        <div style={{ marginBottom: '20px' }}>
-                                            <h3
-                                                style={{
-                                                    fontSize: '14px',
-                                                    fontWeight: 'bold',
-                                                    marginBottom: '5px',
-                                                }}
-                                            >
-                                                Cupón de descuento
-                                            </h3>
-                                            <p
-                                                style={{
-                                                    fontSize: '12px',
-                                                    color: '#6b7280',
-                                                    marginBottom: '10px',
-                                                }}
-                                            >
-                                                Si tienes un cupón de descuento, asegúrate de
-                                                ingresarlo antes de seleccionar el medio de pago.
-                                            </p>
-
-                                            <div
-                                                style={{
-                                                    display: 'flex',
-                                                    gap: '10px',
-                                                    alignItems: 'center',
-                                                    padding: '15px',
-                                                    border: '1px solid #e5e7eb',
-                                                    borderRadius: '8px',
-                                                }}
-                                            >
-                                                <svg
-                                                    width="20"
-                                                    height="20"
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    stroke="#00B4FF"
-                                                    strokeWidth="2"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                >
-                                                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
-                                                    <line x1="7" y1="7" x2="7.01" y2="7"></line>
-                                                </svg>
-                                                <span
-                                                    style={{
-                                                        fontSize: '14px',
-                                                        fontWeight: '500',
-                                                        color: '#111827',
-                                                    }}
-                                                >
-                                                    Agrega un cupón de descuento
-                                                </span>
-
-                                                <div
-                                                    style={{
-                                                        display: 'flex',
-                                                        marginLeft: 'auto',
-                                                        gap: '5px',
-                                                    }}
-                                                >
-                                                    <input
-                                                        type="text"
-                                                        className="efe-form-input"
-                                                        placeholder="Ingrese un cupón"
-                                                        value={couponCode}
-                                                        onChange={(e) =>
-                                                            setCouponCode(
-                                                                e.target.value.toUpperCase()
-                                                            )
-                                                        }
-                                                        style={{
-                                                            padding: '5px 10px',
-                                                            width: '150px',
-                                                            textTransform: 'uppercase',
-                                                        }}
-                                                        disabled={isApplyingCoupon || appliedCoupon}
-                                                    />
-                                                    {!appliedCoupon ? (
-                                                        <button
-                                                            className="efe-btn-outline"
-                                                            onClick={handleApplyCoupon}
-                                                            style={{
-                                                                padding: '5px 15px',
-                                                                borderColor: couponCode
-                                                                    ? '#00B4FF'
-                                                                    : '#d1d5db',
-                                                                color: couponCode
-                                                                    ? '#00B4FF'
-                                                                    : '#9ca3af',
-                                                                minWidth: '80px',
-                                                                display: 'flex',
-                                                                justifyContent: 'center',
-                                                            }}
-                                                            disabled={
-                                                                isApplyingCoupon || !couponCode
-                                                            }
-                                                        >
-                                                            {isApplyingCoupon ? (
-                                                                <div
-                                                                    style={{
-                                                                        width: '14px',
-                                                                        height: '14px',
-                                                                        border: '2px solid rgba(0,180,255,0.3)',
-                                                                        borderTop:
-                                                                            '2px solid #00B4FF',
-                                                                        borderRadius: '50%',
-                                                                        animation:
-                                                                            'spin 1s linear infinite',
-                                                                    }}
-                                                                ></div>
-                                                            ) : (
-                                                                'Aplicar'
-                                                            )}
-                                                        </button>
-                                                    ) : (
-                                                        <button
-                                                            className="efe-btn-outline"
-                                                            onClick={() => {
-                                                                setAppliedCoupon(null);
-                                                                setCouponCode('');
-                                                                setCouponMessage(null);
-                                                                fetchNiubizSession('');
-                                                            }}
-                                                            style={{
-                                                                padding: '5px 15px',
-                                                                borderColor: '#ef4444',
-                                                                color: '#ef4444',
-                                                            }}
-                                                            disabled={isFetchingNiubiz}
-                                                        >
-                                                            Quitar
-                                                        </button>
-                                                    )}
+                                        {/* CUPÓN */}
+                                        <div style={{ marginBottom: '24px', padding: '20px', background: '#F8FAFC', border: '1px solid #E8ECF0', borderRadius: '12px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+                                                <div style={{ width: '32px', height: '32px', background: '#E0F7FF', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#004797" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                                                        <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                                                    </svg>
+                                                </div>
+                                                <div>
+                                                    <div style={{ fontSize: '14px', fontWeight: '700', color: '#0F172A' }}>Cupón de descuento</div>
+                                                    <div style={{ fontSize: '12px', color: '#94A3B8' }}>Ingresa el código antes de seleccionar el pago</div>
                                                 </div>
                                             </div>
-                                            {couponMessage && (
-                                                <div
-                                                    style={{
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: '6px',
-                                                        marginTop: '8px',
-                                                        padding: '8px 12px',
-                                                        background:
-                                                            couponMessage.type === 'error'
-                                                                ? '#fef2f2'
-                                                                : '#f0fdf4',
-                                                        borderRadius: '6px',
-                                                        border: `1px solid ${couponMessage.type === 'error' ? '#fecaca' : '#bbf7d0'}`,
-                                                    }}
-                                                >
-                                                    {couponMessage.type === 'error' ? (
-                                                        <svg
-                                                            width="14"
-                                                            height="14"
-                                                            viewBox="0 0 24 24"
-                                                            fill="none"
-                                                            stroke="#ef4444"
-                                                            strokeWidth="2"
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                        >
-                                                            <circle cx="12" cy="12" r="10"></circle>
-                                                            <line
-                                                                x1="12"
-                                                                y1="8"
-                                                                x2="12"
-                                                                y2="12"
-                                                            ></line>
-                                                            <line
-                                                                x1="12"
-                                                                y1="16"
-                                                                x2="12.01"
-                                                                y2="16"
-                                                            ></line>
-                                                        </svg>
-                                                    ) : (
-                                                        <svg
-                                                            width="14"
-                                                            height="14"
-                                                            viewBox="0 0 24 24"
-                                                            fill="none"
-                                                            stroke="#10b981"
-                                                            strokeWidth="2"
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                        >
-                                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                                                        </svg>
-                                                    )}
-                                                    <p
-                                                        style={{
-                                                            fontSize: '12px',
-                                                            color:
-                                                                couponMessage.type === 'error'
-                                                                    ? '#ef4444'
-                                                                    : '#10b981',
-                                                            margin: 0,
-                                                            fontWeight: '500',
-                                                        }}
+                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                                <input
+                                                    type="text"
+                                                    className="efe-form-input"
+                                                    placeholder="CÓDIGO DE CUPÓN"
+                                                    value={couponCode}
+                                                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                                                    style={{ flex: 1, textTransform: 'uppercase', fontWeight: '600', letterSpacing: '.06em', fontSize: '13px' }}
+                                                    disabled={isApplyingCoupon || appliedCoupon}
+                                                />
+                                                {!appliedCoupon ? (
+                                                    <button
+                                                        onClick={handleApplyCoupon}
+                                                        disabled={isApplyingCoupon || !couponCode}
+                                                        style={{ padding: '0 20px', background: couponCode ? '#004797' : '#E2E8F0', color: couponCode ? '#fff' : '#94A3B8', border: 'none', borderRadius: '10px', fontWeight: '700', fontSize: '13px', cursor: couponCode && !isApplyingCoupon ? 'pointer' : 'not-allowed', transition: 'all .2s ease', display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0, boxShadow: couponCode ? '0 4px 14px rgba(0, 71, 151,.25)' : 'none' }}
                                                     >
-                                                        {couponMessage.text}
-                                                    </p>
-                                                </div>
-                                            )}
-
-                                            {user && loyaltyPoints > 0 && (
-                                                <div style={{ marginTop: '20px', padding: '16px', border: '1px dashed #f59e0b', borderRadius: '8px', background: '#fffbeb' }}>
-                                                    <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', margin: 0 }}>
-                                                        <input 
-                                                            type="checkbox" 
-                                                            checked={usePoints}
-                                                            onChange={(e) => setUsePoints(e.target.checked)}
-                                                            style={{ width: '20px', height: '20px', cursor: 'pointer' }}
-                                                        />
-                                                        <div>
-                                                            <div style={{ fontWeight: 'bold', color: '#b45309' }}>Usar mis Novapuntos</div>
-                                                            <div style={{ fontSize: '13px', color: '#d97706' }}>Tienes {loyaltyPoints} puntos disponibles (S/ {(loyaltyPoints/10).toFixed(2)} de descuento)</div>
-                                                        </div>
-                                                    </label>
+                                                        {isApplyingCoupon ? (
+                                                            <div style={{ width: '14px', height: '14px', border: '2px solid rgba(255,255,255,.4)', borderTop: '2px solid #fff', borderRadius: '50%', animation: 'spin .8s linear infinite' }}></div>
+                                                        ) : 'Aplicar'}
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => { setAppliedCoupon(null); setCouponCode(''); setCouponMessage(null); fetchNiubizSession(''); }}
+                                                        disabled={isFetchingNiubiz}
+                                                        style={{ padding: '0 16px', background: '#FEF2F2', color: '#EF4444', border: '1.5px solid #FECACA', borderRadius: '10px', fontWeight: '700', fontSize: '13px', cursor: 'pointer', transition: 'all .2s ease', flexShrink: 0 }}
+                                                    >
+                                                        Quitar
+                                                    </button>
+                                                )}
+                                            </div>
+                                            {couponMessage && (
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px', padding: '10px 14px', background: couponMessage.type === 'error' ? '#FEF2F2' : '#F0FDF4', borderRadius: '8px', border: `1px solid ${couponMessage.type === 'error' ? '#FECACA' : '#BBF7D0'}` }}>
+                                                    {couponMessage.type === 'error' ? (
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                                                    ) : (
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                                    )}
+                                                    <p style={{ fontSize: '12.5px', color: couponMessage.type === 'error' ? '#EF4444' : '#10B981', margin: 0, fontWeight: '600' }}>{couponMessage.text}</p>
                                                 </div>
                                             )}
                                         </div>
 
-                                        <div style={{ marginTop: '24px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '24px', boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)' }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                                                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                                                    </svg>
-                                                    <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#0F172A', margin: 0 }}>Pago 100% Seguro</h3>
-                                                </div>
-                                                <div style={{ display: 'flex', gap: '4px' }}>
-                                                    <img src="https://logospng.org/download/mercado-pago/logo-mercado-pago-icono-1024.png" alt="Mercado Pago" style={{ height: '24px' }} />
-                                                </div>
+                                        {/* NOVAPUNTOS */}
+                                        {user && loyaltyPoints > 0 && (
+                                            <div style={{ marginBottom: '24px', padding: '18px', border: '1.5px dashed #FCD34D', borderRadius: '12px', background: '#FFFBEB' }}>
+                                                <label style={{ display: 'flex', alignItems: 'center', gap: '14px', cursor: 'pointer', margin: 0 }}>
+                                                    <input type="checkbox" checked={usePoints} onChange={(e) => setUsePoints(e.target.checked)} style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: '#F59E0B' }} />
+                                                    <div>
+                                                        <div style={{ fontWeight: '700', color: '#92400E', fontSize: '14px' }}>⭐ Usar mis Novapuntos</div>
+                                                        <div style={{ fontSize: '12.5px', color: '#D97706', marginTop: '2px' }}>Tienes <strong>{loyaltyPoints} pts</strong> disponibles = <strong>S/ {(loyaltyPoints/10).toFixed(2)}</strong> de descuento</div>
+                                                    </div>
+                                                </label>
                                             </div>
-                                            <p style={{ fontSize: '14px', color: '#64748B', marginBottom: '24px', lineHeight: '1.5' }}>
-                                                Todas las transacciones están encriptadas y aseguradas por Mercado Pago. Puedes pagar con tarjeta, Yape, Plin o efectivo en agentes.
+                                        )}
+
+
+                                        {/* PAGO SEGURO */}
+                                        <div style={{ background: '#F8FAFC', border: '1px solid #E8ECF0', borderRadius: '14px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,.05)' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', paddingBottom: '14px', borderBottom: '1px solid #E8ECF0' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                    <div style={{ width: '36px', height: '36px', background: '#D1FAE5', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                                                        </svg>
+                                                    </div>
+                                                    <div>
+                                                        <div style={{ fontSize: '15px', fontWeight: '700', color: '#0F172A' }}>Pago 100% Seguro</div>
+                                                        <div style={{ fontSize: '12px', color: '#94A3B8' }}>Encriptado y certificado</div>
+                                                    </div>
+                                                </div>
+                                                <img src="https://logospng.org/download/mercado-pago/logo-mercado-pago-icono-1024.png" alt="Mercado Pago" style={{ height: '28px', opacity: .85 }} />
+                                            </div>
+                                            <p style={{ fontSize: '13px', color: '#64748B', marginBottom: '20px', lineHeight: '1.6', margin: '0 0 20px' }}>
+                                                Todas las transacciones están encriptadas y aseguradas. Paga con tarjeta, Yape, Plin o efectivo en agentes.
                                             </p>
 
                                             {isFetchingNiubiz && (
-                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px', gap: '16px', background: '#FFFFFF', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
-                                                    <div style={{ width: '30px', height: '30px', border: '3px solid #F1F5F9', borderTopColor: '#00B4FF', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }}></div>
-                                                    <span style={{ color: '#64748B', fontSize: '14px', fontWeight: '500' }}>Conectando con Mercado Pago...</span>
-                                                    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px', gap: '14px', background: '#fff', borderRadius: '10px', border: '1px solid #E8ECF0' }}>
+                                                    <div style={{ width: '32px', height: '32px', border: '3px solid #E8ECF0', borderTopColor: '#004797', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }}></div>
+                                                    <span style={{ color: '#64748B', fontSize: '13.5px', fontWeight: '500' }}>Conectando con Mercado Pago...</span>
                                                 </div>
                                             )}
 
                                             {!isFetchingNiubiz && niubizSession && (
-                                                <div style={{ background: '#FFFFFF', borderRadius: '8px', padding: '16px', border: '1px solid #E2E8F0', textAlign: 'center' }}>
-                                                    <p style={{ color: '#1E293B', fontWeight: '500', marginBottom: '16px', fontSize: '15px' }}>
-                                                        Estás a un paso de completar tu compra.
+                                                <div style={{ background: '#fff', borderRadius: '10px', padding: '20px', border: '1px solid #E8ECF0', textAlign: 'center' }}>
+                                                    <p style={{ color: '#0F172A', fontWeight: '600', marginBottom: '16px', fontSize: '14.5px' }}>
+                                                        🎉 Estás a un paso de completar tu compra
                                                     </p>
-                                                    <button 
-                                                        className="efe-btn-primary" 
+                                                    <button
+                                                        className="efe-btn-primary"
                                                         onClick={openNiubizModal}
-                                                        style={{ width: '100%', padding: '12px 0', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                                                        style={{ width: '100%', padding: '14px 0', fontSize: '15px', letterSpacing: '.01em' }}
                                                     >
-                                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
                                                         Pagar de Forma Segura
                                                     </button>
-                                                    <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'center', gap: '8px' }}>
-                                                        <img src="https://static-content.vnforapps.com/v2/img/brands/visa.png" alt="Visa" style={{ height: '24px' }} />
-                                                        <img src="https://static-content.vnforapps.com/v2/img/brands/mastercard.png" alt="Mastercard" style={{ height: '24px' }} />
+                                                    <div style={{ marginTop: '14px', display: 'flex', justifyContent: 'center', gap: '8px', opacity: .7 }}>
+                                                        <img src="https://static-content.vnforapps.com/v2/img/brands/visa.png" alt="Visa" style={{ height: '22px' }} />
+                                                        <img src="https://static-content.vnforapps.com/v2/img/brands/mastercard.png" alt="Mastercard" style={{ height: '22px' }} />
                                                     </div>
                                                 </div>
                                             )}
 
                                             {!isFetchingNiubiz && !niubizSession && !niubizError && (
-                                                <div style={{ textAlign: 'center', padding: '32px 24px', background: '#FFFFFF', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
-                                                    <div style={{ width: '48px', height: '48px', background: '#FEE2E2', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                                                <div style={{ textAlign: 'center', padding: '28px 20px', background: '#fff', borderRadius: '10px', border: '1px solid #E8ECF0' }}>
+                                                    <div style={{ width: '48px', height: '48px', background: '#FEE2E2', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
+                                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
                                                     </div>
-                                                    <p style={{ color: '#0F172A', fontWeight: '500', fontSize: '15px', margin: '0 0 8px 0' }}>Conexión interrumpida</p>
-                                                    <p style={{ color: '#64748B', fontSize: '14px', margin: '0 0 20px 0' }}>No pudimos cargar la pasarela de pagos.</p>
-                                                    <button 
+                                                    <p style={{ color: '#0F172A', fontWeight: '600', fontSize: '14.5px', margin: '0 0 6px' }}>Conexión interrumpida</p>
+                                                    <p style={{ color: '#64748B', fontSize: '13px', margin: '0 0 18px' }}>No pudimos cargar la pasarela de pagos.</p>
+                                                    <button
                                                         onClick={() => fetchNiubizSession(appliedCoupon?.codigo || '')}
-                                                        style={{ padding: '10px 24px', background: '#00B4FF', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: '600', fontSize: '14px', boxShadow: '0 4px 14px 0 rgba(0, 180, 255, 0.25)', transition: 'all 0.2s ease' }}
-                                                        onMouseOver={(e) => e.target.style.transform = 'translateY(-1px)'}
-                                                        onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+                                                        className="efe-btn-primary"
+                                                        style={{ padding: '10px 24px', fontSize: '13.5px' }}
                                                     >
                                                         Reintentar Conexión
                                                     </button>
@@ -1585,19 +1312,12 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
                     </div>
                     <div className="efe-checkout-sidebar-body">
                         {/* Comprobante */}
-                        <div
-                            className="efe-summary-comprobante"
-                            style={{
-                                background: '#f8fafc',
-                                padding: '15px',
-                                borderRadius: '8px',
-                                border: '1px solid #e2e8f0',
-                                marginBottom: '20px',
-                            }}
-                        >
+                        <div className="efe-summary-comprobante">
                             <h3
                                 style={{
-                                    fontSize: '14px',
+                                    fontSize: '12px',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '.05em',
                                     fontWeight: 'bold',
                                     marginBottom: '10px',
                                     color: '#0f172a',
@@ -1613,7 +1333,7 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
                                         padding: '10px',
                                         border:
                                             facturacionData.comprobante === 'Boleta'
-                                                ? '2px solid #00B4FF'
+                                                ? '2px solid #004797'
                                                 : '1px solid #cbd5e1',
                                         borderRadius: '8px',
                                         textAlign: 'center',
@@ -1647,7 +1367,7 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
                                         padding: '10px',
                                         border:
                                             facturacionData.comprobante === 'Factura'
-                                                ? '2px solid #00B4FF'
+                                                ? '2px solid #004797'
                                                 : '1px solid #cbd5e1',
                                         borderRadius: '8px',
                                         textAlign: 'center',
@@ -1884,60 +1604,30 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
                         </div>
 
                         {/* Items */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
                         {cartItems.map((item) => (
                             <div
                                 key={item.id}
                                 className="efe-summary-item"
-                                style={{
-                                    borderBottom: '1px solid #f3f4f6',
-                                    paddingBottom: '10px',
-                                    marginBottom: '10px',
-                                }}
+                                style={{ padding: '10px', borderRadius: '10px', border: '1px solid #E8ECF0', background: '#F8FAFC', transition: 'all .2s ease' }}
                             >
-                                <img
-                                    src={item.imagen}
-                                    alt={item.nombre}
-                                    className="efe-summary-item-img"
-                                />
+                                <img src={item.imagen} alt={item.nombre} className="efe-summary-item-img" />
                                 <div className="efe-summary-item-info">
-                                    <h4
-                                        className="efe-summary-item-title"
-                                        style={{ fontSize: '12px', lineHeight: '1.4' }}
-                                    >
-                                        {item.nombre}
-                                    </h4>
-                                    <div
-                                        className="efe-summary-item-meta"
-                                        style={{ marginTop: '5px' }}
-                                    >
-                                        <span className="efe-summary-item-qty">
-                                            Cant: {item.cantidad}
-                                        </span>
+                                    <h4 className="efe-summary-item-title">{item.nombre}</h4>
+                                    {item.variante && <p style={{ fontSize: '11.5px', color: '#94A3B8', margin: '0 0 6px' }}>{item.variante}</p>}
+                                    <div className="efe-summary-item-meta">
+                                        <span className="efe-summary-item-qty">Cant: {item.cantidad}</span>
                                         <div style={{ textAlign: 'right' }}>
-                                            <span
-                                                className="efe-summary-item-price"
-                                                style={{ fontSize: '14px', fontWeight: 'bold' }}
-                                            >
-                                                S/ {formatPrice(item.precio)}
-                                            </span>
+                                            <span className="efe-summary-item-price">S/ {formatPrice(item.precio)}</span>
                                             {item.precio_original > item.precio && (
-                                                <span
-                                                    className="efe-summary-item-old-price"
-                                                    style={{
-                                                        display: 'block',
-                                                        fontSize: '11px',
-                                                        color: '#9ca3af',
-                                                        textDecoration: 'line-through',
-                                                    }}
-                                                >
-                                                    S/ {formatPrice(item.precio_original)}
-                                                </span>
+                                                <span className="efe-summary-item-old-price">S/ {formatPrice(item.precio_original)}</span>
                                             )}
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         ))}
+                        </div>
 
                         <Link
                             href="/"
@@ -2058,7 +1748,13 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
             </div>
 
             {/* LOADING: CREANDO DIRECCIÓN */}
-            {isCreating && <div className="efe-loader-overlay">Creando dirección...</div>}
+            {isCreating && (
+                <div className="efe-loader-overlay">
+                    <div style={{ width: '32px', height: '32px', border: '3px solid #E8ECF0', borderTopColor: '#004797', borderRadius: '50%', animation: 'spin .8s linear infinite', flexShrink: 0 }}></div>
+                    Validando dirección y calculando envío...
+                    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                </div>
+            )}
         </div>
     );
 }

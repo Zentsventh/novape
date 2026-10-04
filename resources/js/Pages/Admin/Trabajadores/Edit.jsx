@@ -35,7 +35,7 @@ export default function Edit({ trabajador, roles }) {
     };
     
     const inputFocusStyle = {
-        borderColor: '#00B4FF', boxShadow: '0 0 0 4px rgba(0, 180, 255, 0.1)', backgroundColor: '#ffffff'
+        borderColor: '#004797', boxShadow: '0 0 0 4px rgba(0, 71, 151, 0.1)', backgroundColor: '#ffffff'
     };
 
     const labelStyle = {
@@ -56,7 +56,7 @@ export default function Edit({ trabajador, roles }) {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
                     <div>
                         <h1 style={{ fontSize: '28px', margin: '0 0 8px 0', fontWeight: 800, color: '#1E293B', letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ background: '#E0F2FE', padding: '10px', borderRadius: '12px', color: '#00B4FF', display: 'flex' }}>
+                            <div style={{ background: '#E0F2FE', padding: '10px', borderRadius: '12px', color: '#004797', display: 'flex' }}>
                                 <Edit2 size={24} />
                             </div>
                             Editar Trabajador
@@ -217,22 +217,22 @@ export default function Edit({ trabajador, roles }) {
                                             style={{
                                                 padding: '20px',
                                                 borderRadius: '16px',
-                                                border: `2px solid ${isSelected ? '#00B4FF' : '#E2E8F0'}`,
+                                                border: `2px solid ${isSelected ? '#004797' : '#E2E8F0'}`,
                                                 background: isSelected ? '#F0F9FF' : '#ffffff',
                                                 cursor: 'pointer',
                                                 transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                                                 display: 'flex',
                                                 alignItems: 'flex-start',
                                                 gap: '16px',
-                                                boxShadow: isSelected ? '0 4px 12px rgba(0, 180, 255, 0.15)' : 'none'
+                                                boxShadow: isSelected ? '0 4px 12px rgba(0, 71, 151, 0.15)' : 'none'
                                             }}
                                             onMouseOver={e => { if(!isSelected) { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'; } }}
                                             onMouseOut={e => { if(!isSelected) { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; } }}
                                         >
                                             <div style={{ 
                                                 width: '24px', height: '24px', borderRadius: '8px', 
-                                                background: isSelected ? '#00B4FF' : '#F1F5F9', 
-                                                border: `2px solid ${isSelected ? '#00B4FF' : '#CBD5E1'}`,
+                                                background: isSelected ? '#004797' : '#F1F5F9', 
+                                                border: `2px solid ${isSelected ? '#004797' : '#CBD5E1'}`,
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                                                 transition: 'all 0.2s', marginTop: '2px'
                                             }}>
@@ -267,7 +267,7 @@ export default function Edit({ trabajador, roles }) {
                                 type="submit"
                                 disabled={processing}
                                 style={{
-                                    background: '#00B4FF',
+                                    background: '#004797',
                                     color: 'white',
                                     border: 'none',
                                     padding: '14px 32px',
@@ -276,14 +276,14 @@ export default function Edit({ trabajador, roles }) {
                                     fontSize: '15px',
                                     cursor: processing ? 'not-allowed' : 'pointer',
                                     opacity: processing ? 0.7 : 1,
-                                    boxShadow: '0 4px 14px rgba(0, 180, 255, 0.3)',
+                                    boxShadow: '0 4px 14px rgba(0, 71, 151, 0.3)',
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '8px',
                                     transition: 'all 0.2s'
                                 }}
-                                onMouseOver={e => { if(!processing) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 180, 255, 0.4)'; } }}
-                                onMouseOut={e => { if(!processing) { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 180, 255, 0.3)'; } }}
+                                onMouseOver={e => { if(!processing) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 71, 151, 0.4)'; } }}
+                                onMouseOut={e => { if(!processing) { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 71, 151, 0.3)'; } }}
                             >
                                 <Save size={18} />
                                 {processing ? 'Actualizando...' : 'Actualizar Usuario'}

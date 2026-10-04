@@ -30,7 +30,7 @@ export default function RolesIndex() {
     };
     
     const inputFocusStyle = {
-        borderColor: '#00B4FF', boxShadow: '0 0 0 4px rgba(0, 180, 255, 0.1)', backgroundColor: '#ffffff'
+        borderColor: '#004797', boxShadow: '0 0 0 4px rgba(0, 71, 151, 0.1)', backgroundColor: '#ffffff'
     };
 
     return (
@@ -43,7 +43,7 @@ export default function RolesIndex() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
                     <div>
                         <h1 style={{ fontSize: '28px', margin: '0 0 8px 0', fontWeight: 800, color: '#1E293B', letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ background: '#E0F2FE', padding: '10px', borderRadius: '12px', color: '#00B4FF', display: 'flex' }}>
+                            <div style={{ background: '#E0F2FE', padding: '10px', borderRadius: '12px', color: '#004797', display: 'flex' }}>
                                 <ShieldCheck size={24} />
                             </div>
                             Roles y Permisos
@@ -57,11 +57,11 @@ export default function RolesIndex() {
                         href="/admin/roles/create" 
                         style={{ 
                             display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', borderRadius: '12px', 
-                            border: 'none', background: '#00B4FF', color: '#ffffff', fontWeight: 700, fontSize: '14px', 
-                            textDecoration: 'none', transition: 'all 0.2s', boxShadow: '0 4px 14px rgba(0, 180, 255, 0.3)'
+                            border: 'none', background: '#004797', color: '#ffffff', fontWeight: 700, fontSize: '14px', 
+                            textDecoration: 'none', transition: 'all 0.2s', boxShadow: '0 4px 14px rgba(0, 71, 151, 0.3)'
                         }}
-                        onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 180, 255, 0.4)'; }}
-                        onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 180, 255, 0.3)'; }}
+                        onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 71, 151, 0.4)'; }}
+                        onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 71, 151, 0.3)'; }}
                     >
                         <Shield size={18} /> Nuevo Rol
                     </Link>
@@ -129,7 +129,7 @@ export default function RolesIndex() {
                                         
                                         <td style={{ padding: '24px 32px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: isSystemRole ? '#F1F5F9' : '#E0F2FE', color: isSystemRole ? '#64748B' : '#00B4FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: isSystemRole ? '#F1F5F9' : '#E0F2FE', color: isSystemRole ? '#64748B' : '#004797', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                     <KeyRound size={20} />
                                                 </div>
                                                 <div>
@@ -163,7 +163,7 @@ export default function RolesIndex() {
                                         
                                         <td style={{ padding: '24px 32px', textAlign: 'right' }}>
                                             <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
-                                                <Link href={`/admin/roles/${rol.id}/edit`} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: '#F1F5F9', color: '#475569', borderRadius: '10px', textDecoration: 'none', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.background = '#E0F2FE'; e.currentTarget.style.color = '#00B4FF'; }} onMouseOut={e => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#475569'; }} title="Editar Permisos">
+                                                <Link href={`/admin/roles/${rol.id}/edit`} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: '#F1F5F9', color: '#475569', borderRadius: '10px', textDecoration: 'none', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.background = '#E0F2FE'; e.currentTarget.style.color = '#004797'; }} onMouseOut={e => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#475569'; }} title="Editar Permisos">
                                                     <Edit2 size={16} />
                                                 </Link>
                                                 {!isSystemRole ? (

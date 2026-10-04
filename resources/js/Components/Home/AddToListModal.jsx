@@ -114,7 +114,7 @@ export default function AddToListModal({ isOpen, onClose, producto }) {
                                     <div style={{ 
                                         width: '20px', height: '20px', borderRadius: '4px', 
                                         border: isChecked ? 'none' : '1px solid #94a3b8', 
-                                        background: isChecked ? '#00B4FF' : 'white', 
+                                        background: isChecked ? '#004797' : 'white', 
                                         marginRight: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center' 
                                     }}>
                                         {isChecked && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><polyline points="20 6 9 17 4 12"></polyline></svg>}
@@ -131,24 +131,24 @@ export default function AddToListModal({ isOpen, onClose, producto }) {
                         })}
                         {listas.length === 0 && (
                             <div style={{ textAlign: 'center', padding: '15px', color: '#64748b', fontSize: '14px' }}>
-                                Aún no tienes listas. Crea una abajo.
+                                Aï¿½n no tienes listas. Crea una abajo.
                             </div>
                         )}
                     </div>
                 )}
                 
                 <form onSubmit={handleCreateList} style={{ display: 'flex', gap: '10px', marginBottom: '25px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', color: '#00B4FF', fontSize: '18px', fontWeight: 'bold' }}>+</div>
+                    <div style={{ display: 'flex', alignItems: 'center', color: '#004797', fontSize: '18px', fontWeight: 'bold' }}>+</div>
                     <input 
                         type="text" 
                         placeholder="Crear una nueva lista" 
                         value={newListName}
                         onChange={(e) => setNewListName(e.target.value)}
-                        style={{ flex: 1, padding: '0', border: 'none', background: 'transparent', outline: 'none', fontSize: '14px', color: '#00B4FF', borderBottom: '1px solid transparent' }}
+                        style={{ flex: 1, padding: '0', border: 'none', background: 'transparent', outline: 'none', fontSize: '14px', color: '#004797', borderBottom: '1px solid transparent' }}
                         disabled={creating}
                     />
                     {newListName.trim().length > 0 && (
-                        <button type="submit" disabled={creating} style={{ padding: '6px 12px', background: '#00B4FF', color: 'white', border: 'none', borderRadius: '4px', fontSize: '12px', cursor: 'pointer' }}>
+                        <button type="submit" disabled={creating} style={{ padding: '6px 12px', background: '#004797', color: 'white', border: 'none', borderRadius: '4px', fontSize: '12px', cursor: 'pointer' }}>
                             {creating ? '...' : 'Crear'}
                         </button>
                     )}

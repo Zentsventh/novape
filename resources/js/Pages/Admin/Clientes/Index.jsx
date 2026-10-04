@@ -154,14 +154,14 @@ export default function Index() {
             accessor: 'estado',
             render: (row) => (
                 <span style={{
-                    color: row.estado === 'activo' ? '#00B4FF' : '#94A3B8',
+                    color: row.estado === 'activo' ? '#004797' : '#94A3B8',
                     fontSize: '12px',
                     fontWeight: 600,
                     display: 'flex',
                     alignItems: 'center',
                     gap: '6px'
                 }}>
-                    {row.estado === 'activo' && <div style={{width: 6, height: 6, borderRadius: '50%', backgroundColor: '#00B4FF', boxShadow: '0 0 4px rgba(0,180,255,0.5)'}}></div>}
+                    {row.estado === 'activo' && <div style={{width: 6, height: 6, borderRadius: '50%', backgroundColor: '#004797', boxShadow: '0 0 4px rgba(0, 71, 151,0.5)'}}></div>}
                     {row.estado.charAt(0).toUpperCase() + row.estado.slice(1)}
                 </span>
             )
@@ -204,7 +204,7 @@ export default function Index() {
                     --twenty-text-main: #1E293B;
                     --twenty-text-secondary: #475569;
                     --twenty-text-muted: #94A3B8;
-                    --twenty-primary-bg: rgba(0, 180, 255, 0.04);
+                    --twenty-primary-bg: rgba(0, 71, 151, 0.04);
                     --twenty-bg-hover: #F1F5F9;
                     --twenty-radius-lg: 12px;
                 }
@@ -234,11 +234,11 @@ export default function Index() {
                     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
                 }
                 .premium-input:focus {
-                    border-color: #00B4FF;
-                    box-shadow: 0 0 0 3px rgba(0, 180, 255, 0.15), 0 1px 2px rgba(0, 0, 0, 0.02);
+                    border-color: #004797;
+                    box-shadow: 0 0 0 3px rgba(0, 71, 151, 0.15), 0 1px 2px rgba(0, 0, 0, 0.02);
                 }
                 .premium-input:focus ~ .premium-search-icon {
-                    color: #00B4FF;
+                    color: #004797;
                 }
                 .premium-input::placeholder {
                     color: #94A3B8;
@@ -275,14 +275,14 @@ export default function Index() {
                     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
                 }
                 .premium-btn-primary {
-                    background: #00B4FF;
+                    background: #004797;
                     color: #FFFFFF;
-                    box-shadow: 0 2px 4px rgba(0, 180, 255, 0.2);
+                    box-shadow: 0 2px 4px rgba(0, 71, 151, 0.2);
                 }
                 .premium-btn-primary:hover {
                     background: #00A2E8;
                     transform: translateY(-1px);
-                    box-shadow: 0 4px 10px rgba(0, 180, 255, 0.3);
+                    box-shadow: 0 4px 10px rgba(0, 71, 151, 0.3);
                 }
                 .premium-table-wrapper {
                     flex: 1;
@@ -296,12 +296,12 @@ export default function Index() {
                     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.06), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
                 }
                 .customer-name:hover {
-                    color: #00B4FF !important;
+                    color: #004797 !important;
                 }
                 .table-row-hover:hover .avatar-container {
-                    border-color: #00B4FF !important;
-                    box-shadow: 0 0 0 2px rgba(0, 180, 255, 0.1);
-                    color: #00B4FF !important;
+                    border-color: #004797 !important;
+                    box-shadow: 0 0 0 2px rgba(0, 71, 151, 0.1);
+                    color: #004797 !important;
                 }
                 .premium-drawer-header {
                     display: flex;
@@ -322,7 +322,7 @@ export default function Index() {
                     justify-content: center;
                     font-size: 20px;
                     font-weight: 600;
-                    color: #00B4FF;
+                    color: #004797;
                     box-shadow: 0 2px 4px rgba(0,0,0,0.02);
                 }
                 .premium-drawer-field {
@@ -369,10 +369,10 @@ export default function Index() {
                     color: #1E293B;
                 }
                 .premium-pagination a.active {
-                    background-color: #00B4FF;
-                    border-color: #00B4FF;
+                    background-color: #004797;
+                    border-color: #004797;
                     color: #FFFFFF;
-                    box-shadow: 0 2px 4px rgba(0, 180, 255, 0.2);
+                    box-shadow: 0 2px 4px rgba(0, 71, 151, 0.2);
                 }
             `}</style>
 
@@ -462,7 +462,7 @@ export default function Index() {
                             </div>
                             <div className="premium-drawer-field" style={{ gridColumn: 'span 2' }}>
                                 <div className="premium-drawer-label">Total Pedidos</div>
-                                <div className="premium-drawer-value" style={{ color: '#00B4FF', fontSize: '16px', fontWeight: 700 }}>{selectedCustomer.pedidos_count}</div>
+                                <div className="premium-drawer-value" style={{ color: '#004797', fontSize: '16px', fontWeight: 700 }}>{selectedCustomer.pedidos_count}</div>
                             </div>
                         </div>
 
@@ -509,7 +509,7 @@ export default function Index() {
                                         </div>
                                     ))}
                                 </div>
-                                {isSavingField && <div style={{ marginTop: '12px', fontSize: '12px', color: '#00B4FF', fontWeight: 500 }}>Guardando cambios...</div>}
+                                {isSavingField && <div style={{ marginTop: '12px', fontSize: '12px', color: '#004797', fontWeight: 500 }}>Guardando cambios...</div>}
                             </div>
                         )}
                         

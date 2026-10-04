@@ -104,7 +104,7 @@ export default function BannersIndex({ banners, logoUrl }) {
     };
     
     const inputFocusStyle = {
-        borderColor: '#00B4FF', boxShadow: '0 0 0 4px rgba(0, 180, 255, 0.1)', backgroundColor: '#ffffff'
+        borderColor: '#004797', boxShadow: '0 0 0 4px rgba(0, 71, 151, 0.1)', backgroundColor: '#ffffff'
     };
 
     return (
@@ -116,7 +116,7 @@ export default function BannersIndex({ banners, logoUrl }) {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
                     <div>
                         <h1 style={{ fontSize: '28px', margin: '0 0 8px 0', fontWeight: 800, color: '#1E293B', letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ background: '#E0F2FE', padding: '10px', borderRadius: '12px', color: '#00B4FF', display: 'flex' }}>
+                            <div style={{ background: '#E0F2FE', padding: '10px', borderRadius: '12px', color: '#004797', display: 'flex' }}>
                                 <ImageIcon size={24} />
                             </div>
                             Banners Publicitarios
@@ -128,12 +128,12 @@ export default function BannersIndex({ banners, logoUrl }) {
                     <button 
                         onClick={openCreateModal} 
                         style={{ 
-                            background: '#00B4FF', color: 'white', padding: '12px 24px', borderRadius: '12px', border: 'none', 
-                            cursor: 'pointer', fontWeight: 700, fontSize: '14px', boxShadow: '0 4px 14px rgba(0, 180, 255, 0.3)',
+                            background: '#004797', color: 'white', padding: '12px 24px', borderRadius: '12px', border: 'none', 
+                            cursor: 'pointer', fontWeight: 700, fontSize: '14px', boxShadow: '0 4px 14px rgba(0, 71, 151, 0.3)',
                             transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', gap: '8px'
                         }}
-                        onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 180, 255, 0.4)'; }}
-                        onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 180, 255, 0.3)'; }}
+                        onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 71, 151, 0.4)'; }}
+                        onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 71, 151, 0.3)'; }}
                     >
                         <Plus size={18} /> Nuevo Banner
                     </button>
@@ -212,7 +212,7 @@ export default function BannersIndex({ banners, logoUrl }) {
                                 </div>
                                 <p style={{ fontSize: '14px', color: '#64748B', margin: '0 0 12px 0', lineHeight: '1.4' }}>{b.subtitulo || 'Sin descripción adicional'}</p>
                                 {b.enlace_url && (
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#00B4FF', fontSize: '13px', fontWeight: 500 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#004797', fontSize: '13px', fontWeight: 500 }}>
                                         <LinkIcon size={14} /> {b.enlace_url}
                                     </div>
                                 )}
@@ -243,7 +243,7 @@ export default function BannersIndex({ banners, logoUrl }) {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                 <button onClick={() => openEditModal(b)} style={{ 
                                     width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #E2E8F0', background: '#ffffff', color: '#1E293B', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s', fontSize: '14px' 
-                                }} onMouseOver={e => { e.currentTarget.style.background = '#F8FAFC'; e.currentTarget.style.color = '#00B4FF'; e.currentTarget.style.borderColor = '#00B4FF'; }} onMouseOut={e => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.color = '#1E293B'; e.currentTarget.style.borderColor = '#E2E8F0'; }}>
+                                }} onMouseOver={e => { e.currentTarget.style.background = '#F8FAFC'; e.currentTarget.style.color = '#004797'; e.currentTarget.style.borderColor = '#004797'; }} onMouseOut={e => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.color = '#1E293B'; e.currentTarget.style.borderColor = '#E2E8F0'; }}>
                                     <Edit2 size={16} /> Editar Banner
                                 </button>
                                 <button onClick={() => handleDelete(b.id)} style={{ 
@@ -261,7 +261,7 @@ export default function BannersIndex({ banners, logoUrl }) {
                             </div>
                             <h3 style={{ margin: '0 0 8px 0', color: '#1E293B', fontSize: '18px', fontWeight: 700 }}>No hay banners publicitarios</h3>
                             <p style={{ margin: '0 0 24px 0', color: '#64748B', fontSize: '15px' }}>Crea tu primer banner para empezar a promocionar ofertas o productos en tu tienda.</p>
-                            <button onClick={openCreateModal} style={{ background: '#00B4FF', color: 'white', padding: '10px 20px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
+                            <button onClick={openCreateModal} style={{ background: '#004797', color: 'white', padding: '10px 20px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
                                 Crear Primer Banner
                             </button>
                         </div>
@@ -327,7 +327,7 @@ export default function BannersIndex({ banners, logoUrl }) {
                                                 type="file" id="banner_image" accept="image/png, image/jpeg, image/webp" 
                                                 onChange={handleImageChange} required={!editingBanner} style={{ display: 'none' }}
                                             />
-                                            <label htmlFor="banner_image" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#ffffff', border: '1px solid #CBD5E1', padding: '10px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: 600, color: '#475569', cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.borderColor = '#00B4FF'} onMouseOut={e => e.currentTarget.style.borderColor = '#CBD5E1'}>
+                                            <label htmlFor="banner_image" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#ffffff', border: '1px solid #CBD5E1', padding: '10px 16px', borderRadius: '8px', fontSize: '14px', fontWeight: 600, color: '#475569', cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.borderColor = '#004797'} onMouseOut={e => e.currentTarget.style.borderColor = '#CBD5E1'}>
                                                 <UploadCloud size={16} /> Seleccionar Archivo
                                             </label>
                                         </div>
@@ -355,7 +355,7 @@ export default function BannersIndex({ banners, logoUrl }) {
                                     <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1px solid #E2E8F0', background: 'white', cursor: 'pointer', fontWeight: 600, color: '#64748B', transition: 'all 0.2s', fontSize: '15px' }} onMouseOver={e => { e.currentTarget.style.background = '#F8FAFC'; e.currentTarget.style.color = '#1E293B'; }} onMouseOut={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.color = '#64748B'; }}>
                                         Cancelar
                                     </button>
-                                    <button type="submit" disabled={processing} style={{ flex: 2, padding: '14px', borderRadius: '12px', border: 'none', background: '#00B4FF', color: 'white', fontWeight: 700, cursor: processing ? 'not-allowed' : 'pointer', boxShadow: '0 4px 14px rgba(0, 180, 255, 0.3)', transition: 'all 0.2s', fontSize: '15px', opacity: processing ? 0.7 : 1 }} onMouseOver={e => { if(!processing) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 180, 255, 0.4)'; } }} onMouseOut={e => { if(!processing) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 180, 255, 0.3)'; } }}>
+                                    <button type="submit" disabled={processing} style={{ flex: 2, padding: '14px', borderRadius: '12px', border: 'none', background: '#004797', color: 'white', fontWeight: 700, cursor: processing ? 'not-allowed' : 'pointer', boxShadow: '0 4px 14px rgba(0, 71, 151, 0.3)', transition: 'all 0.2s', fontSize: '15px', opacity: processing ? 0.7 : 1 }} onMouseOver={e => { if(!processing) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 71, 151, 0.4)'; } }} onMouseOut={e => { if(!processing) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 71, 151, 0.3)'; } }}>
                                         {processing ? 'Guardando...' : (editingBanner ? 'Guardar Cambios' : 'Publicar Banner')}
                                     </button>
                                 </div>

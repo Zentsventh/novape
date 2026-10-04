@@ -30,7 +30,7 @@ export default function ZonasIndex({ zonas, logoUrl }) {
             
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
                 <h1 style={{ fontSize: '24px', margin: 0, fontWeight: '700', color: '#1E293B', display: 'flex', alignItems: 'center', gap: '12px', letterSpacing: '-0.02em' }}>
-                    <div style={{ padding: '8px', backgroundColor: '#F0F9FF', borderRadius: '10px', color: '#00B4FF' }}>
+                    <div style={{ padding: '8px', backgroundColor: '#F0F9FF', borderRadius: '10px', color: '#004797' }}>
                         <Map size={24} />
                     </div>
                     <div>
@@ -43,9 +43,9 @@ export default function ZonasIndex({ zonas, logoUrl }) {
                 
                 <button 
                     onClick={() => setShowModal(true)} 
-                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#009BE0'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 180, 255, 0.3)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#00B4FF'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 180, 255, 0.2)'; }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#00B4FF', color: 'white', border: 'none', padding: '10px 16px', borderRadius: '8px', fontWeight: '600', fontSize: '13px', transition: 'all 0.2s ease', boxShadow: '0 2px 4px rgba(0, 180, 255, 0.2)', cursor: 'pointer' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#009BE0'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 71, 151, 0.3)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#004797'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 71, 151, 0.2)'; }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#004797', color: 'white', border: 'none', padding: '10px 16px', borderRadius: '8px', fontWeight: '600', fontSize: '13px', transition: 'all 0.2s ease', boxShadow: '0 2px 4px rgba(0, 71, 151, 0.2)', cursor: 'pointer' }}
                 >
                     <Plus size={16} />
                     Nueva Zona
@@ -72,11 +72,11 @@ export default function ZonasIndex({ zonas, logoUrl }) {
                                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
                             >
                                 <td style={{ padding: '16px 24px', fontWeight: '700', color: '#1E293B', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <MapPin size={16} style={{ color: '#00B4FF' }} /> {z.nombre}
+                                    <MapPin size={16} style={{ color: '#004797' }} /> {z.nombre}
                                 </td>
                                 <td style={{ padding: '16px 24px', color: '#64748B', fontSize: '13px' }}>{z.descripcion || <span style={{ fontStyle: 'italic', color: '#94A3B8' }}>Sin descripción</span>}</td>
-                                <td style={{ padding: '16px 24px', fontWeight: '700', color: '#00B4FF', fontSize: '14px' }}>
-                                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#F0F9FF', padding: '4px 10px', borderRadius: '6px', border: '1px solid rgba(0, 180, 255, 0.2)' }}>
+                                <td style={{ padding: '16px 24px', fontWeight: '700', color: '#004797', fontSize: '14px' }}>
+                                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#F0F9FF', padding: '4px 10px', borderRadius: '6px', border: '1px solid rgba(0, 71, 151, 0.2)' }}>
                                         S/ {Number(z.costo_envio).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                                     </span>
                                 </td>
@@ -118,7 +118,7 @@ export default function ZonasIndex({ zonas, logoUrl }) {
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
                     <div style={{ background: '#ffffff', padding: '32px', borderRadius: '16px', width: '100%', maxWidth: '420px', boxShadow: '0 20px 40px -10px rgba(0,0,0,0.1)', border: '1px solid #E2E8F0' }}>
                         <h2 style={{ margin: '0 0 24px 0', fontSize: '20px', fontWeight: '800', color: '#1E293B', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Navigation size={20} style={{ color: '#00B4FF' }} />
+                            <Navigation size={20} style={{ color: '#004797' }} />
                             Nueva Zona de Envío
                         </h2>
                         <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -132,7 +132,7 @@ export default function ZonasIndex({ zonas, logoUrl }) {
                                         onChange={e => setData('nombre', e.target.value)} 
                                         placeholder="Ej: Lima Metropolitana"
                                         style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px 12px 36px', borderRadius: '8px', border: '1px solid #E2E8F0', background: '#F8FAFC', color: '#1E293B', outline: 'none', transition: 'all 0.2s', fontSize: '14px', fontFamily: 'inherit' }}
-                                        onFocus={(e) => { e.currentTarget.style.borderColor = '#00B4FF'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.1)'; }}
+                                        onFocus={(e) => { e.currentTarget.style.borderColor = '#004797'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.1)'; }}
                                         onBlur={(e) => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.boxShadow = 'none'; }}
                                         required 
                                     />
@@ -145,7 +145,7 @@ export default function ZonasIndex({ zonas, logoUrl }) {
                                     onChange={e => setData('descripcion', e.target.value)} 
                                     placeholder="Distritos o provincias que cubre..."
                                     style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: '8px', border: '1px solid #E2E8F0', background: '#F8FAFC', color: '#1E293B', outline: 'none', transition: 'all 0.2s', fontSize: '14px', fontFamily: 'inherit', minHeight: '80px', resize: 'vertical' }}
-                                    onFocus={(e) => { e.currentTarget.style.borderColor = '#00B4FF'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.1)'; }}
+                                    onFocus={(e) => { e.currentTarget.style.borderColor = '#004797'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.1)'; }}
                                     onBlur={(e) => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.boxShadow = 'none'; }}
                                 />
                             </div>
@@ -160,7 +160,7 @@ export default function ZonasIndex({ zonas, logoUrl }) {
                                         onChange={e => setData('costo_envio', e.target.value)} 
                                         placeholder="0.00"
                                         style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px 12px 36px', borderRadius: '8px', border: '1px solid #E2E8F0', background: '#F8FAFC', color: '#1E293B', outline: 'none', transition: 'all 0.2s', fontSize: '14px', fontFamily: 'inherit', fontWeight: '600' }}
-                                        onFocus={(e) => { e.currentTarget.style.borderColor = '#00B4FF'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.1)'; }}
+                                        onFocus={(e) => { e.currentTarget.style.borderColor = '#004797'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.1)'; }}
                                         onBlur={(e) => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.boxShadow = 'none'; }}
                                         required 
                                     />
@@ -180,8 +180,8 @@ export default function ZonasIndex({ zonas, logoUrl }) {
                                     type="submit" 
                                     disabled={processing} 
                                     onMouseEnter={(e) => { if(!processing) e.currentTarget.style.backgroundColor = '#009BE0'; }}
-                                    onMouseLeave={(e) => { if(!processing) e.currentTarget.style.backgroundColor = '#00B4FF'; }}
-                                    style={{ flex: 1, padding: '12px', borderRadius: '8px', border: 'none', background: '#00B4FF', color: 'white', fontWeight: '600', cursor: processing ? 'not-allowed' : 'pointer', fontSize: '14px', opacity: processing ? 0.7 : 1, transition: 'all 0.2s' }}
+                                    onMouseLeave={(e) => { if(!processing) e.currentTarget.style.backgroundColor = '#004797'; }}
+                                    style={{ flex: 1, padding: '12px', borderRadius: '8px', border: 'none', background: '#004797', color: 'white', fontWeight: '600', cursor: processing ? 'not-allowed' : 'pointer', fontSize: '14px', opacity: processing ? 0.7 : 1, transition: 'all 0.2s' }}
                                 >
                                     {processing ? 'Guardando...' : 'Crear Zona'}
                                 </button>

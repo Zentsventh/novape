@@ -43,7 +43,7 @@
 .efe-section-icon--highlight {
     background: var(--gradient-primary);
     color: white;
-    box-shadow: 0 10px 24px rgba(0, 180, 255, 0.25);
+    box-shadow: 0 10px 24px rgba(0, 71, 151, 0.25);
     border: none;
 }
 

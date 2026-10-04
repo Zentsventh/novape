@@ -35,7 +35,7 @@ export default function Index() {
             
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                 <h1 style={{ fontSize: '24px', margin: 0, fontWeight: '700', color: '#1E293B', display: 'flex', alignItems: 'center', gap: '12px', letterSpacing: '-0.02em' }}>
-                    <div style={{ padding: '8px', backgroundColor: '#F0F9FF', borderRadius: '10px', color: '#00B4FF' }}>
+                    <div style={{ padding: '8px', backgroundColor: '#F0F9FF', borderRadius: '10px', color: '#004797' }}>
                         <ShoppingBag size={24} />
                     </div>
                     Gestión de Pedidos
@@ -70,7 +70,7 @@ export default function Index() {
                                 placeholder="Ej. PED-NIUBIZ-123456"
                                 value={search} 
                                 onChange={e => setSearch(e.target.value)} 
-                                onFocus={(e) => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.1)'; e.target.style.backgroundColor = '#ffffff'; }}
+                                onFocus={(e) => { e.target.style.borderColor = '#004797'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.1)'; e.target.style.backgroundColor = '#ffffff'; }}
                                 onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; e.target.style.backgroundColor = '#F8FAFC'; }}
                                 style={{ width: '100%', padding: '10px 12px 10px 36px', borderRadius: '8px', border: '1px solid #E2E8F0', backgroundColor: '#F8FAFC', color: '#1E293B', fontSize: '14px', outline: 'none', transition: 'all 0.2s ease', boxSizing: 'border-box' }} 
                             />
@@ -82,7 +82,7 @@ export default function Index() {
                             type="date" 
                             value={dateStart} 
                             onChange={e => setDateStart(e.target.value)} 
-                            onFocus={(e) => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.1)'; e.target.style.backgroundColor = '#ffffff'; }}
+                            onFocus={(e) => { e.target.style.borderColor = '#004797'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.1)'; e.target.style.backgroundColor = '#ffffff'; }}
                             onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; e.target.style.backgroundColor = '#F8FAFC'; }}
                             style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid #E2E8F0', backgroundColor: '#F8FAFC', color: '#1E293B', fontSize: '14px', outline: 'none', transition: 'all 0.2s ease', fontFamily: 'inherit' }} 
                         />
@@ -93,7 +93,7 @@ export default function Index() {
                             type="date" 
                             value={dateEnd} 
                             onChange={e => setDateEnd(e.target.value)} 
-                            onFocus={(e) => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.1)'; e.target.style.backgroundColor = '#ffffff'; }}
+                            onFocus={(e) => { e.target.style.borderColor = '#004797'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.1)'; e.target.style.backgroundColor = '#ffffff'; }}
                             onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; e.target.style.backgroundColor = '#F8FAFC'; }}
                             style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid #E2E8F0', backgroundColor: '#F8FAFC', color: '#1E293B', fontSize: '14px', outline: 'none', transition: 'all 0.2s ease', fontFamily: 'inherit' }} 
                         />
@@ -103,7 +103,7 @@ export default function Index() {
                         <select 
                             value={sort} 
                             onChange={e => setSort(e.target.value)} 
-                            onFocus={(e) => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.1)'; e.target.style.backgroundColor = '#ffffff'; }}
+                            onFocus={(e) => { e.target.style.borderColor = '#004797'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.1)'; e.target.style.backgroundColor = '#ffffff'; }}
                             onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; e.target.style.backgroundColor = '#F8FAFC'; }}
                             style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid #E2E8F0', backgroundColor: '#F8FAFC', color: '#1E293B', fontSize: '14px', outline: 'none', transition: 'all 0.2s ease', width: '160px', cursor: 'pointer' }}
                         >
@@ -125,9 +125,9 @@ export default function Index() {
                         )}
                         <button 
                             type="submit" 
-                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#009BE0'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 180, 255, 0.3)'; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#00B4FF'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 180, 255, 0.2)'; }}
-                            style={{ padding: '10px 24px', borderRadius: '8px', border: 'none', background: '#00B4FF', color: 'white', fontWeight: '600', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s ease', boxShadow: '0 2px 4px rgba(0, 180, 255, 0.2)' }}
+                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#009BE0'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 71, 151, 0.3)'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#004797'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 71, 151, 0.2)'; }}
+                            style={{ padding: '10px 24px', borderRadius: '8px', border: 'none', background: '#004797', color: 'white', fontWeight: '600', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s ease', boxShadow: '0 2px 4px rgba(0, 71, 151, 0.2)' }}
                         >
                             <Filter size={16} />
                             Filtrar
@@ -184,7 +184,7 @@ export default function Index() {
                                     <td style={{ padding: '16px 24px', textAlign: 'right' }}>
                                         <Link 
                                             href={`/admin/pedidos/${pedido.id}`} 
-                                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F1F5F9'; e.currentTarget.style.color = '#00B4FF'; e.currentTarget.style.borderColor = '#00B4FF'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 180, 255, 0.1)'; }}
+                                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F1F5F9'; e.currentTarget.style.color = '#004797'; e.currentTarget.style.borderColor = '#004797'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 71, 151, 0.1)'; }}
                                             onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.color = '#475569'; e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.boxShadow = 'none'; }}
                                             style={{ color: '#475569', textDecoration: 'none', padding: '8px 14px', borderRadius: '8px', background: '#ffffff', border: '1px solid #E2E8F0', fontWeight: '600', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s ease' }}
                                         >
@@ -218,9 +218,9 @@ export default function Index() {
                             onMouseLeave={(e) => { if(link.url && !link.active) { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.color = '#64748B'; } }}
                             style={{ 
                                 padding: '8px 16px', 
-                                background: link.active ? '#00B4FF' : '#ffffff', 
+                                background: link.active ? '#004797' : '#ffffff', 
                                 color: link.active ? '#ffffff' : '#64748B', 
-                                border: `1px solid ${link.active ? '#00B4FF' : '#E2E8F0'}`,
+                                border: `1px solid ${link.active ? '#004797' : '#E2E8F0'}`,
                                 borderRadius: '8px', 
                                 textDecoration: 'none',
                                 fontWeight: '600',
@@ -228,7 +228,7 @@ export default function Index() {
                                 opacity: link.url ? 1 : 0.5,
                                 pointerEvents: link.url ? 'auto' : 'none',
                                 transition: 'all 0.2s ease',
-                                boxShadow: link.active ? '0 4px 6px rgba(0, 180, 255, 0.2)' : '0 1px 2px rgba(0,0,0,0.02)'
+                                boxShadow: link.active ? '0 4px 6px rgba(0, 71, 151, 0.2)' : '0 1px 2px rgba(0,0,0,0.02)'
                             }}
                             dangerouslySetInnerHTML={{ __html: link.label }}
                         />

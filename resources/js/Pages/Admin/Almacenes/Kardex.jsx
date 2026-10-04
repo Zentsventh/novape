@@ -27,7 +27,7 @@ export default function Kardex({ almacen, movimientos, logoUrl }) {
                             display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#64748B', 
                             textDecoration: 'none', fontWeight: 600, fontSize: '14px', transition: 'color 0.2s'
                         }}
-                        onMouseOver={e => e.currentTarget.style.color = '#00B4FF'}
+                        onMouseOver={e => e.currentTarget.style.color = '#004797'}
                         onMouseOut={e => e.currentTarget.style.color = '#64748B'}
                     >
                         <ArrowLeft size={16} /> Volver a Almacenes
@@ -37,7 +37,7 @@ export default function Kardex({ almacen, movimientos, logoUrl }) {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
                     <div>
                         <h1 style={{ fontSize: '28px', margin: '0 0 8px 0', fontWeight: 800, color: '#1E293B', letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ background: '#E0F2FE', padding: '10px', borderRadius: '12px', color: '#00B4FF', display: 'flex' }}>
+                            <div style={{ background: '#E0F2FE', padding: '10px', borderRadius: '12px', color: '#004797', display: 'flex' }}>
                                 <Box size={24} />
                             </div>
                             Kardex: {almacen.nombre}
@@ -105,7 +105,7 @@ export default function Kardex({ almacen, movimientos, logoUrl }) {
                                                 {m.referencia || '—'}
                                             </div>
                                             {m.destino_nombre && m.cantidad < 0 && (
-                                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '8px', color: '#00B4FF', fontSize: '12px', fontWeight: 600, background: '#E0F2FE', padding: '4px 8px', borderRadius: '6px' }}>
+                                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '8px', color: '#004797', fontSize: '12px', fontWeight: 600, background: '#E0F2FE', padding: '4px 8px', borderRadius: '6px' }}>
                                                     <ArrowRightLeft size={12} /> Hacia: {m.destino_nombre}
                                                 </div>
                                             )}
@@ -159,9 +159,9 @@ export default function Kardex({ almacen, movimientos, logoUrl }) {
                                     href={link.url}
                                     style={{
                                         display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '40px', height: '40px', padding: '0 12px',
-                                        background: link.active ? '#00B4FF' : '#ffffff', border: link.active ? 'none' : '1px solid #E2E8F0',
+                                        background: link.active ? '#004797' : '#ffffff', border: link.active ? 'none' : '1px solid #E2E8F0',
                                         color: link.active ? '#ffffff' : '#475569', borderRadius: '10px', fontSize: '14px', fontWeight: link.active ? 800 : 600, textDecoration: 'none',
-                                        boxShadow: link.active ? '0 4px 12px rgba(0, 180, 255, 0.3)' : '0 2px 4px rgba(0,0,0,0.02)', transition: 'all 0.2s'
+                                        boxShadow: link.active ? '0 4px 12px rgba(0, 71, 151, 0.3)' : '0 2px 4px rgba(0,0,0,0.02)', transition: 'all 0.2s'
                                     }}
                                     onMouseOver={e => { if(!link.active) { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.color = '#1E293B'; e.currentTarget.style.transform = 'translateY(-1px)'; } }}
                                     onMouseOut={e => { if(!link.active) { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.color = '#475569'; e.currentTarget.style.transform = 'none'; } }}

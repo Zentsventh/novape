@@ -278,10 +278,10 @@ export default function Producto() {
                         box-shadow: 0 4px 12px rgba(0,0,0,0.05);
                     }
                     .premium-thumb.is-active {
-                        border-color: #00B4FF;
+                        border-color: #004797;
                         opacity: 1;
                         background: #ffffff;
-                        box-shadow: 0 4px 12px rgba(0, 180, 255, 0.15);
+                        box-shadow: 0 4px 12px rgba(0, 71, 151, 0.15);
                     }
                     .premium-main-img {
                         flex: 1;
@@ -302,7 +302,7 @@ export default function Producto() {
                     .premium-brand {
                         font-size: 13px;
                         font-weight: 700;
-                        color: #00B4FF;
+                        color: #004797;
                         text-transform: uppercase;
                         letter-spacing: 1px;
                         margin-bottom: 12px;
@@ -352,8 +352,8 @@ export default function Producto() {
                         transition: all 0.2s;
                     }
                     .premium-qty-box:focus-within {
-                        border-color: #00B4FF;
-                        box-shadow: 0 0 0 3px rgba(0, 180, 255, 0.15);
+                        border-color: #004797;
+                        box-shadow: 0 0 0 3px rgba(0, 71, 151, 0.15);
                     }
                     .premium-qty-btn {
                         width: 40px;
@@ -413,7 +413,7 @@ export default function Producto() {
                     }
                     .premium-btn-buy {
                         flex: 1;
-                        background: #00B4FF;
+                        background: #004797;
                         color: #ffffff;
                         border: none;
                         border-radius: 14px;
@@ -422,11 +422,11 @@ export default function Producto() {
                         font-weight: 700;
                         cursor: pointer;
                         transition: all 0.2s ease;
-                        box-shadow: 0 4px 14px rgba(0, 180, 255, 0.3);
+                        box-shadow: 0 4px 14px rgba(0, 71, 151, 0.3);
                     }
                     .premium-btn-buy:hover:not(:disabled) {
                         background: #009ce0;
-                        box-shadow: 0 6px 20px rgba(0, 180, 255, 0.4);
+                        box-shadow: 0 6px 20px rgba(0, 71, 151, 0.4);
                         transform: translateY(-2px);
                     }
                     .premium-delivery-card {
@@ -514,8 +514,8 @@ export default function Producto() {
                         color: #0f172a;
                     }
                     .premium-tab-btn.is-active {
-                        color: #00B4FF;
-                        border-bottom-color: #00B4FF;
+                        color: #004797;
+                        border-bottom-color: #004797;
                         background: #ffffff;
                     }
                 `}</style>
@@ -644,7 +644,7 @@ export default function Producto() {
                         )}
 
                         <div style={{ marginBottom: '24px' }}>
-                            <button onClick={() => { if (auth?.user) { setIsListModalOpen(true); } else { router.get('/login'); } }} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'transparent', border: 'none', color: '#64748b', fontSize: '14px', fontWeight: '600', cursor: 'pointer', padding: '8px 12px', borderRadius: '8px', transition: 'all 0.2s' }} onMouseOver={(e) => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.color = '#00B4FF'; }} onMouseOut={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}>
+                            <button onClick={() => { if (auth?.user) { setIsListModalOpen(true); } else { router.get('/login'); } }} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'transparent', border: 'none', color: '#64748b', fontSize: '14px', fontWeight: '600', cursor: 'pointer', padding: '8px 12px', borderRadius: '8px', transition: 'all 0.2s' }} onMouseOver={(e) => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.color = '#004797'; }} onMouseOut={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b'; }}>
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
                                 Agregar a Mis listas
                             </button>
@@ -823,8 +823,8 @@ export default function Producto() {
                             backgroundColor: '#ffffff',
                             padding: '30px',
                             borderRadius: '16px',
-                            boxShadow: '0 4px 20px rgba(0, 180, 255, 0.08)',
-                            border: '1px solid rgba(0, 180, 255, 0.15)',
+                            boxShadow: '0 4px 20px rgba(0, 71, 151, 0.08)',
+                            border: '1px solid rgba(0, 71, 151, 0.15)',
                         }}
                     >
                         {/* Producto Principal */}
@@ -877,7 +877,7 @@ export default function Producto() {
                             </span>
                         </div>
 
-                        <div style={{ fontSize: '28px', fontWeight: '300', color: '#00B4FF' }}>
+                        <div style={{ fontSize: '28px', fontWeight: '300', color: '#004797' }}>
                             +
                         </div>
 
@@ -908,9 +908,9 @@ export default function Producto() {
                                     textDecoration: 'none',
                                 }}
                                 onMouseEnter={(e) => {
-                                    e.currentTarget.style.borderColor = '#00B4FF';
+                                    e.currentTarget.style.borderColor = '#004797';
                                     e.currentTarget.style.boxShadow =
-                                        '0 4px 12px rgba(0, 180, 255, 0.15)';
+                                        '0 4px 12px rgba(0, 71, 151, 0.15)';
                                 }}
                                 onMouseLeave={(e) => {
                                     e.currentTarget.style.borderColor = '#e2e8f0';
@@ -941,14 +941,14 @@ export default function Producto() {
                                     textDecoration: 'none',
                                     transition: 'color 0.2s',
                                 }}
-                                onMouseEnter={(e) => (e.currentTarget.style.color = '#00B4FF')}
+                                onMouseEnter={(e) => (e.currentTarget.style.color = '#004797')}
                                 onMouseLeave={(e) => (e.currentTarget.style.color = '#334155')}
                             >
                                 {recomendados[0].nombre}
                             </Link>
                         </div>
 
-                        <div style={{ fontSize: '28px', fontWeight: '300', color: '#00B4FF' }}>
+                        <div style={{ fontSize: '28px', fontWeight: '300', color: '#004797' }}>
                             =
                         </div>
 
@@ -963,7 +963,7 @@ export default function Producto() {
                                 padding: '20px',
                                 backgroundColor: '#f0f9ff',
                                 borderRadius: '12px',
-                                border: '1px dashed rgba(0, 180, 255, 0.4)',
+                                border: '1px dashed rgba(0, 71, 151, 0.4)',
                             }}
                         >
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -982,7 +982,7 @@ export default function Producto() {
                                     style={{
                                         fontSize: '28px',
                                         fontWeight: '800',
-                                        color: '#00B4FF',
+                                        color: '#004797',
                                     }}
                                 >
                                     S/{' '}
@@ -1003,7 +1003,7 @@ export default function Producto() {
                                 style={{
                                     width: '100%',
                                     padding: '14px 20px',
-                                    backgroundColor: '#00B4FF',
+                                    backgroundColor: '#004797',
                                     color: 'white',
                                     border: 'none',
                                     borderRadius: '8px',
@@ -1011,7 +1011,7 @@ export default function Producto() {
                                     fontWeight: '600',
                                     cursor: isAdding ? 'not-allowed' : 'pointer',
                                     transition: 'all 0.2s',
-                                    boxShadow: '0 4px 12px rgba(0, 180, 255, 0.3)',
+                                    boxShadow: '0 4px 12px rgba(0, 71, 151, 0.3)',
                                     display: 'flex',
                                     justifyContent: 'center',
                                     alignItems: 'center',
@@ -1023,7 +1023,7 @@ export default function Producto() {
                                 }}
                                 onMouseLeave={(e) => {
                                     if (!isAdding)
-                                        e.currentTarget.style.backgroundColor = '#00B4FF';
+                                        e.currentTarget.style.backgroundColor = '#004797';
                                 }}
                             >
                                 {isAdding ? (
@@ -1112,9 +1112,9 @@ export default function Producto() {
                                         overflow: 'hidden',
                                     }}
                                     onMouseEnter={(e) => {
-                                        e.currentTarget.style.borderColor = '#00B4FF';
+                                        e.currentTarget.style.borderColor = '#004797';
                                         e.currentTarget.style.boxShadow =
-                                            '0 10px 25px rgba(0, 180, 255, 0.1)';
+                                            '0 10px 25px rgba(0, 71, 151, 0.1)';
                                         e.currentTarget.style.transform = 'translateY(-4px)';
                                     }}
                                     onMouseLeave={(e) => {
@@ -1192,7 +1192,7 @@ export default function Producto() {
                                                 style={{
                                                     fontSize: '18px',
                                                     fontWeight: '800',
-                                                    color: '#00B4FF',
+                                                    color: '#004797',
                                                 }}
                                             >
                                                 S/ {formatPrice(rec.precio_actual)}
@@ -1206,7 +1206,7 @@ export default function Producto() {
                                                     display: 'flex',
                                                     justifyContent: 'center',
                                                     alignItems: 'center',
-                                                    color: '#00B4FF',
+                                                    color: '#004797',
                                                 }}
                                             >
                                                 <svg

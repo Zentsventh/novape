@@ -37,7 +37,7 @@ export default function Index({ productos, categorias, marcas, filters }) {
 
     const getSortIndicator = (field) => {
         if (filters?.sort !== field) return <ChevronDown size={14} style={{ opacity: 0.3 }} />;
-        return filters?.direction === 'asc' ? <ChevronUp size={14} style={{ color: '#00B4FF' }} /> : <ChevronDown size={14} style={{ color: '#00B4FF' }} />;
+        return filters?.direction === 'asc' ? <ChevronUp size={14} style={{ color: '#004797' }} /> : <ChevronDown size={14} style={{ color: '#004797' }} />;
     };
 
     const handleDelete = async (id) => {
@@ -52,7 +52,7 @@ export default function Index({ productos, categorias, marcas, filters }) {
             
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
                 <h1 style={{ fontSize: '24px', margin: 0, fontWeight: '700', color: '#1E293B', display: 'flex', alignItems: 'center', gap: '12px', letterSpacing: '-0.02em' }}>
-                    <div style={{ padding: '8px', backgroundColor: '#F0F9FF', borderRadius: '10px', color: '#00B4FF' }}>
+                    <div style={{ padding: '8px', backgroundColor: '#F0F9FF', borderRadius: '10px', color: '#004797' }}>
                         <Package size={24} />
                     </div>
                     Gestión de Productos
@@ -60,9 +60,9 @@ export default function Index({ productos, categorias, marcas, filters }) {
                 
                 <Link 
                     href="/admin/products/create" 
-                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#009BE0'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 180, 255, 0.3)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#00B4FF'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 180, 255, 0.2)'; }}
-                    style={{ background: '#00B4FF', color: 'white', padding: '10px 16px', borderRadius: '8px', textDecoration: 'none', fontWeight: '600', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s ease', boxShadow: '0 2px 4px rgba(0, 180, 255, 0.2)' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#009BE0'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 71, 151, 0.3)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#004797'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 71, 151, 0.2)'; }}
+                    style={{ background: '#004797', color: 'white', padding: '10px 16px', borderRadius: '8px', textDecoration: 'none', fontWeight: '600', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s ease', boxShadow: '0 2px 4px rgba(0, 71, 151, 0.2)' }}
                 >
                     <Plus size={16} />
                     Nuevo Producto
@@ -80,7 +80,7 @@ export default function Index({ productos, categorias, marcas, filters }) {
                             value={categoriaId} 
                             onChange={(e) => { setCategoriaId(e.target.value); handleFilterChange('categoria_id', e.target.value); }}
                             style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #E2E8F0', outline: 'none', background: '#F8FAFC', color: '#1E293B', fontSize: '13px', transition: 'all 0.2s ease', cursor: 'pointer', fontFamily: 'inherit' }}
-                            onFocus={(e) => { e.currentTarget.style.borderColor = '#00B4FF'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.1)'; }}
+                            onFocus={(e) => { e.currentTarget.style.borderColor = '#004797'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.1)'; }}
                             onBlur={(e) => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.boxShadow = 'none'; }}
                         >
                             <option value="">Todas las categorías</option>
@@ -95,7 +95,7 @@ export default function Index({ productos, categorias, marcas, filters }) {
                             value={marcaId} 
                             onChange={(e) => { setMarcaId(e.target.value); handleFilterChange('marca_id', e.target.value); }}
                             style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #E2E8F0', outline: 'none', background: '#F8FAFC', color: '#1E293B', fontSize: '13px', transition: 'all 0.2s ease', cursor: 'pointer', fontFamily: 'inherit' }}
-                            onFocus={(e) => { e.currentTarget.style.borderColor = '#00B4FF'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.1)'; }}
+                            onFocus={(e) => { e.currentTarget.style.borderColor = '#004797'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.1)'; }}
                             onBlur={(e) => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.boxShadow = 'none'; }}
                         >
                             <option value="">Todas las marcas</option>
@@ -117,15 +117,15 @@ export default function Index({ productos, categorias, marcas, filters }) {
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                     style={{ width: '100%', padding: '10px 14px 10px 36px', borderRadius: '8px', border: '1px solid #E2E8F0', background: '#F8FAFC', outline: 'none', color: '#1E293B', fontSize: '13px', transition: 'all 0.2s ease', boxSizing: 'border-box', fontFamily: 'inherit' }}
-                                    onFocus={(e) => { e.currentTarget.style.borderColor = '#00B4FF'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.1)'; }}
+                                    onFocus={(e) => { e.currentTarget.style.borderColor = '#004797'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.1)'; }}
                                     onBlur={(e) => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.boxShadow = 'none'; }}
                                 />
                             </div>
                             <button 
                                 type="submit" 
                                 onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#009BE0'; }}
-                                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#00B4FF'; }}
-                                style={{ background: '#00B4FF', color: 'white', border: 'none', padding: '0 20px', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s ease', fontSize: '13px' }}
+                                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#004797'; }}
+                                style={{ background: '#004797', color: 'white', border: 'none', padding: '0 20px', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s ease', fontSize: '13px' }}
                             >
                                 <Filter size={16} /> Filtrar
                             </button>
@@ -203,7 +203,7 @@ export default function Index({ productos, categorias, marcas, filters }) {
                                                         .sort((a, b) => (a.categoria_padre_id === null ? -1 : (b.categoria_padre_id === null ? 1 : 0)))
                                                         .slice(0, 2)
                                                         .map((c, i) => (
-                                                            <span key={i} style={{ background: c.categoria_padre_id === null ? '#F0F9FF' : '#F1F5F9', color: c.categoria_padre_id === null ? '#00B4FF' : '#64748B', padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: '600', border: c.categoria_padre_id === null ? '1px solid rgba(0, 180, 255, 0.2)' : '1px solid #E2E8F0' }}>
+                                                            <span key={i} style={{ background: c.categoria_padre_id === null ? '#F0F9FF' : '#F1F5F9', color: c.categoria_padre_id === null ? '#004797' : '#64748B', padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: '600', border: c.categoria_padre_id === null ? '1px solid rgba(0, 71, 151, 0.2)' : '1px solid #E2E8F0' }}>
                                                                 {c.nombre}
                                                             </span>
                                                         ))
@@ -234,8 +234,8 @@ export default function Index({ productos, categorias, marcas, filters }) {
                                                 href={`/admin/products/${producto.id}/edit`} 
                                                 title="Editar" 
                                                 onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F0F9FF'; e.currentTarget.style.color = '#009BE0'; }}
-                                                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#00B4FF'; }}
-                                                style={{ color: '#00B4FF', background: 'transparent', textDecoration: 'none', padding: '8px', borderRadius: '8px', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#004797'; }}
+                                                style={{ color: '#004797', background: 'transparent', textDecoration: 'none', padding: '8px', borderRadius: '8px', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                             >
                                                 <Edit size={18} />
                                             </Link>
@@ -285,18 +285,18 @@ export default function Index({ productos, categorias, marcas, filters }) {
                             }}
                             style={{ 
                                 padding: '8px 16px', 
-                                background: link.active ? '#00B4FF' : '#ffffff', 
+                                background: link.active ? '#004797' : '#ffffff', 
                                 color: link.active ? 'white' : '#475569', 
                                 borderRadius: '8px', 
                                 border: '1px solid',
-                                borderColor: link.active ? '#00B4FF' : '#E2E8F0',
+                                borderColor: link.active ? '#004797' : '#E2E8F0',
                                 textDecoration: 'none',
                                 fontWeight: link.active ? '700' : '500',
                                 fontSize: '13px',
                                 opacity: link.url ? 1 : 0.5,
                                 pointerEvents: link.url ? 'auto' : 'none',
                                 transition: 'all 0.2s ease',
-                                boxShadow: link.active ? '0 2px 8px rgba(0, 180, 255, 0.2)' : '0 1px 2px rgba(0,0,0,0.02)'
+                                boxShadow: link.active ? '0 2px 8px rgba(0, 71, 151, 0.2)' : '0 1px 2px rgba(0,0,0,0.02)'
                             }}
                             dangerouslySetInnerHTML={{ __html: link.label }}
                         />

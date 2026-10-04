@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useShipping } from '@/Contexts/ShippingContext';
 import { router, usePage } from '@inertiajs/react';
 import { DEFAULT_IMAGE } from './constants';
 import { fireConfetti } from '../../utils/confetti';
@@ -16,6 +17,7 @@ export default function ProductCard({ product }) {
     const [isWished, setIsWished] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const { shipping } = useShipping();
     const [isHovering, setIsHovering] = useState(false);
 
     const { auth } = usePage().props;
@@ -260,6 +262,16 @@ export default function ProductCard({ product }) {
                         <span>Envío a domicilio</span>
                     </div>
                 </div>
+                {shipping.costo > 0 && (
+                  <div className="efe-product-shipping-cost" style={{
+                    marginTop: '8px',
+                    color: '#004797',
+                    fontWeight: '600',
+                    fontSize: '14px'
+                  }}>
+                    Costo de envío: S/ {new Intl.NumberFormat('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(shipping.costo)}
+                  </div>
+                )}
             </div>
 
             <div className="efe-product-actions">

@@ -33,7 +33,7 @@ export default function CompraShow({ compra, items, logoUrl }) {
                             display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#64748B', 
                             textDecoration: 'none', fontWeight: 600, fontSize: '14px', transition: 'color 0.2s'
                         }}
-                        onMouseOver={e => e.currentTarget.style.color = '#00B4FF'}
+                        onMouseOver={e => e.currentTarget.style.color = '#004797'}
                         onMouseOut={e => e.currentTarget.style.color = '#64748B'}
                     >
                         <ArrowLeft size={16} /> Volver al Historial
@@ -107,7 +107,7 @@ export default function CompraShow({ compra, items, logoUrl }) {
                                     <tfoot>
                                         <tr>
                                             <td colSpan="4" style={{ padding: '24px 32px', textAlign: 'right', fontWeight: 700, fontSize: '14px', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Total de la Orden:</td>
-                                            <td style={{ padding: '24px 32px', textAlign: 'right', fontWeight: 800, fontSize: '20px', color: '#00B4FF' }}>S/ {Number(compra.total).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                            <td style={{ padding: '24px 32px', textAlign: 'right', fontWeight: 800, fontSize: '20px', color: '#004797' }}>S/ {Number(compra.total).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                                         </tr>
                                     </tfoot>
                                 </table>
@@ -129,7 +129,7 @@ export default function CompraShow({ compra, items, logoUrl }) {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                         <div style={{ background: '#ffffff', borderRadius: '20px', padding: '24px', boxShadow: '0 4px 20px -2px rgba(0,0,0,0.03)', border: '1px solid #E2E8F0' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-                                <div style={{ background: '#E0F2FE', color: '#00B4FF', padding: '8px', borderRadius: '10px' }}><Building2 size={18} /></div>
+                                <div style={{ background: '#E0F2FE', color: '#004797', padding: '8px', borderRadius: '10px' }}><Building2 size={18} /></div>
                                 <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#1E293B' }}>Proveedor</h3>
                             </div>
                             
@@ -141,7 +141,7 @@ export default function CompraShow({ compra, items, logoUrl }) {
                                 {compra.proveedor_email && (
                                     <div>
                                         <div style={{ fontSize: '12px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', marginBottom: '4px', letterSpacing: '0.5px' }}>Email</div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#00B4FF', fontSize: '14px', fontWeight: 500 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#004797', fontSize: '14px', fontWeight: 500 }}>
                                             <Mail size={14} /> {compra.proveedor_email}
                                         </div>
                                     </div>
@@ -186,12 +186,12 @@ export default function CompraShow({ compra, items, logoUrl }) {
                             <button 
                                 onClick={handleCompletar}
                                 style={{ 
-                                    width: '100%', padding: '16px', borderRadius: '16px', border: 'none', background: '#00B4FF', color: 'white', 
+                                    width: '100%', padding: '16px', borderRadius: '16px', border: 'none', background: '#004797', color: 'white', 
                                     fontWeight: 700, fontSize: '15px', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px',
-                                    boxShadow: '0 4px 14px rgba(0, 180, 255, 0.3)', transition: 'all 0.2s ease'
+                                    boxShadow: '0 4px 14px rgba(0, 71, 151, 0.3)', transition: 'all 0.2s ease'
                                 }}
-                                onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 180, 255, 0.4)'; }}
-                                onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 180, 255, 0.3)'; }}
+                                onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 71, 151, 0.4)'; }}
+                                onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 71, 151, 0.3)'; }}
                             >
                                 <Check size={20} /> Completar y Cargar Stock
                             </button>

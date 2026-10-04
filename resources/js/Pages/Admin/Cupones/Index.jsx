@@ -94,7 +94,7 @@ export default function Index({ cupones }) {
     };
     
     const inputFocusStyle = {
-        borderColor: '#00B4FF', boxShadow: '0 0 0 4px rgba(0, 180, 255, 0.1)', backgroundColor: '#ffffff'
+        borderColor: '#004797', boxShadow: '0 0 0 4px rgba(0, 71, 151, 0.1)', backgroundColor: '#ffffff'
     };
 
     const labelStyle = {
@@ -111,7 +111,7 @@ export default function Index({ cupones }) {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
                     <div>
                         <h1 style={{ fontSize: '28px', margin: '0 0 8px 0', fontWeight: 800, color: '#1E293B', letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ background: '#E0F2FE', padding: '10px', borderRadius: '12px', color: '#00B4FF', display: 'flex' }}>
+                            <div style={{ background: '#E0F2FE', padding: '10px', borderRadius: '12px', color: '#004797', display: 'flex' }}>
                                 <Ticket size={24} />
                             </div>
                             Cupones de Descuento
@@ -125,11 +125,11 @@ export default function Index({ cupones }) {
                         onClick={openCreateModal} 
                         style={{ 
                             display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', borderRadius: '12px', 
-                            border: 'none', background: '#00B4FF', color: '#ffffff', fontWeight: 700, fontSize: '14px', 
-                            cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 14px rgba(0, 180, 255, 0.3)'
+                            border: 'none', background: '#004797', color: '#ffffff', fontWeight: 700, fontSize: '14px', 
+                            cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 14px rgba(0, 71, 151, 0.3)'
                         }}
-                        onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 180, 255, 0.4)'; }}
-                        onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 180, 255, 0.3)'; }}
+                        onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 71, 151, 0.4)'; }}
+                        onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 71, 151, 0.3)'; }}
                     >
                         <Plus size={18} /> Nuevo Cupón
                     </button>
@@ -185,7 +185,7 @@ export default function Index({ cupones }) {
                                                         transition: 'all 0.2s'
                                                     }}
                                                     title="Copiar cupón"
-                                                    onMouseOver={(e) => { if(copiedCode !== cupon.codigo) { e.currentTarget.style.borderColor = '#00B4FF'; e.currentTarget.style.color = '#00B4FF'; e.currentTarget.style.background = '#E0F2FE'; } }}
+                                                    onMouseOver={(e) => { if(copiedCode !== cupon.codigo) { e.currentTarget.style.borderColor = '#004797'; e.currentTarget.style.color = '#004797'; e.currentTarget.style.background = '#E0F2FE'; } }}
                                                     onMouseOut={(e) => { if(copiedCode !== cupon.codigo) { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.color = '#1E293B'; e.currentTarget.style.background = '#F1F5F9'; } }}
                                                 >
                                                     {copiedCode === cupon.codigo ? <Check size={16} /> : <Copy size={16} />}
@@ -250,7 +250,7 @@ export default function Index({ cupones }) {
                                             {/* Acciones */}
                                             <td style={{ padding: '24px 32px', textAlign: 'right' }}>
                                                 <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
-                                                    <button onClick={() => openEditModal(cupon)} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: '#F1F5F9', color: '#475569', borderRadius: '10px', border: 'none', cursor: 'pointer', transition: 'all 0.2s', opacity: isExpired ? 0.7 : 1 }} onMouseOver={e => { e.currentTarget.style.background = '#E0F2FE'; e.currentTarget.style.color = '#00B4FF'; }} onMouseOut={e => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#475569'; }} title="Editar">
+                                                    <button onClick={() => openEditModal(cupon)} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: '#F1F5F9', color: '#475569', borderRadius: '10px', border: 'none', cursor: 'pointer', transition: 'all 0.2s', opacity: isExpired ? 0.7 : 1 }} onMouseOver={e => { e.currentTarget.style.background = '#E0F2FE'; e.currentTarget.style.color = '#004797'; }} onMouseOut={e => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#475569'; }} title="Editar">
                                                         <Edit2 size={16} />
                                                     </button>
                                                     <button onClick={() => confirmDelete(cupon.id)} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: '#FEF2F2', color: '#EF4444', borderRadius: '10px', border: 'none', cursor: 'pointer', transition: 'all 0.2s', opacity: isExpired ? 0.7 : 1 }} onMouseOver={e => { e.currentTarget.style.background = '#EF4444'; e.currentTarget.style.color = '#ffffff'; }} onMouseOut={e => { e.currentTarget.style.background = '#FEF2F2'; e.currentTarget.style.color = '#EF4444'; }} title="Eliminar">
@@ -274,7 +274,7 @@ export default function Index({ cupones }) {
                     <div style={{ background: '#ffffff', borderRadius: '24px', width: '100%', maxWidth: '650px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh', animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }}>
                         <div style={{ padding: '24px 32px', borderBottom: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#F8FAFC' }}>
                             <h5 style={{ margin: 0, fontSize: '20px', fontWeight: 800, color: '#1E293B', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <Ticket size={24} color="#00B4FF" />
+                                <Ticket size={24} color="#004797" />
                                 {isEditing ? 'Editar Cupón' : 'Nuevo Cupón Promocional'}
                             </h5>
                             <button type="button" onClick={() => setIsModalOpen(false)} style={{ background: '#E2E8F0', border: 'none', cursor: 'pointer', color: '#64748B', width: '32px', height: '32px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.background = '#EF4444'; e.currentTarget.style.color = '#ffffff'; }} onMouseOut={e => { e.currentTarget.style.background = '#E2E8F0'; e.currentTarget.style.color = '#64748B'; }}>
@@ -409,11 +409,11 @@ export default function Index({ cupones }) {
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '6px' }}>
                                         <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', padding: '12px 16px', borderRadius: '12px', border: '1px solid #E2E8F0', background: '#F8FAFC', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.background = '#ffffff'; }} onMouseOut={e => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.background = '#F8FAFC'; }}>
-                                            <input type="checkbox" checked={form.unico_por_cliente} onChange={e => setForm({...form, unico_por_cliente: e.target.checked})} style={{ width: '18px', height: '18px', accentColor: '#00B4FF', cursor: 'pointer' }} />
+                                            <input type="checkbox" checked={form.unico_por_cliente} onChange={e => setForm({...form, unico_por_cliente: e.target.checked})} style={{ width: '18px', height: '18px', accentColor: '#004797', cursor: 'pointer' }} />
                                             <span style={{ fontSize: '14px', fontWeight: 600, color: '#1E293B' }}>1 solo uso por cliente</span>
                                         </label>
                                         <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', padding: '12px 16px', borderRadius: '12px', border: '1px solid #E2E8F0', background: '#F8FAFC', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.background = '#ffffff'; }} onMouseOut={e => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.background = '#F8FAFC'; }}>
-                                            <input type="checkbox" checked={form.activo} onChange={e => setForm({...form, activo: e.target.checked})} style={{ width: '18px', height: '18px', accentColor: '#00B4FF', cursor: 'pointer' }} />
+                                            <input type="checkbox" checked={form.activo} onChange={e => setForm({...form, activo: e.target.checked})} style={{ width: '18px', height: '18px', accentColor: '#004797', cursor: 'pointer' }} />
                                             <span style={{ fontSize: '14px', fontWeight: 600, color: '#1E293B' }}>Cupón Activo</span>
                                         </label>
                                     </div>
@@ -422,7 +422,7 @@ export default function Index({ cupones }) {
                             </div>
                             <div style={{ padding: '20px 32px', borderTop: '1px solid #E2E8F0', background: '#F8FAFC', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
                                 <button type="button" onClick={() => setIsModalOpen(false)} style={{ background: '#ffffff', border: '1px solid #E2E8F0', padding: '12px 24px', borderRadius: '12px', fontWeight: 700, color: '#475569', cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#1E293B'; }} onMouseOut={e => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.color = '#475569'; }}>Cancelar</button>
-                                <button type="submit" style={{ background: '#00B4FF', border: 'none', padding: '12px 28px', borderRadius: '12px', fontWeight: 800, color: '#ffffff', cursor: 'pointer', boxShadow: '0 4px 14px rgba(0, 180, 255, 0.3)', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 180, 255, 0.4)'; }} onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 180, 255, 0.3)'; }}>Guardar Cupón</button>
+                                <button type="submit" style={{ background: '#004797', border: 'none', padding: '12px 28px', borderRadius: '12px', fontWeight: 800, color: '#ffffff', cursor: 'pointer', boxShadow: '0 4px 14px rgba(0, 71, 151, 0.3)', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 71, 151, 0.4)'; }} onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 71, 151, 0.3)'; }}>Guardar Cupón</button>
                             </div>
                         </form>
                     </div>

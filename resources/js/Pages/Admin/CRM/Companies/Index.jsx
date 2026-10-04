@@ -123,7 +123,7 @@ export default function Index({ companies = { data: [], links: [] }, filters = {
                     --twenty-text-main: #1E293B;
                     --twenty-text-secondary: #475569;
                     --twenty-text-muted: #94A3B8;
-                    --twenty-primary-bg: rgba(0, 180, 255, 0.04);
+                    --twenty-primary-bg: rgba(0, 71, 151, 0.04);
                     --twenty-bg-hover: #F1F5F9;
                     --twenty-radius-lg: 12px;
                 }
@@ -170,11 +170,11 @@ export default function Index({ companies = { data: [], links: [] }, filters = {
                     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
                 }
                 .premium-input:focus {
-                    border-color: #00B4FF;
-                    box-shadow: 0 0 0 3px rgba(0, 180, 255, 0.15), 0 1px 2px rgba(0, 0, 0, 0.02);
+                    border-color: #004797;
+                    box-shadow: 0 0 0 3px rgba(0, 71, 151, 0.15), 0 1px 2px rgba(0, 0, 0, 0.02);
                 }
                 .premium-input:focus ~ .premium-search-icon {
-                    color: #00B4FF;
+                    color: #004797;
                 }
                 .premium-input::placeholder {
                     color: #94A3B8;
@@ -197,7 +197,7 @@ export default function Index({ companies = { data: [], links: [] }, filters = {
                     transform: translateY(0) scale(0.98);
                 }
                 .premium-btn:focus-visible {
-                    box-shadow: 0 0 0 3px rgba(0, 180, 255, 0.3);
+                    box-shadow: 0 0 0 3px rgba(0, 71, 151, 0.3);
                 }
                 .premium-btn-secondary {
                     background: #FFFFFF;
@@ -213,14 +213,14 @@ export default function Index({ companies = { data: [], links: [] }, filters = {
                     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
                 }
                 .premium-btn-primary {
-                    background: #00B4FF;
+                    background: #004797;
                     color: #FFFFFF;
-                    box-shadow: 0 2px 4px rgba(0, 180, 255, 0.2);
+                    box-shadow: 0 2px 4px rgba(0, 71, 151, 0.2);
                 }
                 .premium-btn-primary:hover {
                     background: #00A2E8;
                     transform: translateY(-1px);
-                    box-shadow: 0 4px 10px rgba(0, 180, 255, 0.3);
+                    box-shadow: 0 4px 10px rgba(0, 71, 151, 0.3);
                 }
                 .premium-table-wrapper {
                     flex: 1;
@@ -234,11 +234,11 @@ export default function Index({ companies = { data: [], links: [] }, filters = {
                     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.06), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
                 }
                 .company-link:hover {
-                    color: #00B4FF !important;
+                    color: #004797 !important;
                 }
                 .table-row-hover:hover .company-logo-container {
-                    border-color: #00B4FF !important;
-                    box-shadow: 0 0 0 2px rgba(0, 180, 255, 0.1);
+                    border-color: #004797 !important;
+                    box-shadow: 0 0 0 2px rgba(0, 71, 151, 0.1);
                 }
                 .premium-form {
                     padding: 8px 0;
@@ -266,8 +266,8 @@ export default function Index({ companies = { data: [], links: [] }, filters = {
                     box-shadow: 0 1px 2px rgba(0,0,0,0.02);
                 }
                 .premium-form-input:focus {
-                    border-color: #00B4FF;
-                    box-shadow: 0 0 0 3px rgba(0, 180, 255, 0.15), 0 1px 2px rgba(0,0,0,0.02);
+                    border-color: #004797;
+                    box-shadow: 0 0 0 3px rgba(0, 71, 151, 0.15), 0 1px 2px rgba(0,0,0,0.02);
                 }
                 .premium-form-input::placeholder {
                     color: #94A3B8;

@@ -13,7 +13,7 @@ export default function Inventario({
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
                 <h1 style={{ fontSize: '24px', margin: 0, fontWeight: '700', color: '#1E293B', display: 'flex', alignItems: 'center', gap: '12px', letterSpacing: '-0.02em' }}>
-                    <div style={{ padding: '8px', backgroundColor: '#F0F9FF', borderRadius: '10px', color: '#00B4FF' }}>
+                    <div style={{ padding: '8px', backgroundColor: '#F0F9FF', borderRadius: '10px', color: '#004797' }}>
                         <Box size={24} />
                     </div>
                     <div>
@@ -35,9 +35,9 @@ export default function Inventario({
                     </Link>
                     <Link 
                         href="/admin/almacen/entradas" 
-                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#009BE0'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 180, 255, 0.3)'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#00B4FF'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 180, 255, 0.2)'; }}
-                        style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#00B4FF', color: 'white', textDecoration: 'none', padding: '10px 16px', borderRadius: '8px', fontWeight: '600', fontSize: '13px', transition: 'all 0.2s ease', boxShadow: '0 2px 4px rgba(0, 180, 255, 0.2)' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#009BE0'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 71, 151, 0.3)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#004797'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 71, 151, 0.2)'; }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#004797', color: 'white', textDecoration: 'none', padding: '10px 16px', borderRadius: '8px', fontWeight: '600', fontSize: '13px', transition: 'all 0.2s ease', boxShadow: '0 2px 4px rgba(0, 71, 151, 0.2)' }}
                     >
                         <ArrowRight size={16} />
                         Registrar Entrada
@@ -53,13 +53,13 @@ export default function Inventario({
                     onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px -2px rgba(0, 0, 0, 0.05)'; }}
                     style={{ background: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.3s ease' }}
                 >
-                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#F0F9FF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00B4FF', flexShrink: 0 }}>
+                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#F0F9FF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#004797', flexShrink: 0 }}>
                         <Package size={24} />
                     </div>
                     <div>
                         <div style={{ color: '#64748B', fontSize: '12px', fontWeight: '600', letterSpacing: '0.05em' }}>PRODUCTOS CATÁLOGO</div>
                         <div style={{ fontSize: '24px', fontWeight: '800', color: '#1E293B', letterSpacing: '-0.02em', marginTop: '2px' }}>{totalProductos}</div>
-                        <div style={{ fontSize: '12px', color: '#00B4FF', marginTop: '4px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <div style={{ fontSize: '12px', color: '#004797', marginTop: '4px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
                             <TrendingUp size={12} /> Activos
                         </div>
                     </div>
@@ -123,9 +123,9 @@ export default function Inventario({
                 <div style={{ background: '#ffffff', borderRadius: '12px', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0', overflow: 'hidden' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px 24px 20px 24px' }}>
                         <h2 style={{ fontSize: '16px', fontWeight: '700', color: '#1E293B', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <Package size={18} style={{ color: '#00B4FF' }} /> Resumen de Stock
+                            <Package size={18} style={{ color: '#004797' }} /> Resumen de Stock
                         </h2>
-                        <Link href="/admin/productos" style={{ color: '#00B4FF', fontSize: '13px', textDecoration: 'none', fontWeight: '600', transition: 'color 0.2s ease' }} onMouseEnter={e => e.target.style.color = '#009BE0'} onMouseLeave={e => e.target.style.color = '#00B4FF'}>
+                        <Link href="/admin/productos" style={{ color: '#004797', fontSize: '13px', textDecoration: 'none', fontWeight: '600', transition: 'color 0.2s ease' }} onMouseEnter={e => e.target.style.color = '#009BE0'} onMouseLeave={e => e.target.style.color = '#004797'}>
                             Ver Catálogo
                         </Link>
                     </div>

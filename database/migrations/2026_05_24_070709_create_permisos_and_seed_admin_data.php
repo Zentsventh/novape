@@ -72,26 +72,25 @@ return new class extends Migration
             ]);
         }
 
-        // Ensure user exists and has admin role
-        $user = DB::table('usuario')->first();
-        if (!$user) {
+        // El primer administrador se crea explícitamente, sin credenciales predeterminadas.
+        $adminEmail = env('INITIAL_ADMIN_EMAIL');
+        $adminPassword = env('INITIAL_ADMIN_PASSWORD');
+        if ($adminEmail && $adminPassword) {
             $userId = DB::table('usuario')->insertGetId([
                 'nombres' => 'Admin',
                 'apellidos' => 'Root',
-                'email' => 'admin@admin.com',
-                'password_hash' => Hash::make('12345678'),
+                'email' => $adminEmail,
+                'password_hash' => Hash::make($adminPassword),
                 'estado' => 'activo',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
-        } else {
-            $userId = $user->id;
-        }
 
-        DB::table('usuario_rol')->updateOrInsert([
-            'usuario_id' => $userId,
-            'rol_id' => $adminRole->id
-        ]);
+            DB::table('usuario_rol')->updateOrInsert([
+                'usuario_id' => $userId,
+                'rol_id' => $adminRole->id,
+            ]);
+        }
 
 
     }

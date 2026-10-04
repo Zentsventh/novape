@@ -67,7 +67,7 @@ export default function HistorialPos({ historial, filters, logoUrl }) {
             fontSize: '12px',
             fontWeight: '600',
             backgroundColor: '#F0F9FF',
-            color: '#00B4FF',
+            color: '#004797',
             border: '1px solid #BAE6FD',
         },
         btnBack: {
@@ -89,24 +89,24 @@ export default function HistorialPos({ historial, filters, logoUrl }) {
             width: '100%',
             padding: '10px 16px 10px 42px',
             borderRadius: '8px',
-            border: `1px solid ${isSearchFocused ? '#00B4FF' : '#E2E8F0'}`,
+            border: `1px solid ${isSearchFocused ? '#004797' : '#E2E8F0'}`,
             fontSize: '14px',
             color: '#1E293B',
             outline: 'none',
-            boxShadow: isSearchFocused ? '0 0 0 3px rgba(0, 180, 255, 0.15)' : 'none',
+            boxShadow: isSearchFocused ? '0 0 0 3px rgba(0, 71, 151, 0.15)' : 'none',
             transition: 'all 0.2s ease',
             backgroundColor: isSearchFocused ? '#ffffff' : '#F8FAFC',
         },
         btnSearch: {
             padding: '10px 20px',
-            backgroundColor: '#00B4FF',
+            backgroundColor: '#004797',
             color: '#ffffff',
             border: 'none',
             borderRadius: '8px',
             fontSize: '14px',
             fontWeight: '600',
             cursor: 'pointer',
-            boxShadow: '0 2px 4px rgba(0, 180, 255, 0.25)',
+            boxShadow: '0 2px 4px rgba(0, 71, 151, 0.25)',
             transition: 'all 0.2s ease',
             display: 'flex',
             alignItems: 'center',
@@ -132,7 +132,7 @@ export default function HistorialPos({ historial, filters, logoUrl }) {
             <div style={{ padding: '24px 32px', maxWidth: '1400px', margin: '0 auto' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h1 style={styles.pageTitle}>
-                        <div style={{ padding: '8px', backgroundColor: '#F0F9FF', borderRadius: '10px', color: '#00B4FF' }}>
+                        <div style={{ padding: '8px', backgroundColor: '#F0F9FF', borderRadius: '10px', color: '#004797' }}>
                             <FileText size={24} />
                         </div>
                         Historial de Ventas POS
@@ -151,7 +151,7 @@ export default function HistorialPos({ historial, filters, logoUrl }) {
                     <div style={{ padding: '20px 24px', borderBottom: '1px solid #E2E8F0', backgroundColor: '#ffffff' }}>
                         <form onSubmit={handleSearch} style={{ display: 'flex', gap: '12px', maxWidth: '480px' }}>
                             <div style={{ position: 'relative', flex: 1 }}>
-                                <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: isSearchFocused ? '#00B4FF' : '#94A3B8', transition: 'color 0.2s ease' }} />
+                                <Search size={18} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: isSearchFocused ? '#004797' : '#94A3B8', transition: 'color 0.2s ease' }} />
                                 <input 
                                     type="text"
                                     style={styles.searchInput}
@@ -165,8 +165,8 @@ export default function HistorialPos({ historial, filters, logoUrl }) {
                             <button 
                                 type="submit" 
                                 style={styles.btnSearch}
-                                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#009BE0'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 180, 255, 0.3)'; }}
-                                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#00B4FF'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 180, 255, 0.25)'; }}
+                                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#009BE0'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 71, 151, 0.3)'; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#004797'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 71, 151, 0.25)'; }}
                             >
                                 Buscar
                             </button>
@@ -241,7 +241,7 @@ export default function HistorialPos({ historial, filters, logoUrl }) {
                                                     href={`/admin/pos/ticket/${venta.id}`} 
                                                     target="_blank" 
                                                     style={styles.actionBtn}
-                                                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F0F9FF'; e.currentTarget.style.color = '#00B4FF'; e.currentTarget.style.transform = 'scale(1.05)'; }}
+                                                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F0F9FF'; e.currentTarget.style.color = '#004797'; e.currentTarget.style.transform = 'scale(1.05)'; }}
                                                     onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#94A3B8'; e.currentTarget.style.transform = 'scale(1)'; }}
                                                     title="Imprimir Ticket"
                                                 >
@@ -275,17 +275,17 @@ export default function HistorialPos({ historial, filters, logoUrl }) {
                                     dangerouslySetInnerHTML={{ __html: link.label }}
                                     style={{
                                         padding: '6px 12px',
-                                        border: `1px solid ${link.active ? '#00B4FF' : '#E2E8F0'}`,
+                                        border: `1px solid ${link.active ? '#004797' : '#E2E8F0'}`,
                                         borderRadius: '6px',
                                         textDecoration: 'none',
-                                        backgroundColor: link.active ? '#00B4FF' : '#ffffff',
+                                        backgroundColor: link.active ? '#004797' : '#ffffff',
                                         color: link.active ? '#ffffff' : '#475569',
                                         fontSize: '13px',
                                         fontWeight: link.active ? '600' : '500',
                                         pointerEvents: link.url ? 'auto' : 'none',
                                         opacity: link.url ? 1 : 0.5,
                                         transition: 'all 0.2s ease',
-                                        boxShadow: link.active ? '0 2px 4px rgba(0, 180, 255, 0.25)' : 'none'
+                                        boxShadow: link.active ? '0 2px 4px rgba(0, 71, 151, 0.25)' : 'none'
                                     }}
                                     onMouseEnter={(e) => { 
                                         if (!link.active && link.url) {

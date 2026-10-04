@@ -100,7 +100,7 @@ export default function ComprasIndex({ compras, totalGastado, comprasPendientes,
         fontSize: '14px', outline: 'none', backgroundColor: '#F8FAFC', color: '#1E293B', transition: 'all 0.2s',
         appearance: 'none', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
     };
-    const inputFocusStyle = { borderColor: '#00B4FF', boxShadow: '0 0 0 4px rgba(0, 180, 255, 0.1)', backgroundColor: '#ffffff' };
+    const inputFocusStyle = { borderColor: '#004797', boxShadow: '0 0 0 4px rgba(0, 71, 151, 0.1)', backgroundColor: '#ffffff' };
     const labelStyle = { display: 'block', fontSize: '13px', fontWeight: 600, color: '#64748B', marginBottom: '8px', letterSpacing: '0.02em' };
 
     return (
@@ -116,12 +116,12 @@ export default function ComprasIndex({ compras, totalGastado, comprasPendientes,
                     <button 
                         onClick={() => setShowModal(true)} 
                         style={{ 
-                            display: 'flex', alignItems: 'center', gap: '8px', background: '#00B4FF', color: 'white', 
+                            display: 'flex', alignItems: 'center', gap: '8px', background: '#004797', color: 'white', 
                             padding: '12px 24px', borderRadius: '12px', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '14px',
-                            boxShadow: '0 4px 14px rgba(0, 180, 255, 0.3)', transition: 'all 0.2s ease'
+                            boxShadow: '0 4px 14px rgba(0, 71, 151, 0.3)', transition: 'all 0.2s ease'
                         }}
-                        onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 180, 255, 0.4)'; }}
-                        onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 180, 255, 0.3)'; }}
+                        onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 71, 151, 0.4)'; }}
+                        onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 71, 151, 0.3)'; }}
                     >
                         <Plus size={18} /> Nueva Orden
                     </button>
@@ -161,7 +161,7 @@ export default function ComprasIndex({ compras, totalGastado, comprasPendientes,
                 {/* Filtros */}
                 <div style={{ background: '#ffffff', padding: '24px', borderRadius: '20px', boxShadow: '0 4px 20px -2px rgba(0,0,0,0.03)', border: '1px solid #E2E8F0', marginBottom: '32px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', color: '#1E293B', fontWeight: 700 }}>
-                        <Filter size={18} color="#00B4FF" /> Filtros Avanzados
+                        <Filter size={18} color="#004797" /> Filtros Avanzados
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '20px', alignItems: 'flex-end' }}>
                         <div>
@@ -287,7 +287,7 @@ export default function ComprasIndex({ compras, totalGastado, comprasPendientes,
                     /* TABLA DE ANÁLISIS DE PRECIOS POR PRODUCTO (KARDEX DE COMPRAS) */
                     <div style={{ background: '#ffffff', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 4px 20px -2px rgba(0,0,0,0.03)', border: '1px solid #BAE6FD', marginBottom: '32px' }}>
                         <div style={{ padding: '20px 24px', borderBottom: '1px solid #E0F2FE', background: '#F0F9FF', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ background: '#00B4FF', padding: '8px', borderRadius: '10px', color: 'white' }}><Package size={18} /></div>
+                            <div style={{ background: '#004797', padding: '8px', borderRadius: '10px', color: 'white' }}><Package size={18} /></div>
                             <h3 style={{ margin: 0, color: '#0369A1', fontSize: '16px', fontWeight: 700 }}>Kardex de Compras (Producto Filtrado)</h3>
                         </div>
                         <div style={{ overflowX: 'auto' }}>
@@ -311,7 +311,7 @@ export default function ComprasIndex({ compras, totalGastado, comprasPendientes,
                                                 {index === 0 && <span style={{fontSize:'10px', background:'#10B981', color:'white', padding:'4px 8px', borderRadius:'12px', marginLeft:'8px', fontWeight: 700}}>ÚLTIMA</span>}
                                             </td>
                                             <td style={{ padding: '20px 24px', fontWeight: 700, color: '#1E293B', fontSize: '14px' }}>{hp.numero_orden}</td>
-                                            <td style={{ padding: '20px 24px', color: '#00B4FF', fontWeight: 600, fontSize: '14px' }}>{hp.proveedor_nombre || 'Sin proveedor'}</td>
+                                            <td style={{ padding: '20px 24px', color: '#004797', fontWeight: 600, fontSize: '14px' }}>{hp.proveedor_nombre || 'Sin proveedor'}</td>
                                             <td style={{ padding: '20px 24px', fontWeight: 700, color: '#1E293B', fontSize: '14px' }}>{hp.cantidad} unds.</td>
                                             <td style={{ padding: '20px 24px', fontWeight: 700, color: '#10B981', fontSize: '14px' }}>S/ {Number(hp.costo_unitario).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                                             <td style={{ padding: '20px 24px', fontWeight: 700, color: '#1E293B', fontSize: '14px' }}>S/ {Number(hp.subtotal).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
@@ -376,11 +376,11 @@ export default function ComprasIndex({ compras, totalGastado, comprasPendientes,
                                                 <Link 
                                                     href={`/admin/compras/${c.id}`} 
                                                     style={{ 
-                                                        color: '#00B4FF', background: '#E0F2FE', padding: '8px', borderRadius: '8px', 
+                                                        color: '#004797', background: '#E0F2FE', padding: '8px', borderRadius: '8px', 
                                                         display: 'inline-flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', textDecoration: 'none'
                                                     }}
-                                                    onMouseOver={e => { e.currentTarget.style.backgroundColor = '#00B4FF'; e.currentTarget.style.color = '#ffffff'; e.currentTarget.style.transform = 'scale(1.05)'; }}
-                                                    onMouseOut={e => { e.currentTarget.style.backgroundColor = '#E0F2FE'; e.currentTarget.style.color = '#00B4FF'; e.currentTarget.style.transform = 'scale(1)'; }}
+                                                    onMouseOver={e => { e.currentTarget.style.backgroundColor = '#004797'; e.currentTarget.style.color = '#ffffff'; e.currentTarget.style.transform = 'scale(1.05)'; }}
+                                                    onMouseOut={e => { e.currentTarget.style.backgroundColor = '#E0F2FE'; e.currentTarget.style.color = '#004797'; e.currentTarget.style.transform = 'scale(1)'; }}
                                                     title="Ver Detalles"
                                                 >
                                                     <Eye size={18} />
@@ -410,9 +410,9 @@ export default function ComprasIndex({ compras, totalGastado, comprasPendientes,
                                                 <p style={{ margin: 0, color: '#64748B', fontSize: '15px', fontWeight: 500 }}>No hay compras registradas.</p>
                                                 <button 
                                                     onClick={() => setShowModal(true)} 
-                                                    style={{ background: 'transparent', border: '1px solid #00B4FF', color: '#00B4FF', padding: '8px 16px', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', marginTop: '8px' }}
-                                                    onMouseOver={(e) => { e.currentTarget.style.background = '#00B4FF'; e.currentTarget.style.color = '#fff'; }}
-                                                    onMouseOut={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#00B4FF'; }}
+                                                    style={{ background: 'transparent', border: '1px solid #004797', color: '#004797', padding: '8px 16px', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', marginTop: '8px' }}
+                                                    onMouseOver={(e) => { e.currentTarget.style.background = '#004797'; e.currentTarget.style.color = '#fff'; }}
+                                                    onMouseOut={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#004797'; }}
                                                 >
                                                     Crear Primera Orden
                                                 </button>
@@ -531,12 +531,12 @@ export default function ComprasIndex({ compras, totalGastado, comprasPendientes,
                                             <button 
                                                 type="button" onClick={addItemRow} 
                                                 style={{ 
-                                                    background: '#E0F2FE', color: '#00B4FF', border: '1px dashed #00B4FF', padding: '12px', 
+                                                    background: '#E0F2FE', color: '#004797', border: '1px dashed #004797', padding: '12px', 
                                                     borderRadius: '12px', cursor: 'pointer', fontWeight: 600, fontSize: '14px', transition: 'all 0.2s',
                                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
                                                 }}
-                                                onMouseOver={e => { e.currentTarget.style.background = '#00B4FF'; e.currentTarget.style.color = '#ffffff'; }}
-                                                onMouseOut={e => { e.currentTarget.style.background = '#E0F2FE'; e.currentTarget.style.color = '#00B4FF'; }}
+                                                onMouseOver={e => { e.currentTarget.style.background = '#004797'; e.currentTarget.style.color = '#ffffff'; }}
+                                                onMouseOut={e => { e.currentTarget.style.background = '#E0F2FE'; e.currentTarget.style.color = '#004797'; }}
                                             >
                                                 <Plus size={16} /> Agregar otro producto
                                             </button>
@@ -575,12 +575,12 @@ export default function ComprasIndex({ compras, totalGastado, comprasPendientes,
                                 <button 
                                     type="submit" form="compra-form" disabled={processing} 
                                     style={{ 
-                                        padding: '12px 32px', borderRadius: '12px', border: 'none', background: '#00B4FF', color: 'white', 
+                                        padding: '12px 32px', borderRadius: '12px', border: 'none', background: '#004797', color: 'white', 
                                         fontWeight: 600, cursor: processing ? 'not-allowed' : 'pointer', transition: 'all 0.2s', fontSize: '14px',
-                                        boxShadow: '0 4px 14px rgba(0, 180, 255, 0.3)', opacity: processing ? 0.7 : 1
+                                        boxShadow: '0 4px 14px rgba(0, 71, 151, 0.3)', opacity: processing ? 0.7 : 1
                                     }}
-                                    onMouseOver={e => { if(!processing) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 180, 255, 0.4)'; } }}
-                                    onMouseOut={e => { if(!processing) { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 180, 255, 0.3)'; } }}
+                                    onMouseOver={e => { if(!processing) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 71, 151, 0.4)'; } }}
+                                    onMouseOut={e => { if(!processing) { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 71, 151, 0.3)'; } }}
                                 >
                                     {processing ? 'Creando...' : 'Crear Orden de Compra'}
                                 </button>

@@ -108,11 +108,11 @@ export default function RmaIndex({ rmas }) {
                                                 href={`/admin/rma/${rma.id}`} 
                                                 style={{ 
                                                     display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '8px 16px', 
-                                                    background: '#E0F2FE', color: '#00B4FF', borderRadius: '12px', textDecoration: 'none', 
+                                                    background: '#E0F2FE', color: '#004797', borderRadius: '12px', textDecoration: 'none', 
                                                     fontWeight: 700, fontSize: '14px', transition: 'all 0.2s', border: '1px solid transparent'
                                                 }}
-                                                onMouseOver={e => { e.currentTarget.style.backgroundColor = '#00B4FF'; e.currentTarget.style.color = '#ffffff'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 180, 255, 0.3)'; }}
-                                                onMouseOut={e => { e.currentTarget.style.backgroundColor = '#E0F2FE'; e.currentTarget.style.color = '#00B4FF'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}
+                                                onMouseOver={e => { e.currentTarget.style.backgroundColor = '#004797'; e.currentTarget.style.color = '#ffffff'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 71, 151, 0.3)'; }}
+                                                onMouseOut={e => { e.currentTarget.style.backgroundColor = '#E0F2FE'; e.currentTarget.style.color = '#004797'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}
                                             >
                                                 Revisar <ChevronRight size={16} />
                                             </Link>

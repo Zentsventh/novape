@@ -14,7 +14,7 @@ export default function Show({ producto, costoPromedio, historialCompras = [], c
             
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
                 <h1 style={{ fontSize: '24px', margin: 0, fontWeight: '700', color: '#1E293B', display: 'flex', alignItems: 'center', gap: '12px', letterSpacing: '-0.02em' }}>
-                    <div style={{ padding: '8px', backgroundColor: '#F0F9FF', borderRadius: '10px', color: '#00B4FF' }}>
+                    <div style={{ padding: '8px', backgroundColor: '#F0F9FF', borderRadius: '10px', color: '#004797' }}>
                         <Package size={24} />
                     </div>
                     Detalle del Producto
@@ -31,9 +31,9 @@ export default function Show({ producto, costoPromedio, historialCompras = [], c
                     </Link>
                     <Link 
                         href={`/admin/products/${producto.id}/edit`} 
-                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#009BE0'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 180, 255, 0.3)'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#00B4FF'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 180, 255, 0.2)'; }}
-                        style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#00B4FF', color: 'white', textDecoration: 'none', padding: '10px 16px', borderRadius: '8px', fontWeight: '600', fontSize: '13px', transition: 'all 0.2s ease', boxShadow: '0 2px 4px rgba(0, 180, 255, 0.2)' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#009BE0'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 71, 151, 0.3)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#004797'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 71, 151, 0.2)'; }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#004797', color: 'white', textDecoration: 'none', padding: '10px 16px', borderRadius: '8px', fontWeight: '600', fontSize: '13px', transition: 'all 0.2s ease', boxShadow: '0 2px 4px rgba(0, 71, 151, 0.2)' }}
                     >
                         <Edit size={16} />
                         Editar Producto
@@ -99,7 +99,7 @@ export default function Show({ producto, costoPromedio, historialCompras = [], c
                 {/* Información de Venta */}
                 <div style={{ background: '#ffffff', borderRadius: '12px', padding: '24px', border: '1px solid #E2E8F0', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                     <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#1E293B', margin: '0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <DollarSign size={20} style={{ color: '#00B4FF' }} />
+                        <DollarSign size={20} style={{ color: '#004797' }} />
                         Datos de Venta
                     </h3>
 
@@ -120,7 +120,7 @@ export default function Show({ producto, costoPromedio, historialCompras = [], c
             {/* Comparativa de Proveedores */}
             <div style={{ marginTop: '40px' }}>
                 <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1E293B', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <TrendingUp size={20} style={{ color: '#00B4FF' }} />
+                    <TrendingUp size={20} style={{ color: '#004797' }} />
                     Comparativa de Rentabilidad por Proveedor
                 </h3>
                 
@@ -136,7 +136,7 @@ export default function Show({ producto, costoPromedio, historialCompras = [], c
                                     onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px -2px rgba(0, 0, 0, 0.05)'; }}
                                     style={{ 
                                         background: index === 0 ? '#F0F9FF' : '#ffffff', 
-                                        border: index === 0 ? '1px solid #00B4FF' : '1px solid #E2E8F0', 
+                                        border: index === 0 ? '1px solid #004797' : '1px solid #E2E8F0', 
                                         borderRadius: '12px', 
                                         padding: '24px', 
                                         position: 'relative', 
@@ -145,17 +145,17 @@ export default function Show({ producto, costoPromedio, historialCompras = [], c
                                     }}
                                 >
                                     {index === 0 && (
-                                        <div style={{ position: 'absolute', top: '-12px', right: '24px', background: '#00B4FF', color: 'white', fontSize: '11px', fontWeight: '700', padding: '4px 12px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0, 180, 255, 0.3)' }}>
+                                        <div style={{ position: 'absolute', top: '-12px', right: '24px', background: '#004797', color: 'white', fontSize: '11px', fontWeight: '700', padding: '4px 12px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0, 71, 151, 0.3)' }}>
                                             Mayor Margen / Mejor Precio
                                         </div>
                                     )}
                                     <h4 style={{ margin: '0 0 20px 0', fontSize: '16px', fontWeight: '700', color: '#1E293B', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                        <ShoppingCart size={18} style={{ color: index === 0 ? '#00B4FF' : '#94A3B8' }} />
+                                        <ShoppingCart size={18} style={{ color: index === 0 ? '#004797' : '#94A3B8' }} />
                                         {prov.proveedor_nombre}
                                     </h4>
                                     
                                     {/* Costos y Compras */}
-                                    <div style={{ marginBottom: '20px', paddingBottom: '16px', borderBottom: index === 0 ? '1px dashed rgba(0, 180, 255, 0.2)' : '1px dashed #E2E8F0' }}>
+                                    <div style={{ marginBottom: '20px', paddingBottom: '16px', borderBottom: index === 0 ? '1px dashed rgba(0, 71, 151, 0.2)' : '1px dashed #E2E8F0' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
                                             <span style={{ color: '#64748B', fontSize: '13px', fontWeight: '500' }}>Último costo ud:</span>
                                             <span style={{ fontWeight: '700', color: '#1E293B', fontSize: '14px' }}>S/ {Number(prov.ultimo_costo).toLocaleString('en-US', {minimumFractionDigits:2})}</span>
@@ -174,11 +174,11 @@ export default function Show({ producto, costoPromedio, historialCompras = [], c
                                     <div style={{ background: index === 0 ? '#ffffff' : '#F8FAFC', padding: '16px', borderRadius: '8px', border: index === 0 ? 'none' : '1px solid #E2E8F0', boxShadow: index === 0 ? '0 1px 3px rgba(0,0,0,0.05)' : 'none' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                                             <span style={{ color: index === 0 ? '#009BE0' : '#64748B', fontSize: '13px', fontWeight: '700' }}>Ganancia Neta:</span>
-                                            <span style={{ fontWeight: '800', color: index === 0 ? '#00B4FF' : '#1E293B', fontSize: '15px' }}>S/ {Number(gananciaProv).toLocaleString('en-US', {minimumFractionDigits:2})}</span>
+                                            <span style={{ fontWeight: '800', color: index === 0 ? '#004797' : '#1E293B', fontSize: '15px' }}>S/ {Number(gananciaProv).toLocaleString('en-US', {minimumFractionDigits:2})}</span>
                                         </div>
                                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                             <span style={{ color: index === 0 ? '#009BE0' : '#64748B', fontSize: '13px', fontWeight: '700' }}>Margen de utilidad:</span>
-                                            <span style={{ fontWeight: '700', color: index === 0 ? '#00B4FF' : '#1E293B', fontSize: '14px' }}>{margenProv.toFixed(2)}%</span>
+                                            <span style={{ fontWeight: '700', color: index === 0 ? '#004797' : '#1E293B', fontSize: '14px' }}>{margenProv.toFixed(2)}%</span>
                                         </div>
                                     </div>
                                 </div>

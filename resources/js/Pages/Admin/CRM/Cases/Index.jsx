@@ -219,7 +219,7 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
                     display: 'flex', 
                     alignItems: 'center', 
                     gap: '8px', 
-                    background: 'linear-gradient(135deg, #00B4FF 0%, #007BFF 100%)', 
+                    background: 'linear-gradient(135deg, #004797 0%, #007BFF 100%)', 
                     color: 'white', 
                     border: 'none', 
                     borderRadius: '8px', 
@@ -227,11 +227,11 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
                     fontSize: '14px', 
                     fontWeight: 600, 
                     cursor: 'pointer', 
-                    boxShadow: '0 4px 12px rgba(0, 180, 255, 0.25)',
+                    boxShadow: '0 4px 12px rgba(0, 71, 151, 0.25)',
                     transition: 'all 0.2s ease'
                 }}
-                onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 14px rgba(0, 180, 255, 0.35)'; }}
-                onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 180, 255, 0.25)'; }}
+                onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 14px rgba(0, 71, 151, 0.35)'; }}
+                onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 71, 151, 0.25)'; }}
             >
                 <Plus size={18} strokeWidth={2.5} />
                 Nuevo Caso
@@ -268,8 +268,8 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
                             }}
                             onFocus={e => {
                                 e.currentTarget.style.backgroundColor = '#FFFFFF';
-                                e.currentTarget.style.borderColor = '#00B4FF';
-                                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.15)';
+                                e.currentTarget.style.borderColor = '#004797';
+                                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.15)';
                             }}
                             onBlur={e => {
                                 e.currentTarget.style.backgroundColor = '#F8FAFC';
@@ -380,8 +380,8 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
                                     }}
                                     onFocus={e => {
                                         e.currentTarget.style.backgroundColor = '#FFFFFF';
-                                        e.currentTarget.style.borderColor = '#00B4FF';
-                                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.15)';
+                                        e.currentTarget.style.borderColor = '#004797';
+                                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.15)';
                                     }}
                                     onBlur={e => {
                                         e.currentTarget.style.backgroundColor = '#F8FAFC';
@@ -415,8 +415,8 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
                                         }}
                                         onFocus={e => {
                                             e.currentTarget.style.backgroundColor = '#FFFFFF';
-                                            e.currentTarget.style.borderColor = '#00B4FF';
-                                            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.15)';
+                                            e.currentTarget.style.borderColor = '#004797';
+                                            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.15)';
                                         }}
                                         onBlur={e => {
                                             e.currentTarget.style.backgroundColor = '#F8FAFC';
@@ -452,8 +452,8 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
                                         }}
                                         onFocus={e => {
                                             e.currentTarget.style.backgroundColor = '#FFFFFF';
-                                            e.currentTarget.style.borderColor = '#00B4FF';
-                                            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.15)';
+                                            e.currentTarget.style.borderColor = '#004797';
+                                            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.15)';
                                         }}
                                         onBlur={e => {
                                             e.currentTarget.style.backgroundColor = '#F8FAFC';
@@ -492,8 +492,8 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
                                     }}
                                     onFocus={e => {
                                         e.currentTarget.style.backgroundColor = '#FFFFFF';
-                                        e.currentTarget.style.borderColor = '#00B4FF';
-                                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.15)';
+                                        e.currentTarget.style.borderColor = '#004797';
+                                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.15)';
                                     }}
                                     onBlur={e => {
                                         e.currentTarget.style.backgroundColor = '#F8FAFC';
@@ -535,7 +535,7 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
                                 <button 
                                     type="submit" 
                                     style={{
-                                        background: 'linear-gradient(135deg, #00B4FF 0%, #007BFF 100%)',
+                                        background: 'linear-gradient(135deg, #004797 0%, #007BFF 100%)',
                                         color: 'white',
                                         border: 'none',
                                         borderRadius: '8px',
@@ -543,16 +543,16 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
                                         fontSize: '14px',
                                         fontWeight: 600,
                                         cursor: 'pointer',
-                                        boxShadow: '0 4px 12px rgba(0, 180, 255, 0.25)',
+                                        boxShadow: '0 4px 12px rgba(0, 71, 151, 0.25)',
                                         transition: 'all 0.2s ease',
                                     }}
                                     onMouseOver={e => {
                                         e.currentTarget.style.transform = 'translateY(-1px)';
-                                        e.currentTarget.style.boxShadow = '0 6px 14px rgba(0, 180, 255, 0.35)';
+                                        e.currentTarget.style.boxShadow = '0 6px 14px rgba(0, 71, 151, 0.35)';
                                     }}
                                     onMouseOut={e => {
                                         e.currentTarget.style.transform = 'translateY(0)';
-                                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 180, 255, 0.25)';
+                                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 71, 151, 0.25)';
                                     }}
                                 >
                                     Guardar Caso

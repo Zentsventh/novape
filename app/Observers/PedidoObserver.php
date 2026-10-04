@@ -16,8 +16,8 @@ class PedidoObserver
 
     public function updated(Pedido $pedido): void
     {
-        if ($pedido->isDirty('estado') && $pedido->estado === 'entregado' && $pedido->usuario_id) {
-            $user = $pedido->cliente;
+        if ($pedido->isDirty('estado') && $pedido->estado === 'completado' && $pedido->usuario_id) {
+            $user = $pedido->usuario;
             if ($user) {
                 // Earn 1 point per 10 currency units spent
                 $points = (int) floor($pedido->total / 10);

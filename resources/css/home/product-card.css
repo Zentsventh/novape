@@ -16,7 +16,7 @@
 
 .efe-product-card:hover {
     box-shadow: var(--shadow-hover);
-    border-color: rgba(0, 180, 255, 0.2);
+    border-color: rgba(0, 71, 151, 0.2);
     transform: translateY(-4px);
 }
 
@@ -281,7 +281,7 @@
 .efe-btn-cart:hover:not(.is-loading) {
     background: var(--color-primary);
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0, 180, 255, 0.25);
+    box-shadow: 0 8px 20px rgba(0, 71, 151, 0.25);
 }
 
 .efe-btn-cart.is-loading {

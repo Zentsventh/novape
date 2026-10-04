@@ -81,7 +81,7 @@ export default function Show({ crmCase = {} }) {
                             fontSize: '13px', fontWeight: 600, transition: 'all 0.2s ease',
                             padding: '8px 12px', borderRadius: '8px', marginLeft: '-12px'
                         }}
-                        onMouseOver={(e) => { e.currentTarget.style.color = '#00B4FF'; e.currentTarget.style.backgroundColor = '#F1F5F9'; }}
+                        onMouseOver={(e) => { e.currentTarget.style.color = '#004797'; e.currentTarget.style.backgroundColor = '#F1F5F9'; }}
                         onMouseOut={(e) => { e.currentTarget.style.color = '#64748B'; e.currentTarget.style.backgroundColor = 'transparent'; }}
                     >
                         <ChevronLeft size={16} />
@@ -90,10 +90,10 @@ export default function Show({ crmCase = {} }) {
 
                     <div style={{ marginBottom: '40px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                            <div style={{ width: '40px', height: '40px', background: 'linear-gradient(135deg, #00B4FF, #009BE0)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', boxShadow: '0 4px 12px rgba(0, 180, 255, 0.3)' }}>
+                            <div style={{ width: '40px', height: '40px', background: 'linear-gradient(135deg, #004797, #009BE0)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', boxShadow: '0 4px 12px rgba(0, 71, 151, 0.3)' }}>
                                 <Ticket size={20} />
                             </div>
-                            <span style={{ fontSize: '13px', fontWeight: 700, color: '#00B4FF', letterSpacing: '0.5px' }}>CASO #{crmCase.id}</span>
+                            <span style={{ fontSize: '13px', fontWeight: 700, color: '#004797', letterSpacing: '0.5px' }}>CASO #{crmCase.id}</span>
                         </div>
                         <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#1E293B', marginBottom: '8px', lineHeight: 1.3, letterSpacing: '-0.3px' }}>
                             {crmCase.titulo}
@@ -118,7 +118,7 @@ export default function Show({ crmCase = {} }) {
                                         value={crmCase.estado} 
                                         onChange={(e) => handleQuickUpdate('estado', e.target.value)}
                                         disabled={isSavingStatus}
-                                        onFocus={e => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 4px rgba(0, 180, 255, 0.1)'; }}
+                                        onFocus={e => { e.target.style.borderColor = '#004797'; e.target.style.boxShadow = '0 0 0 4px rgba(0, 71, 151, 0.1)'; }}
                                         onBlur={e => { e.target.style.borderColor = crmCase.estado === 'resuelto' ? '#BBF7D0' : '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; }}
                                     >
                                         <option value="abierto">Abierto</option>
@@ -145,7 +145,7 @@ export default function Show({ crmCase = {} }) {
                                         value={crmCase.prioridad} 
                                         onChange={(e) => handleQuickUpdate('prioridad', e.target.value)}
                                         disabled={isSavingStatus}
-                                        onFocus={e => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 4px rgba(0, 180, 255, 0.1)'; }}
+                                        onFocus={e => { e.target.style.borderColor = '#004797'; e.target.style.boxShadow = '0 0 0 4px rgba(0, 71, 151, 0.1)'; }}
                                         onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; }}
                                     >
                                         <option value="baja">Baja</option>
@@ -172,7 +172,7 @@ export default function Show({ crmCase = {} }) {
                                     value={slaDate}
                                     onChange={(e) => setSlaDate(e.target.value)}
                                     disabled={isSavingStatus}
-                                    onFocus={e => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 4px rgba(0, 180, 255, 0.1)'; }}
+                                    onFocus={e => { e.target.style.borderColor = '#004797'; e.target.style.boxShadow = '0 0 0 4px rgba(0, 71, 151, 0.1)'; }}
                                     onBlur={e => { 
                                         e.target.style.borderColor = '#E2E8F0'; 
                                         e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)';
@@ -213,7 +213,7 @@ export default function Show({ crmCase = {} }) {
                         {crmCase.pedido_id && (
                             <div>
                                 <label style={{ fontSize: '12px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px', display: 'block' }}>Pedido Relacionado</label>
-                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#00B4FF', fontWeight: 600, background: '#E0F2FE', padding: '8px 16px', borderRadius: '8px' }}>
+                                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#004797', fontWeight: 600, background: '#E0F2FE', padding: '8px 16px', borderRadius: '8px' }}>
                                     <Package size={16} />
                                     Pedido #{crmCase.pedido_id}
                                 </div>
@@ -224,7 +224,7 @@ export default function Show({ crmCase = {} }) {
                             <label style={{ fontSize: '12px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px', display: 'block' }}>Agente Asignado</label>
                             {crmCase.asignadoA ? (
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 600, color: '#1E293B', background: '#F8FAFC', padding: '10px 16px', borderRadius: '10px', border: '1px solid #E2E8F0' }}>
-                                    <User size={16} style={{ color: '#00B4FF' }} />
+                                    <User size={16} style={{ color: '#004797' }} />
                                     {crmCase.asignadoA.nombres}
                                 </div>
                             ) : (
@@ -247,7 +247,7 @@ export default function Show({ crmCase = {} }) {
                             Reportado: <span style={{ color: '#1E293B', fontWeight: 600 }}>{new Date(crmCase.created_at).toLocaleString()}</span>
                         </div>
                         {crmCase.fecha_vencimiento && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: new Date(crmCase.fecha_vencimiento) < new Date() ? '#EF4444' : '#00B4FF', fontSize: '13px', fontWeight: 600 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: new Date(crmCase.fecha_vencimiento) < new Date() ? '#EF4444' : '#004797', fontSize: '13px', fontWeight: 600 }}>
                                 <CalendarClock size={16} />
                                 Vence: {new Date(crmCase.fecha_vencimiento).toLocaleString()}
                             </div>
@@ -274,7 +274,7 @@ export default function Show({ crmCase = {} }) {
                     <div style={{ flex: 1, padding: '40px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '32px' }}>
                         {/* Initial Description */}
                         <div style={{ display: 'flex', gap: '20px', maxWidth: '85%' }}>
-                            <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'linear-gradient(135deg, #00B4FF, #009BE0)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', fontWeight: 800, fontSize: '18px', flexShrink: 0, boxShadow: '0 4px 12px rgba(0, 180, 255, 0.2)' }}>
+                            <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'linear-gradient(135deg, #004797, #009BE0)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff', fontWeight: 800, fontSize: '18px', flexShrink: 0, boxShadow: '0 4px 12px rgba(0, 71, 151, 0.2)' }}>
                                 {crmCase.cliente?.nombres?.charAt(0) || 'C'}
                             </div>
                             <div style={{ flex: 1 }}>
@@ -342,7 +342,7 @@ export default function Show({ crmCase = {} }) {
                     <div style={{ padding: '32px 40px', borderTop: '1px solid #E2E8F0', background: '#ffffff', zIndex: 10, boxShadow: '0 -4px 24px rgba(0,0,0,0.02)' }}>
                         <form onSubmit={handleAddNote} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#1E293B', fontWeight: 700, fontSize: '15px' }}>
-                                <MessageSquare size={18} color="#00B4FF" /> Añadir Nota Interna
+                                <MessageSquare size={18} color="#004797" /> Añadir Nota Interna
                             </div>
                             <div style={{ position: 'relative' }}>
                                 <textarea 
@@ -356,7 +356,7 @@ export default function Show({ crmCase = {} }) {
                                     value={data.contenido}
                                     onChange={e => setData('contenido', e.target.value)}
                                     disabled={processing}
-                                    onFocus={e => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 4px rgba(0, 180, 255, 0.1)'; e.target.style.background = '#ffffff'; }}
+                                    onFocus={e => { e.target.style.borderColor = '#004797'; e.target.style.boxShadow = '0 0 0 4px rgba(0, 71, 151, 0.1)'; e.target.style.background = '#ffffff'; }}
                                     onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.background = '#F8FAFC'; }}
                                 />
                                 <div style={{ position: 'absolute', bottom: '16px', right: '16px' }}>
@@ -365,13 +365,13 @@ export default function Show({ crmCase = {} }) {
                                         disabled={processing || !data.contenido.trim()}
                                         style={{ 
                                             display: 'flex', alignItems: 'center', gap: '8px',
-                                            background: (processing || !data.contenido.trim()) ? '#CBD5E1' : '#00B4FF', 
+                                            background: (processing || !data.contenido.trim()) ? '#CBD5E1' : '#004797', 
                                             color: '#ffffff', border: 'none', padding: '10px 20px', borderRadius: '12px',
                                             fontSize: '14px', fontWeight: 600, cursor: (processing || !data.contenido.trim()) ? 'not-allowed' : 'pointer',
-                                            transition: 'all 0.2s', boxShadow: (processing || !data.contenido.trim()) ? 'none' : '0 4px 14px rgba(0, 180, 255, 0.3)'
+                                            transition: 'all 0.2s', boxShadow: (processing || !data.contenido.trim()) ? 'none' : '0 4px 14px rgba(0, 71, 151, 0.3)'
                                         }}
-                                        onMouseOver={e => { if(!processing && data.contenido.trim()) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 180, 255, 0.4)'; } }}
-                                        onMouseOut={e => { if(!processing && data.contenido.trim()) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 180, 255, 0.3)'; } }}
+                                        onMouseOver={e => { if(!processing && data.contenido.trim()) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 71, 151, 0.4)'; } }}
+                                        onMouseOut={e => { if(!processing && data.contenido.trim()) { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 71, 151, 0.3)'; } }}
                                     >
                                         <Send size={16} /> {processing ? 'Enviando...' : 'Enviar Nota'}
                                     </button>

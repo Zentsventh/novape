@@ -422,7 +422,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
             {/* Header KPIs */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                 <h1 style={{ fontSize: '24px', margin: 0, fontWeight: '700', color: '#1E293B', display: 'flex', alignItems: 'center', gap: '12px', letterSpacing: '-0.02em' }}>
-                    <div style={{ padding: '8px', backgroundColor: '#F0F9FF', borderRadius: '10px', color: '#00B4FF' }}>
+                    <div style={{ padding: '8px', backgroundColor: '#F0F9FF', borderRadius: '10px', color: '#004797' }}>
                         <ShoppingCart size={24} />
                     </div>
                     Terminal POS
@@ -453,11 +453,11 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                     </Link>
                     <div style={{ background: '#ffffff', border: '1px solid #E2E8F0', padding: '8px 16px', borderRadius: '8px', textAlign: 'center', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
                         <div style={{ fontSize: '11px', color: '#64748B', fontWeight: '600', letterSpacing: '0.05em' }}>VENTAS HOY</div>
-                        <div style={{ fontSize: '16px', fontWeight: '700', color: '#00B4FF' }}>S/ {Number(ventasHoy).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                        <div style={{ fontSize: '16px', fontWeight: '700', color: '#004797' }}>S/ {Number(ventasHoy).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                     </div>
                     <div style={{ background: '#ffffff', border: '1px solid #E2E8F0', padding: '8px 16px', borderRadius: '8px', textAlign: 'center', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
                         <div style={{ fontSize: '11px', color: '#64748B', fontWeight: '600', letterSpacing: '0.05em' }}>TICKETS</div>
-                        <div style={{ fontSize: '16px', fontWeight: '700', color: '#00B4FF' }}>{ticketsHoy}</div>
+                        <div style={{ fontSize: '16px', fontWeight: '700', color: '#004797' }}>{ticketsHoy}</div>
                     </div>
                 </div>
             </div>
@@ -473,7 +473,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                             placeholder="Buscar por código de barras o nombre (F4)"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            onFocus={(e) => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.15)'; e.target.style.backgroundColor = '#ffffff'; }}
+                            onFocus={(e) => { e.target.style.borderColor = '#004797'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.15)'; e.target.style.backgroundColor = '#ffffff'; }}
                             onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; e.target.style.backgroundColor = '#F8FAFC'; }}
                             style={{ width: '100%', padding: '12px 16px 12px 44px', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '14px', outline: 'none', transition: 'all 0.2s ease', backgroundColor: '#F8FAFC', color: '#1E293B' }}
                         />
@@ -490,15 +490,15 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                                 style={{
                                     padding: '8px 16px',
                                     borderRadius: '8px',
-                                    border: `1px solid ${selectedCategory === cat ? '#00B4FF' : '#E2E8F0'}`,
-                                    background: selectedCategory === cat ? '#00B4FF' : '#ffffff',
+                                    border: `1px solid ${selectedCategory === cat ? '#004797' : '#E2E8F0'}`,
+                                    background: selectedCategory === cat ? '#004797' : '#ffffff',
                                     color: selectedCategory === cat ? '#ffffff' : '#475569',
                                     fontSize: '13px',
                                     fontWeight: selectedCategory === cat ? '600' : '500',
                                     cursor: 'pointer',
                                     whiteSpace: 'nowrap',
                                     transition: 'all 0.2s ease',
-                                    boxShadow: selectedCategory === cat ? '0 2px 4px rgba(0, 180, 255, 0.25)' : 'none'
+                                    boxShadow: selectedCategory === cat ? '0 2px 4px rgba(0, 71, 151, 0.25)' : 'none'
                                 }}
                             >
                                 {cat}
@@ -511,7 +511,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                             <div
                                 key={prod.id}
                                 onClick={() => prod.stock > 0 && agregarAlCarrito(prod)}
-                                onMouseEnter={(e) => { if(prod.stock > 0) { e.currentTarget.style.borderColor = '#00B4FF'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 16px -4px rgba(0, 180, 255, 0.15)'; } }}
+                                onMouseEnter={(e) => { if(prod.stock > 0) { e.currentTarget.style.borderColor = '#004797'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 16px -4px rgba(0, 71, 151, 0.15)'; } }}
                                 onMouseLeave={(e) => { if(prod.stock > 0) { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; } }}
                                 style={{
                                     border: '1px solid #E2E8F0',
@@ -528,7 +528,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                                 }}
                             >
                                 <div>
-                                    <div style={{ color: '#00B4FF', marginBottom: '12px' }}>
+                                    <div style={{ color: '#004797', marginBottom: '12px' }}>
                                         <Package size={32} style={{ margin: '0 auto' }} strokeWidth={1.5} />
                                     </div>
                                     <div style={{ fontSize: '13px', fontWeight: '600', color: '#1E293B', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', height: '38px', lineHeight: '1.4' }}>
@@ -549,7 +549,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                 <div style={{ background: '#ffffff', borderRadius: '12px', padding: '24px', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column' }}>
                     <div style={{ textAlign: 'center', borderBottom: '1px solid #E2E8F0', paddingBottom: '16px', marginBottom: '16px' }}>
                         <h2 style={{ fontSize: '15px', fontWeight: '700', margin: 0, color: '#1E293B', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', letterSpacing: '0.05em' }}>
-                            <Receipt size={18} style={{ color: '#00B4FF' }} /> TICKET DE VENTA
+                            <Receipt size={18} style={{ color: '#004797' }} /> TICKET DE VENTA
                         </h2>
                     </div>
 
@@ -610,7 +610,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                                 onChange={e => setDescuentoValor(e.target.value)}
                                 min="0"
                                 step={descuentoTipo === 'porcentaje' ? "1" : "0.50"}
-                                onFocus={(e) => { e.target.style.borderColor = '#00B4FF'; e.target.style.backgroundColor = '#ffffff'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.1)'; }}
+                                onFocus={(e) => { e.target.style.borderColor = '#004797'; e.target.style.backgroundColor = '#ffffff'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.1)'; }}
                                 onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.backgroundColor = '#F8FAFC'; e.target.style.boxShadow = 'none'; }}
                                 style={{ flex: 1, padding: '10px 12px', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '13px', outline: 'none', backgroundColor: '#F8FAFC', transition: 'all 0.2s ease', color: '#1E293B' }}
                             />
@@ -620,7 +620,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                             <span>Subtotal Bruto:</span><span style={{ fontWeight: '500', color: '#1E293B' }}>S/ {subtotalBruto.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                         </div>
                         {montoDescuento > 0 && (
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#00B4FF', marginBottom: '6px', fontWeight: '500' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#004797', marginBottom: '6px', fontWeight: '500' }}>
                                 <span>Descuento:</span><span>- S/ {montoDescuento.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                             </div>
                         )}
@@ -631,7 +631,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                             <span>IGV ({igv_porcentaje}%):</span><span style={{ fontWeight: '500', color: '#1E293B' }}>S/ {igv.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '24px', fontWeight: '800', color: '#1E293B', marginBottom: '20px', padding: '12px 16px', background: '#F0F9FF', borderRadius: '8px' }}>
-                            <span>TOTAL:</span><span style={{ color: '#00B4FF' }}>S/ {total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            <span>TOTAL:</span><span style={{ color: '#004797' }}>S/ {total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                         </div>
 
                         {/* Tipo de Comprobante */}
@@ -647,7 +647,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                                     style={{
                                         flex: 1, padding: '8px 0', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', textTransform: 'capitalize',
                                         background: tipoComprobante === t ? '#ffffff' : 'transparent',
-                                        color: tipoComprobante === t ? '#00B4FF' : '#64748B',
+                                        color: tipoComprobante === t ? '#004797' : '#64748B',
                                         boxShadow: tipoComprobante === t ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
                                         transition: 'all 0.2s ease'
                                     }}
@@ -661,7 +661,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                         {tipoComprobante !== 'ticket' && (
                             <div style={{ marginBottom: '16px', padding: '12px', borderRadius: '8px', border: '1px solid #E2E8F0', backgroundColor: '#ffffff' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', color: '#1E293B' }}>
-                                    <User size={16} style={{ color: '#00B4FF' }} /> <strong style={{ fontSize: '13px' }}>Datos del Cliente</strong> 
+                                    <User size={16} style={{ color: '#004797' }} /> <strong style={{ fontSize: '13px' }}>Datos del Cliente</strong> 
                                     {tipoComprobante === 'factura' || (tipoComprobante === 'boleta' && total >= 700) ? (
                                         <span style={{ fontSize: '11px', color: '#EF4444', fontWeight: '600' }}>(Obligatorio)</span>
                                     ) : (
@@ -674,7 +674,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                                         placeholder={tipoComprobante === 'factura' ? 'RUC' : 'DNI'}
                                         value={clienteDoc}
                                         onChange={e => setClienteDoc(e.target.value)}
-                                        onFocus={(e) => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.1)'; }}
+                                        onFocus={(e) => { e.target.style.borderColor = '#004797'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.1)'; }}
                                         onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; }}
                                         style={{ flex: 1, padding: '10px 12px', borderRadius: '6px', border: '1px solid #E2E8F0', fontSize: '13px', outline: 'none', transition: 'all 0.2s ease', color: '#1E293B' }}
                                     />
@@ -682,8 +682,8 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                                         onClick={buscarCliente}
                                         disabled={isSearchingCliente || !clienteDoc}
                                         onMouseEnter={(e) => { if(!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = '#009BE0'; }}
-                                        onMouseLeave={(e) => { if(!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = '#00B4FF'; }}
-                                        style={{ padding: '0 16px', background: '#00B4FF', color: 'white', border: 'none', borderRadius: '6px', cursor: (isSearchingCliente || !clienteDoc) ? 'not-allowed' : 'pointer', fontSize: '13px', fontWeight: '600', transition: 'all 0.2s ease', opacity: (isSearchingCliente || !clienteDoc) ? 0.6 : 1 }}
+                                        onMouseLeave={(e) => { if(!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = '#004797'; }}
+                                        style={{ padding: '0 16px', background: '#004797', color: 'white', border: 'none', borderRadius: '6px', cursor: (isSearchingCliente || !clienteDoc) ? 'not-allowed' : 'pointer', fontSize: '13px', fontWeight: '600', transition: 'all 0.2s ease', opacity: (isSearchingCliente || !clienteDoc) ? 0.6 : 1 }}
                                     >
                                         {isSearchingCliente ? '...' : 'Buscar'}
                                     </button>
@@ -693,7 +693,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                                     placeholder={tipoComprobante === 'factura' ? 'Razón Social' : 'Nombre Completo'}
                                     value={clienteNombre}
                                     onChange={e => setClienteNombre(e.target.value)}
-                                    onFocus={(e) => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.1)'; }}
+                                    onFocus={(e) => { e.target.style.borderColor = '#004797'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.1)'; }}
                                     onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; }}
                                     style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #E2E8F0', fontSize: '13px', outline: 'none', marginBottom: '8px', transition: 'all 0.2s ease', boxSizing: 'border-box', color: '#1E293B' }}
                                 />
@@ -703,7 +703,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                                         placeholder="Dirección Fiscal"
                                         value={clienteDireccion}
                                         onChange={e => setClienteDireccion(e.target.value)}
-                                        onFocus={(e) => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.1)'; }}
+                                        onFocus={(e) => { e.target.style.borderColor = '#004797'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.1)'; }}
                                         onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; }}
                                         style={{ width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #E2E8F0', fontSize: '13px', outline: 'none', transition: 'all 0.2s ease', boxSizing: 'border-box', color: '#1E293B' }}
                                     />
@@ -716,7 +716,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                             <select 
                                 value={metodoPagoId} 
                                 onChange={e => setMetodoPagoId(e.target.value)} 
-                                onFocus={(e) => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 180, 255, 0.1)'; }}
+                                onFocus={(e) => { e.target.style.borderColor = '#004797'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.1)'; }}
                                 onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; }}
                                 style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '13px', outline: 'none', backgroundColor: '#F8FAFC', transition: 'all 0.2s ease', color: '#1E293B', fontWeight: '500', cursor: 'pointer' }}>
                                 {metodosPago?.map(m => (
@@ -737,9 +737,9 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                             <button
                                 onClick={iniciarCobro}
                                 disabled={carrito.length === 0 || !cajaAbierta}
-                                onMouseEnter={(e) => { if(!e.currentTarget.disabled) { e.currentTarget.style.backgroundColor = '#009BE0'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 180, 255, 0.3)'; } }}
-                                onMouseLeave={(e) => { if(!e.currentTarget.disabled) { e.currentTarget.style.backgroundColor = '#00B4FF'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 180, 255, 0.2)'; } }}
-                                style={{ flex: 2, padding: '12px', background: '#00B4FF', color: 'white', fontSize: '14px', fontWeight: '700', borderRadius: '8px', border: 'none', cursor: (carrito.length === 0 || !cajaAbierta) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s ease', opacity: (carrito.length === 0 || !cajaAbierta) ? 0.6 : 1, boxShadow: '0 2px 4px rgba(0, 180, 255, 0.2)' }}
+                                onMouseEnter={(e) => { if(!e.currentTarget.disabled) { e.currentTarget.style.backgroundColor = '#009BE0'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 71, 151, 0.3)'; } }}
+                                onMouseLeave={(e) => { if(!e.currentTarget.disabled) { e.currentTarget.style.backgroundColor = '#004797'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 71, 151, 0.2)'; } }}
+                                style={{ flex: 2, padding: '12px', background: '#004797', color: 'white', fontSize: '14px', fontWeight: '700', borderRadius: '8px', border: 'none', cursor: (carrito.length === 0 || !cajaAbierta) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s ease', opacity: (carrito.length === 0 || !cajaAbierta) ? 0.6 : 1, boxShadow: '0 2px 4px rgba(0, 71, 151, 0.2)' }}
                             >
                                 <ShoppingCart size={18} />
                                 COBRAR (F2)
@@ -751,7 +751,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                                     onClick={() => setShowPausadas(true)}
                                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F8FAFC'}
                                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
-                                    style={{ width: '100%', padding: '10px', background: '#ffffff', color: '#00B4FF', border: '1px dashed #00B4FF', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s ease', fontSize: '13px' }}>
+                                    style={{ width: '100%', padding: '10px', background: '#ffffff', color: '#004797', border: '1px dashed #004797', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s ease', fontSize: '13px' }}>
                                     Recuperar Pausadas ({ventasPausadas.length})
                                 </button>
                             </div>

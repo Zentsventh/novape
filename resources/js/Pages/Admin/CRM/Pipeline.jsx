@@ -140,8 +140,8 @@ export default function Pipeline({ pipeline, companies, personas }) {
                     box-shadow: 0 1px 2px rgba(0,0,0,0.03);
                 }
                 .premium-pipeline-search-input:focus {
-                    border-color: #00B4FF;
-                    box-shadow: 0 0 0 3px rgba(0, 180, 255, 0.15);
+                    border-color: #004797;
+                    box-shadow: 0 0 0 3px rgba(0, 71, 151, 0.15);
                 }
                 .premium-pipeline-search-clear {
                     position: absolute;
@@ -189,19 +189,19 @@ export default function Pipeline({ pipeline, companies, personas }) {
                     padding: 10px 20px;
                     border-radius: 10px;
                     border: none;
-                    background: #00B4FF;
+                    background: #004797;
                     font-weight: 600;
                     font-size: 14px;
                     color: #FFFFFF;
                     cursor: pointer;
                     transition: all 0.2s ease;
-                    box-shadow: 0 4px 6px -1px rgba(0, 180, 255, 0.2), 0 2px 4px -1px rgba(0, 180, 255, 0.1);
+                    box-shadow: 0 4px 6px -1px rgba(0, 71, 151, 0.2), 0 2px 4px -1px rgba(0, 71, 151, 0.1);
                     text-decoration: none;
                 }
                 .premium-btn-primary:hover {
                     background: #009be5;
                     transform: translateY(-1px);
-                    box-shadow: 0 6px 10px -1px rgba(0, 180, 255, 0.3), 0 2px 4px -1px rgba(0, 180, 255, 0.1);
+                    box-shadow: 0 6px 10px -1px rgba(0, 71, 151, 0.3), 0 2px 4px -1px rgba(0, 71, 151, 0.1);
                 }
                 .premium-pipeline-header {
                     padding: 32px 32px 16px 32px;
@@ -313,8 +313,8 @@ export default function Pipeline({ pipeline, companies, personas }) {
                     box-sizing: border-box;
                 }
                 .premium-input:focus {
-                    border-color: #00B4FF;
-                    box-shadow: 0 0 0 3px rgba(0, 180, 255, 0.15);
+                    border-color: #004797;
+                    box-shadow: 0 0 0 3px rgba(0, 71, 151, 0.15);
                 }
                 select.premium-input {
                     cursor: pointer;

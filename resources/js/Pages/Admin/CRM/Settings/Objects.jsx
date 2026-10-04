@@ -118,12 +118,12 @@ export default function ObjectsSettings({ fields = [], flash, errors }) {
                             onClick={() => setSelectedObject('deal')}
                             style={{ 
                                 display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', width: '100%',
-                                border: 'none', background: selectedObject === 'deal' ? '#00B4FF' : 'transparent',
+                                border: 'none', background: selectedObject === 'deal' ? '#004797' : 'transparent',
                                 borderRadius: '12px', cursor: 'pointer',
                                 color: selectedObject === 'deal' ? '#ffffff' : '#64748B',
                                 fontWeight: selectedObject === 'deal' ? 600 : 500,
                                 transition: 'all 0.2s ease',
-                                boxShadow: selectedObject === 'deal' ? '0 4px 12px rgba(0, 180, 255, 0.3)' : 'none'
+                                boxShadow: selectedObject === 'deal' ? '0 4px 12px rgba(0, 71, 151, 0.3)' : 'none'
                             }}
                             onMouseOver={(e) => { if(selectedObject !== 'deal') { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#1E293B'; } }}
                             onMouseOut={(e) => { if(selectedObject !== 'deal') { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748B'; } }}
@@ -138,12 +138,12 @@ export default function ObjectsSettings({ fields = [], flash, errors }) {
                             onClick={() => setSelectedObject('user')}
                             style={{ 
                                 display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', width: '100%',
-                                border: 'none', background: selectedObject === 'user' ? '#00B4FF' : 'transparent',
+                                border: 'none', background: selectedObject === 'user' ? '#004797' : 'transparent',
                                 borderRadius: '12px', cursor: 'pointer',
                                 color: selectedObject === 'user' ? '#ffffff' : '#64748B',
                                 fontWeight: selectedObject === 'user' ? 600 : 500,
                                 transition: 'all 0.2s ease',
-                                boxShadow: selectedObject === 'user' ? '0 4px 12px rgba(0, 180, 255, 0.3)' : 'none'
+                                boxShadow: selectedObject === 'user' ? '0 4px 12px rgba(0, 71, 151, 0.3)' : 'none'
                             }}
                             onMouseOver={(e) => { if(selectedObject !== 'user') { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#1E293B'; } }}
                             onMouseOut={(e) => { if(selectedObject !== 'user') { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748B'; } }}
@@ -172,14 +172,14 @@ export default function ObjectsSettings({ fields = [], flash, errors }) {
                             onClick={openModal}
                             style={{
                                 display: 'flex', alignItems: 'center', gap: '8px',
-                                background: '#00B4FF', color: '#ffffff',
+                                background: '#004797', color: '#ffffff',
                                 border: 'none', borderRadius: '12px', padding: '12px 20px',
                                 fontSize: '14px', fontWeight: 600, cursor: 'pointer',
-                                boxShadow: '0 4px 14px rgba(0, 180, 255, 0.4)',
+                                boxShadow: '0 4px 14px rgba(0, 71, 151, 0.4)',
                                 transition: 'all 0.2s ease',
                             }}
-                            onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 180, 255, 0.5)'; }}
-                            onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 180, 255, 0.4)'; }}
+                            onMouseOver={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 71, 151, 0.5)'; }}
+                            onMouseOut={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 71, 151, 0.4)'; }}
                         >
                             <Plus size={18} />
                             Crear Campo
@@ -218,7 +218,7 @@ export default function ObjectsSettings({ fields = [], flash, errors }) {
                                         </td>
                                         <td style={{ padding: '20px 24px', fontSize: '14px', color: '#475569', fontWeight: 500 }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '8px', backgroundColor: '#E0F2FE', color: '#00B4FF' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '28px', height: '28px', borderRadius: '8px', backgroundColor: '#E0F2FE', color: '#004797' }}>
                                                     {typeIcons[field.type]}
                                                 </div>
                                                 {typeLabels[field.type]}
@@ -250,9 +250,9 @@ export default function ObjectsSettings({ fields = [], flash, errors }) {
                                                 <p style={{ margin: 0, color: '#64748B', fontSize: '15px', fontWeight: 500 }}>No hay campos personalizados para este objeto.</p>
                                                 <button 
                                                     onClick={openModal}
-                                                    style={{ background: 'transparent', border: '1px solid #00B4FF', color: '#00B4FF', padding: '8px 16px', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', marginTop: '8px' }}
-                                                    onMouseOver={(e) => { e.currentTarget.style.background = '#00B4FF'; e.currentTarget.style.color = '#fff'; }}
-                                                    onMouseOut={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#00B4FF'; }}
+                                                    style={{ background: 'transparent', border: '1px solid #004797', color: '#004797', padding: '8px 16px', borderRadius: '8px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s', marginTop: '8px' }}
+                                                    onMouseOver={(e) => { e.currentTarget.style.background = '#004797'; e.currentTarget.style.color = '#fff'; }}
+                                                    onMouseOut={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#004797'; }}
                                                 >
                                                     Agregar mi primer campo
                                                 </button>
@@ -316,9 +316,9 @@ export default function ObjectsSettings({ fields = [], flash, errors }) {
                                                 transition: 'all 0.2s ease', boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
                                             }}
                                             onMouseEnter={e => {
-                                                e.currentTarget.style.borderColor = '#00B4FF';
+                                                e.currentTarget.style.borderColor = '#004797';
                                                 e.currentTarget.style.transform = 'translateY(-2px)';
-                                                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 180, 255, 0.15)';
+                                                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 71, 151, 0.15)';
                                             }}
                                             onMouseLeave={e => {
                                                 e.currentTarget.style.borderColor = '#E2E8F0';
@@ -326,7 +326,7 @@ export default function ObjectsSettings({ fields = [], flash, errors }) {
                                                 e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.02)';
                                             }}
                                         >
-                                            <div style={{ color: '#00B4FF', background: '#E0F2FE', padding: '12px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <div style={{ color: '#004797', background: '#E0F2FE', padding: '12px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                 {typeIcons[typeKey]}
                                             </div>
                                             <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -362,7 +362,7 @@ export default function ObjectsSettings({ fields = [], flash, errors }) {
                                                 fontSize: '15px', outline: 'none', transition: 'all 0.2s',
                                                 boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
                                             }}
-                                            onFocus={e => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 4px rgba(0, 180, 255, 0.1)'; }}
+                                            onFocus={e => { e.target.style.borderColor = '#004797'; e.target.style.boxShadow = '0 0 0 4px rgba(0, 71, 151, 0.1)'; }}
                                             onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; }}
                                             required
                                         />
@@ -382,7 +382,7 @@ export default function ObjectsSettings({ fields = [], flash, errors }) {
                                                 width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #E2E8F0', 
                                                 fontSize: '15px', outline: 'none', backgroundColor: '#F8FAFC', transition: 'all 0.2s'
                                             }}
-                                            onFocus={e => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 4px rgba(0, 180, 255, 0.1)'; e.target.style.backgroundColor = '#ffffff'; }}
+                                            onFocus={e => { e.target.style.borderColor = '#004797'; e.target.style.boxShadow = '0 0 0 4px rgba(0, 71, 151, 0.1)'; e.target.style.backgroundColor = '#ffffff'; }}
                                             onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; e.target.style.backgroundColor = '#F8FAFC'; }}
                                             required
                                         />
@@ -404,7 +404,7 @@ export default function ObjectsSettings({ fields = [], flash, errors }) {
                                                     fontSize: '15px', outline: 'none', transition: 'all 0.2s',
                                                     boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
                                                 }}
-                                                onFocus={e => { e.target.style.borderColor = '#00B4FF'; e.target.style.boxShadow = '0 0 0 4px rgba(0, 180, 255, 0.1)'; }}
+                                                onFocus={e => { e.target.style.borderColor = '#004797'; e.target.style.boxShadow = '0 0 0 4px rgba(0, 71, 151, 0.1)'; }}
                                                 onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; }}
                                                 required
                                             />
@@ -433,13 +433,13 @@ export default function ObjectsSettings({ fields = [], flash, errors }) {
                                     form="field-form" 
                                     disabled={processing}
                                     style={{
-                                        background: '#00B4FF', border: 'none', color: '#ffffff',
+                                        background: '#004797', border: 'none', color: '#ffffff',
                                         padding: '10px 24px', borderRadius: '10px', fontSize: '14px', fontWeight: 600,
                                         cursor: processing ? 'not-allowed' : 'pointer', transition: 'all 0.2s',
-                                        boxShadow: '0 4px 12px rgba(0, 180, 255, 0.3)', opacity: processing ? 0.7 : 1
+                                        boxShadow: '0 4px 12px rgba(0, 71, 151, 0.3)', opacity: processing ? 0.7 : 1
                                     }}
-                                    onMouseOver={(e) => { if(!processing) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 180, 255, 0.4)'; } }}
-                                    onMouseOut={(e) => { if(!processing) { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 180, 255, 0.3)'; } }}
+                                    onMouseOver={(e) => { if(!processing) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 71, 151, 0.4)'; } }}
+                                    onMouseOut={(e) => { if(!processing) { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 71, 151, 0.3)'; } }}
                                 >
                                     {processing ? 'Guardando...' : 'Crear Campo'}
                                 </button>

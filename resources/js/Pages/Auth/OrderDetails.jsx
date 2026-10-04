@@ -18,7 +18,7 @@ export default function OrderDetails({ pedido }) {
                 <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <div style={{ textAlign: 'center', color: '#64748b' }}>
                         <h2 style={{ fontSize: '20px', marginBottom: '10px' }}>Pedido no encontrado</h2>
-                        <Link href="/perfil?tab=compras" style={{ color: '#00B4FF', textDecoration: 'none', fontWeight: '600' }}>← Volver a Mis Compras</Link>
+                        <Link href="/perfil?tab=compras" style={{ color: '#004797', textDecoration: 'none', fontWeight: '600' }}>← Volver a Mis Compras</Link>
                     </div>
                 </div>
                 <Footer />
@@ -85,11 +85,11 @@ export default function OrderDetails({ pedido }) {
                             </div>
                         </div>
                         <div style={{ display: 'flex', gap: '12px' }}>
-                            <button onClick={handleDescargar} disabled={downloading} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px', background: '#00B4FF', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: downloading ? 'wait' : 'pointer', transition: 'all 0.2s', boxShadow: '0 2px 8px rgba(0,180,255,0.3)' }}>
+                            <button onClick={handleDescargar} disabled={downloading} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px', background: '#004797', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: downloading ? 'wait' : 'pointer', transition: 'all 0.2s', boxShadow: '0 2px 8px rgba(0, 71, 151,0.3)' }}>
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                                 {downloading ? 'Generando...' : 'Descargar Comprobante'}
                             </button>
-                            <Link href={`/seguimiento?codigo=${pedido.codigo}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px', background: 'white', color: '#00B4FF', border: '2px solid #00B4FF', borderRadius: '10px', fontSize: '14px', fontWeight: '600', textDecoration: 'none', transition: 'all 0.2s' }}>
+                            <Link href={`/seguimiento?codigo=${pedido.codigo}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px', background: 'white', color: '#004797', border: '2px solid #004797', borderRadius: '10px', fontSize: '14px', fontWeight: '600', textDecoration: 'none', transition: 'all 0.2s' }}>
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                                 Ver seguimiento
                             </Link>
@@ -103,7 +103,7 @@ export default function OrderDetails({ pedido }) {
                     <div>
                         <div style={{ background: 'white', borderRadius: '16px', padding: '25px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
                             <h2 style={{ fontSize: '16px', fontWeight: '600', color: '#1e293b', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00B4FF" strokeWidth="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#004797" strokeWidth="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
                                 Artículos ({items.length})
                             </h2>
 
@@ -141,7 +141,7 @@ export default function OrderDetails({ pedido }) {
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '20px' }}>
                             <div style={{ background: 'white', borderRadius: '16px', padding: '25px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
                                 <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00B4FF" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#004797" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                                     Dirección de envío
                                 </h3>
                                 {Object.keys(dirEnvio).length > 0 ? (
@@ -158,7 +158,7 @@ export default function OrderDetails({ pedido }) {
 
                             <div style={{ background: 'white', borderRadius: '16px', padding: '25px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
                                 <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00B4FF" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#004797" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                                     Facturación
                                 </h3>
                                 <div style={{ fontSize: '13px', color: '#64748b', lineHeight: '1.7' }}>
@@ -213,7 +213,7 @@ export default function OrderDetails({ pedido }) {
                         {/* Ayuda */}
                         <div style={{ background: 'white', borderRadius: '16px', padding: '20px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)', marginTop: '15px', textAlign: 'center' }}>
                             <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '10px' }}>¿Necesitas ayuda con este pedido?</div>
-                            <Link href="/ayuda" style={{ color: '#00B4FF', fontSize: '14px', fontWeight: '600', textDecoration: 'none' }}>Contactar soporte →</Link>
+                            <Link href="/ayuda" style={{ color: '#004797', fontSize: '14px', fontWeight: '600', textDecoration: 'none' }}>Contactar soporte →</Link>
                         </div>
                     </div>
                 </div>
