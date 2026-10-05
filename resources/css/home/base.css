@@ -4,10 +4,10 @@
 
 :root {
     /* Premium 3-Color Corporate Palette */
-    --color-primary-dark: #009ce0; /* Slightly darker than primary */
-    --color-primary: #004797;      /* Brand Cyan/Blue */
+    --color-primary-dark: #003670;
+    --color-primary: #004797;
     --color-accent: #004797;       /* Secondary actions use primary for consistency */
-    --color-accent-hover: #009ce0; /* Hover state */
+    --color-accent-hover: #003670;
     --color-bg-light: #F8FAFC;     /* Ice Gray / Premium background */
     --color-bg-alt: #ffffff;
     --color-white: #ffffff;
@@ -19,8 +19,8 @@
     --font-main: 'Inter', sans-serif;
 
     /* Reusable Gradients & Glows */
-    --gradient-primary: linear-gradient(135deg, #004797, #009ce0);
-    --gradient-hover: linear-gradient(135deg, #009ce0, #007bb5);
+    --gradient-primary: linear-gradient(135deg, #004797, #003670);
+    --gradient-hover: linear-gradient(135deg, #003670, #002851);
     
     --shadow-soft: 0 4px 20px rgba(0, 71, 151, 0.06);
     --shadow-hover: 0 12px 30px rgba(0, 71, 151, 0.12), 0 4px 6px rgba(0, 0, 0, 0.04);

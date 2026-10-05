@@ -16,6 +16,14 @@
     flex-shrink: 0;
 }
 
+.efe-hero-slide > a, .efe-hero-slide picture { display: block; width: 100%; height: 100%; }
+.efe-hero-slide { aspect-ratio: 2367 / 728; }
+.efe-hero-carousel { touch-action: pan-y; }
+.hero-autoplay-toggle { position: absolute; bottom: 12px; right: 16px; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid #ffffff70; color: #fff; background: #10253ca6; cursor: pointer; }
+.efe-hero-carousel button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+@media (max-width: 767px) { .efe-hero-slide { aspect-ratio: 1; } }
+@media (prefers-reduced-motion: reduce) { .efe-hero-track { transition: none; } }
+
 .efe-hero-slide img {
     width: 100%;
     height: 100%;

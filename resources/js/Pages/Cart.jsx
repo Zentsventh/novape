@@ -28,7 +28,7 @@ export default function Cart() {
 
             {/* HEADER EXACTLY LIKE REFERENCE */}
             <header style={{ background: '#fff', borderBottom: '1px solid #E8ECF0', padding: '16px 0', position: 'sticky', top: 0, zIndex: 50 }}>
-                <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', position: 'relative' }}>
+                <div className="store-checkout-header" style={{ maxWidth: '68.75rem', margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', position: 'relative' }}>
                     
                     {/* LOGO */}
                     <Link href="/" style={{ textDecoration: 'none', position: 'relative', zIndex: 2 }}>
@@ -42,8 +42,8 @@ export default function Cart() {
                     </Link>
 
                     {/* Stepper Center (Absolute to ensure perfect centering) */}
-                    <div style={{ position: 'absolute', left: 0, right: 0, display: 'flex', justifyContent: 'center', zIndex: 1 }}>
-                        <div style={{ position: 'relative', width: '380px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingTop: '4px' }}>
+                    <div className="store-checkout-progress">
+                        <div className="store-checkout-steps">
                             
                             {/* Dotted line behind circles */}
                             <div style={{ position: 'absolute', top: '12px', left: '20px', right: '20px', borderBottom: '2px dotted #004797', zIndex: -1 }}></div>
@@ -105,14 +105,14 @@ export default function Cart() {
                             </div>
                         ) : (
                             items.map((item, index) => (
-                                <div key={item.id} style={{ display: 'flex', padding: '24px', borderBottom: index < items.length - 1 ? '1px solid #E8ECF0' : 'none', gap: '20px', alignItems: 'center' }}>
+                                <div className="store-cart-item" key={item.id} style={{ display: 'flex', padding: 'clamp(0.75rem, 2vw, 1.5rem)', borderBottom: index < items.length - 1 ? '1px solid #E8ECF0' : 'none', gap: '20px', alignItems: 'center' }}>
                                     {/* Imagen */}
                                     <div style={{ width: '80px', height: '80px', flexShrink: 0 }}>
                                         <img src={item.imagen} alt={item.nombre} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                                     </div>
                                     
                                     {/* Info */}
-                                    <div style={{ flex: 1 }}>
+                                    <div className="store-cart-info">
                                         <div style={{ color: '#64748B', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase', marginBottom: '4px' }}>
                                             {item.marca || 'NovaPe'}
                                         </div>
@@ -127,7 +127,7 @@ export default function Cart() {
                                         </div>
                                         
                                         {/* Badges */}
-                                        <div style={{ display: 'flex', gap: '12px' }}>
+                                        <div className="store-cart-badges">
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0369A1', fontSize: '12px', fontWeight: '500' }}>
                                                 <div style={{ width: '24px', height: '24px', background: '#E0F7FF', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
@@ -144,7 +144,7 @@ export default function Cart() {
                                     </div>
                                     
                                     {/* Precio y Controles */}
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+                                    <div className="store-cart-actions">
                                         <div style={{ textAlign: 'right' }}>
                                             <div style={{ fontSize: '16px', fontWeight: '700', color: '#0F172A', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                                 S/ {formatPrice(item.precio)}
@@ -178,13 +178,13 @@ export default function Cart() {
 
                 {/* SIDEBAR */}
                 {items.length > 0 && (
-                    <div className="efe-checkout-sidebar" style={{ width: '380px' }}>
+                    <div className="efe-checkout-sidebar">
                         <div style={{ background: '#E0F7FF', padding: '20px 24px', borderBottom: '1px solid #BAE6FD' }}>
                             <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#0F172A', margin: '0 0 4px' }}>Resumen de pedido</h2>
                             <p style={{ color: '#475569', fontSize: '13px', margin: 0 }}>{cart.count} Productos</p>
                         </div>
                         
-                        <div style={{ padding: '24px' }}>
+                        <div style={{ padding: 'clamp(0.75rem, 3vw, 1.5rem)' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', fontSize: '14px', color: '#64748B' }}>
                                 <span>Subtotal</span>
                                 <span style={{ color: '#0369A1', fontWeight: '600' }}>S/ {formatPrice(cart.total)}</span>

@@ -26,13 +26,13 @@ export default function LibroReclamaciones() {
             <Head title="Libro de Reclamaciones" />
             
             <div style={{ maxWidth: '700px', margin: '0 auto', background: 'white', borderRadius: '16px', boxShadow: '0 10px 40px rgba(0,0,0,0.08)', overflow: 'hidden' }}>
-                <div style={{ background: 'var(--color-primary, #0073D8)', padding: '40px 30px', textAlign: 'center', color: 'white' }}>
+                <div style={{ background: 'var(--color-primary, #0073D8)', padding: 'clamp(1rem, 4vw, 2.5rem) clamp(0.75rem, 3vw, 1.875rem)', textAlign: 'center', color: 'white' }}>
                     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '16px' }}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
                     <h1 style={{ margin: 0, fontSize: '24px', fontWeight: '700' }}>Libro de Reclamaciones</h1>
                     <p style={{ margin: '10px 0 0', opacity: 0.9, fontSize: '15px' }}>Conforme a lo establecido en el Código de Protección y Defensa del Consumidor</p>
                 </div>
 
-                <div style={{ padding: '40px 30px' }}>
+                <div style={{ padding: 'clamp(1rem, 4vw, 2.5rem) clamp(0.75rem, 3vw, 1.875rem)' }}>
                     {flash?.success && (
                         <div style={{ background: '#dcfce7', color: '#166534', padding: '16px', borderRadius: '8px', marginBottom: '24px', fontWeight: '500' }}>
                             {flash.success}
@@ -40,7 +40,7 @@ export default function LibroReclamaciones() {
                     )}
 
                     <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 16rem), 1fr))', gap: '20px' }}>
                             <div>
                                 <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>Nombres</label>
                                 <input type="text" value={data.nombres} onChange={e => setData('nombres', e.target.value)} required style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none' }} />
@@ -53,7 +53,7 @@ export default function LibroReclamaciones() {
                             </div>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '20px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 16rem), 1fr))', gap: '20px' }}>
                             <div>
                                 <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>Documento</label>
                                 <select value={data.tipo_documento} onChange={e => setData('tipo_documento', e.target.value)} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none' }}>
@@ -68,7 +68,7 @@ export default function LibroReclamaciones() {
                             </div>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 16rem), 1fr))', gap: '20px' }}>
                             <div>
                                 <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>Teléfono / Celular</label>
                                 <input type="tel" value={data.telefono} onChange={e => setData('telefono', e.target.value)} required style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none' }} />

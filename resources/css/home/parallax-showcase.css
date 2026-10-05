@@ -1,0 +1,19 @@
+.parallax-showcase { width: 100%; margin: clamp(32px, 5vw, 72px) auto; }
+.parallax-showcase-heading { max-width: 1440px; margin: 0 auto 24px; padding: 0 clamp(16px, 4vw, 56px); display: flex; align-items: end; justify-content: space-between; gap: 20px; }
+.parallax-showcase-heading > div > span { color: #004797; font-size: 11px; letter-spacing: .16em; font-weight: 700; }
+.parallax-showcase-heading h2 { font-size: clamp(26px, 3vw, 42px); letter-spacing: -.035em; color: #152c47; font-weight: 750; margin: 8px 0 0; line-height: 1.1; }
+.parallax-showcase-heading a { display: inline-flex; gap: 12px; align-items: center; color: #004797; font-size: 13px; font-weight: 650; text-decoration: none; white-space: nowrap; padding-bottom: 4px; }
+.parallax-stage { position: relative; width: 100%; height: clamp(320px, 40vw, 580px); background: #fff; overflow: hidden; isolation: isolate; border-block: 1px solid #edf1f6; }
+.parallax-wordmark { position: absolute; inset: 0; display: grid; place-items: center; white-space: nowrap; font-size: clamp(60px, 10vw, 170px); font-weight: 850; letter-spacing: -.055em; color: #edf2f8; pointer-events: none; }
+.parallax-canvas, .parallax-poster { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: contain; mix-blend-mode: multiply; pointer-events: none; }
+.parallax-poster { padding: 2%; }
+.parallax-caption { position: absolute; bottom: 16px; left: 0; width: 100%; text-align: center; font-size: 11px; letter-spacing: .04em; color: #61738a; background: #ffffffd9; padding: 8px; }
+@media (max-width: 767px) {
+    .parallax-showcase-heading { flex-direction: column; align-items: flex-start; gap: 14px; }
+    .parallax-stage { height: 300px; }
+    .parallax-wordmark { font-size: 15vw; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .parallax-canvas { display: none; }
+    .parallax-poster { opacity: 1 !important; }
+}

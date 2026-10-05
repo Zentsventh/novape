@@ -25,7 +25,7 @@ export default function LoginModal({ isOpen, onClose, onSuccessCallback }) {
     };
 
     return (
-        <div style={{
+        <div className="store-modal-overlay" style={{
             position: 'fixed',
             top: 0, left: 0, right: 0, bottom: 0,
             backgroundColor: 'rgba(0, 0, 0, 0.6)',
@@ -35,9 +35,9 @@ export default function LoginModal({ isOpen, onClose, onSuccessCallback }) {
             justifyContent: 'center',
             padding: '20px'
         }}>
-            <div style={{
+            <div className="store-modal-panel" style={{
                 background: 'white',
-                padding: '40px',
+                padding: 'clamp(0.75rem, 3vw, 2.5rem)',
                 borderRadius: '12px',
                 boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
                 width: '100%',

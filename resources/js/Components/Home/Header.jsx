@@ -1,3 +1,5 @@
+import '../../../css/home/base.css';
+import '../../../css/home/header.css';
 import { useEffect, useState, useRef } from 'react';
 import { Link, usePage, router } from '@inertiajs/react';
 import { LOGO } from './constants';
@@ -205,6 +207,7 @@ export default function Header({
                     {!minimal && (
                         <button
                             className="efe-header-hamburger efe-mobile-only"
+                            aria-label="Abrir categorías"
                             onClick={onOpenCategories}
                         >
                             <svg

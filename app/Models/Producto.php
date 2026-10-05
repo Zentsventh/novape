@@ -30,6 +30,8 @@ class Producto extends Model implements Auditable
         'activo',
         'tipo_afectacion_igv',
         'garantias',
+        'fuente_url',
+        'fuente_consultada_at',
         'sku_base'
     ];
 

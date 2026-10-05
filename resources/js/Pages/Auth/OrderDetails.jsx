@@ -71,7 +71,7 @@ export default function OrderDetails({ pedido }) {
                 </div>
 
                 {/* Header con estado */}
-                <div style={{ background: 'white', borderRadius: '16px', padding: '30px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)', marginBottom: '20px' }}>
+                <div style={{ background: 'white', borderRadius: '16px', padding: 'clamp(0.75rem, 3vw, 1.875rem)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)', marginBottom: '20px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '20px' }}>
                         <div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '12px' }}>
@@ -98,10 +98,10 @@ export default function OrderDetails({ pedido }) {
                 </div>
 
                 {/* Content Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '20px', alignItems: 'start' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 24rem), 1fr))', gap: '20px', alignItems: 'start' }}>
                     {/* Left Column: Products */}
                     <div>
-                        <div style={{ background: 'white', borderRadius: '16px', padding: '25px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                        <div style={{ background: 'white', borderRadius: '16px', padding: 'clamp(0.75rem, 3vw, 1.5625rem)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
                             <h2 style={{ fontSize: '16px', fontWeight: '600', color: '#1e293b', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#004797" strokeWidth="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
                                 Artículos ({items.length})
@@ -138,8 +138,8 @@ export default function OrderDetails({ pedido }) {
                         </div>
 
                         {/* Información de envío y facturación */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '20px' }}>
-                            <div style={{ background: 'white', borderRadius: '16px', padding: '25px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 16rem), 1fr))', gap: '20px', marginTop: '20px' }}>
+                            <div style={{ background: 'white', borderRadius: '16px', padding: 'clamp(0.75rem, 3vw, 1.5625rem)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
                                 <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#004797" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                                     Dirección de envío
@@ -156,7 +156,7 @@ export default function OrderDetails({ pedido }) {
                                 )}
                             </div>
 
-                            <div style={{ background: 'white', borderRadius: '16px', padding: '25px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                            <div style={{ background: 'white', borderRadius: '16px', padding: 'clamp(0.75rem, 3vw, 1.5625rem)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
                                 <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', marginBottom: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#004797" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                                     Facturación
@@ -173,7 +173,7 @@ export default function OrderDetails({ pedido }) {
 
                     {/* Right Column: Summary (Sticky) */}
                     <div style={{ position: 'sticky', top: '100px' }}>
-                        <div style={{ background: 'white', borderRadius: '16px', padding: '25px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                        <div style={{ background: 'white', borderRadius: '16px', padding: 'clamp(0.75rem, 3vw, 1.5625rem)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
                             <h2 style={{ fontSize: '16px', fontWeight: '600', color: '#1e293b', marginBottom: '20px' }}>Resumen del pedido</h2>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>

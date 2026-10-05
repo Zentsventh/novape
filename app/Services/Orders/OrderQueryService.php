@@ -69,7 +69,7 @@ class OrderQueryService
 
     public function getOrderForUpdate(int $id): Pedido
     {
-        return Pedido::query()->with(['envio', 'items', 'usuario'])->findOrFail($id);
+        return Pedido::query()->with(['envio', 'items', 'usuario', 'pago'])->findOrFail($id);
     }
     
     public function getOrderForRefund(int $id): Pedido

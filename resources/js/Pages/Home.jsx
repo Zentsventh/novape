@@ -165,7 +165,7 @@ export default function Home({ appName, categoriaProductos = [], mejorSemana = [
             )}
 
             {hasCategorias ? (
-                categoriaProductos.map((cat, index) => (
+                categoriaProductos.filter((cat) => cat.productos?.length > 0).map((cat, index) => (
                     <SlideUp key={cat.id} delay={0.3 + (index * 0.05)}>
                         <CategorySection categoria={cat} index={index} />
                     </SlideUp>

@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
-import { Link, router } from '@inertiajs/react';
-import { useDeviceContext } from '@/Contexts/DeviceContext';
+import '../../../css/home/category-nav.css';
+
+
+
 import { useLocation } from '@/Contexts/LocationContext';
 
 const CategoryIcon = ({ name }) => {
@@ -168,138 +169,31 @@ const CategoryIcon = ({ name }) => {
     );
 };
 
-export default function CategoryNavBar({ categorias = [], onOpenCategories, onSelectCategory }) {
-    const { isMobile } = useDeviceContext();
+export default function CategoryNavBar({ categorias = [], onOpenCategories }) {
     const { location } = useLocation();
-    const [activeId, setActiveId] = useState(null);
-    const [hoverId, setHoverId] = useState(null);
-    const barRef = useRef(null);
-    const [isStuck, setIsStuck] = useState(false);
-
-    useEffect(() => {
-        const bar = barRef.current;
-        if (!bar) return;
-
-        const observer = new IntersectionObserver(([entry]) => setIsStuck(!entry.isIntersecting), {
-            threshold: [1],
-            rootMargin: '-72px 0px 0px 0px',
-        });
-
-        observer.observe(bar);
-        return () => observer.disconnect();
-    }, []);
-
-    const handleClick = (cat) => {
-        setActiveId(cat.id);
-
-        // En móviles, si la categoría tiene subcategorías, tocarla debería mostrar el menú
-        // desplegable en lugar de enrutar inmediatamente, para permitir ver el submenú.
-        if (isMobile && cat.subcategorias && cat.subcategorias.length > 0) {
-            setHoverId(hoverId === cat.id ? null : cat.id);
-            return;
-        }
-
-        if (onSelectCategory) {
-            onSelectCategory(cat);
-            return;
-        }
-        router.get('/catalogo', { categoria: cat.nombre });
-    };
-
-    const handleBlur = (event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) {
-            setHoverId(null);
-        }
+    const openCategory = (cat) => {
+        window.dispatchEvent(new CustomEvent('select-store-category', { detail: { id: cat.id } }));
+        if (onOpenCategories) onOpenCategories();
+        else window.dispatchEvent(new CustomEvent('open-categories'));
     };
 
     return (
-        <nav ref={barRef} className={`efe-category-bar ${isStuck ? 'is-stuck' : ''}`}>
+        <nav className="efe-category-bar" aria-label="Categorías de productos">
             <div className="efe-category-bar-inner">
                 <button className="efe-nav-location-btn" onClick={() => window.dispatchEvent(new CustomEvent('open-location-modal'))}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                        <circle cx="12" cy="10" r="3"></circle>
-                    </svg>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg>
                     <span>{location.distrito ? `${location.distrito}, ${location.departamento}` : 'Ingresa tu ubicación'}</span>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
                 </button>
-                <span className="efe-cat-nav-sep" style={{ marginRight: '10px' }} />
-                <button className="efe-cat-nav-all" onClick={onOpenCategories}>
-                    <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                    >
-                        <line x1="3" y1="6" x2="21" y2="6" />
-                        <line x1="3" y1="12" x2="21" y2="12" />
-                        <line x1="3" y1="18" x2="21" y2="18" />
-                    </svg>
-                    Todas las categorias
+                <button className="efe-cat-nav-all" onClick={() => onOpenCategories ? onOpenCategories() : window.dispatchEvent(new CustomEvent('open-categories'))} aria-haspopup="dialog">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
+                    <span>Todas las categorías</span>
                 </button>
-                <span className="efe-cat-nav-sep" />
                 <div className="efe-category-nav">
                     {categorias.map((cat) => (
-                        <div
-                            key={cat.id}
-                            onMouseEnter={() => setHoverId(cat.id)}
-                            onMouseLeave={() => setHoverId(null)}
-                            onFocus={() => setHoverId(cat.id)}
-                            onBlur={handleBlur}
-                            onKeyDown={(event) => {
-                                if (event.key === 'Escape') {
-                                    setHoverId(null);
-                                }
-                            }}
-                            className="efe-cat-nav-item-wrap"
-                        >
-                            <button
-                                className={`efe-cat-nav-item ${activeId === cat.id ? 'is-active' : ''}`}
-                                onClick={() => handleClick(cat)}
-                                aria-haspopup={
-                                    cat.subcategorias && cat.subcategorias.length > 0
-                                        ? 'menu'
-                                        : undefined
-                                }
-                                aria-expanded={hoverId === cat.id ? 'true' : 'false'}
-                                aria-controls={
-                                    cat.subcategorias && cat.subcategorias.length > 0
-                                        ? `cat-submenu-${cat.id}`
-                                        : undefined
-                                }
-                            >
-                                <span className="efe-cat-nav-icon">
-                                    <CategoryIcon name={cat.nombre} />
-                                </span>
-                                {cat.nombre}
-                            </button>
-
-                            {hoverId === cat.id &&
-                                cat.subcategorias &&
-                                cat.subcategorias.length > 0 && (
-                                    <div
-                                        className="efe-cat-submenu"
-                                        role="menu"
-                                        id={`cat-submenu-${cat.id}`}
-                                    >
-                                        {cat.subcategorias.map((sub) => (
-                                            <Link
-                                                key={sub.id}
-                                                href={`/catalogo?categoria=${encodeURIComponent(cat.nombre)}&subcategoria=${encodeURIComponent(sub.nombre)}`}
-                                                className="efe-cat-sub-item"
-                                                role="menuitem"
-                                            >
-                                                {sub.nombre}
-                                            </Link>
-                                        ))}
-                                    </div>
-                                )}
-                        </div>
+                        <button key={cat.id} className="efe-cat-nav-item" onClick={() => openCategory(cat)} aria-haspopup="dialog">
+                            <span className="efe-cat-nav-icon" aria-hidden="true"><CategoryIcon name={cat.nombre} /></span>
+                            <span>{cat.nombre}</span>
+                        </button>
                     ))}
                 </div>
             </div>

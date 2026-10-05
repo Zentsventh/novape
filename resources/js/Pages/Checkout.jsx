@@ -603,7 +603,7 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
             <Head title="Checkout" />
             {/* HEADER EXACTLY LIKE REFERENCE */}
             <header style={{ background: '#fff', borderBottom: '1px solid #E8ECF0', padding: '16px 0', position: 'sticky', top: 0, zIndex: 50 }}>
-                <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', position: 'relative' }}>
+                <div className="store-checkout-header" style={{ maxWidth: '68.75rem', margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', position: 'relative' }}>
                     
                     {/* LOGO */}
                     <Link href="/" style={{ textDecoration: 'none', position: 'relative', zIndex: 2 }}>
@@ -617,8 +617,8 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
                     </Link>
 
                     {/* Stepper Center (Absolute to ensure perfect centering) */}
-                    <div style={{ position: 'absolute', left: 0, right: 0, display: 'flex', justifyContent: 'center', zIndex: 1 }}>
-                        <div style={{ position: 'relative', width: '380px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingTop: '4px' }}>
+                    <div className="store-checkout-progress">
+                        <div className="store-checkout-steps">
                             
                             {/* Dotted line behind circles */}
                             <div style={{ position: 'absolute', top: '12px', left: '20px', right: '20px', borderBottom: '2px dotted #004797', zIndex: -1 }}></div>
@@ -1234,7 +1234,7 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
 
 
                                         {/* PAGO SEGURO */}
-                                        <div style={{ background: '#F8FAFC', border: '1px solid #E8ECF0', borderRadius: '14px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,.05)' }}>
+                                        <div style={{ background: '#F8FAFC', border: '1px solid #E8ECF0', borderRadius: '14px', padding: 'clamp(0.75rem, 3vw, 1.5rem)', boxShadow: '0 2px 8px rgba(0,0,0,.05)' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', paddingBottom: '14px', borderBottom: '1px solid #E8ECF0' }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                                     <div style={{ width: '36px', height: '36px', background: '#D1FAE5', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -1255,7 +1255,7 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
                                             </p>
 
                                             {isFetchingNiubiz && (
-                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px', gap: '14px', background: '#fff', borderRadius: '10px', border: '1px solid #E8ECF0' }}>
+                                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 'clamp(0.75rem, 3vw, 2rem)', gap: '14px', background: '#fff', borderRadius: '10px', border: '1px solid #E8ECF0' }}>
                                                     <div style={{ width: '32px', height: '32px', border: '3px solid #E8ECF0', borderTopColor: '#004797', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }}></div>
                                                     <span style={{ color: '#64748B', fontSize: '13.5px', fontWeight: '500' }}>Conectando con Mercado Pago...</span>
                                                 </div>

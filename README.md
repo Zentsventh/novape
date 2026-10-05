@@ -1,63 +1,62 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Novape E‑Commerce Platform
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Vision
+A **enterprise‑grade** e‑commerce platform built with **Laravel** using **Domain‑Driven Design (DDD)**. The architecture separates concerns into clear domains, supports rich business logic, robust automation, AI assistance, and a premium UI.
 
-## About Laravel
+## High‑Level Structure
+```
+app/
+├─ Domain/
+│  ├─ Catalog/       # Productos, categorías, marcas, variantes, atributos
+│  ├─ Inventory/     # Stock, almacenes, movimientos, kardex
+│  ├─ Sales/         # Pedidos, checkout, historial, comparador
+│  ├─ Payments/      # Métodos, transacciones, webhooks, conciliación
+│  ├─ Customers/     # Registro, perfil, direcciones, CRM, fidelización
+│  ├─ CRM/           # Conversaciones, tickets, notas, asignaciones
+│  ├─ Marketing/     # Campañas, cupones, automatizaciones, IA
+│  ├─ Procurement/   # Solicitudes, cotizaciones, órdenes de compra
+│  ├─ Billing/       # Facturación electrónica (SUNAT), comprobantes
+│  ├─ Automation/    # Motor de reglas, programaciones, notificaciones
+│  └─ AI/            # Asistente administrativo, generación de contenido
+├─ Actions/          # Use‑case / application services
+├─ Services/         # Infra‑estructuras (email, payment gateways, AI)
+├─ Events/           # Domain events
+├─ Listeners/        # Event listeners
+├─ Jobs/             # Queued jobs (emails, imports, IA)
+├─ Policies/         # Authorization policies (modulo.recurso.accion)
+└─ Notifications/    # Laravel notifications (email, SMS, push)
+```
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Core Decisions (Senior‑Level)
+- **Laravel 11** with PHP 8.3 – latest LTS features, type‑safe models, route attributes.
+- **DDD** – each domain has its own `Entities`, `ValueObjects`, `Repositories` and `Services`.
+- **CQRS** – Commands for write‑side, Queries for read‑side (via dedicated query classes).
+- **Event‑Sourcing** – critical actions (order status changes, payments) emit events stored in `events` table.
+- **Hexagonal Architecture** – `Domain` core is independent of Laravel, enabling easy testing and future migration.
+- **API‑first** – All features exposed through a versioned REST/GraphQL API (`/api/v1`).
+- **Security** – JWT + Laravel Sanctum for API, 2FA for admin, granular permissions (`module.resource.action`).
+- **CI/CD** – GitHub Actions pipeline (lint, phpstan, tests, Docker build, deployment).
+- **Docker** – Multi‑stage build with PHP‑FPM, Nginx, MySQL, Redis, Horizon.
+- **Testing** – PestPHP + PHPUnit, 100 % coverage on core domain logic.
+- **AI Integration** – OpenAI SDK wrapper under `App\Domain\AI\Services\OpenAIService`.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Immediate Next Steps (implemented now)
+1. Create the **DDD folder skeleton**.
+2. Add a base **Entity** class with UUID primary key.
+3. Scaffold a **Product** entity (Catalog domain) with migrations placeholder.
+4. Provide a **README** with onboarding instructions.
+5. Add a minimal **composer.json** and **.gitignore**.
+6. Commit these files – the project is ready for further development.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## How to Continue
+- Run `composer install` to fetch Laravel dependencies.
+- Execute `php artisan migrate` after generating migrations for each domain.
+- Implement API resources, request validation, and service classes per domain.
+- Extend the UI layer (Vue 3 + Vite) with a premium dashboard (glass‑morphism, dark mode).
 
-## Learning Laravel
+---
+*All decisions were taken to ensure scalability, maintainability, and a premium user experience.*
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+# Datos de catálogo y demostración
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## Security / Rate Limiting
-
-The application applies Laravel's `throttle` middleware to all sensitive POST routes (Cart, Checkout, Niubiz, Shipping, Profile) to limit the number of requests per minute and mitigate brute‑force attacks. Adjust the limits in `app/Http/Kernel.php` as needed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+La carga de 200 clientes, catálogo de EFE e imágenes locales y un mes de operaciones simuladas está documentada en [docs/SEMILLAS_REALES.md](docs/SEMILLAS_REALES.md).

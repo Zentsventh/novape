@@ -1,10 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import React, { useState, useEffect, useRef } from 'react';
 import { Plus, MoreHorizontal, DollarSign, Edit2, Trash2 } from 'lucide-react';
 import { AnimatedList } from '../../Animations/AnimatedList';
 
 export default function TwentyKanban({ stages = [], deals, onDragEnd, onDealClick, onDealEdit, onDealDelete }) {
     const [activeDropdown, setActiveDropdown] = useState(null);
+    const [draggingId, setDraggingId] = useState(null);
+    const [overStage, setOverStage] = useState(null);
+    const draggedDeal = useRef(null);
+
+    const moveDeal = (dealId, sourceStage, targetStage, sourceIndex = 0) => {
+        if (String(sourceStage) === String(targetStage)) return;
+        onDragEnd?.({
+            draggableId: String(dealId),
+            source: { droppableId: String(sourceStage), index: sourceIndex },
+            destination: { droppableId: String(targetStage), index: 0 },
+        });
+    };
 
     useEffect(() => {
         const handleClickOutside = () => setActiveDropdown(null);
@@ -226,7 +237,6 @@ export default function TwentyKanban({ stages = [], deals, onDragEnd, onDealClic
             `}</style>
 
             <div className="premium-kanban-container">
-                <DragDropContext onDragEnd={onDragEnd}>
                     <AnimatedList className="premium-kanban-list">
                         {stages.map((stage) => (
                         <div key={stage.id} className="premium-column">
@@ -245,24 +255,34 @@ export default function TwentyKanban({ stages = [], deals, onDragEnd, onDealClic
                             </div>
 
                             {/* Droppable Area */}
-                            <Droppable droppableId={stage.id.toString()}>
-                                {(provided, snapshot) => (
-                                    <div
-                                        ref={provided.innerRef}
-                                        {...provided.droppableProps}
-                                        className={`premium-droppable-area ${snapshot.isDraggingOver ? 'is-dragging-over' : ''}`}
-                                    >
+                            <div
+                                className={`premium-droppable-area ${overStage === stage.id ? 'is-dragging-over' : ''}`}
+                                onDragOver={(event) => { event.preventDefault(); setOverStage(stage.id); }}
+                                onDragLeave={() => setOverStage(null)}
+                                onDrop={(event) => {
+                                    event.preventDefault();
+                                    if (draggedDeal.current) {
+                                        moveDeal(draggedDeal.current.id, draggedDeal.current.stageId, stage.id, draggedDeal.current.index);
+                                    }
+                                    draggedDeal.current = null;
+                                    setDraggingId(null);
+                                    setOverStage(null);
+                                }}
+                            >
                                         {groupedDeals[stage.id]?.map((deal, index) => (
-                                            <Draggable key={deal.id.toString()} draggableId={deal.id.toString()} index={index}>
-                                                {(provided, snapshot) => (
-                                                    <div
-                                                        ref={provided.innerRef}
-                                                        {...provided.draggableProps}
-                                                        {...provided.dragHandleProps}
-                                                        onClick={() => onDealClick && onDealClick(deal)}
-                                                        className={`premium-kanban-card ${snapshot.isDragging ? 'is-dragging' : ''}`}
-                                                        style={provided.draggableProps.style}
-                                                    >
+                                            <div
+                                                key={deal.id}
+                                                draggable
+                                                onDragStart={(event) => {
+                                                    draggedDeal.current = { id: deal.id, stageId: stage.id, index };
+                                                    event.dataTransfer.effectAllowed = 'move';
+                                                    event.dataTransfer.setData('text/plain', String(deal.id));
+                                                    setDraggingId(deal.id);
+                                                }}
+                                                onDragEnd={() => { draggedDeal.current = null; setDraggingId(null); setOverStage(null); }}
+                                                onClick={() => onDealClick && onDealClick(deal)}
+                                                className={`premium-kanban-card ${draggingId === deal.id ? 'is-dragging' : ''}`}
+                                            >
                                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                                             <h4 className="premium-card-title">
                                                                 {deal.titulo}
@@ -291,6 +311,21 @@ export default function TwentyKanban({ stages = [], deals, onDragEnd, onDealClic
                                                                         >
                                                                             <Edit2 size={14} /> Editar
                                                                         </button>
+                                                                        <select
+                                                                            className="premium-dropdown-item"
+                                                                            aria-label={`Mover ${deal.titulo} a otra etapa`}
+                                                                            value={stage.id}
+                                                                            onClick={(event) => event.stopPropagation()}
+                                                                            onChange={(event) => {
+                                                                                event.stopPropagation();
+                                                                                moveDeal(deal.id, stage.id, event.target.value, index);
+                                                                                setActiveDropdown(null);
+                                                                            }}
+                                                                        >
+                                                                            {stages.map((option) => (
+                                                                                <option key={option.id} value={option.id}>{option.nombre}</option>
+                                                                            ))}
+                                                                        </select>
                                                                         <button 
                                                                             className="premium-dropdown-item delete"
                                                                             onClick={(e) => {
@@ -319,18 +354,12 @@ export default function TwentyKanban({ stages = [], deals, onDragEnd, onDealClic
                                                                 {deal.cliente?.nombres?.charAt(0) || 'C'}
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                )}
-                                            </Draggable>
+                                            </div>
                                         ))}
-                                        {provided.placeholder}
-                                    </div>
-                                )}
-                            </Droppable>
+                            </div>
                         </div>
                         ))}
                     </AnimatedList>
-                </DragDropContext>
             </div>
         </>
     );

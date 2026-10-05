@@ -36,7 +36,7 @@ class HomeController extends Controller
 
     public function catalogo(Request $request): Response
     {
-        $filters = $request->only(['categoria', 'subcategoria', 'marca', 'precio_min', 'precio_max', 'q', 'sort']);
+        $filters = $request->only(['categoria', 'subcategoria', 'categoria_id', 'marca', 'precio_min', 'precio_max', 'q', 'sort']);
         $page = $request->query('page', 1);
 
         $cacheKey = 'catalogo_' . md5(json_encode($filters) . '_page_' . $page);

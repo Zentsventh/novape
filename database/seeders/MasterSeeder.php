@@ -13,8 +13,17 @@ class MasterSeeder extends Seeder
 {
     public function run(): void
     {
+        if (!app()->environment(['local', 'testing'])) {
+            throw new \RuntimeException('Los datos de demostracion solo se pueden cargar en local o testing.');
+        }
+
+        $demoPassword = env('DEMO_SEED_PASSWORD');
+        if (!is_string($demoPassword) || strlen($demoPassword) < 12) {
+            throw new \RuntimeException('Configura DEMO_SEED_PASSWORD con al menos 12 caracteres.');
+        }
+
         $now = Carbon::now();
-        $password = Hash::make('12345678');
+        $password = Hash::make($demoPassword);
 
         // ═══════════════════════════════════════════
         // 1. PERMISOS (todos los que usan las rutas)
@@ -38,6 +47,9 @@ class MasterSeeder extends Seeder
             ['nombre' => 'inventario.gestionar', 'descripcion' => 'Ver y modificar inventario y almacenes'],
             ['nombre' => 'usuarios.gestionar',   'descripcion' => 'Crear, editar o eliminar usuarios y roles'],
             ['nombre' => 'reportes.ver',         'descripcion' => 'Ver métricas y reportes del dashboard'],
+            ['nombre' => 'crm.gestionar', 'descripcion' => 'Acceder y modificar CRM'],
+            ['nombre' => 'finanzas.gestionar', 'descripcion' => 'Acceder y modificar gastos'],
+            ['nombre' => 'marketing.gestionar', 'descripcion' => 'Acceder y modificar campanas de marketing'],
         ];
 
         foreach ($permisosData as $p) {
@@ -750,7 +762,6 @@ class MasterSeeder extends Seeder
         $this->command->info('   → Reseñas: ' . DB::table('resenas')->count());
         $this->command->info('   → Proveedores: ' . DB::table('proveedor')->count());
         $this->command->info('');
-        $this->command->info('🔑 Credenciales de acceso (todas con password: 12345678):');
         $this->command->info('   Admin:     admin@novape.com');
         $this->command->info('   Cajero:    cajero@novape.com');
         $this->command->info('   Almacén:   almacen@novape.com');

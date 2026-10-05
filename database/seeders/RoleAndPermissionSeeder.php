@@ -16,6 +16,15 @@ class RoleAndPermissionSeeder extends Seeder
      */
     public function run()
     {
+        if (!app()->environment(['local', 'testing'])) {
+            throw new \RuntimeException('Los datos de demostracion solo se pueden cargar en local o testing.');
+        }
+
+        $demoPassword = env('DEMO_SEED_PASSWORD');
+        if (!is_string($demoPassword) || strlen($demoPassword) < 12) {
+            throw new \RuntimeException('Configura DEMO_SEED_PASSWORD con al menos 12 caracteres.');
+        }
+
         // 1. Limpiar datos (Opcional, pero util si se ejecuta varias veces)
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         DB::table('rol_permiso')->truncate();
@@ -76,7 +85,7 @@ class RoleAndPermissionSeeder extends Seeder
         DB::table('rol_permiso')->insert($rolPermisos);
 
         // 5. Crear Usuarios Semilla
-        $password = Hash::make('12345678');
+        $password = Hash::make($demoPassword);
         $usuariosData = [
             [
                 'nombres' => 'Eduardo (Admin)',

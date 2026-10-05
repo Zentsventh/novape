@@ -23,13 +23,15 @@ class CheckoutService
     {
         $total = 0;
         foreach ($cart as &$item) {
-            if (isset($item['variante_id'])) {
-                $variante = Variante::find($item['variante_id']);
-                if ($variante) {
-                    $item['precio'] = (float) $variante->precio;
-                }
+            if (empty($item['variante_id']) || !is_numeric($item['cantidad'] ?? null) || (int) $item['cantidad'] < 1) {
+                throw new \InvalidArgumentException('El carrito contiene un producto inválido.');
             }
-            $total += ($item['precio'] * $item['cantidad']);
+            $variante = Variante::find($item['variante_id']);
+            if (!$variante || !$variante->activo) {
+                throw new \InvalidArgumentException('Un producto del carrito ya no está disponible.');
+            }
+            $item['precio'] = (float) $variante->precio;
+            $total += $item['precio'] * (int) $item['cantidad'];
         }
         unset($item);
 
@@ -89,6 +91,10 @@ class CheckoutService
             }
         }
 
+        if (!is_finite($shippingCost) || $shippingCost < 0) {
+            throw new \InvalidArgumentException('Costo de envío inválido.');
+        }
+
         $totalConDescuento = max(0, $total - $descuentoMonto) + $shippingCost;
 
         if ($totalConDescuento < 2.00 && $totalConDescuento > 0) {
@@ -110,20 +116,33 @@ class CheckoutService
         $stockError = DB::transaction(function () use ($cart, $sessionId) {
             ReservaStock::where('expires_at', '<', now())->delete();
 
+            $requiredByVariant = [];
             foreach ($cart as $item) {
-                $varianteId = $item['variante_id'] ?? null;
+                $variantId = $item['variante_id'] ?? null;
+                if ($variantId) {
+                    $requiredByVariant[$variantId] = ($requiredByVariant[$variantId] ?? 0) + (int) $item['cantidad'];
+                }
+            }
+
+            foreach ($requiredByVariant as $varianteId => $requiredQuantity) {
                 if ($varianteId) {
-                    $variante = Variante::lockForUpdate()->find($varianteId);
-                    $stockReal = $variante ? $variante->stock : 0;
+                    Variante::lockForUpdate()->find($varianteId);
+                    $almacenEcommerceId = (int) ConfiguracionSitio::obtener('almacen_ecommerce_id', 1);
+                    $stockReal = (int) (DB::table('stock_almacen')
+                        ->where('variante_id', $varianteId)
+                        ->where('almacen_id', $almacenEcommerceId)
+                        ->lockForUpdate()
+                        ->value('cantidad') ?? 0);
 
                     $reservado = ReservaStock::where('variante_id', $varianteId)
                         ->where('session_id', '!=', $sessionId)
+                        ->where('expires_at', '>', now())
                         ->sum('cantidad');
                     
                     $stockDisponible = max(0, $stockReal - $reservado);
 
-                    if ($item['cantidad'] > $stockDisponible) {
-                        return "Stock insuficiente para el producto: {$item['nombre']}. Solo quedan {$stockDisponible} unidades disponibles.";
+                    if ($requiredQuantity > $stockDisponible) {
+                        return "Stock insuficiente para la variante {$varianteId}. Solo quedan {$stockDisponible} unidades disponibles.";
                     }
                 }
             }
@@ -210,19 +229,19 @@ class CheckoutService
         });
     }
 
-    public function processSuccessfulPayment(string $codigoPedido, float $montoPagado, ?string $paymentIntentId = null, string $pasarela = 'stripe'): bool
+    public function processSuccessfulPayment(string $codigoPedido, float $montoPagado, ?string $transactionReference = null): bool
     {
-        return DB::transaction(function () use ($codigoPedido, $montoPagado, $paymentIntentId, $pasarela) {
+        return DB::transaction(function () use ($codigoPedido, $montoPagado, $transactionReference) {
             $pedido = Pedido::with('items')->where('codigo', $codigoPedido)->lockForUpdate()->first();
 
             if ($pedido && $pedido->estado === 'Pendiente') {
                 if (abs($montoPagado - $pedido->total) > 0.01) {
-                    Log::warning("Webhook {$pasarela}: Monto pagado ($montoPagado) no coincide con total del pedido {$pedido->codigo} ({$pedido->total}).");
+                    Log::warning("Webhook Niubiz: Monto pagado ($montoPagado) no coincide con total del pedido {$pedido->codigo} ({$pedido->total}).");
                     
                     \App\Models\TransaccionPago::create([
                         'pedido_id' => $pedido->id,
-                        'payment_intent_id' => $paymentIntentId,
-                        'pasarela' => $pasarela,
+                        'referencia_pasarela' => $transactionReference,
+                        'pasarela' => 'niubiz',
                         'monto' => $montoPagado,
                         'estado' => 'fallido',
                         'error_message' => 'Monto inválido'
@@ -235,11 +254,16 @@ class CheckoutService
 
                 \App\Models\TransaccionPago::create([
                     'pedido_id' => $pedido->id,
-                    'payment_intent_id' => $paymentIntentId,
-                    'pasarela' => $pasarela,
+                    'referencia_pasarela' => $transactionReference,
+                    'pasarela' => 'niubiz',
                     'monto' => $montoPagado,
                     'estado' => 'exitoso'
                 ]);
+
+                \App\Models\Pago::updateOrCreate(
+                    ['pedido_id' => $pedido->id],
+                    ['metodo' => 'niubiz', 'monto' => $montoPagado, 'estado' => 'completado']
+                );
 
                 if ($pedido->cupon_id) {
                     Cupon::where('id', $pedido->cupon_id)->increment('usos_actuales');
@@ -267,19 +291,14 @@ class CheckoutService
                             $stockAlmacen = DB::table('stock_almacen')
                                 ->where('variante_id', $item->variante_id)
                                 ->where('almacen_id', $almacenEcommerceId)
+                                ->lockForUpdate()
                                 ->first();
 
-                            if ($stockAlmacen) {
-                                DB::table('stock_almacen')->where('id', $stockAlmacen->id)->decrement('cantidad', $item->cantidad);
-                            } else {
-                                DB::table('stock_almacen')->insert([
-                                    'almacen_id' => $almacenEcommerceId,
-                                    'variante_id' => $item->variante_id,
-                                    'cantidad' => 0 - $item->cantidad,
-                                    'created_at' => now(),
-                                    'updated_at' => now(),
-                                ]);
+                            if (!$stockAlmacen || $stockAlmacen->cantidad < $item->cantidad) {
+                                throw new \RuntimeException('Stock insuficiente para completar el pedido.');
                             }
+
+                            DB::table('stock_almacen')->where('id', $stockAlmacen->id)->decrement('cantidad', $item->cantidad);
 
                             DB::statement('UPDATE variante SET stock = (SELECT COALESCE(SUM(cantidad), 0) FROM stock_almacen WHERE variante_id = ?) WHERE id = ?', [$item->variante_id, $item->variante_id]);
 
@@ -288,7 +307,7 @@ class CheckoutService
                                 'variante_id' => $item->variante_id,
                                 'tipo' => 'salida',
                                 'cantidad' => -$item->cantidad,
-                                'referencia' => 'Venta Ecommerce Stripe - '.$pedido->codigo,
+                                'referencia' => 'Venta Ecommerce Niubiz - '.$pedido->codigo,
                                 'usuario_id' => $pedido->usuario_id ?? 1,
                                 'created_at' => now(),
                                 'updated_at' => now(),

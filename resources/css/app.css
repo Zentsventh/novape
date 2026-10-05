@@ -1,4 +1,6 @@
-@import "tailwindcss";
+@import "tailwindcss" source(none);
+@source "../js";
+@source "../views";
 
 /* ============================
    NOVAPE - DESIGN SYSTEM

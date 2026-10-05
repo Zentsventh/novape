@@ -25,11 +25,11 @@ export default function Wishlist() {
             <div style={{ maxWidth: '1200px', margin: '40px auto', padding: '20px', minHeight: '60vh' }}>
                 <h1 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '20px' }}>Mis Listas de Deseos</h1>
                 {loading ? (
-                    <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>Cargando listas...</div>
+                    <div style={{ padding: 'clamp(0.75rem, 3vw, 2.5rem)', textAlign: 'center', color: '#666' }}>Cargando listas...</div>
                 ) : wishlists.length > 0 ? (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 18.75rem), 1fr))', gap: '20px' }}>
                         {wishlists.map(list => (
-                            <div key={list.id} style={{ border: '1px solid #e5e7eb', padding: '24px', borderRadius: '12px', background: 'white', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
+                            <div key={list.id} style={{ border: '1px solid #e5e7eb', padding: 'clamp(0.75rem, 3vw, 1.5rem)', borderRadius: '12px', background: 'white', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
                                 <h3 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1f2937' }}>{list.nombre}</h3>
                                 <p style={{ color: '#6b7280', marginTop: '8px' }}>{list.items_count} producto(s)</p>
                             </div>

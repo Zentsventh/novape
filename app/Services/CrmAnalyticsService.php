@@ -141,11 +141,25 @@ class CrmAnalyticsService
 
     private function getLeaderboard(): array
     {
-        // El esquema actual no tiene vendedor_id en crm_deals, devolvemos un ranking simulado o vacío.
-        return [
-            ['vendedor' => 'Admin Vendedor', 'total_ventas' => 15000, 'deals_cerrados' => 5],
-            ['vendedor' => 'Asesor de Ventas', 'total_ventas' => 8500, 'deals_cerrados' => 3]
-        ];
+        // Attribute each won deal once to its first recorded activity author.
+        $authors = DB::table('crm_activities')
+            ->whereNotNull('usuario_id')
+            ->selectRaw('deal_id, MIN(id) as first_activity_id')
+            ->groupBy('deal_id');
+
+        return DB::table('crm_deals')
+            ->joinSub($authors, 'authors', fn ($join) => $join->on('authors.deal_id', '=', 'crm_deals.id'))
+            ->join('crm_activities', 'crm_activities.id', '=', 'authors.first_activity_id')
+            ->join('usuario', 'usuario.id', '=', 'crm_activities.usuario_id')
+            ->where('crm_deals.estado', 'won')
+            ->select('usuario.nombres', 'usuario.apellidos')
+            ->selectRaw('SUM(crm_deals.valor) AS total_ventas, COUNT(crm_deals.id) AS deals_cerrados')
+            ->groupBy('usuario.id', 'usuario.nombres', 'usuario.apellidos')
+            ->orderByDesc('total_ventas')
+            ->limit(10)
+            ->get()
+            ->map(fn ($row) => ['vendedor' => trim($row->nombres.' '.$row->apellidos), 'total_ventas' => (float) $row->total_ventas, 'deals_cerrados' => (int) $row->deals_cerrados])
+            ->all();
     }
 
     private function getTopDeals(): array

@@ -1,0 +1,4479 @@
+{
+  "source_url": "https://www.efe.com.pe/",
+  "collected_on": "2026-10-04",
+  "categories": [
+    {
+      "name": "Estilo de vida",
+      "url": "https://www.efe.com.pe/estilo-de-vida.html",
+      "children": [
+        {
+          "name": "Trabajo y estudio en casa",
+          "url": "https://www.efe.com.pe/estilo-de-vida/trabajo-y-estudio-en-casa.html",
+          "children": [
+            {
+              "name": "Laptops",
+              "url": "https://www.efe.com.pe/estilo-de-vida/trabajo-y-estudio-en-casa/laptops.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "All in one",
+              "url": "https://www.efe.com.pe/estilo-de-vida/trabajo-y-estudio-en-casa/all-in-one.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Impresoras y multifuncionales",
+              "url": "https://www.efe.com.pe/estilo-de-vida/trabajo-y-estudio-en-casa/impresoras-y-multifuncionales.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Tablets",
+              "url": "https://www.efe.com.pe/estilo-de-vida/trabajo-y-estudio-en-casa/tablets.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Routers y repetidores",
+              "url": "https://www.efe.com.pe/estilo-de-vida/trabajo-y-estudio-en-casa/routers-y-repetidores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Escritorios",
+              "url": "https://www.efe.com.pe/estilo-de-vida/trabajo-y-estudio-en-casa/escritorios.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Sillas de escritorio",
+              "url": "https://www.efe.com.pe/estilo-de-vida/trabajo-y-estudio-en-casa/sillas-de-escritorio.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Estantes y libreros",
+              "url": "https://www.efe.com.pe/estilo-de-vida/trabajo-y-estudio-en-casa/estantes-y-libreros.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Útiles escolares y de oficina",
+              "url": "https://www.efe.com.pe/estilo-de-vida/trabajo-y-estudio-en-casa/utiles-escolares-y-de-oficina.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Hogareño",
+          "url": "https://www.efe.com.pe/estilo-de-vida/hogare-o.html",
+          "children": [
+            {
+              "name": "Cocina divertida",
+              "url": "https://www.efe.com.pe/estilo-de-vida/hogare-o/cocina-divertida.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Parrilla en familia",
+              "url": "https://www.efe.com.pe/estilo-de-vida/hogare-o/parrilla-en-familia.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Renueva tu cocina",
+              "url": "https://www.efe.com.pe/estilo-de-vida/hogare-o/renueva-tu-cocina.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Cuidado de la ropa",
+              "url": "https://www.efe.com.pe/estilo-de-vida/hogare-o/cuidado-de-la-ropa.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Refrigeración",
+              "url": "https://www.efe.com.pe/estilo-de-vida/hogare-o/refrigeracion.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Decora tu espacio",
+              "url": "https://www.efe.com.pe/estilo-de-vida/hogare-o/decora-tu-espacio.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Descanso perfecto",
+              "url": "https://www.efe.com.pe/estilo-de-vida/hogare-o/descanso-perfecto.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Limpieza del hogar",
+              "url": "https://www.efe.com.pe/estilo-de-vida/hogare-o/limpieza-del-hogar.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Tecnológico",
+          "url": "https://www.efe.com.pe/estilo-de-vida/tecnologico.html",
+          "children": [
+            {
+              "name": "Casa Inteligente",
+              "url": "https://www.efe.com.pe/estilo-de-vida/tecnologico/casa-inteligente.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Smartphones",
+              "url": "https://www.efe.com.pe/estilo-de-vida/tecnologico/smartphones.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Gadgets",
+              "url": "https://www.efe.com.pe/estilo-de-vida/tecnologico/gadgets.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Drones",
+              "url": "https://www.efe.com.pe/estilo-de-vida/tecnologico/drones.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Power bank y accesorios",
+              "url": "https://www.efe.com.pe/estilo-de-vida/tecnologico/power-bank-y-accesorios.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Smartwatch & wearables",
+              "url": "https://www.efe.com.pe/estilo-de-vida/tecnologico/smartwatch-wearables.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Tablets",
+              "url": "https://www.efe.com.pe/estilo-de-vida/tecnologico/tablets.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Gamer",
+          "url": "https://www.efe.com.pe/estilo-de-vida/gamer.html",
+          "children": [
+            {
+              "name": "Accesorios gaming",
+              "url": "https://www.efe.com.pe/estilo-de-vida/gamer/accesorios-gaming.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Consolas",
+              "url": "https://www.efe.com.pe/estilo-de-vida/gamer/consolas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Laptops gamer",
+              "url": "https://www.efe.com.pe/estilo-de-vida/gamer/laptops-gamer.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Mandos",
+              "url": "https://www.efe.com.pe/estilo-de-vida/gamer/mandos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Monitores gamer",
+              "url": "https://www.efe.com.pe/estilo-de-vida/gamer/monitores-gamer.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Mouse y mousepad gamer",
+              "url": "https://www.efe.com.pe/estilo-de-vida/gamer/mouse-y-mousepad-gamer.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Teclados gamer",
+              "url": "https://www.efe.com.pe/estilo-de-vida/gamer/teclados-gamer.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Videojuegos",
+              "url": "https://www.efe.com.pe/estilo-de-vida/gamer/videojuegos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Sillas Gamer",
+              "url": "https://www.efe.com.pe/estilo-de-vida/gamer/sillas-gamer.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Deporte y vida sana",
+          "url": "https://www.efe.com.pe/estilo-de-vida/deporte-y-vida-sana.html",
+          "children": [
+            {
+              "name": "Accesorios de deporte",
+              "url": "https://www.efe.com.pe/estilo-de-vida/deporte-y-vida-sana/accesorios-de-deporte.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Bicicletas",
+              "url": "https://www.efe.com.pe/estilo-de-vida/deporte-y-vida-sana/bicicletas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Máquinas y gimnasio",
+              "url": "https://www.efe.com.pe/estilo-de-vida/deporte-y-vida-sana/maquinas-y-gimnasio.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Motos",
+              "url": "https://www.efe.com.pe/estilo-de-vida/deporte-y-vida-sana/motos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Ropa deportiva",
+              "url": "https://www.efe.com.pe/estilo-de-vida/deporte-y-vida-sana/ropa-deportiva.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Viajero",
+          "url": "https://www.efe.com.pe/estilo-de-vida/viajero.html",
+          "children": [
+            {
+              "name": "Camping",
+              "url": "https://www.efe.com.pe/estilo-de-vida/viajero/camping.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Maletería y accesorios",
+              "url": "https://www.efe.com.pe/estilo-de-vida/viajero/maleteria-y-accesorios.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Fotografía y video",
+              "url": "https://www.efe.com.pe/estilo-de-vida/viajero/fotografia-y-video.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Tablets y kindle",
+              "url": "https://www.efe.com.pe/estilo-de-vida/viajero/tablets-y-kindle.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Parlantes bluetooth",
+              "url": "https://www.efe.com.pe/estilo-de-vida/viajero/parlantes-bluetooth.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Audífonos",
+              "url": "https://www.efe.com.pe/estilo-de-vida/viajero/audifonos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Cargadores y accesorios",
+              "url": "https://www.efe.com.pe/estilo-de-vida/viajero/cargadores-y-accesorios.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Drones",
+              "url": "https://www.efe.com.pe/estilo-de-vida/viajero/drones.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Divertido",
+          "url": "https://www.efe.com.pe/estilo-de-vida/divertido.html",
+          "children": [
+            {
+              "name": "Parrillas cilindros y cajas chinas",
+              "url": "https://www.efe.com.pe/estilo-de-vida/divertido/parrillas-cilindros-y-cajas-chinas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Piscinas y flotadores",
+              "url": "https://www.efe.com.pe/estilo-de-vida/divertido/piscinas-y-flotadores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Cocina divertida",
+              "url": "https://www.efe.com.pe/estilo-de-vida/divertido/cocina-divertida.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Juegos de mesa",
+              "url": "https://www.efe.com.pe/estilo-de-vida/divertido/juegos-de-mesa.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Juegos de exteriores",
+              "url": "https://www.efe.com.pe/estilo-de-vida/divertido/juegos-de-exteriores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Instrumentos musicales",
+              "url": "https://www.efe.com.pe/estilo-de-vida/divertido/instrumentos-musicales.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Bicicletas",
+              "url": "https://www.efe.com.pe/estilo-de-vida/divertido/bicicletas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Audio y karaoke",
+              "url": "https://www.efe.com.pe/estilo-de-vida/divertido/audio-y-karaoke.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        }
+      ],
+      "level": 0
+    },
+    {
+      "name": "Tecnología",
+      "url": "https://www.efe.com.pe/tecnologia.html",
+      "children": [
+        {
+          "name": "Celulares",
+          "url": "https://www.efe.com.pe/tecnologia/celulares.html",
+          "children": [
+            {
+              "name": "Celulares y Smartphones",
+              "url": "https://www.efe.com.pe/tecnologia/celulares/celulares-y-smartphones.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Smartwatch",
+              "url": "https://www.efe.com.pe/tecnologia/celulares/smartwatch.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Audífonos",
+              "url": "https://www.efe.com.pe/tecnologia/celulares/audifonos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Cargadores y cables",
+              "url": "https://www.efe.com.pe/tecnologia/celulares/cargadores-y-cables.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Baterías externas",
+              "url": "https://www.efe.com.pe/tecnologia/celulares/baterias-externas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Carcasas y láminas",
+              "url": "https://www.efe.com.pe/tecnologia/celulares/carcasas-y-laminas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Accesorios de celulares",
+              "url": "https://www.efe.com.pe/tecnologia/celulares/accesorios-de-celulares.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Parlantes",
+              "url": "https://www.efe.com.pe/tecnologia/celulares/parlantes.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Televisores",
+          "url": "https://www.efe.com.pe/tecnologia/televisores.html",
+          "children": [
+            {
+              "name": "Smart TV",
+              "url": "https://www.efe.com.pe/tecnologia/televisores/smart-tv.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "LED",
+              "url": "https://www.efe.com.pe/tecnologia/televisores/led.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "QLED",
+              "url": "https://www.efe.com.pe/tecnologia/televisores/qled.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "MINILED",
+              "url": "https://www.efe.com.pe/tecnologia/televisores/mini-led.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "QD MINILED",
+              "url": "https://www.efe.com.pe/tecnologia/televisores/qd-miniled.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "OLED",
+              "url": "https://www.efe.com.pe/tecnologia/televisores/oled.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Soundbars y Home Theaters",
+              "url": "https://www.efe.com.pe/tecnologia/televisores/soundbars-y-home-theaters.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Convertidor a Smart TV",
+              "url": "https://www.efe.com.pe/tecnologia/televisores/convertidor-a-smart-tv.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Accesorios de TV",
+              "url": "https://www.efe.com.pe/tecnologia/televisores/accesorios-de-tv.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Racks",
+              "url": "https://www.efe.com.pe/tecnologia/televisores/racks.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Computación",
+          "url": "https://www.efe.com.pe/tecnologia/computacion.html",
+          "children": [
+            {
+              "name": "Laptops",
+              "url": "https://www.efe.com.pe/tecnologia/computacion/laptops.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Computadoras de escritorio",
+              "url": "https://www.efe.com.pe/tecnologia/computacion/computadoras-de-escritorio.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "All in one",
+              "url": "https://www.efe.com.pe/tecnologia/computacion/all-in-one.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Monitores y Proyectores",
+              "url": "https://www.efe.com.pe/tecnologia/computacion/monitores-y-proyectores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Tablets y Tabletas gráficas",
+              "url": "https://www.efe.com.pe/tecnologia/computacion/tablets-y-tabletas-graficas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Impresoras y multifuncionales",
+              "url": "https://www.efe.com.pe/tecnologia/computacion/impresoras-y-multifuncionales.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Tintas y Toners",
+              "url": "https://www.efe.com.pe/tecnologia/computacion/tintas-y-toners.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Accesorios de computación",
+              "url": "https://www.efe.com.pe/tecnologia/computacion/accesorios-de-computacion.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Software",
+              "url": "https://www.efe.com.pe/tecnologia/computacion/software.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Proyectores",
+              "url": "https://www.efe.com.pe/tecnologia/computacion/proyectores.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Gaming",
+          "url": "https://www.efe.com.pe/tecnologia/gaming.html",
+          "children": [
+            {
+              "name": "Laptops Gamer",
+              "url": "https://www.efe.com.pe/tecnologia/gaming/laptops-gamer.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Monitores gamer",
+              "url": "https://www.efe.com.pe/tecnologia/gaming/monitores-gamer.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Audífonos gamer",
+              "url": "https://www.efe.com.pe/tecnologia/gaming/audifonos-gamer.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Mouse y Mousepad gamer",
+              "url": "https://www.efe.com.pe/tecnologia/gaming/mouse-y-mousepad-gamer.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Teclados gamer",
+              "url": "https://www.efe.com.pe/tecnologia/gaming/teclados-gamer.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Coolers",
+              "url": "https://www.efe.com.pe/tecnologia/gaming/coolers.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Sillas gamer",
+              "url": "https://www.efe.com.pe/tecnologia/gaming/sillas-gamer.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Arma tu PC",
+              "url": "https://www.efe.com.pe/tecnologia/gaming/arma-tu-pc.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Otros accesorios gamer",
+              "url": "https://www.efe.com.pe/tecnologia/gaming/otros-accesorios-gamer.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Audífonos",
+          "url": "https://www.efe.com.pe/tecnologia/audifonos.html",
+          "children": [
+            {
+              "name": "True Wireless",
+              "url": "https://www.efe.com.pe/tecnologia/audifonos/true-wireless.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "In ear",
+              "url": "https://www.efe.com.pe/tecnologia/audifonos/in-ear.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "On ear",
+              "url": "https://www.efe.com.pe/tecnologia/audifonos/on-ear.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Over ear",
+              "url": "https://www.efe.com.pe/tecnologia/audifonos/over-ear.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Audio",
+          "url": "https://www.efe.com.pe/tecnologia/audio.html",
+          "children": [
+            {
+              "name": "Equipos de sonido",
+              "url": "https://www.efe.com.pe/tecnologia/audio/equipos-de-sonido.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Parlantes bluetooth",
+              "url": "https://www.efe.com.pe/tecnologia/audio/parlantes-bluetooth.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Soundbars y home theaters",
+              "url": "https://www.efe.com.pe/tecnologia/audio/soundbars-y-home-theaters.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Audio profesional",
+              "url": "https://www.efe.com.pe/tecnologia/audio/audio-profesional.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Instrumentos musicales",
+              "url": "https://www.efe.com.pe/tecnologia/audio/instrumentos-musicales.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Autoradios",
+              "url": "https://www.efe.com.pe/tecnologia/audio/autoradios.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Accesorios de audio",
+              "url": "https://www.efe.com.pe/tecnologia/audio/accesorios-de-audio.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Mezcladora DJ",
+              "url": "https://www.efe.com.pe/tecnologia/audio/mezcladora-dj.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Videojuegos",
+          "url": "https://www.efe.com.pe/tecnologia/videojuegos.html",
+          "children": [
+            {
+              "name": "Consolas",
+              "url": "https://www.efe.com.pe/tecnologia/videojuegos/consolas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "PlayStation",
+              "url": "https://www.efe.com.pe/tecnologia/videojuegos/play-station.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Nintendo",
+              "url": "https://www.efe.com.pe/tecnologia/videojuegos/nintendo.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Juegos",
+              "url": "https://www.efe.com.pe/tecnologia/videojuegos/juegos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Mandos",
+              "url": "https://www.efe.com.pe/tecnologia/videojuegos/mandos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Accesorios de videojuegos",
+              "url": "https://www.efe.com.pe/tecnologia/videojuegos/accesorios-de-videojuegos.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Smart home y domótica",
+          "url": "https://www.efe.com.pe/tecnologia/smart-home-y-domotica.html",
+          "children": [
+            {
+              "name": "Asistente de voz",
+              "url": "https://www.efe.com.pe/tecnologia/smart-home-y-domotica/asistente-de-voz.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Aspiradora robot",
+              "url": "https://www.efe.com.pe/tecnologia/smart-home-y-domotica/aspiradora-robot.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Iluminación inteligente",
+              "url": "https://www.efe.com.pe/tecnologia/smart-home-y-domotica/iluminacion-inteligente.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Interruptor y enchufes inteligentes",
+              "url": "https://www.efe.com.pe/tecnologia/smart-home-y-domotica/interruptor-y-enchufes-inteligentes.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Cámaras de seguridad",
+              "url": "https://www.efe.com.pe/tecnologia/smart-home-y-domotica/camaras-de-seguridad.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Streaming",
+              "url": "https://www.efe.com.pe/tecnologia/smart-home-y-domotica/streaming.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Routers y conexión inalámbrica",
+              "url": "https://www.efe.com.pe/tecnologia/smart-home-y-domotica/routers-y-conexion-inalambrica.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Nuevos dispositivos inteligentes",
+              "url": "https://www.efe.com.pe/tecnologia/smart-home-y-domotica/nuevos-dispositivos-inteligentes.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Aspiradora ",
+              "url": "https://www.efe.com.pe/tecnologia/smart-home-y-domotica/aspiradora.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Fotografía y video",
+          "url": "https://www.efe.com.pe/tecnologia/fotografia-y-video.html",
+          "children": [
+            {
+              "name": "Cámaras semis y profesionales",
+              "url": "https://www.efe.com.pe/tecnologia/fotografia-y-video/camaras-semis-y-profesionales.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Drones",
+              "url": "https://www.efe.com.pe/tecnologia/fotografia-y-video/drones.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Cámaras compactas",
+              "url": "https://www.efe.com.pe/tecnologia/fotografia-y-video/camaras-compactas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Cámaras de video",
+              "url": "https://www.efe.com.pe/tecnologia/fotografia-y-video/camaras-de-video.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Cámaras instantáneas y retro",
+              "url": "https://www.efe.com.pe/tecnologia/fotografia-y-video/camaras-instantaneas-y-retro.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Cámaras de acción",
+              "url": "https://www.efe.com.pe/tecnologia/fotografia-y-video/camaras-de-accion.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Lentes y accesorios",
+              "url": "https://www.efe.com.pe/tecnologia/fotografia-y-video/lentes-y-accesorios.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Tarjetas de memoria",
+              "url": "https://www.efe.com.pe/tecnologia/fotografia-y-video/tarjetas-de-memoria.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Marcas",
+          "url": "https://www.efe.com.pe/tecnologia/marcas.html",
+          "children": [
+            {
+              "name": "Apple",
+              "url": "https://www.efe.com.pe/tecnologia/marcas/apple.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "LG",
+              "url": "https://www.efe.com.pe/tecnologia/marcas/lg.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Samsung",
+              "url": "https://www.efe.com.pe/catalog/category/view/s/samsung/id/1374/",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Skullcandy",
+              "url": "https://www.efe.com.pe/tecnologia/marcas/skullcandy.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "JBL",
+              "url": "https://www.efe.com.pe/tecnologia/marcas/jbl.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "HP",
+              "url": "https://www.efe.com.pe/tecnologia/marcas/hp.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Lenovo",
+              "url": "https://www.efe.com.pe/tecnologia/marcas/lenovo.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Xiaomi",
+              "url": "https://www.efe.com.pe/tecnologia/marcas/xiaomi.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Asus",
+              "url": "https://www.efe.com.pe/tecnologia/marcas/asus.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Google",
+              "url": "https://www.efe.com.pe/tecnologia/marcas/google.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Acer",
+              "url": "https://www.efe.com.pe/catalog/category/view/s/acer/id/4486/",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        }
+      ],
+      "level": 0
+    },
+    {
+      "name": "Electrohogar",
+      "url": "https://www.efe.com.pe/electrohogar.html",
+      "children": [
+        {
+          "name": "Lavado",
+          "url": "https://www.efe.com.pe/electrohogar/lavado.html",
+          "children": [
+            {
+              "name": "Lavadoras",
+              "url": "https://www.efe.com.pe/electrohogar/lavado/lavadoras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Secadoras",
+              "url": "https://www.efe.com.pe/electrohogar/lavado/secadoras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Lavasecas",
+              "url": "https://www.efe.com.pe/electrohogar/lavado/lavasecas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Centros de lavado",
+              "url": "https://www.efe.com.pe/electrohogar/lavado/centros-de-lavado.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Lavavajillas",
+              "url": "https://www.efe.com.pe/electrohogar/lavado/lavavajillas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Hidrolavadoras",
+              "url": "https://www.efe.com.pe/electrohogar/lavado/hidrolavadoras.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Refrigeración",
+          "url": "https://www.efe.com.pe/electrohogar/refrigeracion.html",
+          "children": [
+            {
+              "name": "Refrigeradoras",
+              "url": "https://www.efe.com.pe/electrohogar/refrigeracion/refrigeradoras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Congeladoras y Exhibidoras",
+              "url": "https://www.efe.com.pe/electrohogar/refrigeracion/congeladoras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Frigobares y vineras",
+              "url": "https://www.efe.com.pe/electrohogar/refrigeracion/frigobares-y-vineras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Dispensadores y purificadores de agua",
+              "url": "https://www.efe.com.pe/electrohogar/refrigeracion/dispensadores-y-purificadores-de-agua.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Visicoolers",
+              "url": "https://www.efe.com.pe/electrohogar/refrigeracion/visicoolers.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Cocina",
+          "url": "https://www.efe.com.pe/electrohogar/cocina.html",
+          "children": [
+            {
+              "name": "Cocinas de pie",
+              "url": "https://www.efe.com.pe/electrohogar/cocina/cocinas-de-pie.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Cocinas empotrables",
+              "url": "https://www.efe.com.pe/electrohogar/cocina/cocinas-empotrables.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Cocinas de mesa",
+              "url": "https://www.efe.com.pe/electrohogar/cocina/cocinas-de-mesa.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Campanas",
+              "url": "https://www.efe.com.pe/electrohogar/cocina/campanas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Hornos empotrables",
+              "url": "https://www.efe.com.pe/electrohogar/cocina/hornos-empotrables.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Combos de cocina",
+              "url": "https://www.efe.com.pe/electrohogar/cocina/combos-de-cocina.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Lavavajillas",
+              "url": "https://www.efe.com.pe/electrohogar/cocina/lavavajillas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Microondas",
+              "url": "https://www.efe.com.pe/electrohogar/cocina/microondas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Hornos eléctricos",
+              "url": "https://www.efe.com.pe/electrohogar/cocina/hornos-electricos.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Limpieza",
+          "url": "https://www.efe.com.pe/electrohogar/limpieza.html",
+          "children": [
+            {
+              "name": "Aspiradoras",
+              "url": "https://www.efe.com.pe/electrohogar/limpieza/aspiradoras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Aspiradoras de robot",
+              "url": "https://www.efe.com.pe/electrohogar/limpieza/aspiradoras-de-robot.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Lustradoras",
+              "url": "https://www.efe.com.pe/electrohogar/limpieza/lustradoras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Hidrolavadoras",
+              "url": "https://www.efe.com.pe/electrohogar/limpieza/hidrolavadoras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Otros",
+              "url": "https://www.efe.com.pe/electrohogar/limpieza/otros.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Cuidado de la ropa",
+          "url": "https://www.efe.com.pe/electrohogar/cuidado-de-la-ropa.html",
+          "children": [
+            {
+              "name": "Máquinas de coser",
+              "url": "https://www.efe.com.pe/electrohogar/cuidado-de-la-ropa/maquinas-de-coser.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Planchas",
+              "url": "https://www.efe.com.pe/electrohogar/cuidado-de-la-ropa/planchas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Planchador",
+              "url": "https://www.efe.com.pe/electrohogar/cuidado-de-la-ropa/planchador.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Electrodomésticos",
+          "url": "https://www.efe.com.pe/electrohogar/electrodomesticos.html",
+          "children": [
+            {
+              "name": "Licuadoras",
+              "url": "https://www.efe.com.pe/electrohogar/electrodomesticos/licuadoras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Freidoras de aire",
+              "url": "https://www.efe.com.pe/electrohogar/electrodomesticos/freidoras-de-aire.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Ollas arroceras",
+              "url": "https://www.efe.com.pe/electrohogar/electrodomesticos/ollas-arroceras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Batidoras",
+              "url": "https://www.efe.com.pe/electrohogar/electrodomesticos/batidoras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Cafeteras y Hervidores",
+              "url": "https://www.efe.com.pe/electrohogar/electrodomesticos/cafeteras-y-hervidores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Tostadoras y sandwicheras",
+              "url": "https://www.efe.com.pe/electrohogar/electrodomesticos/tostadoras-y-sandwicheras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Extractores y exprimidores",
+              "url": "https://www.efe.com.pe/electrohogar/electrodomesticos/extractores-y-exprimidores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Cocina entretenida",
+              "url": "https://www.efe.com.pe/electrohogar/electrodomesticos/cocina-entretenida.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Combos",
+              "url": "https://www.efe.com.pe/electrohogar/electrodomesticos/combos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Hornos Eléctricos",
+              "url": "https://www.efe.com.pe/electrohogar/electrodomesticos/hornos-electricos.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Climatización",
+          "url": "https://www.efe.com.pe/electrohogar/climatizacion.html",
+          "children": [
+            {
+              "name": "Termas y calentadores",
+              "url": "https://www.efe.com.pe/electrohogar/climatizacion/termas-y-calentadores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Ventiladores",
+              "url": "https://www.efe.com.pe/electrohogar/climatizacion/ventiladores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Aires acondicionados",
+              "url": "https://www.efe.com.pe/electrohogar/climatizacion/aires-acondicionados.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Deshumedecedores",
+              "url": "https://www.efe.com.pe/electrohogar/climatizacion/deshumedecedores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Purificadores de aire",
+              "url": "https://www.efe.com.pe/electrohogar/climatizacion/purificadores-de-aire.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Calefacción",
+              "url": "https://www.efe.com.pe/electrohogar/climatizacion/calefaccion.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Cuidado personal",
+          "url": "https://www.efe.com.pe/electrohogar/cuidado-personal.html",
+          "children": [
+            {
+              "name": "Secadoras de pelo",
+              "url": "https://www.efe.com.pe/electrohogar/cuidado-personal/secadoras-de-pelo.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Alisadoras y onduladoras",
+              "url": "https://www.efe.com.pe/electrohogar/cuidado-personal/alisadoras-y-onduladoras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Depiladoras",
+              "url": "https://www.efe.com.pe/electrohogar/cuidado-personal/depiladoras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Afeitadoras y cortadoras de pelo",
+              "url": "https://www.efe.com.pe/electrohogar/cuidado-personal/afeitadoras-y-cortadoras-de-pelo.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Bienestar y salud",
+              "url": "https://www.efe.com.pe/electrohogar/cuidado-personal/bienestar-y-salud.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Marcas",
+          "url": "https://www.efe.com.pe/electrohogar/marcas.html",
+          "children": [
+            {
+              "name": "Bord",
+              "url": "https://www.efe.com.pe/electrohogar/marcas/bord.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Coldex",
+              "url": "https://www.efe.com.pe/electrohogar/marcas/coldex.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Samsung",
+              "url": "https://www.efe.com.pe/electrohogar/marcas/samsung.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "LG",
+              "url": "https://www.efe.com.pe/electrohogar/marcas/lg.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Indurama",
+              "url": "https://www.efe.com.pe/electrohogar/marcas/indurama.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Mabe",
+              "url": "https://www.efe.com.pe/electrohogar/marcas/mabe.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Electrolux",
+              "url": "https://www.efe.com.pe/electrohogar/marcas/electrolux.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Bosch",
+              "url": "https://www.efe.com.pe/electrohogar/marcas/bosch.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Oster",
+              "url": "https://www.efe.com.pe/electrohogar/marcas/oster.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Imaco",
+              "url": "https://www.efe.com.pe/electrohogar/marcas/imaco.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        }
+      ],
+      "level": 0
+    },
+    {
+      "name": "Equipamento Gastronómico",
+      "url": "https://www.efe.com.pe/equipamiento-gastronomico.html",
+      "children": [
+        {
+          "name": "Línea de Frío",
+          "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-de-frio.html",
+          "children": [
+            {
+              "name": "Acerados",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-de-frio/acerados.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Congeladoras",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-de-frio/congeladoras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Cremoladeras",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-de-frio/cremoladeras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Vitrinas Exhibidoras",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-de-frio/vitrinas-exhibidoras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Visicoolers",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-de-frio/visicoolers.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Dispensadores de Agua",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-de-frio/dispensadores-de-agua.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Dispensadores de Jugos",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-de-frio/dispensadores-de-jugos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Maquinas de Helados",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-de-frio/maquinas-de-helados.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Otros",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-de-frio/otros.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Exhibidoras",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-de-frio/exhibidoras.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Línea de Calor",
+          "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-de-calor.html",
+          "children": [
+            {
+              "name": "Cocinas",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-de-calor/cocinas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Creperas",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-de-calor/creperas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Freidoras",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-de-calor/freidoras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Hervidores de Agua",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-de-calor/hervidores-de-agua.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Hornos",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-de-calor/hornos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Mantenedores",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-de-calor/mantenedores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Maquinas de Algodón",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-de-calor/maquinas-de-algodon.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Maquinas para Barquillos",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-de-calor/maquinas-para-barquillos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Maquinas de Pop Corn",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-de-calor/maquinas-de-pop-corn.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Wafleras Eléctricas",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-de-calor/wafleras-electricas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Paninis Grill",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-de-calor/paninis-grill.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Planchas Freidoras",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-de-calor/planchas-freidoras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Exhibidores",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-de-calor/exhibidores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Otros",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-de-calor/otros.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Línea Neutro",
+          "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-neutro.html",
+          "children": [
+            {
+              "name": "Amasadoras",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-neutro/amasadora.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Balanzas",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-neutro/balanzas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Batidoras",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-neutro/batidoras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Exprimidores de Jugos",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-neutro/exprimidores-de-jugos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Licuadoras",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-neutro/licuadoras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Moledoras",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-neutro/moledoras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Peladoras",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-neutro/peladoras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Ralladoras",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-neutro/ralladoras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Rebanadoras",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-neutro/rebanadoras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Procesadoras",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-neutro/procesadoras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Selladoras al Vacio",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-neutro/selladoras-al-vacio.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Otros",
+              "url": "https://www.efe.com.pe/equipamiento-gastronomico/linea-neutro/otros.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        }
+      ],
+      "level": 0
+    },
+    {
+      "name": "Hogar",
+      "url": "https://www.efe.com.pe/hogar.html",
+      "children": [
+        {
+          "name": "Grill",
+          "url": "https://www.efe.com.pe/hogar/grill.html",
+          "children": [
+            {
+              "name": "Grill",
+              "url": "https://www.efe.com.pe/hogar/grill/grill.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Parrillas",
+              "url": "https://www.efe.com.pe/hogar/grill/parrillas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Cajas chinas",
+              "url": "https://www.efe.com.pe/hogar/grill/cajas-chinas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Kamados",
+              "url": "https://www.efe.com.pe/hogar/grill/kamados.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Cilindros",
+              "url": "https://www.efe.com.pe/hogar/grill/cilindros.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Accesorios de parrilla",
+              "url": "https://www.efe.com.pe/hogar/grill/accesorios-de-parrilla.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Cocina",
+          "url": "https://www.efe.com.pe/hogar/cocina.html",
+          "children": [
+            {
+              "name": "Juegos de ollas",
+              "url": "https://www.efe.com.pe/hogar/cocina/juegos-de-ollas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Sartenes y woks",
+              "url": "https://www.efe.com.pe/hogar/cocina/sartenes-y-woks.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Termos y teteras",
+              "url": "https://www.efe.com.pe/hogar/cocina/termos-y-teteras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Utensilios de cocina",
+              "url": "https://www.efe.com.pe/hogar/cocina/utensilios-de-cocina.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Lavaderos",
+              "url": "https://www.efe.com.pe/hogar/cocina/lavaderos.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Menaje",
+          "url": "https://www.efe.com.pe/hogar/menaje.html",
+          "children": [
+            {
+              "name": "Vajillas",
+              "url": "https://www.efe.com.pe/hogar/menaje/vajillas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Cubiertos",
+              "url": "https://www.efe.com.pe/hogar/menaje/cubiertos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Vasos y copas",
+              "url": "https://www.efe.com.pe/hogar/menaje/vasos-y-copas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Organizadores y contenedores",
+              "url": "https://www.efe.com.pe/hogar/menaje/organizadores-y-contenedores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Accesorios de mesa",
+              "url": "https://www.efe.com.pe/hogar/menaje/accesorios-de-mesa.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Menaje de cocina",
+              "url": "https://www.efe.com.pe/hogar/menaje/menaje-de-cocina.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Organización",
+          "url": "https://www.efe.com.pe/hogar/organizacion.html",
+          "children": [
+            {
+              "name": "Canastas y Cestos",
+              "url": "https://www.efe.com.pe/hogar/organizacion/canastas-y-cestos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Mesas auxiliares",
+              "url": "https://www.efe.com.pe/hogar/organizacion/mesas-auxiliares.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Gabinetes",
+              "url": "https://www.efe.com.pe/hogar/organizacion/gabinetes.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Cajas fuertes",
+              "url": "https://www.efe.com.pe/catalog/category/view/s/cajas-fuertes/id/5999/",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Decoración",
+          "url": "https://www.efe.com.pe/hogar/decoracion.html",
+          "children": [
+            {
+              "name": "Espejos",
+              "url": "https://www.efe.com.pe/hogar/decoracion/espejos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Cojines",
+              "url": "https://www.efe.com.pe/hogar/decoracion/cojines.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Alfombras",
+              "url": "https://www.efe.com.pe/hogar/decoracion/alfombras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Iluminación",
+              "url": "https://www.efe.com.pe/hogar/decoracion/iluminacion.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Vinilos",
+              "url": "https://www.efe.com.pe/hogar/decoracion/vinilos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Adornos y Otros",
+              "url": "https://www.efe.com.pe/catalog/category/view/s/adornos-y-otros/id/6362/",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Baño",
+          "url": "https://www.efe.com.pe/hogar/ba-o.html",
+          "children": [
+            {
+              "name": "Toallas",
+              "url": "https://www.efe.com.pe/hogar/ba-o/toallas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Tendederos",
+              "url": "https://www.efe.com.pe/hogar/ba-o/tendederos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Accesorios de baño",
+              "url": "https://www.efe.com.pe/hogar/ba-o/accesorios-de-ba-o.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Maletería y Viajes",
+          "url": "https://www.efe.com.pe/hogar/maleteria-y-viajes.html",
+          "children": [
+            {
+              "name": "Maleta de cabina",
+              "url": "https://www.efe.com.pe/hogar/maleteria-y-viajes/maleta-de-cabina.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Maleta de viaje",
+              "url": "https://www.efe.com.pe/hogar/maleteria-y-viajes/maleta-de-viaje.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Mochilas outdoors",
+              "url": "https://www.efe.com.pe/hogar/maleteria-y-viajes/mochilas-outdoors.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Menaje de cocina",
+          "url": "https://www.efe.com.pe/hogar/menaje-de-cocina.html",
+          "children": [],
+          "level": 1
+        }
+      ],
+      "level": 0
+    },
+    {
+      "name": "Muebles",
+      "url": "https://www.efe.com.pe/muebles.html",
+      "children": [
+        {
+          "name": "Sala",
+          "url": "https://www.efe.com.pe/muebles/sala.html",
+          "children": [
+            {
+              "name": "Seccionales",
+              "url": "https://www.efe.com.pe/muebles/sala/seccionales.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Juegos de Sala",
+              "url": "https://www.efe.com.pe/muebles/sala/juegos-de-sala.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Sillones Reclinables",
+              "url": "https://www.efe.com.pe/muebles/sala/sillones-reclinables.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Futones y Sofá Cama",
+              "url": "https://www.efe.com.pe/muebles/sala/futones-y-sofa-cama.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Mesas de Centro y Complementos",
+              "url": "https://www.efe.com.pe/muebles/sala/mesas-de-centro-y-complementos.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Comedor",
+          "url": "https://www.efe.com.pe/muebles/comedor.html",
+          "children": [
+            {
+              "name": "Juegos de Comedor",
+              "url": "https://www.efe.com.pe/muebles/comedor/juegos-de-comedor.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Sillas de Comedor",
+              "url": "https://www.efe.com.pe/muebles/comedor/sillas-de-comedor.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Mesas de Comedor",
+              "url": "https://www.efe.com.pe/muebles/comedor/mesas-de-comedor.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Bares",
+              "url": "https://www.efe.com.pe/muebles/comedor/bares.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Bancos de Bar",
+              "url": "https://www.efe.com.pe/muebles/comedor/bancos-de-bar.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Aparadores y Vitrinas",
+              "url": "https://www.efe.com.pe/muebles/comedor/aparadores-y-vitrinas.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Oficina y estudio",
+          "url": "https://www.efe.com.pe/muebles/oficina-y-estudio.html",
+          "children": [
+            {
+              "name": "Escritorios Gamers",
+              "url": "https://www.efe.com.pe/muebles/oficina-y-estudio/escritorios-gamer.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Escritorios",
+              "url": "https://www.efe.com.pe/muebles/oficina-y-estudio/escritorios.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Estantes y Libreros",
+              "url": "https://www.efe.com.pe/muebles/oficina-y-estudio/estantes-y-libreros.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Sillas de escritorio",
+              "url": "https://www.efe.com.pe/muebles/oficina-y-estudio/sillas-de-escritorio.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Sillas Gamers",
+              "url": "https://www.efe.com.pe/muebles/oficina-y-estudio/sillas-gamers.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Dormitorio",
+          "url": "https://www.efe.com.pe/muebles/dormitorio.html",
+          "children": [
+            {
+              "name": "Cabeceras",
+              "url": "https://www.efe.com.pe/muebles/dormitorio/cabeceras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Roperos",
+              "url": "https://www.efe.com.pe/muebles/dormitorio/roperos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Veladores",
+              "url": "https://www.efe.com.pe/muebles/dormitorio/veladores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Cómodas y Tocadores",
+              "url": "https://www.efe.com.pe/muebles/dormitorio/comodas-y-tocadores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Zapateras",
+              "url": "https://www.efe.com.pe/muebles/dormitorio/zapateras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Organizadores",
+              "url": "https://www.efe.com.pe/muebles/dormitorio/organizadores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "C modas y Tocadores",
+              "url": "https://www.efe.com.pe/muebles/dormitorio/c-modas-y-tocadores.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Terrazas",
+          "url": "https://www.efe.com.pe/muebles/terrazas.html",
+          "children": [
+            {
+              "name": "Comedor y sillas",
+              "url": "https://www.efe.com.pe/muebles/terrazas/comedor-y-sillas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Accesorios de Terraza",
+              "url": "https://www.efe.com.pe/muebles/terrazas/accesorios-de-terraza.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Muebles de TV",
+          "url": "https://www.efe.com.pe/muebles/muebles-de-tv.html",
+          "children": [
+            {
+              "name": "Mesas de TV",
+              "url": "https://www.efe.com.pe/muebles/muebles-de-tv/mesas-de-tv.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Centros de Entretenimiento",
+              "url": "https://www.efe.com.pe/muebles/muebles-de-tv/centros-de-entretenimiento.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Paneles",
+              "url": "https://www.efe.com.pe/muebles/muebles-de-tv/paneles.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Racks de TV",
+              "url": "https://www.efe.com.pe/muebles/muebles-de-tv/racks-de-tv.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Otros espacios",
+          "url": "https://www.efe.com.pe/muebles/otros-espacios.html",
+          "children": [
+            {
+              "name": "Muebles de Baño",
+              "url": "https://www.efe.com.pe/muebles/otros-espacios/muebles-de-ba-o.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Muebles de Cocina",
+              "url": "https://www.efe.com.pe/muebles/otros-espacios/muebles-de-cocina.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Accesorios para muebles",
+          "url": "https://www.efe.com.pe/muebles/accesorios-para-muebles.html",
+          "children": [],
+          "level": 1
+        },
+        {
+          "name": "Marcas",
+          "url": "https://www.efe.com.pe/muebles/marcas.html",
+          "children": [
+            {
+              "name": "Forli",
+              "url": "https://www.efe.com.pe/muebles/marcas/forli.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        }
+      ],
+      "level": 0
+    },
+    {
+      "name": "Dormitorio",
+      "url": "https://www.efe.com.pe/dormitorio.html",
+      "children": [
+        {
+          "name": "Colchones",
+          "url": "https://www.efe.com.pe/dormitorio/colchones.html",
+          "children": [
+            {
+              "name": "King",
+              "url": "https://www.efe.com.pe/dormitorio/colchones/king.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Queen",
+              "url": "https://www.efe.com.pe/dormitorio/colchones/queen.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "2 Plazas",
+              "url": "https://www.efe.com.pe/dormitorio/colchones/2-plazas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "1.5 Plazas",
+              "url": "https://www.efe.com.pe/dormitorio/colchones/1-5-plazas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "1 Plaza",
+              "url": "https://www.efe.com.pe/dormitorio/colchones/1-plaza.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Infantil",
+              "url": "https://www.efe.com.pe/dormitorio/colchones/infantil.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Camas Box Tarima",
+          "url": "https://www.efe.com.pe/dormitorio/camas-box-tarima.html",
+          "children": [
+            {
+              "name": "King",
+              "url": "https://www.efe.com.pe/dormitorio/camas-box-tarina/king.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Queen",
+              "url": "https://www.efe.com.pe/dormitorio/camas-box-tarina/queen.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "2 Plazas",
+              "url": "https://www.efe.com.pe/dormitorio/camas-box-tarina/2-plazas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "1.5 Plazas",
+              "url": "https://www.efe.com.pe/dormitorio/camas-box-tarina/1-5-plazas.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Juegos de dormitorio",
+          "url": "https://www.efe.com.pe/dormitorio/juegos-de-dormitorio.html",
+          "children": [
+            {
+              "name": "King",
+              "url": "https://www.efe.com.pe/dormitorio/juegos-de-dormitorio/king.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Queen",
+              "url": "https://www.efe.com.pe/dormitorio/juegos-de-dormitorio/queen.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "2 Plazas",
+              "url": "https://www.efe.com.pe/dormitorio/juegos-de-dormitorio/2-plazas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "1.5 Plazas",
+              "url": "https://www.efe.com.pe/dormitorio/juegos-de-dormitorio/1-5-plazas.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Muebles de dormitorio",
+          "url": "https://www.efe.com.pe/dormitorio/muebles-de-dormitorio.html",
+          "children": [
+            {
+              "name": "Cabeceras",
+              "url": "https://www.efe.com.pe/dormitorio/muebles-de-dormitorio/cabeceras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Roperos",
+              "url": "https://www.efe.com.pe/dormitorio/muebles-de-dormitorio/roperos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Veladores",
+              "url": "https://www.efe.com.pe/dormitorio/muebles-de-dormitorio/veladores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Cómodas y tocadores",
+              "url": "https://www.efe.com.pe/dormitorio/muebles-de-dormitorio/comodas-y-tocadores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Zapateras",
+              "url": "https://www.efe.com.pe/dormitorio/muebles-de-dormitorio/zapateras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "C modas y tocadores",
+              "url": "https://www.efe.com.pe/dormitorio/muebles-de-dormitorio/c-modas-y-tocadores.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Ropa de cama",
+          "url": "https://www.efe.com.pe/dormitorio/ropa-de-cama.html",
+          "children": [
+            {
+              "name": "Sábanas y fundas de almohadas",
+              "url": "https://www.efe.com.pe/dormitorio/ropa-de-cama/sabanas-y-fundas-de-almohadas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Edredones y plumas",
+              "url": "https://www.efe.com.pe/dormitorio/ropa-de-cama/edredones-y-plumas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Cubrecamas",
+              "url": "https://www.efe.com.pe/dormitorio/ropa-de-cama/cubrecamas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Frazadas y mantas",
+              "url": "https://www.efe.com.pe/dormitorio/ropa-de-cama/frazadas-y-mantas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Almohadas y protectores",
+              "url": "https://www.efe.com.pe/dormitorio/ropa-de-cama/almohadas-y-protectores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Cojines y accesorios",
+              "url": "https://www.efe.com.pe/dormitorio/ropa-de-cama/cojines-y-accesorios.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Dormitorio infantil",
+          "url": "https://www.efe.com.pe/dormitorio/dormitorio-infantil.html",
+          "children": [
+            {
+              "name": "Cunas y cama para niños",
+              "url": "https://www.efe.com.pe/dormitorio/dormitorio-infantil/cunas-y-cama-para-ni-os.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Comodas y cambiadores",
+              "url": "https://www.efe.com.pe/dormitorio/dormitorio-infantil/c-modas-y-cambiadores.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Marcas",
+          "url": "https://www.efe.com.pe/dormitorio/marcas.html",
+          "children": [
+            {
+              "name": "Paraíso",
+              "url": "https://www.efe.com.pe/dormitorio/marcas/paraiso.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "El Cisne",
+              "url": "https://www.efe.com.pe/dormitorio/marcas/el-cisne.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Forli",
+              "url": "https://www.efe.com.pe/dormitorio/marcas/forli.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        }
+      ],
+      "level": 0
+    },
+    {
+      "name": "Deporte",
+      "url": "https://www.efe.com.pe/deporte.html",
+      "children": [
+        {
+          "name": "Máquinas y gimnasio",
+          "url": "https://www.efe.com.pe/deporte/maquinas-y-gimnasio.html",
+          "children": [
+            {
+              "name": "Trotadoras",
+              "url": "https://www.efe.com.pe/deporte/maquinas-y-gimnasio/trotadoras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Elípticas",
+              "url": "https://www.efe.com.pe/deporte/maquinas-y-gimnasio/elipticas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Bicicletas estacionarias",
+              "url": "https://www.efe.com.pe/deporte/maquinas-y-gimnasio/bicicletas-estacionarias.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Bancas",
+              "url": "https://www.efe.com.pe/deporte/maquinas-y-gimnasio/bancas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Gimnasios",
+              "url": "https://www.efe.com.pe/deporte/maquinas-y-gimnasio/gimnasios.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Bicicletas",
+          "url": "https://www.efe.com.pe/deporte/bicicletas.html",
+          "children": [
+            {
+              "name": "Bicicletas de niños",
+              "url": "https://www.efe.com.pe/deporte/bicicletas/bicicletas-de-ni-os.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Bicicletas de paseo",
+              "url": "https://www.efe.com.pe/deporte/bicicletas/bicicletas-de-paseo.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Bicicletas montañeras",
+              "url": "https://www.efe.com.pe/deporte/bicicletas/bicicletas-monta-eras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Bicicletas eléctricas",
+              "url": "https://www.efe.com.pe/deporte/bicicletas/bicicletas-electricas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Scooters eléctricos",
+              "url": "https://www.efe.com.pe/deporte/bicicletas/scooters-electricos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Accesorios de bicicletas",
+              "url": "https://www.efe.com.pe/deporte/bicicletas/accesorios-de-bicicletas.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Accesorios de deporte",
+          "url": "https://www.efe.com.pe/deporte/accesorios-de-deporte.html",
+          "children": [
+            {
+              "name": "Pesas y mancuernas",
+              "url": "https://www.efe.com.pe/deporte/accesorios-de-deporte/pesas-y-mancuernas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Gimnasia",
+              "url": "https://www.efe.com.pe/deporte/accesorios-de-deporte/gimnasia.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Aeróbicos",
+              "url": "https://www.efe.com.pe/deporte/accesorios-de-deporte/aerobicos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Yoga",
+              "url": "https://www.efe.com.pe/deporte/accesorios-de-deporte/yoga.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Boxeo",
+              "url": "https://www.efe.com.pe/deporte/accesorios-de-deporte/boxeo.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Accesorios de protección",
+              "url": "https://www.efe.com.pe/deporte/accesorios-de-deporte/accesorios-de-proteccion.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Tiempo libre y camping",
+          "url": "https://www.efe.com.pe/deporte/tiempo-libre-y-camping.html",
+          "children": [
+            {
+              "name": "Carpas",
+              "url": "https://www.efe.com.pe/deporte/tiempo-libre-y-camping/carpas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Sacos de dormir",
+              "url": "https://www.efe.com.pe/deporte/tiempo-libre-y-camping/sacos-de-dormir.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Colchones inflables",
+              "url": "https://www.efe.com.pe/deporte/tiempo-libre-y-camping/colchones-inflables.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Coolers",
+              "url": "https://www.efe.com.pe/deporte/tiempo-libre-y-camping/coolers.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Mochilas outdoors",
+              "url": "https://www.efe.com.pe/deporte/tiempo-libre-y-camping/mochilas-outdoors.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Piscinas e inflables",
+              "url": "https://www.efe.com.pe/deporte/tiempo-libre-y-camping/piscinas-e-inflables.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Accesorios de camping",
+              "url": "https://www.efe.com.pe/deporte/tiempo-libre-y-camping/accesorios-de-camping.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Juegos de exterior",
+              "url": "https://www.efe.com.pe/deporte/tiempo-libre-y-camping/juegos-de-exterior.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Ropa y accesorios",
+          "url": "https://www.efe.com.pe/deporte/ropa-y-accesorios.html",
+          "children": [
+            {
+              "name": "Ropa deportiva",
+              "url": "https://www.efe.com.pe/deporte/ropa-y-accesorios/ropa-deportiva.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Mochilas y accesorios",
+              "url": "https://www.efe.com.pe/deporte/ropa-y-accesorios/mochilas-y-accesorios.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Zapatillas",
+              "url": "https://www.efe.com.pe/deporte/ropa-y-accesorios/zapatillas.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Suplementos",
+          "url": "https://www.efe.com.pe/deporte/suplementos.html",
+          "children": [
+            {
+              "name": "Accesorios",
+              "url": "https://www.efe.com.pe/deporte/suplementos/accesorios.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Creatinas",
+              "url": "https://www.efe.com.pe/deporte/suplementos/creatinas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Ganador de masa",
+              "url": "https://www.efe.com.pe/deporte/suplementos/ganador-de-masa.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Preworkout",
+              "url": "https://www.efe.com.pe/deporte/suplementos/preworkout.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Proteínas",
+              "url": "https://www.efe.com.pe/deporte/suplementos/proteinas.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        }
+      ],
+      "level": 0
+    },
+    {
+      "name": "Bebé y Juguetes",
+      "url": "https://www.efe.com.pe/infantil.html",
+      "children": [
+        {
+          "name": "Juguetería",
+          "url": "https://www.efe.com.pe/infantil/jugueteria.html",
+          "children": [
+            {
+              "name": "Coleccionables y funkos",
+              "url": "https://www.efe.com.pe/infantil/jugueteria/coleccionables-y-funkos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Muñecas y accesorios",
+              "url": "https://www.efe.com.pe/infantil/jugueteria/mu-ecas-y-accesorios.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Figuras de acción",
+              "url": "https://www.efe.com.pe/infantil/jugueteria/figuras-de-accion.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Autos y Vehículos a Control",
+              "url": "https://www.efe.com.pe/infantil/jugueteria/autos-y-pistas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Juegos de mesa",
+              "url": "https://www.efe.com.pe/infantil/jugueteria/juegos-de-mesa.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Cocinitas y Juegos de Roles",
+              "url": "https://www.efe.com.pe/infantil/jugueteria/organizacion-y-didacticos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Legos y armables",
+              "url": "https://www.efe.com.pe/infantil/jugueteria/legos-y-armables.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Juguetes de Bebé",
+              "url": "https://www.efe.com.pe/infantil/jugueteria/pre-escolar.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Escolar",
+          "url": "https://www.efe.com.pe/infantil/escolar.html",
+          "children": [
+            {
+              "name": "Mochilas",
+              "url": "https://www.efe.com.pe/infantil/escolar/mochilas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Tomatodos",
+              "url": "https://www.efe.com.pe/infantil/escolar/tomatodos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Loncheras y tapers",
+              "url": "https://www.efe.com.pe/infantil/escolar/loncheras-y-tapers.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Útiles escolares y de oficina",
+              "url": "https://www.efe.com.pe/infantil/escolar/utiles-escolares-y-de-oficina.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Bebés",
+          "url": "https://www.efe.com.pe/infantil/bebes.html",
+          "children": [
+            {
+              "name": "Lactancia",
+              "url": "https://www.efe.com.pe/infantil/bebes/lactancia.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Coches",
+              "url": "https://www.efe.com.pe/infantil/bebes/coches.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Sillas de auto",
+              "url": "https://www.efe.com.pe/infantil/bebes/sillas-de-auto.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Cunas y corrales",
+              "url": "https://www.efe.com.pe/infantil/bebes/cunas-y-corrales.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Sillas de comer",
+              "url": "https://www.efe.com.pe/infantil/bebes/sillas-de-comer.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Gimnasios y centro de actividades",
+              "url": "https://www.efe.com.pe/infantil/bebes/gimnasios-y-centro-de-actividades.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Accesorios de bebés",
+              "url": "https://www.efe.com.pe/infantil/bebes/accesorios-de-bebes.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Triciclos andadores y correpasillos",
+              "url": "https://www.efe.com.pe/infantil/bebes/andadores-y-correpasillos.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Juegos de exterior",
+          "url": "https://www.efe.com.pe/infantil/juegos-de-exterior.html",
+          "children": [
+            {
+              "name": "Inflables y Camas Elásticas",
+              "url": "https://www.efe.com.pe/infantil/juegos-de-exterior/inflables.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Scooter, Skate y Patines",
+              "url": "https://www.efe.com.pe/infantil/juegos-de-exterior/scooters-y-patines.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Bicicletas infantiles",
+              "url": "https://www.efe.com.pe/infantil/juegos-de-exterior/bicicletas-infantiles.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Flotadores y Piscinas",
+              "url": "https://www.efe.com.pe/infantil/juegos-de-exterior/piscinas-y-juegos-de-agua.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Juegos Deportivos",
+              "url": "https://www.efe.com.pe/bebe-y-juguetes/juegos-de-exterior/juegos-deportivos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Scooter",
+              "url": "https://www.efe.com.pe/bebe-y-juguetes/juegos-de-exterior/scooter.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Juegos Didácticos",
+          "url": "https://www.efe.com.pe/infantil/juegos-didacticos.html",
+          "children": [
+            {
+              "name": "Arte y Manualidades ",
+              "url": "https://www.efe.com.pe/infantil/juegos-didacticos/arte-y-manualidades.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Seguridad y Paseo",
+          "url": "https://www.efe.com.pe/infantil/seguridad-y-paseo.html",
+          "children": [
+            {
+              "name": "Mochilas Pañaleras",
+              "url": "https://www.efe.com.pe/infantil/seguridad-y-paseo/mochilas-panaleras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Monitores y Cámaras",
+              "url": "https://www.efe.com.pe/infantil/seguridad-y-paseo/monitores-y-camaras.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        }
+      ],
+      "level": 0
+    },
+    {
+      "name": "Belleza y Salud",
+      "url": "https://www.efe.com.pe/salud.html",
+      "children": [
+        {
+          "name": "Cuidado de salud",
+          "url": "https://www.efe.com.pe/salud/cuidado-de-salud.html",
+          "children": [
+            {
+              "name": "Termómetros",
+              "url": "https://www.efe.com.pe/salud/cuidado-de-salud/termometros.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Mascarillas",
+              "url": "https://www.efe.com.pe/salud/cuidado-de-salud/mascarillas.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Salud",
+          "url": "https://www.efe.com.pe/salud/salud.html",
+          "children": [
+            {
+              "name": "Equipos médicos",
+              "url": "https://www.efe.com.pe/salud/salud/equipos-medicos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Balanzas",
+              "url": "https://www.efe.com.pe/salud/salud/balanzas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Concentradores de oxígeno",
+              "url": "https://www.efe.com.pe/salud/salud/concentradores-de-oxigeno.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Bienestar Sexual",
+              "url": "https://www.efe.com.pe/salud/salud/bienestar-sexual.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Salud y bienestar",
+          "url": "https://www.efe.com.pe/salud/vitaminas-y-suplementos.html",
+          "children": [
+            {
+              "name": "Vitaminas",
+              "url": "https://www.efe.com.pe/salud/vitaminas-y-suplementos/vitaminas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Vitaminas y suplementos",
+              "url": "https://www.efe.com.pe/salud/vitaminas-y-suplementos/suplementos-alimenticios.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Multivitamínicos",
+              "url": "https://www.efe.com.pe/salud/vitaminas-y-suplementos/alimentacion-deportiva.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Colágeno y belleza",
+              "url": "https://www.efe.com.pe/salud/vitaminas-y-suplementos/colageno-y-belleza.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Suplementos naturales",
+              "url": "https://www.efe.com.pe/salud/vitaminas-y-suplementos/suplementos-naturales.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Vitaminas para niños",
+              "url": "https://www.efe.com.pe/salud/vitaminas-y-suplementos/vitaminas-para-ninos.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Dermocosmética ",
+          "url": "https://www.efe.com.pe/salud/dermocosmetica.html",
+          "children": [
+            {
+              "name": "Antiedad",
+              "url": "https://www.efe.com.pe/salud/dermocosmetica/antiedad.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Protección solar",
+              "url": "https://www.efe.com.pe/salud/dermocosmetica/proteccion-solar.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Serums",
+              "url": "https://www.efe.com.pe/salud/dermocosmetica/serums.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Bebés y niños",
+              "url": "https://www.efe.com.pe/salud/dermocosmetica/bebes-y-ninos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Hidratación",
+              "url": "https://www.efe.com.pe/salud/dermocosmetica/hidratacion.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Limpieza",
+              "url": "https://www.efe.com.pe/salud/dermocosmetica/limpieza.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Tratamientos",
+              "url": "https://www.efe.com.pe/salud/dermocosmetica/tratamientos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Rutinas y packs",
+              "url": "https://www.efe.com.pe/salud/dermocosmetica/rutinas-y-packs.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Cuidado capilar",
+          "url": "https://www.efe.com.pe/salud/cuidado-capilar.html",
+          "children": [
+            {
+              "name": "Shampoo",
+              "url": "https://www.efe.com.pe/salud/cuidado-capilar/shampoo.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Acondicionador",
+              "url": "https://www.efe.com.pe/salud/cuidado-capilar/acondicionador.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Tratamiento capilar",
+              "url": "https://www.efe.com.pe/salud/cuidado-capilar/tratamiento-capilar.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Tinte y coloración",
+              "url": "https://www.efe.com.pe/salud/cuidado-capilar/tinte-y-coloracion.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Accesorios",
+              "url": "https://www.efe.com.pe/salud/cuidado-capilar/accesorios.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Otros",
+              "url": "https://www.efe.com.pe/salud/cuidado-capilar/otros.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Cuidado de piel",
+          "url": "https://www.efe.com.pe/salud/cuidado-de-piel.html",
+          "children": [
+            {
+              "name": "Cuerpo",
+              "url": "https://www.efe.com.pe/salud/cuidado-de-piel/cuerpo.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Bloqueadores",
+              "url": "https://www.efe.com.pe/salud/cuidado-de-piel/bloqueadores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Bronceadores",
+              "url": "https://www.efe.com.pe/salud/cuidado-de-piel/bronceadores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Repelentes",
+              "url": "https://www.efe.com.pe/salud/cuidado-de-piel/repelentes.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Manos",
+              "url": "https://www.efe.com.pe/salud/cuidado-de-piel/manos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Hidratación",
+              "url": "https://www.efe.com.pe/salud/cuidado-de-piel/hidratacion.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Barba",
+              "url": "https://www.efe.com.pe/salud/cuidado-de-piel/barba.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Otros",
+              "url": "https://www.efe.com.pe/salud/cuidado-de-piel/otros.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Maquillaje",
+          "url": "https://www.efe.com.pe/salud/maquillaje.html",
+          "children": [
+            {
+              "name": "Labios",
+              "url": "https://www.efe.com.pe/salud/maquillaje/labios.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Rostro",
+              "url": "https://www.efe.com.pe/salud/maquillaje/rostro.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Ojos",
+              "url": "https://www.efe.com.pe/salud/maquillaje/ojos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Uñas",
+              "url": "https://www.efe.com.pe/salud/maquillaje/unas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Brochas y accesorios",
+              "url": "https://www.efe.com.pe/salud/maquillaje/brochas-y-accesorios.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Perfumes",
+          "url": "https://www.efe.com.pe/salud/perfumes.html",
+          "children": [
+            {
+              "name": "Mujer",
+              "url": "https://www.efe.com.pe/salud/perfumes/mujer.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Hombre",
+              "url": "https://www.efe.com.pe/salud/perfumes/hombre.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Masajes y spa",
+          "url": "https://www.efe.com.pe/salud/masajes-y-spa.html",
+          "children": [
+            {
+              "name": "Artículos de Relajación",
+              "url": "https://www.efe.com.pe/salud/masajes-y-spa/articulos-de-relajacion.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Masajeadores",
+              "url": "https://www.efe.com.pe/salud/masajes-y-spa/masajeadores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Tonificadores",
+              "url": "https://www.efe.com.pe/salud/masajes-y-spa/tonificadores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Otros",
+              "url": "https://www.efe.com.pe/salud/masajes-y-spa/otros.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Belleza coreana",
+          "url": "https://www.efe.com.pe/salud/belleza-coreana.html",
+          "children": [
+            {
+              "name": "Serums coreanos",
+              "url": "https://www.efe.com.pe/salud/belleza-coreana/serums-coreanos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Fotoprotectores coreanos",
+              "url": "https://www.efe.com.pe/salud/belleza-coreana/fotoprotectores-coreanos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Sets y packs coreanos",
+              "url": "https://www.efe.com.pe/salud/belleza-coreana/sets-y-packs-coreanos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Hidratación coreana",
+              "url": "https://www.efe.com.pe/salud/belleza-coreana/hidratacion-coreana.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Tratamientos coreanos",
+              "url": "https://www.efe.com.pe/salud/belleza-coreana/tratamientos-coreanos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Cuidado corporal coreano",
+              "url": "https://www.efe.com.pe/salud/belleza-coreana/cuidado-corporal-coreano.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Limpieza coreana",
+              "url": "https://www.efe.com.pe/salud/belleza-coreana/limpieza-coreana.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        }
+      ],
+      "level": 0
+    },
+    {
+      "name": "Mejoramiento del hogar",
+      "url": "https://www.efe.com.pe/mejoramiento-del-hogar.html",
+      "children": [
+        {
+          "name": "Herramientas eléctricas",
+          "url": "https://www.efe.com.pe/mejoramiento-del-hogar/herramientas-electricas.html",
+          "children": [
+            {
+              "name": "Taladro",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/herramientas-electricas/taladro.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Atornilladores",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/herramientas-electricas/atornilladores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Sierra circular",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/herramientas-electricas/sierra-circular.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Pulidoras y lijadoras",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/herramientas-electricas/pulidoras-y-lijadoras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Amoladora y esmeriles",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/herramientas-electricas/amoladora-y-esmeriles.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Rotomartillo y demoledores",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/herramientas-electricas/rotomartillo-y-demoledores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Tronzadora",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/herramientas-electricas/tronzadora.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Soplador",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/herramientas-electricas/soplador.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Accesorios de Herramientas eléctricas",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/herramientas-electricas/accesorios-de-herramientas-electricas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Otras Herramientas eléctricas",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/herramientas-electricas/otras-herramientas.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Herramientas manuales",
+          "url": "https://www.efe.com.pe/mejoramiento-del-hogar/herramientas-manuales.html",
+          "children": [
+            {
+              "name": "Martillos y masos",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/herramientas-manuales/martillos-y-masos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Desarmadores",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/herramientas-manuales/desarmadores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Alicates",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/herramientas-manuales/alicates.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Set de herramientas",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/herramientas-manuales/set-de-herramientas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Herramientas de medición",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/herramientas-manuales/herramientas-de-medicion.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Otras Herramientas manuales",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/herramientas-manuales/otras-herramientas-manuales.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Automotriz",
+          "url": "https://www.efe.com.pe/mejoramiento-del-hogar/automotriz.html",
+          "children": [
+            {
+              "name": "Baterías",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/automotriz/baterias.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Audio y video",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/automotriz/audio-y-video.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Limpieza para autos",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/automotriz/limpieza-para-autos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Herramientas y equipos",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/automotriz/herramientas-y-equipos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Accesorios",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/automotriz/accesorios.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Ferretería",
+          "url": "https://www.efe.com.pe/mejoramiento-del-hogar/ferreteria.html",
+          "children": [
+            {
+              "name": "Iluminación",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/ferreteria/iluminacion.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Gasfitería",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/ferreteria/gasfiteria.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Jardinería",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/ferreteria/jardineria.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Seguridad y EPPS",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/ferreteria/seguridad-y-epps.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Pinturas y terminaciones",
+          "url": "https://www.efe.com.pe/mejoramiento-del-hogar/pinturas-y-terminaciones.html",
+          "children": [
+            {
+              "name": "Escaleras",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/pinturas-y-terminaciones/escaleras.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Construcción",
+          "url": "https://www.efe.com.pe/mejoramiento-del-hogar/construccion.html",
+          "children": [
+            {
+              "name": "Materiales de construcción",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/construccion/materiales-de-construccion.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Herramientas de construcción",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/construccion/herramientas-de-construccion.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Maderas y tableros",
+              "url": "https://www.efe.com.pe/mejoramiento-del-hogar/construccion/maderas-y-tableros.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        }
+      ],
+      "level": 0
+    },
+    {
+      "name": "Moto",
+      "url": "https://www.efe.com.pe/motos.html",
+      "children": [
+        {
+          "name": "Moto",
+          "url": "https://www.efe.com.pe/motos/moto-2-ruedas.html",
+          "children": [],
+          "level": 1
+        },
+        {
+          "name": "Accesorios y Ropa",
+          "url": "https://www.efe.com.pe/catalog/category/view/s/accesorios-y-ropa/id/6188/",
+          "children": [
+            {
+              "name": "Accesorios",
+              "url": "https://www.efe.com.pe/catalog/category/view/s/accesorios/id/6191/",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Marcas",
+          "url": "https://www.efe.com.pe/motos/marcas.html",
+          "children": [
+            {
+              "name": "Jettor",
+              "url": "https://www.efe.com.pe/motos/marcas/jettor.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Ronco",
+              "url": "https://www.efe.com.pe/motos/marcas/ronco.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Tipo",
+          "url": "https://www.efe.com.pe/motos/tipo.html",
+          "children": [
+            {
+              "name": "Semiautomáticas",
+              "url": "https://www.efe.com.pe/motos/tipo/semiautomaticas.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        }
+      ],
+      "level": 0
+    },
+    {
+      "name": "Moda Mujer",
+      "url": "https://www.efe.com.pe/moda-y-belleza.html",
+      "children": [
+        {
+          "name": "Accesorios mujer",
+          "url": "https://www.efe.com.pe/moda-y-belleza/accesorios-de-moda.html",
+          "children": [
+            {
+              "name": "Carteras y mochilas",
+              "url": "https://www.efe.com.pe/moda-y-belleza/accesorios-de-moda/carteras-y-mochilas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Relojes",
+              "url": "https://www.efe.com.pe/moda-y-belleza/accesorios-de-moda/relojes.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Joyería de mujer",
+              "url": "https://www.efe.com.pe/moda-y-belleza/accesorios-de-moda/joyeria.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Lentes",
+              "url": "https://www.efe.com.pe/moda-y-belleza/accesorios-de-moda/lentes.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Gorros y correas",
+              "url": "https://www.efe.com.pe/moda-y-belleza/accesorios-de-moda/gorros-y-correas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Billeteras y monederos",
+              "url": "https://www.efe.com.pe/moda-y-belleza/accesorios-de-moda/billeteras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Perfumes",
+              "url": "https://www.efe.com.pe/moda-y-belleza/accesorios-de-moda/perfumes.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Mochilas y morrales informales",
+              "url": "https://www.efe.com.pe/moda-y-belleza/accesorios-de-moda/mochilas-y-morrales-informales.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Calzado mujer",
+          "url": "https://www.efe.com.pe/moda-y-belleza/calzado.html",
+          "children": [
+            {
+              "name": "Zapatos de mujer",
+              "url": "https://www.efe.com.pe/moda-y-belleza/calzado/zapatos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Zapatillas",
+              "url": "https://www.efe.com.pe/moda-y-belleza/calzado/zapatillas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Sandalias y pantuflas",
+              "url": "https://www.efe.com.pe/moda-y-belleza/calzado/sandalias.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Botas y botines de mujer",
+              "url": "https://www.efe.com.pe/moda-y-belleza/calzado/botas-y-botines.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Zapatillas deportivas",
+              "url": "https://www.efe.com.pe/moda-y-belleza/calzado/zapatos-de-vestir.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Zapatillas urbanas",
+              "url": "https://www.efe.com.pe/moda-y-belleza/calzado/zapatillas-urbanas.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Ropa de mujer",
+          "url": "https://www.efe.com.pe/moda-y-belleza/ropa-de-mujer.html",
+          "children": [
+            {
+              "name": "Blusas",
+              "url": "https://www.efe.com.pe/moda-y-belleza/ropa-de-mujer/blusas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Polos y tops",
+              "url": "https://www.efe.com.pe/moda-y-belleza/ropa-de-mujer/polos-y-tops.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Faldas y shorts",
+              "url": "https://www.efe.com.pe/moda-y-belleza/ropa-de-mujer/faldas-y-shorts.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Jeans y pantalones",
+              "url": "https://www.efe.com.pe/moda-y-belleza/ropa-de-mujer/jeans-y-pantalones.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Casacas y poleras",
+              "url": "https://www.efe.com.pe/moda-y-belleza/ropa-de-mujer/casacas-y-poleras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Ropa de baño y bikinis",
+              "url": "https://www.efe.com.pe/moda-y-belleza/ropa-de-mujer/ropa-de-bano-y-bikinis.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Abrigos y chompas",
+              "url": "https://www.efe.com.pe/moda-y-belleza/ropa-de-mujer/abrigos-y-chompas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Ropa de maternidad",
+              "url": "https://www.efe.com.pe/moda-y-belleza/ropa-de-mujer/ropa-de-maternidad.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Ropa formal",
+              "url": "https://www.efe.com.pe/moda-y-belleza/ropa-de-mujer/ropa-formal.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Ropa interior y pijamas",
+          "url": "https://www.efe.com.pe/moda-y-belleza/ropa-interior-y-pijamas.html",
+          "children": [
+            {
+              "name": "Panties y medias",
+              "url": "https://www.efe.com.pe/moda-y-belleza/ropa-interior-y-pijamas/panties-y-medias.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Pijamas y camisones",
+              "url": "https://www.efe.com.pe/moda-y-belleza/ropa-interior-y-pijamas/pijamas-y-camisones.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Brasiers y formadores",
+              "url": "https://www.efe.com.pe/moda-y-belleza/ropa-interior-y-pijamas/brasiers-y-formadores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Trusas",
+              "url": "https://www.efe.com.pe/moda-y-belleza/ropa-interior-y-pijamas/trusas.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        }
+      ],
+      "level": 0
+    },
+    {
+      "name": "Multiservicios",
+      "url": "https://www.efe.com.pe/multiservicios.html",
+      "children": [
+        {
+          "name": "Garantías adicionales",
+          "url": "https://www.efe.com.pe/multiservicios/garantias-adicionales.html",
+          "children": [
+            {
+              "name": "Audio",
+              "url": "https://www.efe.com.pe/multiservicios/garantias-adicionales/audio.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Computo",
+              "url": "https://www.efe.com.pe/multiservicios/garantias-adicionales/computo.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Digital",
+              "url": "https://www.efe.com.pe/multiservicios/garantias-adicionales/digital.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Línea Blanca",
+              "url": "https://www.efe.com.pe/multiservicios/garantias-adicionales/linea-blanca.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Pequeños electrodomésticos",
+              "url": "https://www.efe.com.pe/multiservicios/garantias-adicionales/peque-os-electrodomesticos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Televisores",
+              "url": "https://www.efe.com.pe/multiservicios/garantias-adicionales/televisores.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Asistencias",
+          "url": "https://www.efe.com.pe/multiservicios/asistencias.html",
+          "children": [
+            {
+              "name": "Servicios de asistencia para el hogar",
+              "url": "https://www.efe.com.pe/multiservicios/asistencias/servicios-de-asistencia-para-el-hogar.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Servicios de asistencia tecnológicas",
+              "url": "https://www.efe.com.pe/multiservicios/asistencias/servicios-de-asistencia-tecnologicas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Servicios para smartphone",
+              "url": "https://www.efe.com.pe/multiservicios/asistencias/servicios-para-smartphone.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Instalaciones",
+          "url": "https://www.efe.com.pe/multiservicios/instalaciones.html",
+          "children": [
+            {
+              "name": "Instalación de línea blanca",
+              "url": "https://www.efe.com.pe/multiservicios/instalaciones/instalacion-de-linea-blanca.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Instalación de racks",
+              "url": "https://www.efe.com.pe/multiservicios/instalaciones/instalacion-de-racks.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        }
+      ],
+      "level": 0
+    },
+    {
+      "name": "Supermercados",
+      "url": "https://www.efe.com.pe/supermercados.html",
+      "children": [
+        {
+          "name": "Cuidado Personal",
+          "url": "https://www.efe.com.pe/supermercados/cuidado-personal.html",
+          "children": [
+            {
+              "name": "Aseo Personal",
+              "url": "https://www.efe.com.pe/supermercados/cuidado-personal/aseo-personal.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Licores y bebidas",
+          "url": "https://www.efe.com.pe/supermercados/licores-y-bebidas.html",
+          "children": [
+            {
+              "name": "Bares",
+              "url": "https://www.efe.com.pe/supermercados/licores-y-bebidas/bares.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Espumantes",
+              "url": "https://www.efe.com.pe/supermercados/licores-y-bebidas/espumantes.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Packs",
+              "url": "https://www.efe.com.pe/supermercados/licores-y-bebidas/packs.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Otros licores",
+              "url": "https://www.efe.com.pe/supermercados/licores-y-bebidas/otros-licores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Pisco",
+              "url": "https://www.efe.com.pe/supermercados/licores-y-bebidas/pisco.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Ron",
+              "url": "https://www.efe.com.pe/supermercados/licores-y-bebidas/ron.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Vinos",
+              "url": "https://www.efe.com.pe/supermercados/licores-y-bebidas/vinos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Vodka, gin y tequila",
+              "url": "https://www.efe.com.pe/supermercados/licores-y-bebidas/vodka-gin-y-tequila.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Whisky",
+              "url": "https://www.efe.com.pe/supermercados/licores-y-bebidas/whisky.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Desayuno",
+          "url": "https://www.efe.com.pe/supermercados/desayuno.html",
+          "children": [
+            {
+              "name": "Café e infusiones",
+              "url": "https://www.efe.com.pe/supermercados/desayuno/cafe-e-infusiones.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Lácteos y jugos",
+              "url": "https://www.efe.com.pe/supermercados/desayuno/lacteos-y-jugos.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Limpieza",
+          "url": "https://www.efe.com.pe/supermercados/limpieza.html",
+          "children": [
+            {
+              "name": "Accesorios, tachos, organizadores",
+              "url": "https://www.efe.com.pe/supermercados/limpieza/accesorios-tachos-organizadores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Jabones",
+              "url": "https://www.efe.com.pe/supermercados/limpieza/jabones.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Congelados",
+          "url": "https://www.efe.com.pe/supermercados/congelados.html",
+          "children": [
+            {
+              "name": "Carnes y aves congelados",
+              "url": "https://www.efe.com.pe/supermercados/congelados/carnes-y-aves-congelados.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Hamburguesas, nuggets y apanados",
+              "url": "https://www.efe.com.pe/supermercados/congelados/hamburguesas-nuggets-y-apanados.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Helados y postres",
+              "url": "https://www.efe.com.pe/supermercados/congelados/helados-y-postres.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Pescados y mariscos congelados",
+              "url": "https://www.efe.com.pe/supermercados/congelados/pescados-y-mariscos-congelados.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        }
+      ],
+      "level": 0
+    },
+    {
+      "name": "Moda Hombre",
+      "url": "https://www.efe.com.pe/moda-hombre.html",
+      "children": [
+        {
+          "name": "Accesorios",
+          "url": "https://www.efe.com.pe/moda-hombre/accesorios.html",
+          "children": [
+            {
+              "name": "Relojes",
+              "url": "https://www.efe.com.pe/moda-hombre/accesorios/relojes.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Lentes",
+              "url": "https://www.efe.com.pe/moda-hombre/accesorios/lentes.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Billeteras y monederos",
+              "url": "https://www.efe.com.pe/moda-hombre/accesorios/joyeria-de-mujer.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Mochilas y morrales",
+              "url": "https://www.efe.com.pe/moda-hombre/accesorios/mochilas-y-morrales.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Correas y cinturones",
+              "url": "https://www.efe.com.pe/moda-hombre/accesorios/correas-y-cinturones.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Joyería de hombre",
+              "url": "https://www.efe.com.pe/moda-hombre/accesorios/joyeria-de-hombre.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Otros",
+              "url": "https://www.efe.com.pe/moda-hombre/accesorios/otros.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Calzado hombre",
+          "url": "https://www.efe.com.pe/moda-hombre/calzado-hombre.html",
+          "children": [
+            {
+              "name": "Zapatillas deportivas",
+              "url": "https://www.efe.com.pe/moda-hombre/calzado-hombre/zapatillas-deportivas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Zapatillas urbanas",
+              "url": "https://www.efe.com.pe/moda-hombre/calzado-hombre/zapatillas-urbanas.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Ropa de hombre",
+          "url": "https://www.efe.com.pe/moda-hombre/ropa-de-hombre.html",
+          "children": [
+            {
+              "name": "Polos y camisas",
+              "url": "https://www.efe.com.pe/moda-hombre/ropa-de-hombre/polos-y-camisas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Casacas y poleras",
+              "url": "https://www.efe.com.pe/moda-hombre/ropa-de-hombre/casacas-y-poleras.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Chompas y chalecos",
+              "url": "https://www.efe.com.pe/moda-hombre/ropa-de-hombre/chompas-y-chalecos.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Ropa interior y pijamas",
+          "url": "https://www.efe.com.pe/moda-hombre/ropa-interior-y-pijamas.html",
+          "children": [
+            {
+              "name": "Bóxers y calzoncillos",
+              "url": "https://www.efe.com.pe/moda-hombre/ropa-interior-y-pijamas/boxers-y-calzoncillos.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        }
+      ],
+      "level": 0
+    },
+    {
+      "name": "Librería",
+      "url": "https://www.efe.com.pe/libreria.html",
+      "children": [
+        {
+          "name": "Libros",
+          "url": "https://www.efe.com.pe/libreria/libros.html",
+          "children": [
+            {
+              "name": "Álbumes",
+              "url": "https://www.efe.com.pe/libreria/libros/albumes.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Actualidad",
+              "url": "https://www.efe.com.pe/libreria/libros/actualidad.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Clásicos",
+              "url": "https://www.efe.com.pe/libreria/libros/clasicos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Autoayuda y Desarrollo Personal",
+              "url": "https://www.efe.com.pe/libreria/libros/autoayuda-y-desarrollo-personal.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Liderazgo y Gestión",
+              "url": "https://www.efe.com.pe/libreria/libros/liderazgo-y-gestion.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Útiles y Papelería",
+          "url": "https://www.efe.com.pe/libreria/utiles-y-papeleria.html",
+          "children": [
+            {
+              "name": "Artículos para Fiestas",
+              "url": "https://www.efe.com.pe/libreria/utiles-y-papeleria/articulos-para-fiestas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Artículos de Oficina",
+              "url": "https://www.efe.com.pe/libreria/utiles-y-papeleria/articulos-de-oficina.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Cuadernos y Libretas",
+              "url": "https://www.efe.com.pe/libreria/utiles-y-papeleria/cuadernos-y-libretas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Manualidades",
+              "url": "https://www.efe.com.pe/libreria/utiles-y-papeleria/manualidades.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Papelería",
+              "url": "https://www.efe.com.pe/libreria/utiles-y-papeleria/papeleria.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Útiles Escolares",
+              "url": "https://www.efe.com.pe/libreria/utiles-y-papeleria/utiles-escolares.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Agendas y calendarios",
+          "url": "https://www.efe.com.pe/libreria/agendas-y-calendarios.html",
+          "children": [],
+          "level": 1
+        }
+      ],
+      "level": 0
+    },
+    {
+      "name": "Farmacia",
+      "url": "https://www.efe.com.pe/farmacia.html",
+      "children": [
+        {
+          "name": "Adultos Mayores",
+          "url": "https://www.efe.com.pe/farmacia/adultos-mayores.html",
+          "children": [
+            {
+              "name": "Pañales y Protectores",
+              "url": "https://www.efe.com.pe/farmacia/adultos-mayores/panales-y-protectores.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Botiquín en Casa",
+          "url": "https://www.efe.com.pe/farmacia/botiquin-en-casa.html",
+          "children": [
+            {
+              "name": "Repelente",
+              "url": "https://www.efe.com.pe/farmacia/botiquin-en-casa/repelente.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Antibiótico y Antiséptico",
+              "url": "https://www.efe.com.pe/farmacia/botiquin-en-casa/antibiotico-y-antiseptico.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Galénicos",
+          "url": "https://www.efe.com.pe/farmacia/galenicos.html",
+          "children": [
+            {
+              "name": "Alcohol",
+              "url": "https://www.efe.com.pe/farmacia/galenicos/alcohol.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        }
+      ],
+      "level": 0
+    },
+    {
+      "name": "Mascotas",
+      "url": "https://www.efe.com.pe/mascotas.html",
+      "children": [
+        {
+          "name": "Accesorios",
+          "url": "https://www.efe.com.pe/mascotas/accesorios.html",
+          "children": [],
+          "level": 1
+        },
+        {
+          "name": "Cuidado e Higiene",
+          "url": "https://www.efe.com.pe/mascotas/cuidado-e-higiene.html",
+          "children": [],
+          "level": 1
+        },
+        {
+          "name": "Camas y Casas",
+          "url": "https://www.efe.com.pe/mascotas/camas-y-casas.html",
+          "children": [],
+          "level": 1
+        },
+        {
+          "name": "Alimentos",
+          "url": "https://www.efe.com.pe/mascotas/alimentos.html",
+          "children": [
+            {
+              "name": "Comida perros",
+              "url": "https://www.efe.com.pe/mascotas/alimentos/comida-perros.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Snacks y premios para gatos",
+              "url": "https://www.efe.com.pe/mascotas/alimentos/snacks-y-premios-para-gatos.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Perros",
+          "url": "https://www.efe.com.pe/mascotas/perros.html",
+          "children": [
+            {
+              "name": "Platos, dispensadores y botellas",
+              "url": "https://www.efe.com.pe/mascotas/perros/platos-dispensadores-y-botellas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Antipulgas para perros",
+              "url": "https://www.efe.com.pe/mascotas/perros/antipulgas-para-perros.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Suplementos y vitaminas para perros",
+              "url": "https://www.efe.com.pe/mascotas/perros/suplementos-y-vitaminas-para-perros.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Casas para perros",
+              "url": "https://www.efe.com.pe/mascotas/perros/casas-para-perros.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Jaula y transporte",
+              "url": "https://www.efe.com.pe/mascotas/perros/jaula-y-transporte.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Arnés, collares y correas",
+              "url": "https://www.efe.com.pe/mascotas/perros/arnes-collares-y-correas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Peluquería canina",
+              "url": "https://www.efe.com.pe/mascotas/perros/peluqueria-canina.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Juguetes y entrenamiento",
+              "url": "https://www.efe.com.pe/mascotas/perros/juguetes-y-entrenamiento.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Ropa y accesorios",
+              "url": "https://www.efe.com.pe/mascotas/perros/ropa-y-accesorios.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Gatos",
+          "url": "https://www.efe.com.pe/mascotas/gatos.html",
+          "children": [
+            {
+              "name": "Comedero y bebedero",
+              "url": "https://www.efe.com.pe/mascotas/gatos/comedero-y-bebedero.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Antipulgas para gatos",
+              "url": "https://www.efe.com.pe/mascotas/gatos/antipulgas-para-gatos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Arena y areneros",
+              "url": "https://www.efe.com.pe/mascotas/gatos/arena-y-areneros.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Camas para gatos",
+              "url": "https://www.efe.com.pe/mascotas/gatos/camas-para-gatos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Rascadores",
+              "url": "https://www.efe.com.pe/mascotas/gatos/rascadores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Juguetes y entretención",
+              "url": "https://www.efe.com.pe/mascotas/gatos/juguetes-y-entretencion.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Peluquería para gatos",
+              "url": "https://www.efe.com.pe/mascotas/gatos/peluqueria-para-gatos.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Otros productos de higiene gato",
+              "url": "https://www.efe.com.pe/mascotas/gatos/otros-productos-de-higiene-gato.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Peces, tortugas y reptiles",
+          "url": "https://www.efe.com.pe/mascotas/peces-tortugas-y-reptiles.html",
+          "children": [
+            {
+              "name": "Accesorios de acuarios",
+              "url": "https://www.efe.com.pe/mascotas/peces-tortugas-y-reptiles/accesorios-de-acuarios.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Acuarios y terrarios",
+              "url": "https://www.efe.com.pe/mascotas/peces-tortugas-y-reptiles/acuarios-y-terrarios.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        },
+        {
+          "name": "Roedores y aves",
+          "url": "https://www.efe.com.pe/mascotas/roedores-y-aves.html",
+          "children": [
+            {
+              "name": "Comedero de aves",
+              "url": "https://www.efe.com.pe/mascotas/roedores-y-aves/comedero-de-aves.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Jaulas",
+              "url": "https://www.efe.com.pe/mascotas/roedores-y-aves/jaulas.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Juguetes para roedores",
+              "url": "https://www.efe.com.pe/mascotas/roedores-y-aves/juguetes-para-roedores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Accesorios para roedores",
+              "url": "https://www.efe.com.pe/mascotas/roedores-y-aves/accesorios-para-roedores.html",
+              "children": [],
+              "level": 2
+            },
+            {
+              "name": "Otros artículos",
+              "url": "https://www.efe.com.pe/mascotas/roedores-y-aves/otros-articulos.html",
+              "children": [],
+              "level": 2
+            }
+          ],
+          "level": 1
+        }
+      ],
+      "level": 0
+    },
+    {
+      "name": "Computación",
+      "url": "https://www.efe.com.pe/computacion.html",
+      "children": [
+        {
+          "name": "Accesorios de computación",
+          "url": "https://www.efe.com.pe/computacion/accesorios-de-computacion.html",
+          "children": [],
+          "level": 1
+        }
+      ],
+      "level": 0
+    },
+    {
+      "name": "Audífonos",
+      "url": "https://www.efe.com.pe/audifonos.html",
+      "children": [
+        {
+          "name": "Over ear",
+          "url": "https://www.efe.com.pe/audifonos/over-ear.html",
+          "children": [],
+          "level": 1
+        },
+        {
+          "name": "True Wireless",
+          "url": "https://www.efe.com.pe/audifonos/true-wireless.html",
+          "children": [],
+          "level": 1
+        }
+      ],
+      "level": 0
+    }
+  ]
+}

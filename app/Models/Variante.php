@@ -20,6 +20,7 @@ class Variante extends Model
         'producto_id', 
         'sku', 
         'precio', 
+        'precio_anterior',
         'activo', 
         'stock', 
         'stock_reservado'
@@ -27,6 +28,7 @@ class Variante extends Model
 
     protected $casts = [
         'precio' => 'decimal:2',
+        'precio_anterior' => 'decimal:2',
         'activo' => 'boolean',
         'stock' => 'integer',
         'stock_reservado' => 'integer',

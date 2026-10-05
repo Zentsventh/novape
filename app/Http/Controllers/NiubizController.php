@@ -95,7 +95,12 @@ class NiubizController extends Controller
             $securityToken = $this->generateToken();
 
             // Número de compra: max 9-12 dígitos
-            $purchaseNumber = str_pad((string) $pedido->id, 9, '0', STR_PAD_LEFT);
+            $attempt = (int) session('niubiz_attempt', 0) + 1;
+            if ($attempt > 99 || $pedido->id > 9999999) {
+                throw new \RuntimeException('No se puede generar otro número de compra para este pedido.');
+            }
+            $purchaseNumber = str_pad((string) ($pedido->id * 100 + $attempt), 9, '0', STR_PAD_LEFT);
+            session(['niubiz_attempt' => $attempt]);
 
             // Crear la Sesión
             $response = Http::withHeaders(['Authorization' => $securityToken])
@@ -132,6 +137,8 @@ class NiubizController extends Controller
                 'env' => config('services.niubiz.env', 'sandbox')
             ]);
 
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
         } catch (\Exception $e) {
             Log::error('Niubiz Session Error: ' . $e->getMessage());
             return response()->json(['error' => $e->getMessage()], 500);
@@ -170,7 +177,7 @@ class NiubizController extends Controller
             Log::info('Niubiz authorization result', ['purchase_number' => $purchaseNumber, 'action_code' => $authData['dataMap']['ACTION_CODE'] ?? null]);
             
             if (isset($authData['dataMap']['ACTION_CODE']) && $authData['dataMap']['ACTION_CODE'] === '000') {
-                if (!$this->checkoutService->processSuccessfulPayment($codigoPedido, $amount, $transactionToken, 'niubiz')) {
+                if (!$this->checkoutService->processSuccessfulPayment($codigoPedido, $amount, $transactionToken)) {
                     throw new \RuntimeException('El pedido no está pendiente de pago.');
                 }
                 \App\Models\ReservaStock::where('session_id', session()->getId())->delete();
@@ -178,7 +185,7 @@ class NiubizController extends Controller
                 $correoDestino = auth()->check() ? auth()->user()->email : ($request->input('customerEmail') ?? null);
                 $this->checkoutService->finalizeSuccessAction($codigoPedido, $correoDestino);
                 
-                session()->forget(['cart', 'checkout_pedido', 'niubiz_amount', 'niubiz_purchaseNumber', 'checkout_cupon_id', 'checkout_monto']);
+                session()->forget(['cart', 'checkout_pedido', 'niubiz_amount', 'niubiz_purchaseNumber', 'niubiz_attempt', 'checkout_cupon_id', 'checkout_monto']);
 
                 return redirect()->route('checkout.niubiz.success')->with('success', 'Pago aprobado correctamente.');
             } else {
@@ -188,7 +195,7 @@ class NiubizController extends Controller
                 if ($pedidoId) {
                     \App\Models\TransaccionPago::create([
                         'pedido_id' => $pedidoId,
-                        'payment_intent_id' => $transactionToken,
+                        'referencia_pasarela' => $transactionToken,
                         'pasarela' => 'niubiz',
                         'monto' => $amount,
                         'estado' => 'fallido',

@@ -1,171 +1,159 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Link } from '@inertiajs/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import '../../../css/home/parallax-showcase.css';
 
 gsap.registerPlugin(ScrollTrigger);
+const frameUrl = (index) => `/images/paradox/frame_${String(index + 1).padStart(4, '0')}_resultado.webp`;
 
 export default function GsapCanvas() {
+    const stageRef = useRef(null);
     const canvasRef = useRef(null);
-    const containerRef = useRef(null);
+    const textRef = useRef(null);
+    const [ready, setReady] = useState(false);
 
     useEffect(() => {
         const canvas = canvasRef.current;
-        const context = canvas.getContext('2d');
-        const container = containerRef.current;
+        const stage = stageRef.current;
+        const context = canvas.getContext('2d', { alpha: true });
+        if (!context) return;
+        let alive = true;
+        let animationFrame = 0;
+        let busy = 0;
+        let queue = [];
+        let requestedFrame = -1;
+        let visible = false;
+        const frames = new Map();
+        const pending = new Set();
+        const failed = new Set();
+        const controllers = new Set();
+        const sequence = { frame: 0 };
+        let width = 0;
+        let height = 0;
 
-        const frameCount = 120;
-        
-        // Detectar versión móvil vs PC para cargar imágenes (opcional si existieran 2 carpetas)
-        // Por ahora cargamos siempre las de paradox
-        const currentFrame = index => `/images/paradox/frame_${(index + 1).toString().padStart(4, '0')}_resultado.webp`;
-
-        const images = [];
-        const seq = { frame: 0 };
-        let lastRenderedFrame = -1;
-
-        // Precarga de imágenes usando decodificación por hardware (Elimina el lag en el primer scroll)
-        const preloadImages = async () => {
-            const decodePromises = [];
-            for (let i = 0; i < frameCount; i++) {
-                const img = new Image();
-                img.src = currentFrame(i);
-                images.push(img);
-                
-                // Si el navegador soporta decode(), preprocesamos la imagen en GPU antes de dibujarla
-                if (img.decode) {
-                    decodePromises.push(img.decode().catch(() => {}));
-                }
-            }
-            await Promise.all(decodePromises);
-
-            // Restauramos el comportamiento natural: el canvas será transparente y se mezclará
-            // usando mix-blend-mode: multiply, así el fondo gris de la imagen desaparece.
-            // Eliminamos el auto-sampler que oscurecía la caja.
-
-            resizeCanvas(); // Render inicial cuando todo está listo
+        const drawImage = (image, alpha = 1) => {
+            const scale = Math.min(width / image.width, height / image.height) * .96;
+            context.globalAlpha = alpha;
+            context.drawImage(image, (width - image.width * scale) / 2, (height - image.height * scale) / 2, image.width * scale, image.height * scale);
         };
-
-        preloadImages();
-
-        // Ajustar el tamaño del canvas al contenedor (Rectángulo fijo)
-        function resizeCanvas() {
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
-            render(); 
-        }
-
-        window.addEventListener('resize', resizeCanvas, { passive: true });
-
-        // La función render ultra-optimizada
-        function render() {
-            const currentFrameIndex = Math.round(seq.frame);
-            
-            // Optimization 1: No redibujar si estamos en el mismo frame (ahorra muchísima CPU)
-            if (currentFrameIndex === lastRenderedFrame) return;
-            if (!images[currentFrameIndex] || !images[currentFrameIndex].complete) return;
-
-            const img = images[currentFrameIndex];
-            lastRenderedFrame = currentFrameIndex;
-            
-            // Matemáticas para un escalado más elegante y pequeño
-            // Usamos Math.min para que la imagen no se desproporcione intentando llenar todo el ancho.
-            // Multiplicamos por 1.2 para darle un sutil aumento de tamaño centrado, luciendo más premium.
-            const scale = Math.min(canvas.width / img.width, canvas.height / img.height) * 1.2;
-            const x = (canvas.width / 2) - (img.width / 2) * scale;
-            const y = (canvas.height / 2) - (img.height / 2) * scale;
-
-            context.clearRect(0, 0, canvas.width, canvas.height);
-            context.drawImage(img, x, y, img.width * scale, img.height * scale);
-        }
-
-        // Timeline para sincronizar el Canvas y el Parallax Text
-        const tl = gsap.timeline({
-            scrollTrigger: {
-                trigger: container,
-                start: 'center center',
-                end: '+=600', 
-                scrub: 0.5, 
-                pin: true, 
-                anticipatePin: 1 
+        const draw = () => {
+            animationFrame = 0;
+            if (!alive || !frames.size) return;
+            const target = sequence.frame;
+            const lower = Math.floor(target);
+            const upper = Math.min(119, lower + 1);
+            const nearest = [...frames.keys()].reduce((best, index) => Math.abs(index - target) < Math.abs(best - target) ? index : best);
+            context.clearRect(0, 0, width, height);
+            drawImage(frames.get(lower) ?? frames.get(nearest));
+            if (frames.has(lower) && frames.has(upper) && upper !== lower) drawImage(frames.get(upper), target - lower);
+            context.globalAlpha = 1;
+        };
+        const scheduleDraw = () => {
+            if (!animationFrame && alive) animationFrame = requestAnimationFrame(draw);
+        };
+        const pump = () => {
+            while (alive && busy < 4 && queue.length) {
+                const index = queue.shift();
+                if (frames.has(index) || pending.has(index) || failed.has(index)) continue;
+                pending.add(index);
+                busy++;
+                const controller = new AbortController();
+                controllers.add(controller);
+                (async () => {
+                    let image;
+                    if ('createImageBitmap' in window) {
+                        const response = await fetch(frameUrl(index), { signal: controller.signal });
+                        if (!response.ok) throw new Error('Frame unavailable');
+                        image = await createImageBitmap(await response.blob(), { resizeWidth: window.innerWidth < 768 ? 640 : 960, resizeQuality: 'high' });
+                    } else {
+                        image = new Image();
+                        image.src = frameUrl(index);
+                        await image.decode();
+                    }
+                    if (!alive) { image.close?.(); return; }
+                    frames.set(index, image);
+                    // Bound decoded memory instead of decoding all 120 frames together.
+                    if (frames.size > 32) {
+                        const farthest = [...frames.keys()].sort((a, b) => Math.abs(b - sequence.frame) - Math.abs(a - sequence.frame))[0];
+                        frames.get(farthest).close?.();
+                        frames.delete(farthest);
+                    }
+                    setReady(true);
+                    scheduleDraw();
+                })().catch(() => { if (alive) failed.add(index); }).finally(() => {
+                    controllers.delete(controller);
+                    pending.delete(index);
+                    busy--;
+                    if (alive) pump();
+                });
             }
+        };
+        const requestFrames = () => {
+            const center = Math.round(sequence.frame);
+            if (!visible || center === requestedFrame) return;
+            requestedFrame = center;
+            queue = [center];
+            for (let offset = 1; offset <= 12; offset++) queue.push(center + offset, center - offset);
+            queue = queue.filter((index) => index >= 0 && index < 120);
+            pump();
+        };
+        const resize = () => {
+            width = stage.clientWidth;
+            height = stage.clientHeight;
+            const ratio = Math.min(window.devicePixelRatio || 1, 2);
+            canvas.width = Math.round(width * ratio);
+            canvas.height = Math.round(height * ratio);
+            context.setTransform(ratio, 0, 0, ratio, 0, 0);
+            scheduleDraw();
+        };
+        const resizeObserver = new ResizeObserver(resize);
+        resizeObserver.observe(stage);
+        resize();
+        const observer = new IntersectionObserver(([entry]) => {
+            visible = entry.isIntersecting;
+            if (visible && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                requestedFrame = -1;
+                requestFrames();
+            }
+        }, { rootMargin: '500px 0px' });
+        observer.observe(stage);
+        const media = gsap.matchMedia();
+        media.add({ desktop: '(min-width: 1024px)', mobile: '(max-width: 1023px)', reduce: '(prefers-reduced-motion: reduce)' }, ({ conditions }) => {
+            if (conditions.reduce) { setReady(false); return; }
+            const timeline = gsap.timeline({ scrollTrigger: {
+                trigger: stage,
+                start: conditions.desktop ? 'center center' : 'top 75%',
+                end: conditions.desktop ? () => `+=${Math.max(1000, stage.clientHeight * 2.5)}` : 'bottom 20%',
+                pin: conditions.desktop,
+                scrub: .8,
+                anticipatePin: 1,
+                invalidateOnRefresh: true,
+            } });
+            timeline.to(sequence, { frame: 119, ease: 'none', duration: 1, onUpdate: () => { requestFrames(); scheduleDraw(); } }, 0);
+            timeline.fromTo(textRef.current, { xPercent: 6 }, { xPercent: -12, duration: 1, ease: 'none' }, 0);
         });
-
-        // 1. Animación principal de los productos (ocupa de 0 a 10s relativos)
-        tl.to(seq, {
-            frame: frameCount - 1,
-            snap: 'frame',
-            ease: 'none',
-            onUpdate: render,
-            duration: 10
-        }, 0);
-
-        // 2. Efecto Parallax de Alta Gama (Luxury Typo)
-        // El texto gigante se moverá lenta y majestuosamente de derecha a izquierda detrás de los productos
-        tl.fromTo('.parallax-text', 
-            { x: '10%' }, 
-            { x: '-30%', ease: 'none', duration: 10 }, 
-            0
-        );
-
         return () => {
-            window.removeEventListener('resize', resizeCanvas);
-            tl.kill();
-            ScrollTrigger.getAll().forEach(t => {
-                if (t.vars.trigger === container) t.kill();
-            });
+            alive = false;
+            media.revert();
+            observer.disconnect();
+            resizeObserver.disconnect();
+            cancelAnimationFrame(animationFrame);
+            controllers.forEach((controller) => controller.abort());
+            frames.forEach((image) => image.close?.());
+            frames.clear();
         };
     }, []);
 
     return (
-        <div style={{ margin: '40px 0', width: '100%', position: 'relative' }}>
-            <div 
-                ref={containerRef} 
-                className="scroll-sequence-container"
-                style={{ 
-                    width: '100%',
-                    height: '450px', 
-                    background: '#ffffff', // Blanco puro para maximizar el contraste del blend
-                    position: 'relative', 
-                    overflow: 'hidden',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                }}
-            >
-                {/* Tipografía Masiva de Fondo (Luxury SaaS Style) */}
-                <h1 
-                    className="parallax-text"
-                    style={{
-                        position: 'absolute',
-                        whiteSpace: 'nowrap',
-                        fontSize: '16vw', // Tamaño colosal dinámico
-                        fontWeight: '900',
-                        color: '#f1f5f9', // Gris ultra sutil (Slate 100)
-                        letterSpacing: '-0.04em',
-                        margin: 0,
-                        zIndex: 1, // Estrictamente detrás de los productos
-                        fontFamily: '"Inter", "SF Pro Display", sans-serif',
-                        textTransform: 'uppercase',
-                        userSelect: 'none'
-                    }}
-                >
-                    ECOSISTEMA INTELIGENTE
-                </h1>
-
-                {/* Secuencia 3D */}
-                <canvas 
-                    ref={canvasRef} 
-                    style={{ 
-                        position: 'relative',
-                        zIndex: 2, // Por encima de la tipografía
-                        width: '100%', 
-                        height: '100%', 
-                        display: 'block', 
-                        willChange: 'transform',
-                        mixBlendMode: 'multiply' // Magia: Hace que el blanco de la imagen sea transparente y deje ver la letra, pero oscurezca los bordes de los electrodomésticos encima de ella
-                    }}
-                />
+        <section className="parallax-showcase" aria-label="Tecnología para tu hogar">
+            <div className="parallax-showcase-heading"><div><span>INNOVACIÓN EN CADA DETALLE</span><h2>Un hogar más inteligente.</h2></div><Link href="/catalogo?categoria=Refrigeraci%C3%B3n">Explorar electrohogar <span aria-hidden="true">↗</span></Link></div>
+            <div ref={stageRef} className="parallax-stage">
+                <span ref={textRef} className="parallax-wordmark" aria-hidden="true">HOGAR CONECTADO</span>
+                <img className="parallax-poster" src={frameUrl(0)} alt="Tecnología de refrigeración para el hogar" style={{ opacity: ready ? 0 : 1 }} loading="lazy" />
+                <canvas ref={canvasRef} className="parallax-canvas" aria-hidden="true" style={{ opacity: ready ? 1 : 0 }} />
+                <span className="parallax-caption">Diseño que se ve. Tecnología que se siente.</span>
             </div>
-        </div>
+        </section>
     );
 }

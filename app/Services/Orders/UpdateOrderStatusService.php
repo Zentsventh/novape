@@ -28,6 +28,12 @@ class UpdateOrderStatusService
     {
         $estadoAnterior = $pedido->estado;
         $nuevoEstado = $data['estado'];
+        if ($nuevoEstado === 'cancelado' && in_array($pedido->pago?->estado, ['completado', 'reembolso_pendiente'], true)) {
+            throw new \InvalidArgumentException('Confirma primero la anulación en Niubiz.');
+        }
+        if ($estadoAnterior === 'cancelado' && $nuevoEstado !== 'cancelado') {
+            throw new \InvalidArgumentException('No se puede reabrir un pedido cancelado.');
+        }
 
         DB::beginTransaction();
         try {
@@ -37,8 +43,8 @@ class UpdateOrderStatusService
                 'courier_name' => $data['courier_name'] ?? $pedido->courier_name,
             ]);
 
-            if ($nuevoEstado === 'cancelado' && $estadoAnterior !== 'cancelado') {
-                $this->inventoryService->returnStockForOrder($pedido, auth()->id() ?? 1, 'Cancelación Administrativa');
+            if ($nuevoEstado === 'cancelado' && $estadoAnterior !== 'cancelado' && strtolower($estadoAnterior) !== 'pendiente') {
+                $this->inventoryService->returnStockForOrder($pedido, auth()->guard('admin')->id() ?? 1, 'Cancelación Administrativa');
 
                 // Restaurar Beneficios del Cliente (Puntos y Cupones)
                 if ($pedido->cupon_id) {
@@ -83,7 +89,7 @@ class UpdateOrderStatusService
             throw $e;
         }
 
-        $this->sendNotifications($pedido, $data);
+        DB::afterCommit(fn () => $this->sendNotifications($pedido, $data));
     }
 
     /**

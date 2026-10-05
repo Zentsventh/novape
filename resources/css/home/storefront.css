@@ -1,0 +1,217 @@
+﻿/* Storefront-only layout contract. Base: one column at 20rem (320 CSS px).
+   The extra scope deliberately outranks legacy page styles, including lazy CSS. */
+.storefront {
+    --store-gutter: clamp(0.75rem, 2.5vw, 2rem);
+    --store-gap: clamp(0.75rem, 2vw, 1.75rem);
+    --store-bottom: 0rem;
+    width: 100%;
+    min-width: 0;
+    font-size: clamp(0.875rem, 0.8rem + 0.25vw, 1rem);
+    overflow-wrap: anywhere;
+}
+.storefront--with-nav {
+    --store-bottom: calc(4.25rem + env(safe-area-inset-bottom, 0rem));
+    padding-bottom: var(--store-bottom);
+}
+.storefront *, .storefront *::before, .storefront *::after { box-sizing: border-box; }
+.storefront :where(main, section, article, aside, form, fieldset, div) { min-width: 0; }
+.storefront :where(img, video, iframe, canvas) { max-width: 100%; }
+.storefront :where(input, select, textarea) { max-width: 100%; min-width: 0; }
+.storefront :is(input:not([type=checkbox]):not([type=radio]), select, textarea) { font-size: 1rem !important; }
+.storefront :where(button, a, input, select, textarea):focus-visible { outline: 0.1875rem solid #009ce0; outline-offset: 0.1875rem; }
+.storefront :where(button, [role=button]) { touch-action: manipulation; }
+.storefront .efe-home { container-type: normal; }
+.storefront :is(.catalogo-layout, .efe-producto-container, .efe-category-section, .efe-recently-viewed-section, .efe-header-main, .efe-footer-grid, .catalogo-breadcrumb-inner) {
+    width: 100%;
+    max-width: 90rem;
+    margin-inline: auto;
+    padding-inline: var(--store-gutter);
+}
+.storefront :is(.efe-section-title, .efe-recently-viewed-title, .info-section-title) { font-size: clamp(1.125rem, 0.9rem + 1vw, 1.875rem); }
+.storefront :is(.efe-producto-title, .info-title, .seguimiento-title) { font-size: clamp(1.375rem, 1rem + 1.5vw, 2.25rem); }
+.storefront :is(.info-card, .efe-producto-main, .efe-producto-sections, .efe-checkout-step-content) { padding: clamp(0.75rem, 2.5vw, 1.875rem); }
+.storefront :is(.efe-top-bar-inner, .efe-section-header, .efe-footer-socials, .catalogo-top-bar, .catalogo-sort-container, .efe-producto-share, .efe-producto-actions, .efe-summary-total-row, .seguimiento-row) {
+    flex-wrap: wrap;
+    gap: clamp(0.5rem, 1vw, 1rem);
+}
+/* Navigation: search gets a full row until there is room for desktop actions. */
+.storefront .efe-header-main { flex-wrap: wrap; gap: clamp(0.375rem, 1vw, 1.25rem); }
+.storefront .efe-header-logo-link { flex: 1; min-width: 0; justify-content: center; }
+.storefront .efe-header-logo { width: auto; height: auto !important; max-height: clamp(2rem, 5vw, 3.25rem); max-width: 100%; }
+.storefront .efe-header-search-wrap { flex: 1 1 100%; order: 4; width: 100%; }
+.storefront .efe-header-search { height: auto; min-height: 2.75rem; }
+.storefront .efe-header-search-input { flex: 1 1 0; width: 0; min-width: 0; }
+.storefront .efe-header-search-btn { flex: 0 0 2.75rem; width: 2.75rem; }
+/* Keep the first row stable as available space changes, including browser zoom. */
+@media (max-width: 48rem) {
+    .storefront .efe-header-main:not(.is-minimal) {
+        display: grid;
+        grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
+        grid-template-areas: 'menu logo cart' 'search search search';
+    }
+    .storefront .efe-header-hamburger { grid-area: menu; justify-content: center; padding: 0; }
+    .storefront .efe-header-logo-link { grid-area: logo; }
+    .storefront .efe-header-cart { grid-area: cart; }
+    .storefront .efe-header-search-wrap { grid-area: search; margin-top: 0; }
+    .storefront .efe-header-hamburger svg { flex: 0 0 26px; width: 26px; height: 26px; }
+}
+@media (max-width: 15rem) {
+    .storefront .efe-header-main { padding-inline: 0.375rem; gap: 0.25rem; }
+    .storefront .efe-header-voice-btn { display: none; }
+    .storefront .efe-header-search-input { padding-inline: 0.5rem !important; }
+}
+/* A fixed header must not consume the entire visible area at high zoom. */
+@media (max-height: 30rem) and (max-width: 48rem) {
+    .storefront .efe-header { position: relative; }
+}
+.storefront .efe-desktop-actions { display: none !important; }
+.storefront .efe-mobile-only { display: flex !important; }
+.storefront .efe-header-cat-btn .efe-cat-label { display: none; }
+.storefront .efe-dropdown-mega { min-width: 0; width: min(28rem, calc(100vw - 1.5rem)); flex-wrap: wrap; }
+.storefront .efe-dropdown-mega-left { width: 100%; }
+.storefront .efe-megamenu { max-height: 65dvh; overflow-y: auto; }
+.storefront .efe-megamenu-container { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+.storefront :is(.efe-megamenu-sidebar, .efe-megamenu-products) { padding: var(--store-gutter); }
+.storefront :is(.efe-megamenu-header, .efe-header-actions) { flex-wrap: wrap; }
+.storefront--with-nav .efe-header-cart.efe-mobile-only { display: none !important; }
+.storefront .efe-mobile-bottom-nav {
+    display: flex; align-items: center; justify-content: space-around;
+    height: auto; min-height: var(--store-bottom);
+    padding: 0.375rem max(0.25rem, env(safe-area-inset-right)) env(safe-area-inset-bottom, 0rem) max(0.25rem, env(safe-area-inset-left));
+}
+.storefront .efe-mobile-bottom-nav .nav-item { min-height: 3.5rem; min-width: 0; font-size: clamp(0.625rem, 2.5vw, 0.75rem); }
+.storefront .efe-cintillo-bottom { position: static; }
+/* Automatic grids: min(100%, ...) guarantees that 320px cannot overflow. */
+.storefront :is(.catalogo-grid, .efe-megamenu-grid, .efe-footer-grid, .efe-form-grid-modern) {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    gap: var(--store-gap);
+}
+.storefront .catalogo-layout { flex-direction: column; gap: var(--store-gap); }
+.storefront .catalogo-main { width: 100%; }
+.storefront .catalogo-sidebar { width: 100%; position: static; }
+.storefront .catalogo-sort-container { flex: 1 1 14rem; }
+.storefront .catalogo-sort-select { width: 100%; }
+.storefront :is(.catalogo-breadcrumb-inner, .efe-breadcrumb) { white-space: normal; }
+.storefront .catalogo-pagination { flex-wrap: wrap; }
+.storefront .catalogo-sidebar.bottom-sheet-mobile {
+    max-height: 85dvh; overflow-y: auto; overscroll-behavior: contain;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+/* Cards respond to their actual allocated column, independently of viewport. */
+.storefront :is(.efe-product-card, .catalogo-product-card) { container: product-card / inline-size; min-width: 0; }
+.storefront .efe-product-img-wrap { height: auto; aspect-ratio: 4 / 3; padding: clamp(1rem, 5cqi, 1.875rem); }
+.storefront .efe-product-img-wrap img { width: 100%; height: 100%; object-fit: contain; max-height: 14rem; }
+.storefront :is(.efe-product-wishlist-btn, .efe-product-compare-btn, .efe-product-quick-view-btn) { opacity: 1; }
+@container product-card (min-width: 18rem) {
+    .storefront .efe-product-title { font-size: clamp(1rem, 5cqi, 1.25rem); }
+    .storefront .efe-product-img-wrap { aspect-ratio: 3 / 2; }
+}
+/* Native scrolling stays usable with touch, trackpads, keyboards and resizing. */
+.storefront .efe-section-carousel { padding: 0; overflow: visible; }
+.storefront .efe-carousel-track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: min(100%, 16rem);
+    gap: var(--store-gap);
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 0.25rem;
+    padding: 0.5rem 0.25rem 1rem;
+    transform: none;
+}
+.storefront .store-carousel-item { scroll-snap-align: start; }
+.storefront .store-carousel-controls { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.75rem; }
+.storefront .store-carousel-controls button { min-height: 2.75rem; min-width: 2.75rem; border-radius: 50%; border: 0; background: #004797; color: white; cursor: pointer; }
+.storefront .store-carousel-controls button:disabled { opacity: 0.4; cursor: default; }
+/* Product detail and checkout start stacked. */
+.storefront .efe-producto-main { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--store-gap); }
+.storefront .efe-producto-info { width: 100%; }
+.storefront .efe-producto-gallery { flex-direction: column-reverse; min-width: 0; }
+.storefront .efe-producto-thumbnails { width: 100%; flex-direction: row; overflow-x: auto; gap: 0.5rem; }
+.storefront .efe-thumb-img { width: clamp(3rem, 12vw, 4.375rem); height: auto; aspect-ratio: 1; flex-shrink: 0; }
+.storefront .efe-checkout-container { width: 100%; max-width: 75rem; padding-inline: var(--store-gutter); flex-direction: column; gap: var(--store-gap); margin-top: clamp(1rem, 3vw, 2.25rem); }
+.storefront :is(.efe-checkout-main, .efe-checkout-sidebar) { width: 100%; min-width: 0; }
+.storefront .efe-checkout-sidebar { position: static; max-width: none; flex: auto; }
+.storefront .store-checkout-header { display: flex; flex-wrap: wrap; gap: var(--store-gap); padding-inline: var(--store-gutter) !important; }
+.storefront .store-checkout-progress { position: relative; flex: 1 1 100%; display: flex; justify-content: center; }
+.storefront .store-checkout-steps { position: relative; width: 100%; max-width: 24rem; display: flex; justify-content: space-between; align-items: flex-start; padding-top: 0.25rem; }
+.storefront .efe-checkout-main { container: checkout-main / inline-size; }
+.storefront .store-cart-item { flex-wrap: wrap; gap: var(--store-gap) !important; }
+.storefront .store-cart-info { flex: 1 1 10rem; }
+.storefront .store-cart-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; flex: 1 1 100%; gap: 1rem; }
+.storefront .store-cart-badges { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.storefront :is(.efe-address-card, .efe-delivery-card, .efe-doc-group) { flex-wrap: wrap; }
+@container checkout-main (min-width: 40rem) {
+    .storefront .store-cart-actions { flex-basis: auto; }
+}
+.storefront .efe-profile-layout { flex-direction: column; gap: var(--store-gap) !important; }
+.storefront .efe-profile-sidebar { width: 100%; }
+.storefront .efe-profile-layout > div { width: 100%; }
+.storefront .seguimiento-form-inline { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.storefront .seguimiento-input-inline { flex: 1 1 16rem; width: 100%; }
+.storefront .seguimiento-btn-inline { flex: 1 1 8rem; min-height: 2.75rem; }
+.storefront .seguimiento-banner { padding: clamp(1.5rem, 5vw, 3.75rem) var(--store-gutter); }
+/* Dialogs are bounded by the visible viewport, including landscape keyboards. */
+.storefront :is(.efe-quick-view-overlay, .loc-modal-overlay, .store-modal-overlay) { padding: var(--store-gutter); overflow-y: auto; }
+.storefront :is(.efe-quick-view-modal, .loc-modal-container, .store-modal-panel) { width: 100%; max-height: calc(100dvh - 2 * var(--store-gutter)); overflow-y: auto; overscroll-behavior: contain; }
+.storefront .efe-quick-view-modal { max-width: 60rem; container: quick-view / inline-size; }
+.storefront .efe-qv-content { flex-direction: column; max-height: none; overflow: visible; }
+.storefront :is(.efe-qv-image-side, .efe-qv-info-side) { padding: clamp(1rem, 4cqi, 2.5rem); min-height: 0; min-width: 0; }
+.storefront .efe-qv-main-img { max-height: 35dvh; }
+@container quick-view (min-width: 42rem) {
+    .storefront .efe-qv-content { flex-direction: row; }
+    .storefront .efe-qv-main-img { max-height: 60dvh; }
+}
+.storefront :is(.efe-cart-overlay, .efe-cat-drawer-overlay) { height: 100dvh; }
+.storefront :is(.efe-cart-drawer, .efe-cat-drawer) { height: 100dvh; max-width: 100%; padding-bottom: env(safe-area-inset-bottom, 0rem); }
+.storefront .efe-cart-drawer { width: min(100%, 25rem); }
+.storefront .efe-cat-drawer { width: min(100%, 24rem); overflow: hidden; z-index: 10001; }
+.storefront .efe-cat-drawer-overlay { z-index: 10000; }
+.storefront .efe-cat-drawer-left { width: 100%; flex-shrink: 0; }
+.storefront .efe-cat-drawer-right { position: absolute; inset: 0; width: 100%; height: 100%; transform: translateX(100%); display: flex; flex-direction: column; overflow-y: auto; padding: var(--store-gutter) !important; }
+.storefront .efe-cat-drawer.show-right .efe-cat-drawer-right { transform: translateX(0); }
+.storefront .efe-cat-drawer.show-right .efe-cat-drawer-left { visibility: hidden; }
+.storefront .efe-chatbot-wrapper { bottom: calc(var(--store-bottom) + 0.75rem); right: 0.75rem; width: 4rem; height: 4rem; }
+.storefront .efe-chatbot-btn, .storefront .efe-chatbot-btn img { width: 100%; height: 100%; }
+.storefront .efe-chat-panel { top: auto; left: auto; border-radius: 1rem; width: min(24rem, calc(100% - 1.5rem)); right: 0.75rem; bottom: calc(var(--store-bottom) + 5rem); max-height: min(34rem, calc(100dvh - var(--store-bottom) - 6rem)); }
+.storefront .efe-chat-messages { min-height: 0; }
+.storefront .efe-toast { max-width: calc(100% - 1.5rem); overflow-wrap: anywhere; }
+@media (min-width: 48rem) {
+    .storefront .catalogo-layout { flex-direction: row; }
+    .storefront .catalogo-sidebar { width: clamp(12rem, 23vw, 16.25rem); flex-shrink: 0; }
+    .storefront .efe-cat-drawer { width: min(90%, 48rem); }
+    .storefront .efe-cat-drawer-left { width: 40%; }
+    .storefront .efe-cat-drawer-right { position: static; width: 60%; transform: none; }
+    .storefront .efe-cat-drawer.show-right .efe-cat-drawer-left { visibility: visible; transform: none; opacity: 1; }
+    .storefront .store-checkout-progress { flex: 1 1 24rem; }
+    .storefront .efe-megamenu-container { grid-template-columns: minmax(10rem, 1fr) minmax(0, 2fr); }
+}
+@media (min-width: 64rem) {
+    .storefront--with-nav { --store-bottom: 0rem; padding-bottom: 0; }
+    .storefront .efe-mobile-bottom-nav { display: none; }
+    .storefront .efe-mobile-only { display: none !important; }
+    .storefront .efe-desktop-actions { display: flex !important; }
+    .storefront .efe-header-logo-link { flex: 0 1 auto; }
+    .storefront .efe-header-search-wrap { flex: 1 1 15rem; width: auto; order: 0; }
+    .storefront .efe-header-cat-btn .efe-cat-label { display: inline; }
+    .storefront .efe-producto-main { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
+    .storefront .efe-checkout-container { flex-direction: row; }
+    .storefront .efe-checkout-main { flex: 1 1 0%; }
+    .storefront .efe-checkout-sidebar { width: 32%; flex: 0 0 32%; }
+    .storefront .efe-profile-layout { flex-direction: row !important; }
+    .storefront .efe-profile-sidebar { width: 16rem !important; flex-shrink: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .storefront *, .storefront *::before, .storefront *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+.storefront .store-table-scroll { max-width: 100%; overflow-x: auto; overscroll-behavior-inline: contain; }
+.storefront .auth-content { padding: clamp(1rem, 5vw, 3.75rem) var(--store-gutter); }
+.storefront .auth-card { padding: clamp(1rem, 4vw, 3rem); max-width: 32.5rem; }
+.storefront .auth-title { font-size: clamp(1.375rem, 1rem + 1.5vw, 1.75rem); }
+.storefront .password-rules-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); }
+.storefront .auth-form .form-row { flex-wrap: wrap; }
+.storefront .auth-form .form-row > :not(.fixed-width) { flex: 1 1 10rem; }
+.storefront .catalogo-product-img { height: auto; aspect-ratio: 4 / 3; padding: clamp(0.75rem, 5cqi, 1.5rem); }
+.storefront .catalogo-product-img img { max-height: 100%; object-fit: contain; }

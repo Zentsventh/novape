@@ -1,76 +1,61 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Link } from '@inertiajs/react';
+import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react';
+import { useDeviceContext } from '@/Contexts/DeviceContext';
 
-/* Renderiza el carrusel hero con autoplay y navegación manual.
-   Las imágenes vienen de la tabla cms_banner (gestionadas desde /admin/banners). */
 export default function HeroCarousel({ banners = [] }) {
-    const activeSlides = banners;
     const [current, setCurrent] = useState(0);
-    const [lock, setLock] = useState(false);
     const [hover, setHover] = useState(false);
+    const [focus, setFocus] = useState(false);
+    const [paused, setPaused] = useState(false);
+    const [visible, setVisible] = useState(true);
+    const pointer = useRef(null);
+    const { prefersReducedMotion } = useDeviceContext();
+    const count = banners.length;
+    const go = (direction) => setCurrent((index) => (index + direction + count) % count);
 
-    /* Navega a un slide específico con bloqueo antispam. */
-    const go = useCallback((i) => {
-        if (lock) return;
-        setLock(true);
-        setCurrent(i);
-        setTimeout(() => setLock(false), 500);
-    }, [lock]);
-
-    const next = useCallback(() => go((current + 1) % activeSlides.length), [current, go, activeSlides.length]);
-    const prev = useCallback(() => go((current - 1 + activeSlides.length) % activeSlides.length), [current, go, activeSlides.length]);
-
-    /* Autoplay del carrusel, se pausa al hacer hover. */
     useEffect(() => {
-        if (hover) return;
-        const t = setInterval(next, 4500);
-        return () => clearInterval(t);
-    }, [next, hover]);
+        const visibility = () => setVisible(!document.hidden);
+        document.addEventListener('visibilitychange', visibility);
+        return () => document.removeEventListener('visibilitychange', visibility);
+    }, []);
+    useEffect(() => {
+        if (count < 2 || paused || hover || focus || !visible || prefersReducedMotion) return;
+        const interval = setInterval(() => setCurrent((index) => (index + 1) % count), 6000);
+        return () => clearInterval(interval);
+    }, [count, paused, hover, focus, visible, prefersReducedMotion]);
+    useEffect(() => setCurrent(0), [count]);
+    if (!count) return null;
 
     return (
-        <section
-            className="efe-hero-carousel"
-            onMouseEnter={() => setHover(true)}
-            onMouseLeave={() => setHover(false)}
-        >
-            <div
-                className="efe-hero-track"
-                style={{ transform: `translateX(-${current * 100}%)` }}
-            >
-                {activeSlides.map((s, idx) => (
-                    <div key={s.id || idx} className="efe-hero-slide">
-                        {s.link_url ? (
-                            <a href={s.link_url} style={{ display: 'block', width: '100%', height: '100%' }}>
-                                <img src={s.imagen_url || s.image} alt={s.titulo || s.alt || 'Banner'} draggable="false" />
-                            </a>
-                        ) : (
-                            <img src={s.imagen_url || s.image} alt={s.titulo || s.alt || 'Banner'} draggable="false" />
-                        )}
-                    </div>
-                ))}
+        <section className="efe-hero-carousel" aria-label="Promociones de la tienda" aria-roledescription="carrusel"
+            onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
+            onFocusCapture={() => setFocus(true)} onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setFocus(false); }}
+            onPointerDown={(event) => { pointer.current = { x: event.clientX, y: event.clientY }; }}
+            onPointerUp={(event) => {
+                if (!pointer.current) return;
+                const dx = event.clientX - pointer.current.x;
+                const dy = event.clientY - pointer.current.y;
+                pointer.current = null;
+                if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) && count > 1) go(dx < 0 ? 1 : -1);
+            }}>
+            <div className="efe-hero-track" style={{ transform: `translateX(-${current * 100}%)` }}>
+                {banners.map((banner, index) => {
+                    const image = <picture>
+                        {banner.imagen_mobile_url && <source media="(max-width: 767px)" srcSet={banner.imagen_mobile_url} />}
+                        <img src={banner.imagen_url || banner.image} alt={banner.titulo || 'Promoción de la tienda'} width="2367" height="728" loading={index === 0 ? 'eager' : 'lazy'} fetchPriority={index === 0 ? 'high' : 'auto'} draggable="false" />
+                    </picture>;
+                    return <div key={banner.id || index} className="efe-hero-slide" inert={index !== current} aria-hidden={index !== current}>
+                        {(banner.enlace_url || banner.link_url) ? <Link href={banner.enlace_url || banner.link_url}>{image}</Link> : image}
+                    </div>;
+                })}
             </div>
-
-            <button className="efe-hero-arrow efe-hero-arrow--prev" onClick={prev} aria-label="Anterior">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                    <path d="m15 18-6-6 6-6" />
-                </svg>
-            </button>
-
-            <button className="efe-hero-arrow efe-hero-arrow--next" onClick={next} aria-label="Siguiente">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                    <path d="m9 18 6-6-6-6" />
-                </svg>
-            </button>
-
-            <div className="efe-hero-dots">
-                {activeSlides.map((_, i) => (
-                    <button
-                        key={i}
-                        className={`efe-hero-dot ${i === current ? 'is-active' : ''}`}
-                        onClick={() => go(i)}
-                        aria-label={`Slide ${i + 1}`}
-                    />
-                ))}
-            </div>
+            {count > 1 && <>
+                <button className="efe-hero-arrow efe-hero-arrow--prev" onClick={() => go(-1)} aria-label="Promoción anterior"><ChevronLeft size={22} /></button>
+                <button className="efe-hero-arrow efe-hero-arrow--next" onClick={() => go(1)} aria-label="Promoción siguiente"><ChevronRight size={22} /></button>
+                <div className="efe-hero-dots">{banners.map((_, index) => <button key={index} className={`efe-hero-dot ${index === current ? 'is-active' : ''}`} onClick={() => setCurrent(index)} aria-label={`Ver promoción ${index + 1}`} aria-current={index === current ? 'true' : undefined} />)}</div>
+                <button className="hero-autoplay-toggle" onClick={() => setPaused((value) => !value)} aria-label={paused ? 'Reanudar promociones' : 'Pausar promociones'}>{paused ? <Play size={16} /> : <Pause size={16} />}</button>
+            </>}
         </section>
     );
 }

@@ -14,6 +14,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call(MasterSeeder::class);
+        if (app()->environment(['local', 'testing']) && filter_var(env('APP_REAL_DEMO_SEED', false), FILTER_VALIDATE_BOOLEAN)) {
+            $this->call(RealStoreMonthSeeder::class);
+            return;
+        }
+        if (app()->environment(['local', 'testing']) && filter_var(env('APP_DEMO_SEED', false), FILTER_VALIDATE_BOOLEAN)) {
+            $this->call(MasterSeeder::class);
+        }
     }
 }

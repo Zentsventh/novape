@@ -22,7 +22,7 @@ export default function Devoluciones({ pedidos = [] }) {
             <Head title="Mis Devoluciones" />
             <Header />
             <div style={{ maxWidth: '800px', margin: '40px auto', padding: '20px' }}>
-                <div style={{ background: 'white', borderRadius: '12px', padding: '30px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
+                <div style={{ background: 'white', borderRadius: '12px', padding: 'clamp(0.75rem, 3vw, 1.875rem)', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
                     <h1 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px' }}>Solicitar Devolución / Garantía</h1>
                     
                     {flash?.success && (

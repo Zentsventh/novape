@@ -194,8 +194,8 @@ export default function Profile({ usuario = {}, pedidos = [], direcciones = [], 
                 <h2 style={{ fontSize: '28px', color: '#1E293B', fontWeight: '700', letterSpacing: '-0.5px', margin: 0 }}>Panel de Control</h2>
             </div>
             
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginBottom: '48px' }}>
-                <div style={{ background: '#ffffff', borderRadius: '16px', padding: '24px', border: '1px solid #E2E8F0', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.03)', display: 'flex', flexDirection: 'column', transition: 'all 0.3s ease', cursor: 'default' }}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 18.75rem), 1fr))', gap: '24px', marginBottom: '48px' }}>
+                <div style={{ background: '#ffffff', borderRadius: '16px', padding: 'clamp(0.75rem, 3vw, 1.5rem)', border: '1px solid #E2E8F0', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.03)', display: 'flex', flexDirection: 'column', transition: 'all 0.3s ease', cursor: 'default' }}
                      onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 71, 151, 0.1)'; e.currentTarget.style.borderColor = '#004797'; }}
                      onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.03)'; e.currentTarget.style.borderColor = '#E2E8F0'; }}
                 >
@@ -212,7 +212,7 @@ export default function Profile({ usuario = {}, pedidos = [], direcciones = [], 
                     </button>
                 </div>
 
-                <div style={{ background: '#ffffff', borderRadius: '16px', padding: '24px', border: '1px solid #E2E8F0', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.03)', display: 'flex', flexDirection: 'column', transition: 'all 0.3s ease', cursor: 'default' }}
+                <div style={{ background: '#ffffff', borderRadius: '16px', padding: 'clamp(0.75rem, 3vw, 1.5rem)', border: '1px solid #E2E8F0', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.03)', display: 'flex', flexDirection: 'column', transition: 'all 0.3s ease', cursor: 'default' }}
                      onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 12px 24px rgba(0, 71, 151, 0.1)'; e.currentTarget.style.borderColor = '#004797'; }}
                      onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.03)'; e.currentTarget.style.borderColor = '#E2E8F0'; }}
                 >
@@ -247,7 +247,7 @@ export default function Profile({ usuario = {}, pedidos = [], direcciones = [], 
                         <span style={{ fontSize: '15px', fontWeight: '500' }}>Aún no tienes compras realizadas.</span>
                     </div>
                 ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '20px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 20rem), 1fr))', gap: '20px' }}>
                         {pedidos.slice(0, 3).map(pedido => {
                             const primerItem = pedido.items && pedido.items.length > 0 ? pedido.items[0] : null;
                             const imagenUrl = primerItem?.variante?.producto?.imagenes?.[0]?.url || primerItem?.variante?.producto?.imagenes?.[0]?.ruta || '/img/placeholder.jpg';
@@ -636,7 +636,7 @@ export default function Profile({ usuario = {}, pedidos = [], direcciones = [], 
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '30px' }}>
                 <h2 style={{ fontSize: '28px', color: '#1E293B', fontWeight: '700', letterSpacing: '-0.5px', margin: 0 }}>Datos de Reembolso / CCI</h2>
             </div>
-            <div style={{ background: '#ffffff', borderRadius: '16px', padding: '32px', border: '1px solid #E2E8F0', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
+            <div style={{ background: '#ffffff', borderRadius: '16px', padding: 'clamp(0.75rem, 3vw, 2rem)', border: '1px solid #E2E8F0', boxShadow: '0 4px 20px rgba(0,0,0,0.03)' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '16px 20px', background: '#F0F9FF', borderRadius: '10px', marginBottom: '28px', border: '1px solid #BAE6FD' }}>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0284C7" strokeWidth="2" style={{ flexShrink: 0, marginTop: '1px' }}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
                     <p style={{ fontSize: '14px', color: '#0369A1', margin: 0, lineHeight: '1.6' }}>Completa los datos de tu cuenta bancaria para recibir reembolsos en caso de cancelaciones o devoluciones.</p>
@@ -644,7 +644,7 @@ export default function Profile({ usuario = {}, pedidos = [], direcciones = [], 
                 <form onSubmit={submitReembolso} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                     <div style={{ borderBottom: '1px solid #F1F5F9', paddingBottom: '24px' }}>
                         <div style={{ fontSize: '14px', fontWeight: '700', color: '#1E293B', marginBottom: '16px' }}>Información del titular</div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 16rem), 1fr))', gap: '16px' }}>
                             <div>
                                 <label style={labelStyle}>Tipo Documento</label>
                                 <select value={reembolsoForm.data.tipo_documento} onChange={e => reembolsoForm.setData('tipo_documento', e.target.value)} style={inputStyle}>
@@ -677,7 +677,7 @@ export default function Profile({ usuario = {}, pedidos = [], direcciones = [], 
                     </div>
                     <div>
                         <div style={{ fontSize: '14px', fontWeight: '700', color: '#1E293B', marginBottom: '16px' }}>Datos bancarios</div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 16rem), 1fr))', gap: '16px' }}>
                             <div>
                                 <label style={labelStyle}>Banco</label>
                                 <select value={reembolsoForm.data.banco} onChange={e => reembolsoForm.setData('banco', e.target.value)} style={inputStyle} required>
@@ -741,7 +741,7 @@ export default function Profile({ usuario = {}, pedidos = [], direcciones = [], 
             const allSelected = items.length > 0 && Object.keys(selectedItems).length === items.length && Object.values(selectedItems).every(v => v);
             
             return (
-                <div style={{ flex: 1, background: 'white', borderRadius: '12px', padding: '30px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                <div style={{ flex: 1, background: 'white', borderRadius: '12px', padding: 'clamp(0.75rem, 3vw, 1.875rem)', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
                         <button onClick={() => {setSelectedList(null); setSelectedItems({});}} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '20px', color: '#333', fontWeight: '400', padding: 0 }}>
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
@@ -827,7 +827,7 @@ export default function Profile({ usuario = {}, pedidos = [], direcciones = [], 
         <div style={{ flex: 1 }}>
             <h2 style={{ fontSize: '20px', color: '#333', fontWeight: '400', marginBottom: '25px' }}>Mis listas</h2>
             
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 17.5rem), 1fr))', gap: '20px' }}>
                 {listas.map(lista => (
                     <div 
                         key={lista.id} 
@@ -865,7 +865,7 @@ export default function Profile({ usuario = {}, pedidos = [], direcciones = [], 
     };
     const renderPuntos = () => (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-            <div style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', borderRadius: '16px', padding: '32px', color: 'white', boxShadow: '0 10px 25px rgba(245,158,11,0.3)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', borderRadius: '16px', padding: 'clamp(0.75rem, 3vw, 2rem)', color: 'white', boxShadow: '0 10px 25px rgba(245,158,11,0.3)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                     <h2 style={{ margin: '0 0 8px 0', fontSize: '24px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <Star fill="white" size={28} /> Novapuntos Disponibles
@@ -887,7 +887,7 @@ export default function Profile({ usuario = {}, pedidos = [], direcciones = [], 
                 </div>
                 
                 {pointsHistory && pointsHistory.length > 0 ? (
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <div className="store-table-scroll" tabIndex={0} role="region" aria-label="Historial de puntos"><table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', textAlign: 'left', color: '#64748b', fontSize: '12px', textTransform: 'uppercase' }}>
                                 <th style={{ padding: '16px 24px', fontWeight: '600' }}>Fecha</th>
@@ -920,9 +920,9 @@ export default function Profile({ usuario = {}, pedidos = [], direcciones = [], 
                                 </tr>
                             ))}
                         </tbody>
-                    </table>
+                    </table></div>
                 ) : (
-                    <div style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
+                    <div style={{ padding: 'clamp(0.75rem, 3vw, 2.5rem)', textAlign: 'center', color: '#94a3b8' }}>
                         <Star size={40} style={{ opacity: 0.3, marginBottom: '12px' }} />
                         <p style={{ margin: 0 }}>No tienes historial de puntos aún.</p>
                     </div>
@@ -1057,7 +1057,7 @@ export default function Profile({ usuario = {}, pedidos = [], direcciones = [], 
             {showEditProfile && (
                 <>
                     <div onClick={() => setShowEditProfile(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)', transition: 'all 0.3s' }}></div>
-                    <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: '100%', maxWidth: '400px', background: 'white', zIndex: 10000, boxShadow: '-5px 0 25px rgba(0,0,0,0.1)', padding: '30px', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 'calc(100% - 1.5rem)', maxWidth: '400px', background: 'white', zIndex: 10000, boxShadow: '-5px 0 25px rgba(0,0,0,0.1)', padding: 'clamp(0.75rem, 3vw, 1.875rem)', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                             <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#333', display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#004797" strokeWidth="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
@@ -1089,7 +1089,7 @@ export default function Profile({ usuario = {}, pedidos = [], direcciones = [], 
             {showEditPhone && (
                 <>
                     <div onClick={() => setShowEditPhone(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)', transition: 'all 0.3s' }}></div>
-                    <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: '100%', maxWidth: '400px', background: 'white', zIndex: 10000, boxShadow: '-5px 0 25px rgba(0,0,0,0.1)', padding: '30px', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 'calc(100% - 1.5rem)', maxWidth: '400px', background: 'white', zIndex: 10000, boxShadow: '-5px 0 25px rgba(0,0,0,0.1)', padding: 'clamp(0.75rem, 3vw, 1.875rem)', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                             <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#333', display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
@@ -1144,7 +1144,7 @@ export default function Profile({ usuario = {}, pedidos = [], direcciones = [], 
             {showAddAddress && (
                 <>
                     <div onClick={() => setShowAddAddress(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)', transition: 'all 0.3s' }}></div>
-                    <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: '100%', maxWidth: '400px', background: 'white', zIndex: 10000, boxShadow: '-5px 0 25px rgba(0,0,0,0.1)', padding: '30px', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 'calc(100% - 1.5rem)', maxWidth: '400px', background: 'white', zIndex: 10000, boxShadow: '-5px 0 25px rgba(0,0,0,0.1)', padding: 'clamp(0.75rem, 3vw, 1.875rem)', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                             <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#333', display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#004797" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
@@ -1202,7 +1202,7 @@ export default function Profile({ usuario = {}, pedidos = [], direcciones = [], 
             {showEditPassword && (
                 <>
                     <div onClick={() => setShowEditPassword(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)', transition: 'all 0.3s' }}></div>
-                    <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: '100%', maxWidth: '400px', background: 'white', zIndex: 10000, boxShadow: '-5px 0 25px rgba(0,0,0,0.1)', padding: '30px', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 'calc(100% - 1.5rem)', maxWidth: '400px', background: 'white', zIndex: 10000, boxShadow: '-5px 0 25px rgba(0,0,0,0.1)', padding: 'clamp(0.75rem, 3vw, 1.875rem)', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                             <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#333', display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#004797" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
@@ -1293,7 +1293,7 @@ export default function Profile({ usuario = {}, pedidos = [], direcciones = [], 
             {showAddTarjeta && (
                 <>
                     <div onClick={() => setShowAddTarjeta(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)' }}></div>
-                    <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: '100%', maxWidth: '400px', background: 'white', zIndex: 10000, boxShadow: '-5px 0 25px rgba(0,0,0,0.1)', padding: '30px', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 'calc(100% - 1.5rem)', maxWidth: '400px', background: 'white', zIndex: 10000, boxShadow: '-5px 0 25px rgba(0,0,0,0.1)', padding: 'clamp(0.75rem, 3vw, 1.875rem)', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                             <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#333' }}>Agregar tarjeta</h3>
                             <button onClick={() => setShowAddTarjeta(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer' }}>✕</button>
@@ -1329,7 +1329,7 @@ export default function Profile({ usuario = {}, pedidos = [], direcciones = [], 
             {showAddLista && (
                 <>
                     <div onClick={() => setShowAddLista(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)' }}></div>
-                    <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '100%', maxWidth: '400px', background: 'white', zIndex: 10000, borderRadius: '12px', padding: '30px' }}>
+                    <div className="store-modal-panel" style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 'calc(100% - 1.5rem)', maxWidth: '400px', background: 'white', zIndex: 10000, borderRadius: '12px', padding: 'clamp(0.75rem, 3vw, 1.875rem)' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                             <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#333' }}>Nueva Lista</h3>
                             <button onClick={() => setShowAddLista(false)} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer' }}>✕</button>
@@ -1353,7 +1353,7 @@ export default function Profile({ usuario = {}, pedidos = [], direcciones = [], 
             {showDeleteAccount && (
                 <>
                     <div onClick={() => setShowDeleteAccount(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(2px)' }}></div>
-                    <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '100%', maxWidth: '400px', background: 'white', zIndex: 10000, borderRadius: '12px', padding: '30px' }}>
+                    <div className="store-modal-panel" style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 'calc(100% - 1.5rem)', maxWidth: '400px', background: 'white', zIndex: 10000, borderRadius: '12px', padding: 'clamp(0.75rem, 3vw, 1.875rem)' }}>
                         <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#e11d48', marginBottom: '15px' }}>Eliminar Cuenta</h3>
                         <p style={{ fontSize: '14px', color: '#666', marginBottom: '20px' }}>Por favor ingresa tu contraseña para confirmar que deseas eliminar tu cuenta permanentemente.</p>
                         <form onSubmit={submitDeleteAccount} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useShipping } from '@/Contexts/ShippingContext';
+import { useLocation } from '@/Contexts/LocationContext';
 import Swal from 'sweetalert2';
+import axios from 'axios';
 
 export default function LocationModal({ isOpen, onClose, onLocationSelect }) {
     const [departamento, setDepartamento] = useState('');
@@ -8,6 +10,14 @@ export default function LocationModal({ isOpen, onClose, onLocationSelect }) {
     const [distrito, setDistrito] = useState('');
     const [isLoadingGps, setIsLoadingGps] = useState(false);
   const { setShipping } = useShipping();
+    const { location } = useLocation();
+
+    useEffect(() => {
+        if (!isOpen) return;
+        setDepartamento(location.departamento);
+        setProvincia(location.provincia);
+        setDistrito(location.distrito);
+    }, [isOpen, location.departamento, location.provincia, location.distrito]);
 
     if (!isOpen) return null;
 
@@ -39,13 +49,10 @@ export default function LocationModal({ isOpen, onClose, onLocationSelect }) {
                         }
 
                         // Calcular envío vía API
-                        fetch('/api/shipping/calculate', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ departamento: 'Lima', provincia: 'Lima', distrito: 'Ate' })
+                        axios.post('/api/shipping/calculate', {
+                            address: { departamento: 'Lima', provincia: 'Lima', distrito: 'Ate' }
                         })
-                        .then(res => res.json())
-                        .then(data => setShipping(data))
+                        .then(({ data }) => setShipping(data))
                         .catch(err => console.error('Error calculando envío:', err));
 
                         onClose();
@@ -69,7 +76,8 @@ export default function LocationModal({ isOpen, onClose, onLocationSelect }) {
 
     const handleContinue = () => {
     // Validar campos y luego solicitar cálculo de envío
-        if (!departamento || !provincia || !distrito) {
+        const selected = { departamento: departamento.trim(), provincia: provincia.trim(), distrito: distrito.trim() };
+        if (!selected.departamento || !selected.provincia || !selected.distrito) {
             Swal.fire({
                 text: 'Por favor, completa todos los campos de tu ubicación.',
                 icon: 'warning',
@@ -79,17 +87,12 @@ export default function LocationModal({ isOpen, onClose, onLocationSelect }) {
         }
 
         if (onLocationSelect) {
-            onLocationSelect({ departamento, provincia, distrito });
+            onLocationSelect(selected);
         }
 
         // Calcular envío vía API
-        fetch('/api/shipping/calculate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ departamento, provincia, distrito })
-        })
-        .then(res => res.json())
-        .then(data => {
+        axios.post('/api/shipping/calculate', { address: selected })
+        .then(({ data }) => {
             setShipping(data);
         })
         .catch(err => {

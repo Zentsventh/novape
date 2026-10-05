@@ -1,3 +1,4 @@
+import '../../../css/home/footer.css';
 import { Link, usePage } from '@inertiajs/react';
 
 /* Renderiza el pie de página con enlaces, contacto y redes sociales. */

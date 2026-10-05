@@ -32,6 +32,11 @@ class WhatsAppService
 
             if ($response->successful()) {
                 $sessions = $response->json();
+
+                if (!is_iterable($sessions)) {
+                    return null;
+                }
+
                 foreach ($sessions as $session) {
                     if (isset($session['name']) && $session['name'] === $this->sessionName) {
                         return $session['id'];

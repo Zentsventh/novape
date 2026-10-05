@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import { useDeviceContext } from '@/Contexts/DeviceContext';
 import { Home, Search, ShoppingCart, User, Menu } from 'lucide-react';
 import '../../../css/home/mobile-nav.css';
@@ -12,12 +12,14 @@ export default function MobileBottomNav({ user, cart }) {
 
     const openCart = (e) => {
         e.preventDefault();
-        window.dispatchEvent(new CustomEvent('open-cart'));
+        if (document.querySelector('.efe-cart-drawer')) window.dispatchEvent(new CustomEvent('open-cart'));
+        else router.visit('/cart');
     };
 
     const openCategories = (e) => {
         e.preventDefault();
-        window.dispatchEvent(new CustomEvent('open-categories'));
+        if (document.querySelector('.efe-cat-drawer')) window.dispatchEvent(new CustomEvent('open-categories'));
+        else router.visit('/catalogo');
     };
 
     return (

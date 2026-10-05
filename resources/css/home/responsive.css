@@ -1,237 +1,74 @@
-/* ============================================================
-   RESPONSIVE.CSS — Sistema Unificado de Breakpoints para NOVAPE
-   ============================================================
-   
-   Estrategia:
-   1. Variables CSS fluidas con clamp() — tipografía y espaciados se adaptan
-      de forma continua (como un líquido) sin saltos bruscos entre breakpoints.
-   2. Breakpoints estandarizados — los mismos 6 puntos para TODO el proyecto.
-   3. Utilidades responsive — clases helper reutilizables.
-   4. Touch-first helpers — tamaños de toque ≥ 44px (Apple HIG / Material Design).
-   ============================================================ */
-
-/* ====== TIPOGRAFÍA FLUIDA ====== */
-/* clamp(MIN, PREFERIDO, MAX) — crece/disminuye suavemente con el viewport */
-:root {
-    /* Headings */
-    --fs-hero:     clamp(1.75rem, 4vw + 0.5rem, 3rem);       /* 28px → 48px */
-    --fs-h1:       clamp(1.5rem, 3vw + 0.25rem, 2.25rem);    /* 24px → 36px */
-    --fs-h2:       clamp(1.25rem, 2.5vw + 0.2rem, 1.875rem); /* 20px → 30px */
-    --fs-h3:       clamp(1.1rem, 2vw + 0.15rem, 1.5rem);     /* 17.6px → 24px */
-    --fs-h4:       clamp(0.95rem, 1.5vw + 0.1rem, 1.25rem);  /* 15.2px → 20px */
-    
-    /* Body text */
-    --fs-body:     clamp(0.875rem, 1vw + 0.25rem, 1rem);     /* 14px → 16px */
-    --fs-small:    clamp(0.75rem, 0.8vw + 0.2rem, 0.875rem); /* 12px → 14px */
-    --fs-xs:       clamp(0.6875rem, 0.6vw + 0.2rem, 0.8125rem); /* 11px → 13px */
-    
-    /* Espaciados fluidos */
-    --space-xs:    clamp(4px, 0.5vw, 8px);
-    --space-sm:    clamp(8px, 1vw, 16px);
-    --space-md:    clamp(16px, 2vw, 24px);
-    --space-lg:    clamp(24px, 3vw, 40px);
-    --space-xl:    clamp(32px, 4vw, 64px);
-    --space-2xl:   clamp(48px, 6vw, 96px);
-    
-    /* Touch targets — mínimo 44px (Apple HIG) */
-    --touch-target: 44px;
-    
-    /* Container max-widths */
-    --container-sm: 640px;
-    --container-md: 768px;
-    --container-lg: 1024px;
-    --container-xl: 1280px;
-    --container-2xl: 1440px;
+﻿/* Shared storefront helpers. Admin pages do not inherit these rules. */
+.storefront {
+    --fs-hero: clamp(1.75rem, 4vw + 0.5rem, 3rem);
+    --fs-h1: clamp(1.5rem, 3vw + 0.25rem, 2.25rem);
+    --fs-h2: clamp(1.25rem, 2.5vw + 0.2rem, 1.875rem);
+    --fs-h3: clamp(1.1rem, 2vw + 0.15rem, 1.5rem);
+    --fs-h4: clamp(0.95rem, 1.5vw + 0.1rem, 1.25rem);
+    --fs-body: clamp(0.875rem, 1vw + 0.25rem, 1rem);
+    --fs-small: clamp(0.75rem, 0.8vw + 0.2rem, 0.875rem);
+    --fs-xs: clamp(0.6875rem, 0.6vw + 0.2rem, 0.8125rem);
+    --space-xs: clamp(0.25rem, 0.5vw, 0.5rem);
+    --space-sm: clamp(0.5rem, 1vw, 1rem);
+    --space-md: clamp(1rem, 2vw, 1.5rem);
+    --space-lg: clamp(1.5rem, 3vw, 2.5rem);
+    --space-xl: clamp(2rem, 4vw, 4rem);
+    --space-2xl: clamp(3rem, 6vw, 6rem);
+    --touch-target: 2.75rem;
+    --container-sm: 40rem;
+    --container-md: 48rem;
+    --container-lg: 64rem;
+    --container-xl: 80rem;
+    --container-2xl: 90rem;
 }
-
-/* ====== UTILIDADES DE VISIBILIDAD ====== */
-/* Ocultar elementos según breakpoint (sin desmontar del DOM — para CSS puro) */
-
-/* Solo visible en móvil (< 768px) */
-.show-mobile { display: none !important; }
-@media (max-width: 767px) {
-    .show-mobile { display: flex !important; }
-    .hide-mobile { display: none !important; }
+.storefront .show-mobile { display: flex !important; }
+.storefront :is(.hide-mobile, .show-tablet, .show-desktop) { display: none !important; }
+.storefront .container-query { container-type: inline-size; }
+.storefront :is(.grid-auto-fit, .grid-auto-fill) {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--grid-min, 15.625rem)), 1fr));
+    gap: var(--grid-gap, var(--space-md));
 }
-
-/* Solo visible en tablet (768px - 1023px) */
-.show-tablet { display: none !important; }
-@media (min-width: 768px) and (max-width: 1023px) {
-    .show-tablet { display: flex !important; }
-    .hide-tablet { display: none !important; }
+.storefront .safe-area-bottom { padding-bottom: max(var(--space-md), env(safe-area-inset-bottom)); }
+.storefront .safe-area-top { padding-top: env(safe-area-inset-top, 0rem); }
+.storefront .scroll-x-mobile { overflow-x: auto; scroll-snap-type: x mandatory; }
+.storefront .scroll-x-mobile > * { scroll-snap-align: start; }
+.storefront .sticky-bottom-cta {
+    position: fixed; bottom: 0; inset-inline: 0; z-index: 8000;
+    background: white; padding: var(--space-md);
+    padding-bottom: max(var(--space-md), env(safe-area-inset-bottom));
+    box-shadow: 0 -0.25rem 1.25rem rgb(0 0 0 / 8%);
 }
-
-/* Solo visible en desktop (≥ 1024px) */
-.show-desktop { display: none !important; }
-@media (min-width: 1024px) {
-    .show-desktop { display: flex !important; }
-    .hide-desktop { display: none !important; }
+.storefront .bottom-sheet-mobile {
+    position: fixed !important; bottom: 0 !important; inset-inline: 0 !important; top: auto !important;
+    max-height: 85dvh; border-radius: 1.25rem 1.25rem 0 0 !important;
+    animation: slideUpSheet 0.25s ease;
 }
-
-/* ====== TOUCH-FIRST HELPERS ====== */
-/* En dispositivos táctiles: agrandar targets y eliminar hover */
+@keyframes slideUpSheet { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.storefront .table-responsive-cards thead { display: none; }
+.storefront .table-responsive-cards tbody tr { display: flex; flex-direction: column; padding: var(--space-sm); }
+.storefront .table-responsive-cards tbody td { display: flex; justify-content: space-between; gap: var(--space-sm); }
+.storefront .table-responsive-cards tbody td::before { content: attr(data-label); font-weight: 600; }
+@media (min-width: 48rem) {
+    .storefront .show-mobile { display: none !important; }
+    .storefront .hide-mobile { display: revert !important; }
+    .storefront .show-tablet { display: flex !important; }
+    .storefront .hide-tablet { display: none !important; }
+    .storefront .sticky-bottom-cta { position: static; }
+    .storefront .bottom-sheet-mobile { position: static !important; max-height: none; }
+    .storefront .table-responsive-cards thead { display: table-header-group; }
+    .storefront .table-responsive-cards tbody tr { display: table-row; }
+    .storefront .table-responsive-cards tbody td { display: table-cell; }
+    .storefront .table-responsive-cards tbody td::before { content: none; }
+}
+@media (min-width: 64rem) {
+    .storefront .show-tablet { display: none !important; }
+    .storefront .hide-tablet { display: revert !important; }
+    .storefront .show-desktop { display: flex !important; }
+    .storefront .hide-desktop { display: none !important; }
+}
 @media (pointer: coarse) {
-    .touch-target {
-        min-height: var(--touch-target);
-        min-width: var(--touch-target);
-    }
-    
-    /* Deshabilitar el cursor personalizado en touch */
-    .efe-cursor,
-    .efe-cursor-ring {
-        display: none !important;
-    }
+    .storefront .touch-target { min-height: var(--touch-target); min-width: var(--touch-target); }
+    .storefront :is(.efe-cursor, .efe-cursor-ring) { display: none !important; }
 }
-
-/* ====== CONTAINER QUERIES ====== */
-/* Habilitar Container Queries en contenedores clave */
-.container-query {
-    container-type: inline-size;
-}
-
-/* ====== GRID UTILITIES ====== */
-/* Grid fluido que se adapta automáticamente */
-.grid-auto-fit {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(var(--grid-min, 250px), 1fr));
-    gap: var(--grid-gap, var(--space-md));
-}
-
-.grid-auto-fill {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(var(--grid-min, 250px), 1fr));
-    gap: var(--grid-gap, var(--space-md));
-}
-
-/* ====== SAFE AREA (para notch de iPhone X+) ====== */
-@supports (padding: max(0px)) {
-    .safe-area-bottom {
-        padding-bottom: max(var(--space-md), env(safe-area-inset-bottom));
-    }
-    
-    .safe-area-top {
-        padding-top: max(0px, env(safe-area-inset-top));
-    }
-}
-
-/* ====== SCROLL HORIZONTAL MOBILE ====== */
-.scroll-x-mobile {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none; /* Firefox */
-    scroll-snap-type: x mandatory;
-}
-
-.scroll-x-mobile::-webkit-scrollbar {
-    display: none;
-}
-
-.scroll-x-mobile > * {
-    scroll-snap-align: start;
-}
-
-/* ====== STICKY BOTTOM BAR (para CTAs en móvil) ====== */
-@media (max-width: 767px) {
-    .sticky-bottom-cta {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        z-index: 8000;
-        background: white;
-        padding: 12px 16px;
-        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
-        border-top: 1px solid #e2e8f0;
-    }
-}
-
-/* ====== BOTTOM SHEET PATTERN ====== */
-/* Para filtros, modales, quick-view en móvil */
-@media (max-width: 767px) {
-    .bottom-sheet-mobile {
-        position: fixed !important;
-        bottom: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        top: auto !important;
-        max-height: 85vh;
-        border-radius: 20px 20px 0 0 !important;
-        animation: slideUpSheet 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-    }
-
-    .bottom-sheet-mobile::before {
-        content: '';
-        display: block;
-        width: 36px;
-        height: 4px;
-        background: #d1d5db;
-        border-radius: 2px;
-        margin: 10px auto 8px;
-    }
-}
-
-@keyframes slideUpSheet {
-    from {
-        transform: translateY(100%);
-        opacity: 0.5;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-/* ====== RESPONSIVE TABLES ====== */
-/* Tablas que se transforman en cards en móvil */
-@media (max-width: 767px) {
-    .table-responsive-cards thead {
-        display: none;
-    }
-    
-    .table-responsive-cards tbody tr {
-        display: flex;
-        flex-direction: column;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 12px;
-        margin-bottom: 8px;
-        background: white;
-    }
-    
-    .table-responsive-cards tbody td {
-        display: flex;
-        justify-content: space-between;
-        padding: 6px 0;
-        border: none;
-    }
-    
-    .table-responsive-cards tbody td::before {
-        content: attr(data-label);
-        font-weight: 600;
-        color: #475569;
-        margin-right: 12px;
-    }
-}
-
-/* ====== INPUT ZOOM PREVENTION (iOS) ====== */
-/* iOS hace zoom automático si font-size < 16px en inputs */
-@media (max-width: 767px) {
-    input[type="text"],
-    input[type="email"],
-    input[type="password"],
-    input[type="tel"],
-    input[type="number"],
-    input[type="search"],
-    input[type="url"],
-    select,
-    textarea {
-        font-size: 16px !important;
-    }
-}
-
-/* ====== PRINT STYLES ====== */
-@media print {
-    .no-print {
-        display: none !important;
-    }
-}
+@media print { .storefront .no-print { display: none !important; } }

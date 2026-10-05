@@ -59,7 +59,7 @@ export default function RmaIndex({ rmas, categoriaProductos = [] }) {
                     </Link>
                 </div>
 
-                <div style={{ background: 'white', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)', padding: '24px' }}>
+                <div style={{ background: 'white', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)', padding: 'clamp(0.75rem, 3vw, 1.5rem)' }}>
                     {rmas.length === 0 ? (
                         <div style={{ textAlign: 'center', padding: '60px 20px' }}>
                             <PackageX size={64} color="#cbd5e1" style={{ margin: '0 auto 16px' }} />

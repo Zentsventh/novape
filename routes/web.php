@@ -194,14 +194,14 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
 
     Route::controller(DashboardController::class)->group(function () {
         Route::get('/', 'dashboard')->name('admin.dashboard')->middleware('permiso:ver_dashboard');
-        Route::get('/pedidos/exportar-pdf', 'exportarPdf')->name('admin.pedidos.exportar_pdf')->middleware('permiso:ver_dashboard');
-        Route::get('/pedidos/exportar-excel', 'exportarExcel')->name('admin.pedidos.exportar_excel')->middleware('permiso:ver_dashboard');
-        Route::get('/buscar', 'globalSearch')->name('admin.buscar');
+        Route::get('/pedidos/exportar-pdf', 'exportarPdf')->name('admin.pedidos.exportar_pdf')->middleware('permiso:ver_pedidos');
+        Route::get('/pedidos/exportar-excel', 'exportarExcel')->name('admin.pedidos.exportar_excel')->middleware('permiso:ver_pedidos');
+        Route::get('/buscar', 'globalSearch')->name('admin.buscar')->middleware('permiso:ver_dashboard');
     });
 
-    Route::get('/analiticas', [AnaliticasController::class, 'index'])->name('admin.analiticas')->middleware('permiso:ver_dashboard');
+    Route::get('/analiticas', [AnaliticasController::class, 'index'])->name('admin.analiticas')->middleware('permiso:ver_analiticas');
 
-    Route::get('/audit-logs', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('admin.audits')->middleware('permiso:ver_dashboard');
+    Route::get('/audit-logs', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('admin.audits')->middleware('permiso:gestionar_ajustes');
 
     // Notificaciones
     Route::controller(\App\Http\Controllers\Admin\NotificationController::class)->prefix('notificaciones')->group(function () {
@@ -217,17 +217,17 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
         Route::post('/process', 'process')->name('admin.clientes.import.process');
     });
 
-    Route::controller(\App\Http\Controllers\Admin\CrmDashboardController::class)->prefix('crm')->group(function () {
+    Route::controller(\App\Http\Controllers\Admin\CrmDashboardController::class)->prefix('crm')->middleware('permiso:crm.gestionar')->group(function () {
         Route::get('/dashboard', 'index')->name('admin.crm.dashboard');
     });
 
-    Route::controller(\App\Http\Controllers\Admin\CrmCustomFieldController::class)->prefix('crm/custom-fields')->group(function () {
+    Route::controller(\App\Http\Controllers\Admin\CrmCustomFieldController::class)->prefix('crm/custom-fields')->middleware('permiso:crm.gestionar')->group(function () {
         Route::get('/', 'index')->name('admin.crm.custom_fields.index');
         Route::post('/', 'store')->name('admin.crm.custom_fields.store');
         Route::delete('/{customField}', 'destroy')->name('admin.crm.custom_fields.destroy');
     });
 
-    Route::controller(\App\Http\Controllers\Admin\CrmTaskController::class)->prefix('crm')->group(function () {
+    Route::controller(\App\Http\Controllers\Admin\CrmTaskController::class)->prefix('crm')->middleware('permiso:crm.gestionar')->group(function () {
         Route::get('/tasks', 'index')->name('admin.crm.tasks');
         Route::post('/tasks', 'store')->name('admin.crm.tasks.store');
         Route::put('/tasks/{activity}', 'update')->name('admin.crm.tasks.update');
@@ -235,11 +235,11 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
         Route::delete('/tasks/{activity}', 'destroy')->name('admin.crm.tasks.destroy');
     });
 
-    Route::controller(\App\Http\Controllers\Admin\CrmSearchController::class)->prefix('crm')->group(function () {
+    Route::controller(\App\Http\Controllers\Admin\CrmSearchController::class)->prefix('crm')->middleware('permiso:crm.gestionar')->group(function () {
         Route::get('/search', 'search')->name('admin.crm.search');
     });
 
-    Route::controller(\App\Http\Controllers\Admin\CrmCaseController::class)->prefix('crm')->group(function () {
+    Route::controller(\App\Http\Controllers\Admin\CrmCaseController::class)->prefix('crm')->middleware('permiso:crm.gestionar')->group(function () {
         Route::get('/cases', 'index')->name('admin.crm.cases');
         Route::post('/cases', 'store')->name('admin.crm.cases.store');
         Route::get('/cases/{crmCase}', 'show')->name('admin.crm.cases.show');
@@ -248,22 +248,22 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
         Route::delete('/cases/{crmCase}', 'destroy')->name('admin.crm.cases.destroy');
     });
 
-    Route::controller(\App\Http\Controllers\Admin\CrmCalendarController::class)->prefix('crm')->group(function () {
+    Route::controller(\App\Http\Controllers\Admin\CrmCalendarController::class)->prefix('crm')->middleware('permiso:crm.gestionar')->group(function () {
         Route::get('/calendar', 'index')->name('admin.crm.calendar');
         Route::get('/calendar/events', 'events')->name('admin.crm.calendar.events');
     });
 
-    Route::controller(\App\Http\Controllers\Admin\CrmExportController::class)->prefix('crm')->group(function () {
+    Route::controller(\App\Http\Controllers\Admin\CrmExportController::class)->prefix('crm')->middleware('permiso:crm.gestionar')->group(function () {
         Route::get('/export', 'export')->name('admin.crm.export');
     });
 
-    Route::controller(\App\Http\Controllers\Admin\CrmAutomationController::class)->prefix('crm/automations')->group(function () {
+    Route::controller(\App\Http\Controllers\Admin\CrmAutomationController::class)->prefix('crm/automations')->middleware('permiso:crm.gestionar')->group(function () {
         Route::get('/', 'index')->name('admin.crm.automations.index');
         Route::post('/', 'store')->name('admin.crm.automations.store');
         Route::delete('/{id}', 'destroy')->name('admin.crm.automations.destroy');
     });
 
-    Route::controller(\App\Http\Controllers\Admin\CrmPipelineController::class)->prefix('crm')->group(function () {
+    Route::controller(\App\Http\Controllers\Admin\CrmPipelineController::class)->prefix('crm')->middleware('permiso:crm.gestionar')->group(function () {
         Route::get('/pipeline', 'index')->name('admin.crm.pipeline');
         Route::post('/deals', 'store')->name('admin.crm.deals.store');
         Route::put('/deals/{id}/move', 'move')->name('admin.crm.deals.move');
@@ -277,7 +277,7 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
         Route::get('/deals/{id}/quote', 'generateQuote')->name('admin.crm.deals.quote');
     });
 
-    Route::controller(\App\Http\Controllers\Admin\CrmCompanyController::class)->prefix('crm/companies')->group(function () {
+    Route::controller(\App\Http\Controllers\Admin\CrmCompanyController::class)->prefix('crm/companies')->middleware('permiso:crm.gestionar')->group(function () {
         Route::get('/', 'index')->name('admin.crm.companies.index');
         Route::post('/', 'store')->name('admin.crm.companies.store');
         Route::get('/{id}', 'show')->name('admin.crm.companies.show');
@@ -285,7 +285,7 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
         Route::delete('/{id}', 'destroy')->name('admin.crm.companies.destroy');
     });
 
-    Route::controller(\App\Http\Controllers\Admin\CrmSettingsController::class)->prefix('crm/settings')->group(function () {
+    Route::controller(\App\Http\Controllers\Admin\CrmSettingsController::class)->prefix('crm/settings')->middleware('permiso:crm.gestionar')->group(function () {
         Route::get('/objects', 'objects')->name('admin.crm.settings.objects');
         Route::post('/objects/fields', 'storeField')->name('admin.crm.settings.fields.store');
         Route::delete('/objects/fields/{id}', 'destroyField')->name('admin.crm.settings.fields.destroy');
@@ -293,23 +293,21 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
     });
 
     // Devoluciones / RMA
-    Route::controller(\App\Http\Controllers\Admin\RmaRequestController::class)->prefix('rma')->group(function () {
+    Route::controller(\App\Http\Controllers\Admin\RmaRequestController::class)->prefix('rma')->middleware('permiso:editar_pedido')->group(function () {
         Route::get('/', 'index')->name('admin.rma.index');
         Route::get('/{id}', 'show')->name('admin.rma.show');
         Route::put('/{id}/status', 'updateStatus')->name('admin.rma.update_status');
     });
 
     // Marketing Cloud
-    Route::controller(\App\Http\Controllers\Admin\MarketingCampaignController::class)->prefix('marketing/campaigns')->group(function () {
+    Route::controller(\App\Http\Controllers\Admin\MarketingCampaignController::class)->prefix('marketing/campaigns')->middleware('permiso:marketing.gestionar')->group(function () {
         Route::get('/', 'index')->name('admin.marketing.campaigns');
         Route::get('/create', 'create')->name('admin.marketing.campaigns.create');
         Route::post('/', 'store')->name('admin.marketing.campaigns.store');
         Route::post('/{campaign}/send', 'send')->name('admin.marketing.campaigns.send');
     });
 
-    Route::post('/clientes/{id}/notas', [\App\Http\Controllers\Admin\CustomerController::class, 'storeNota'])->name('admin.clientes.notas.store');
-
-    Route::controller(AlmacenController::class)->prefix('almacenes')->group(function () {
+    Route::controller(AlmacenController::class)->prefix('almacenes')->middleware('permiso:inventario.gestionar')->group(function () {
         Route::get('/', 'index')->name('admin.almacenes.index');
         Route::post('/', 'store')->name('admin.almacenes.store');
         Route::post('/transferir', 'transferir')->name('admin.almacenes.transferir');
@@ -317,7 +315,7 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
         Route::delete('/{id}', 'destroy')->name('admin.almacenes.destroy');
     });
 
-    Route::controller(GastoController::class)->prefix('gastos')->group(function () {
+    Route::controller(GastoController::class)->prefix('gastos')->middleware('permiso:finanzas.gestionar')->group(function () {
         Route::get('/', 'index')->name('admin.gastos.index');
         Route::post('/', 'store')->name('admin.gastos.store');
         Route::put('/{id}', 'update')->name('admin.gastos.update');
@@ -358,13 +356,13 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
         Route::get('/factura/{id}/descargar', 'generarFacturaPos')->name('admin.factura.descargar');
     });
 
-    Route::controller(CajaController::class)->prefix('caja')->group(function () {
+    Route::controller(CajaController::class)->prefix('caja')->middleware('permiso:pos.vender')->group(function () {
         Route::post('/aperturar', 'aperturar')->name('admin.caja.aperturar');
         Route::post('/cerrar', 'cerrar')->name('admin.caja.cerrar');
         Route::post('/movimiento', 'movimiento')->name('admin.caja.movimiento');
     });
 
-    Route::controller(CompraController::class)->prefix('compras')->group(function () {
+    Route::controller(CompraController::class)->prefix('compras')->middleware('permiso:inventario.gestionar')->group(function () {
         Route::get('/', 'index')->name('admin.compras.index');
         Route::post('/', 'store')->name('admin.compras.store');
         Route::post('/{id}/completar', 'completar')->name('admin.compras.completar');
@@ -372,16 +370,16 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
         Route::delete('/{id}', 'destroy')->name('admin.compras.destroy');
     });
 
-    Route::get('/inventario', [InventarioController::class, 'dashboard'])->name('admin.inventario');
+    Route::get('/inventario', [InventarioController::class, 'dashboard'])->name('admin.inventario')->middleware('permiso:inventario.gestionar');
 
-    Route::controller(ZonaController::class)->prefix('zonas')->group(function () {
+    Route::controller(ZonaController::class)->prefix('zonas')->middleware('permiso:gestionar_ajustes')->group(function () {
         Route::get('/', 'index')->name('admin.zonas.index');
         Route::post('/', 'store')->name('admin.zonas.store');
         Route::put('/{id}', 'update')->name('admin.zonas.update');
         Route::delete('/{id}', 'destroy')->name('admin.zonas.destroy');
     });
 
-    Route::controller(MetodoPagoController::class)->prefix('metodos-pago')->group(function () {
+    Route::controller(MetodoPagoController::class)->prefix('metodos-pago')->middleware('permiso:gestionar_ajustes')->group(function () {
         Route::get('/', 'index')->name('admin.metodospago.index');
         Route::post('/', 'store')->name('admin.metodospago.store');
         Route::put('/{id}', 'update')->name('admin.metodospago.update');
@@ -397,7 +395,7 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
         Route::delete('/{id}', 'destroy')->name('admin.marcas.destroy');
     });
 
-    Route::resource('proveedores', ProveedorController::class)->middleware('permiso:ver_productos');
+    Route::resource('proveedores', ProveedorController::class)->middleware('permiso:inventario.gestionar');
     Route::resource('cupones', CuponController::class)->middleware('permiso:gestionar_cupones');
 
     Route::controller(OrderController::class)->prefix('pedidos')->group(function () {
@@ -407,6 +405,7 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
         Route::get('/{id}/factura', 'facturaVista')->name('admin.pedidos.factura')->middleware('permiso:ver_pedidos');
         Route::put('/{id}/estado', 'updateEstado')->name('admin.pedidos.update_estado')->middleware('permiso:editar_pedido');
         Route::post('/{id}/reembolsar', 'reembolsar')->name('admin.pedidos.reembolsar')->middleware('permiso:editar_pedido');
+        Route::post('/{id}/reembolso-confirmar', 'confirmarReembolso')->name('admin.pedidos.reembolso_confirmar')->middleware('permiso:editar_pedido');
     });
 
     Route::controller(SettingController::class)->prefix('ajustes')->middleware('permiso:gestionar_ajustes')->group(function () {

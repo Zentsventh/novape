@@ -572,7 +572,7 @@ export default function Producto() {
                                         width: '100%',
                                         height: '100%',
                                         objectFit: 'contain',
-                                        padding: '24px',
+                                        padding: 'clamp(0.75rem, 3vw, 1.5rem)',
                                         opacity: isZooming ? 0 : 1,
                                         transition: 'opacity 0.2s ease',
                                     }}
@@ -720,7 +720,7 @@ export default function Producto() {
                         </div>
 
                     {/* Tab Content */}
-                    <div style={{ padding: '30px', backgroundColor: 'white' }}>
+                    <div style={{ padding: 'clamp(0.75rem, 3vw, 1.875rem)', backgroundColor: 'white' }}>
                         {activeTab === 'desc' && (
                             <div
                                 style={{ lineHeight: '1.6', color: '#333' }}
@@ -821,7 +821,7 @@ export default function Producto() {
                             alignItems: 'center',
                             gap: '30px',
                             backgroundColor: '#ffffff',
-                            padding: '30px',
+                            padding: 'clamp(0.75rem, 3vw, 1.875rem)',
                             borderRadius: '16px',
                             boxShadow: '0 4px 20px rgba(0, 71, 151, 0.08)',
                             border: '1px solid rgba(0, 71, 151, 0.15)',
@@ -959,7 +959,7 @@ export default function Producto() {
                                 flexDirection: 'column',
                                 gap: '15px',
                                 marginLeft: 'auto',
-                                minWidth: '240px',
+                                minWidth: 'min(100%, 15rem)',
                                 padding: '20px',
                                 backgroundColor: '#f0f9ff',
                                 borderRadius: '12px',
@@ -1083,7 +1083,7 @@ export default function Producto() {
                     <div
                         style={{
                             display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 13.75rem), 1fr))',
                             gap: '24px',
                         }}
                     >

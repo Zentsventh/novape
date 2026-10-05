@@ -1,3 +1,4 @@
+import '../../../css/home/product-card.css';
 import { useState } from 'react';
 import { useShipping } from '@/Contexts/ShippingContext';
 import { router, usePage } from '@inertiajs/react';

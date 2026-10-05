@@ -23,7 +23,7 @@ export default function Login() {
             <Header />
             
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 20px', background: 'rgba(0,0,0,0.5)' }}>
-                <div style={{ background: 'white', padding: '40px', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)', width: '100%', maxWidth: '450px', position: 'relative' }}>
+                <div style={{ background: 'white', padding: 'clamp(0.75rem, 3vw, 2.5rem)', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)', width: '100%', maxWidth: '450px', position: 'relative' }}>
                     
                     <Link href="/" style={{ position: 'absolute', top: '20px', right: '20px', color: '#666', textDecoration: 'none', fontSize: '18px', fontWeight: 'bold' }}>✕</Link>
 

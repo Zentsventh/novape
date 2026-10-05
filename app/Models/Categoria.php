@@ -19,6 +19,8 @@ class Categoria extends Model
         $clearCache = function () {
             \Illuminate\Support\Facades\Cache::forget('home_categorias');
             \Illuminate\Support\Facades\Cache::forget('home_mejor_semana');
+            \Illuminate\Support\Facades\Cache::forget('catalog_categorias_base');
+            \Illuminate\Support\Facades\Cache::forget('home_categorias_menu');
         };
 
         static::saved($clearCache);

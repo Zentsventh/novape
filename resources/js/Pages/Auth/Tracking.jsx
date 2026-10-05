@@ -65,7 +65,7 @@ export default function Tracking({ pedido, trackingData }) {
                     </Link>
                 </div>
 
-                <div style={{ background: 'white', borderRadius: '16px', padding: '40px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+                <div style={{ background: 'white', borderRadius: '16px', padding: 'clamp(0.75rem, 3vw, 2.5rem)', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '30px', borderBottom: '1px solid #e2e8f0', paddingBottom: '20px' }}>
                         <div>
                             <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#0f172a', margin: '0 0 5px 0' }}>Pedido {pedido.codigo}</h1>
@@ -147,7 +147,7 @@ export default function Tracking({ pedido, trackingData }) {
                                 ))}
                             </div>
                         ) : (
-                            <div style={{ padding: '30px', textAlign: 'center', border: '1px dashed #cbd5e1', borderRadius: '12px' }}>
+                            <div style={{ padding: 'clamp(0.75rem, 3vw, 1.875rem)', textAlign: 'center', border: '1px dashed #cbd5e1', borderRadius: '12px' }}>
                                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '10px' }}><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
                                 <p style={{ margin: 0, color: '#64748b', fontSize: '14px' }}>Aún no hay actualizaciones de ubicación para este paquete.</p>
                             </div>

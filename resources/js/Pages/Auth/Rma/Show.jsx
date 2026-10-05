@@ -37,7 +37,7 @@ export default function RmaShow({ rma, categoriaProductos = [] }) {
                     <ArrowLeft size={18} /> Volver a mis Solicitudes
                 </Link>
 
-                <div style={{ background: 'white', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)', padding: '32px' }}>
+                <div style={{ background: 'white', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)', padding: 'clamp(0.75rem, 3vw, 2rem)' }}>
                     
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #e2e8f0', paddingBottom: '24px', marginBottom: '24px' }}>
                         <div>
@@ -59,7 +59,7 @@ export default function RmaShow({ rma, categoriaProductos = [] }) {
                         </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '32px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 16rem), 1fr))', gap: '24px', marginBottom: '32px' }}>
                         <div>
                             <h3 style={{ fontSize: '13px', textTransform: 'uppercase', color: '#64748b', fontWeight: '700', marginBottom: '12px' }}>Detalles de la Solicitud</h3>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>

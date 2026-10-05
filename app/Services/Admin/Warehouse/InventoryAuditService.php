@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services\Admin\Warehouse;
 
-use App\Models\Variante;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -51,19 +50,26 @@ class InventoryAuditService
             ->groupBy('variante_id', 'fecha')
             ->get();
 
-        $productos = Variante::with(['producto.categorias', 'producto.marca'])
-            ->whereHas('producto', function($q) {
-                $q->where('activo', true);
-            })
+        $categoryIds = DB::table('producto_categoria as pc')
+            ->join('categoria as c', 'c.id', '=', 'pc.categoria_id')
+            ->where('c.activa', true)->whereNull('c.deleted_at')
+            ->selectRaw('pc.producto_id, COALESCE(MIN(CASE WHEN c.categoria_padre_id IS NULL THEN c.id END), MIN(c.id)) as categoria_id')
+            ->groupBy('pc.producto_id');
+        // Keep the dashboard payload small: product descriptions and full category trees are not used here.
+        $productos = DB::table('variante as v')->join('producto as p', 'p.id', '=', 'v.producto_id')
+            ->leftJoin('marca as m', function ($join) { $join->on('m.id', '=', 'p.marca_id')->whereNull('m.deleted_at'); })
+            ->leftJoinSub($categoryIds, 'primary_category', 'primary_category.producto_id', '=', 'p.id')
+            ->leftJoin('categoria as c', 'c.id', '=', 'primary_category.categoria_id')
+            ->where('p.activo', true)->whereNull('p.deleted_at')->whereNull('v.deleted_at')
+            ->select(['v.id', 'v.sku', 'v.stock', 'v.precio', 'v.precio_compra', 'v.stock_minimo', 'v.stock_maximo', 'v.stock_seguridad',
+                'p.id as producto_id', 'p.nombre as producto_nombre', 'c.id as categoria_id', 'c.nombre as categoria', 'm.id as marca_id', 'm.nombre as marca'])
+            ->orderBy('v.id')
             ->get()
             ->map(function($v) use ($ventasPorVariante, $comprasPorVariante) {
-                $catPadre = $v->producto->categorias->whereNull('categoria_padre_id')->first();
-                $cat = $catPadre ?? $v->producto->categorias->first();
-
                 return [
                     'id' => $v->id,
-                    'producto_nombre' => $v->producto->nombre,
-                    'producto_id' => $v->producto->id,
+                    'producto_nombre' => $v->producto_nombre,
+                    'producto_id' => $v->producto_id,
                     'sku' => $v->sku,
                     'stock' => $v->stock,
                     'precio' => $v->precio,
@@ -71,10 +77,10 @@ class InventoryAuditService
                     'stock_minimo' => $v->stock_minimo,
                     'stock_maximo' => $v->stock_maximo,
                     'stock_seguridad' => $v->stock_seguridad,
-                    'categoria' => $cat ? $cat->nombre : 'Sin Categoría',
-                    'categoria_id' => $cat ? $cat->id : null,
-                    'marca' => $v->producto->marca ? $v->producto->marca->nombre : 'Sin Marca',
-                    'marca_id' => $v->producto->marca ? $v->producto->marca->id : null,
+                    'categoria' => $v->categoria ?? 'Sin Categoría',
+                    'categoria_id' => $v->categoria_id,
+                    'marca' => $v->marca ?? 'Sin Marca',
+                    'marca_id' => $v->marca_id,
                     'unidades_vendidas' => $ventasPorVariante->get($v->id, 0),
                     'unidades_compradas' => $comprasPorVariante->get($v->id, 0),
                 ];
@@ -82,6 +88,7 @@ class InventoryAuditService
 
         $categorias = DB::table('categoria')
             ->where('activa', true)
+            ->whereNull('deleted_at')
             ->whereNull('categoria_padre_id')
             ->select('id', 'nombre')
             ->orderBy('nombre')

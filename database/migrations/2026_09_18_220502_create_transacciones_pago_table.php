@@ -11,8 +11,8 @@ return new class extends Migration
         Schema::create('transacciones_pago', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('pedido_id')->nullable();
-            $table->string('payment_intent_id')->nullable();
-            $table->string('pasarela')->default('stripe');
+            $table->string('referencia_pasarela')->nullable();
+            $table->string('pasarela')->default('niubiz');
             $table->decimal('monto', 10, 2);
             $table->string('estado')->default('pendiente'); // pendiente, exitoso, fallido
             $table->text('error_message')->nullable();

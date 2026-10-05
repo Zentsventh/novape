@@ -20,12 +20,9 @@ class ShippingController extends Controller
 
     public function calculate(CalculateShippingRequest $request)
     {
-        Log::info('Shipping calculate called', ['user_id' => auth()->id(), 'cart' => $request->input('cart')]);
+        Log::info('Shipping calculate called', ['user_id' => auth()->id()]);
 
-        $cart = $request->input('cart');
-        if (!$cart || empty($cart)) {
-            $cart = session()->get('cart', []);
-        }
+        $cart = session()->get('cart', []);
 
         $result = $this->shippingCalculationService->calculateCost($cart, $request->input('address', []));
 

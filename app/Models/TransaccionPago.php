@@ -13,7 +13,7 @@ class TransaccionPago extends Model
 
     protected $fillable = [
         'pedido_id',
-        'payment_intent_id',
+        'referencia_pasarela',
         'pasarela',
         'monto',
         'estado',

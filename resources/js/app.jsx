@@ -1,4 +1,4 @@
-import { createInertiaApp } from '@inertiajs/react';
+import { createInertiaApp, usePage } from '@inertiajs/react';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
@@ -10,6 +10,7 @@ import { LocationProvider } from '@/Contexts/LocationContext';
 import { ShippingProvider } from '@/Contexts/ShippingContext';
 import '../css/home/chatbot.css';
 import '../css/home/responsive.css';
+import '../css/home/storefront.css';
 import './echo';
 
 /* Error Boundary to catch silent React crashes */
@@ -43,19 +44,23 @@ class ErrorBoundary extends React.Component {
 }
 
 /* Wrapper global que muestra el ChatBot en páginas públicas (no admin). */
-function GlobalLayout({ children, pageName = '', serverHints = {}, user = null, cart = null }) {
-    const isAdmin = typeof pageName === 'string' && (pageName.startsWith('Admin/') || pageName.startsWith('Auth/'));
-    const isCheckoutFlow = typeof pageName === 'string' && pageName.startsWith('Checkout');
+function GlobalLayout({ children }) {
+    const { component: pageName, props } = usePage();
+    const isAdmin = pageName.startsWith('Admin/');
+    const hasWidgets = !isAdmin && !pageName.startsWith('Auth/') && !pageName.startsWith('Checkout');
+    const content = isAdmin ? children : (
+        <div className={`storefront${hasWidgets ? ' storefront--with-nav' : ''}`}>
+            {children}
+            {hasWidgets && <MobileBottomNav user={props.auth?.user} cart={props.cart} />}
+            {hasWidgets && <ChatBot user={props.auth?.user} />}
+        </div>
+    );
 
     return (
-        <DeviceProvider serverHints={serverHints}>
+        <DeviceProvider serverHints={props.device || {}}>
             <LocationProvider>
                 <ShippingProvider>
-                    <ConfirmProvider>
-                        {children}
-                        {!isAdmin && !isCheckoutFlow && <MobileBottomNav user={user} cart={cart} />}
-                        {!isAdmin && !isCheckoutFlow && <ChatBot user={user} />}
-                    </ConfirmProvider>
+                    <ConfirmProvider>{content}</ConfirmProvider>
                 </ShippingProvider>
             </LocationProvider>
         </DeviceProvider>
@@ -64,18 +69,15 @@ function GlobalLayout({ children, pageName = '', serverHints = {}, user = null, 
 
 createInertiaApp({
     title: (title) => title ? `${title} - Novape` : 'Novape',
-    resolve: (name) => resolvePageComponent(`./Pages/${name}.jsx`, import.meta.glob('./Pages/**/*.jsx')),
+    resolve: async (name) => {
+        const page = await resolvePageComponent(`./Pages/${name}.jsx`, import.meta.glob('./Pages/**/*.jsx'));
+        page.default.layout = (children) => <GlobalLayout>{children}</GlobalLayout>;
+        return page;
+    },
     setup({ el, App, props }) {
         createRoot(el).render(
             <ErrorBoundary>
-                <GlobalLayout 
-                    pageName={props?.initialPage?.component || ''} 
-                    serverHints={props?.initialPage?.props?.device || {}}
-                    user={props?.initialPage?.props?.auth?.user}
-                    cart={props?.initialPage?.props?.cart}
-                >
-                    <App {...props} />
-                </GlobalLayout>
+                <App {...props} />
             </ErrorBoundary>
         );
     },

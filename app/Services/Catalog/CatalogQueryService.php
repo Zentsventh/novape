@@ -21,10 +21,10 @@ class CatalogQueryService
     {
         $categoriaProductos = Cache::remember('home_categorias', 3600, function () {
             $categorias = Categoria::whereNull('categoria_padre_id')
+                ->where('activa', true)->orderBy('orden')->orderBy('id')
                 ->where(function ($q) {
                     $q->whereNotIn('slug', ['cyber-bombas', 'retiro-inmediato'])->orWhereNull('slug');
                 })
-                ->with('subcategorias')
                 ->get();
 
             // Cargar solo 10 productos por categoría (no todos)
@@ -44,10 +44,8 @@ class CatalogQueryService
             return $categorias->map(function ($cat) use ($productosPorCat) {
                 $prods = $productosPorCat[$cat->id] ?? collect();
                 return [
-                    'id' => $cat->id,
-                    'nombre' => $cat->nombre,
+                    ...($this->getCategoryMenu()->firstWhere('id', $cat->id) ?? []),
                     'descripcion' => $cat->descripcion,
-                    'subcategorias' => $cat->subcategorias->map(fn($sub) => ['id' => $sub->id, 'nombre' => $sub->nombre]),
                     'productos' => $prods->map(fn($prod) => $this->formatProducto($prod)),
                 ];
             });
@@ -55,6 +53,7 @@ class CatalogQueryService
 
         $mejorSemana = Cache::remember('home_mejor_semana', 3600, function () {
             $productos = Producto::where('activo', 1)
+                ->whereHas('categorias', fn($q) => $q->where('categoria.activa', true))
                 ->with(['marca', 'variantes', 'imagenes'])
                 ->orderBy('created_at', 'desc')
                 ->take(10)
@@ -100,13 +99,24 @@ class CatalogQueryService
 
         $categorias = $this->getCachedBaseCategories();
 
-        $query = Producto::where('activo', 1)->with(['marca', 'variantes', 'imagenes', 'categorias']);
+        $query = Producto::where('activo', 1)->whereHas('categorias', fn($q) => $q->where('categoria.activa', true))->with(['marca', 'variantes', 'imagenes', 'categorias']);
 
         $categoriaActiva = null;
         $subcategoriaActiva = null;
 
         // Resolver categorías usando las ya cacheadas (0 queries extra)
-        if ($subcategoriaParam && $categoriaParam) {
+        if (!empty($filters['categoria_id'])) {
+            $selected = Categoria::where('activa', true)->find((int) $filters['categoria_id']);
+            if ($selected) {
+                $root = $selected;
+                while ($root->categoria_padre_id) $root = $root->padre;
+                $categoriaActiva = $root;
+                $subcategoriaActiva = $selected->id === $root->id ? null : $selected;
+                $query->whereHas('categorias', fn($q) => $q->where('categoria.id', $selected->id));
+            } else {
+                $query->whereRaw('1 = 0');
+            }
+        } elseif ($subcategoriaParam && $categoriaParam) {
             $catPadre = $categorias->first(fn($c) => $c->nombre === $categoriaParam);
             if ($catPadre) {
                 $subcat = $catPadre->subcategorias->first(fn($s) => $s->nombre === $subcategoriaParam);
@@ -225,11 +235,7 @@ class CatalogQueryService
                 'total' => $paginator->total(),
                 'links' => $paginator->linkCollection()->toArray()
             ],
-            'categorias' => $categorias->map(fn($cat) => [
-                'id' => $cat->id,
-                'nombre' => $cat->nombre,
-                'subcategorias' => $cat->subcategorias->map(fn($s) => ['id' => $s->id, 'nombre' => $s->nombre]),
-            ]),
+            'categorias' => $this->getCategoryMenu(),
             'marcasDisponibles' => $marcasDisponibles,
             'categoriaActiva' => $categoriaActiva ? $categoriaActiva->nombre : null,
             'subcategoriaActiva' => $subcategoriaActiva ? $subcategoriaActiva->nombre : null,
@@ -243,7 +249,7 @@ class CatalogQueryService
             return ['productos' => [], 'marcas' => [], 'categorias' => [], 'sugerencias' => []];
         }
 
-        $query = Producto::where('activo', 1)->with(['marca', 'variantes', 'imagenes', 'categorias']);
+        $query = Producto::where('activo', 1)->whereHas('categorias', fn($q) => $q->where('categoria.activa', true))->with(['marca', 'variantes', 'imagenes', 'categorias']);
         $this->applySmartSearch($query, $q);
 
         $productos = $query->limit(8)->get();
@@ -266,6 +272,7 @@ class CatalogQueryService
         $categorias = $productos->pluck('categorias')->flatten()->pluck('nombre')->filter()->unique()->values();
         if ($categorias->count() < 3) {
             $topCategorias = Categoria::whereNull('categoria_padre_id')
+                ->where('activa', true)
                 ->where(function ($q) {
                     $q->whereNotIn('slug', ['cyber-bombas', 'retiro-inmediato'])->orWhereNull('slug');
                 })
@@ -334,11 +341,7 @@ class CatalogQueryService
                 'todas_imagenes' => $producto->imagenes->pluck('url')
             ],
             'recomendados' => $recomendados,
-            'categorias' => $categorias->map(fn($cat) => [
-                'id' => $cat->id,
-                'nombre' => $cat->nombre,
-                'subcategorias' => $cat->subcategorias->map(fn($s) => ['id' => $s->id, 'nombre' => $s->nombre]),
-            ])
+            'categorias' => $this->getCategoryMenu()
         ];
     }
 
@@ -427,11 +430,31 @@ class CatalogQueryService
     {
         return Cache::remember('catalog_categorias_base', 3600, function () {
             return Categoria::whereNull('categoria_padre_id')
+                ->where('activa', true)->orderBy('orden')->orderBy('id')
                 ->where(function ($q) {
                     $q->whereNotIn('slug', ['cyber-bombas', 'retiro-inmediato'])->orWhereNull('slug');
                 })
-                ->with('subcategorias')
+                ->with(['subcategorias' => fn($q) => $q->where('activa', true)->orderBy('orden')])
                 ->get();
+        });
+    }
+
+    public function getCategoryMenu(): Collection
+    {
+        return Cache::remember('home_categorias_menu', 3600, function () {
+            $categories = Categoria::where('activa', true)->orderBy('orden')->orderBy('id')->get(['id', 'nombre', 'slug', 'categoria_padre_id']);
+            $children = $categories->groupBy(fn($category) => $category->categoria_padre_id ?? 0);
+            $brands = DB::table('producto_categoria as pc')
+                ->join('producto as p', 'p.id', '=', 'pc.producto_id')
+                ->join('marca as m', 'm.id', '=', 'p.marca_id')
+                ->where('p.activo', true)->whereNull('p.deleted_at')
+                ->select('pc.categoria_id', 'm.id', 'm.nombre')->distinct()->orderBy('m.nombre')->get()->groupBy('categoria_id');
+            $node = function ($category) use (&$node, $children, $brands) {
+                return ['id' => $category->id, 'nombre' => $category->nombre, 'slug' => $category->slug,
+                    'subcategorias' => ($children[$category->id] ?? collect())->map($node)->values(),
+                    'marcas' => ($brands[$category->id] ?? collect())->map(fn($brand) => ['id' => $brand->id, 'nombre' => $brand->nombre])->values()];
+            };
+            return ($children[0] ?? collect())->map($node)->values();
         });
     }
 
@@ -459,16 +482,10 @@ class CatalogQueryService
         $precio_actual = $variante ? (float) $variante->precio : 0;
         $imagen = $prod->imagenes->first();
         $imagen_url = $imagen ? $imagen->url : null;
-        $precio_anterior = null;
-        $descuento = 0;
-        
-        $isBombaCyber = $prod->relationLoaded('categorias') && $prod->categorias->contains('slug', 'cyber-bombas');
-        $isRetiro = $prod->relationLoaded('categorias') && $prod->categorias->contains('slug', 'retiro-inmediato');
-        
-        if ($isBombaCyber || $isRetiro) {
-            $descuento = 15 + ($prod->id % 45);
-            $precio_anterior = round($precio_actual / (1 - ($descuento / 100)), 2);
-        }
+        $precio_anterior = $variante && (float) $variante->precio_anterior > $precio_actual
+            ? (float) $variante->precio_anterior : null;
+        $descuento = $precio_anterior
+            ? (int) round(100 * (1 - $precio_actual / $precio_anterior)) : 0;
 
         $stock = 0;
         if ($variante) {

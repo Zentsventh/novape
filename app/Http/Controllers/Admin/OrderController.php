@@ -74,6 +74,14 @@ class OrderController extends Controller
         return redirect()->back()->with('success', $result['message']);
     }
 
+    public function confirmarReembolso(int $id)
+    {
+        $pedido = $this->orderQueryService->getOrderForRefund($id);
+        $result = $this->refundOrderService->confirmManualRefund($pedido);
+
+        return redirect()->back()->with($result['success'] ? 'success' : 'error', $result['message']);
+    }
+
     public function facturaVista(int $id)
     {
         $pedido = $this->orderQueryService->getOrderForInvoice($id);

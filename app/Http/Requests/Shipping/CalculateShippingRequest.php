@@ -20,7 +20,6 @@ class CalculateShippingRequest extends FormRequest
             'address.provincia' => 'required|string',
             'address.distrito' => 'required|string',
             'address.codigo_postal' => 'nullable|string',
-            'cart' => 'nullable|array',
         ];
     }
 }

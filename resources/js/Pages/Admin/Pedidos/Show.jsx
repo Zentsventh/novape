@@ -57,6 +57,11 @@ export default function Show({ pedido }) {
                 </div>
             </div>
 
+            {flash?.error && (
+                <div style={{ background: '#FEF2F2', color: '#B91C1C', padding: '16px', borderRadius: '8px', marginBottom: '24px', border: '1px solid #FECACA' }}>
+                    {flash.error}
+                </div>
+            )}
             {flash?.success && (
                 <div style={{ background: '#ECFDF5', color: '#059669', padding: '16px', borderRadius: '8px', marginBottom: '24px', fontWeight: '600', border: '1px solid #A7F3D0', display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <CheckCircle size={20} />
@@ -224,7 +229,7 @@ export default function Show({ pedido }) {
                         <div style={{ background: '#F8FAFC', padding: '16px', borderRadius: '8px', border: '1px solid #E2E8F0', marginBottom: '20px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', marginBottom: '8px' }}>
                                 <span style={{ color: '#64748B' }}>Método de Pago</span>
-                                <span style={{ color: '#1E293B', fontWeight: '700', textTransform: 'capitalize' }}>{pedido.pago?.metodo_pago || 'Desconocido'}</span>
+                                <span style={{ color: '#1E293B', fontWeight: '700', textTransform: 'capitalize' }}>{pedido.pago?.metodo || 'Desconocido'}</span>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px' }}>
                                 <span style={{ color: '#64748B' }}>Estado del Pago</span>
@@ -244,7 +249,7 @@ export default function Show({ pedido }) {
                         
                         {pedido.pago?.estado === 'completado' && pedido.estado !== 'cancelado' ? (
                             <button 
-                                onClick={async () => { if(await confirmDialog('¿Estás seguro que deseas reembolsar y cancelar este pedido? Esta acción no se puede deshacer.')) {
+                                onClick={async () => { if(await confirmDialog('¿Solicitar anulación manual del pago en Niubiz? El pedido seguirá activo hasta confirmar la anulación.')) {
                                         router.post(`/admin/pedidos/${pedido.id}/reembolsar`);
                                     }
                                 }}
@@ -253,7 +258,18 @@ export default function Show({ pedido }) {
                                 style={{ width: '100%', background: '#DC2626', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', fontWeight: '600', fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                             >
                                 <RefreshCw size={16} />
-                                Reembolsar Pedido
+                                Solicitar anulación Niubiz
+                            </button>
+                        ) : pedido.pago?.estado === 'reembolso_pendiente' ? (
+                            <button
+                                onClick={async () => {
+                                    if (await confirmDialog('Confirma que la anulación ya fue completada en el portal Niubiz. El pedido se cancelará y el stock se devolverá.')) {
+                                        router.post(`/admin/pedidos/${pedido.id}/reembolso-confirmar`);
+                                    }
+                                }}
+                                style={{ width: '100%', background: '#D97706', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', fontWeight: '600', fontSize: '14px', cursor: 'pointer' }}
+                            >
+                                Confirmar anulación hecha en Niubiz
                             </button>
                         ) : (
                             <p style={{ color: '#94A3B8', fontSize: '13px', textAlign: 'center', margin: 0, fontWeight: '500' }}>No es posible reembolsar este pedido actualmente.</p>

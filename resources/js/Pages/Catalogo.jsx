@@ -30,6 +30,17 @@ const formatPrice = (price) =>
         price
     );
 
+const CategoryFilterBranch = ({ category, selectedId, selectedName, depth = 1 }) => (
+    <div>
+        <Link href={`/catalogo?categoria_id=${category.id}`}
+            className={`catalogo-cat-link catalogo-cat-sub ${String(selectedId) === String(category.id) || selectedName === category.nombre ? 'is-active' : ''}`}
+            style={{ paddingLeft: 12 + depth * 12 }}>
+            {category.nombre}
+        </Link>
+        {category.subcategorias?.map((child) => <CategoryFilterBranch key={child.id} category={child} selectedId={selectedId} selectedName={selectedName} depth={depth + 1} />)}
+    </div>
+);
+
 export default function Catalogo({
     productos = [],
     categorias = [],
@@ -50,7 +61,7 @@ export default function Catalogo({
     const [precioMin, setPrecioMin] = useState(filtros.precio_min || '');
     const [precioMax, setPrecioMax] = useState(filtros.precio_max || '');
     const [marcaSearch, setMarcaSearch] = useState('');
-    const [sort, setSort] = useState(filtros.sort || 'relevancia');
+    const [sort, setSort] = useState(typeof filtros.sort === 'string' ? filtros.sort : 'relevancia');
 
     // Animaciones de carrito
     const [addingIds, setAddingIds] = useState({});
@@ -78,6 +89,7 @@ export default function Catalogo({
     }, []);
 
     const activeCategoryParams = useMemo(() => {
+        if (filtros.categoria_id) return { categoria_id: filtros.categoria_id };
         if (subcategoriaActiva && categoriaActiva) {
             return { categoria: categoriaActiva, subcategoria: subcategoriaActiva };
         }
@@ -88,7 +100,7 @@ export default function Catalogo({
             return { categoria: categoriaActiva };
         }
         return {};
-    }, [categoriaActiva, subcategoriaActiva]);
+    }, [categoriaActiva, subcategoriaActiva, filtros.categoria_id]);
 
     const filteredBrands = useMemo(() => {
         if (!marcaSearch.trim()) return marcasDisponibles;
@@ -292,20 +304,14 @@ export default function Catalogo({
                                 {categorias.map((cat) => (
                                     <div key={cat.id}>
                                         <Link
-                                            href={`/catalogo?categoria=${encodeURIComponent(cat.nombre)}`}
+                                            href={`/catalogo?categoria_id=${cat.id}`}
                                             className={`catalogo-cat-link ${categoriaActiva === cat.nombre ? 'is-active' : ''}`}
                                         >
                                             {cat.nombre}
                                         </Link>
                                         {categoriaActiva === cat.nombre &&
                                             cat.subcategorias?.map((sub) => (
-                                                <Link
-                                                    key={sub.id}
-                                                    href={`/catalogo?categoria=${encodeURIComponent(cat.nombre)}&subcategoria=${encodeURIComponent(sub.nombre)}`}
-                                                    className={`catalogo-cat-link catalogo-cat-sub ${subcategoriaActiva === sub.nombre ? 'is-active' : ''}`}
-                                                >
-                                                    {sub.nombre}
-                                                </Link>
+                                                <CategoryFilterBranch key={sub.id} category={sub} selectedId={filtros.categoria_id} selectedName={subcategoriaActiva} />
                                             ))}
                                     </div>
                                 ))}
@@ -336,7 +342,7 @@ export default function Catalogo({
                                 <span className="efe-radio-text">Todas las marcas</span>
                             </label>
                             {filteredBrands.map((b) => (
-                                <label className="catalogo-marca-item efe-custom-radio" key={b.id}>
+                                <label className="catalogo-marca-item efe-custom-radio" key={b.nombre}>
                                     <input
                                         type="radio"
                                         name="marca"

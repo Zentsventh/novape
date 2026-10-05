@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('webhook_logs', function (Blueprint $table) {
             $table->id();
-            $table->string('provider'); // stripe, shippo, etc
+            $table->string('provider'); // niubiz, shippo, etc
             $table->string('event_id')->unique();
             $table->string('type');
             $table->json('payload');

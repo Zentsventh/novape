@@ -1,2 +1,10 @@
 *
 !.gitignore
+!productos/
+productos/*
+!productos/catalogo-real/
+!productos/catalogo-real/*
+!banners/
+banners/*
+!banners/efe/
+!banners/efe/*

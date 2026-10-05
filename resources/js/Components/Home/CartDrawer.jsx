@@ -1,3 +1,4 @@
+import '../../../css/home/cart-drawer.css';
 import { router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import LoginModal from './LoginModal';

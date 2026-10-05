@@ -107,7 +107,7 @@ class AnalyticsService
             'pedidosRecientes' => $pedidosRecientes,
             'ventasSemana' => $ventasSemana,
             'stockBajo' => $this->getLowStock(),
-            'topProductosVendidos' => $this->getTopProducts(null, null),
+            'topProductosVendidos' => $this->getTopProducts($startDate, $endDate),
         ];
     }
 

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use App\Http\Requests\Admin\Auth\AdminLoginRequest;
 
 class AdminAuthController extends Controller
@@ -26,7 +27,7 @@ class AdminAuthController extends Controller
         if (Auth::guard('admin')->attempt(['email' => $credentials['email'], 'password' => $credentials['password'], 'estado' => 'activo'])) {
             $user = Auth::guard('admin')->user();
             if (!$user->roles()->where('nombre', '!=', 'cliente')->exists() || 
-                Illuminate\Support\Facades\Hash::check('12345678', $user->password_hash)) {
+                Hash::check('12345678', $user->password_hash)) {
                 Auth::guard('admin')->logout();
                 return back()->withErrors(['email' => 'Acceso administrativo no autorizado.'])->onlyInput('email');
             }

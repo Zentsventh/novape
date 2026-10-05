@@ -3,6 +3,12 @@
 declare(strict_types=1);
 
 namespace App\Models;
+/**
+ * @property int $id
+ * @property string $email
+ * @property string $password_hash
+ * @property bool $has_set_password
+ */
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -19,6 +25,12 @@ use App\Models\CrmCompany;
 use App\Models\CrmCase;
 use OwenIt\Auditing\Contracts\Auditable;
 
+/**
+ * @property int $id
+ * @property string $email
+ * @property string $password_hash
+ * @property bool $has_set_password
+ */
 class Usuario extends Authenticatable implements Auditable
 {
     use HasFactory, Notifiable, SoftDeletes, SchemalessAttributesTrait, \OwenIt\Auditing\Auditable;

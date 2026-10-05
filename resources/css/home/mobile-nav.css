@@ -19,10 +19,7 @@
         height: 65px;
     }
 
-    /* Ocultar el botón original del Header porque ahora está aquí */
-    .efe-header-cart.efe-mobile-only {
-        display: none !important;
-    }
+
 }
 
 .efe-mobile-bottom-nav .nav-item {
@@ -68,11 +65,4 @@
     min-width: 18px;
     text-align: center;
     border: 1.5px solid #ffffff;
-}
-
-/* Espacio extra en el home para que el Nav no tape contenido (como el footer o el cintillo) */
-@media (max-width: 1024px) {
-    body {
-        padding-bottom: 65px !important;
-    }
 }
