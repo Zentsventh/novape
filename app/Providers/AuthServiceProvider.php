@@ -4,19 +4,18 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-use App\Models\Producto;
-use App\Policies\ProductPolicy;
-use App\Domain\Inventory\Entities\Warehouse;
 use App\Domain\Inventory\Entities\Stock;
-use App\Policies\WarehousePolicy;
-use App\Policies\StockPolicy;
-
-// Sales domain imports
-use App\Domain\Sales\Entities\Order;
+use App\Domain\Inventory\Entities\Warehouse;
 use App\Domain\Sales\Entities\Cart;
-use App\Policies\OrderPolicy;
+use App\Domain\Sales\Entities\Order;
+use App\Models\Producto;
 use App\Policies\CartPolicy;
+use App\Policies\OrderPolicy;
+// Sales domain imports
+use App\Policies\ProductPolicy;
+use App\Policies\StockPolicy;
+use App\Policies\WarehousePolicy;
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -28,8 +27,10 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         Producto::class => ProductPolicy::class,
         Warehouse::class => WarehousePolicy::class,
-    Stock::class => StockPolicy::class,
-];
+        Stock::class => StockPolicy::class,
+        Order::class => OrderPolicy::class,
+        Cart::class => CartPolicy::class,
+    ];
 
     /**
      * Register any authentication / authorization services.
@@ -39,4 +40,3 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
     }
 }
-?>

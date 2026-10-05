@@ -16,10 +16,11 @@ class UpdateCouponRequest extends FormRequest
     public function rules(): array
     {
         $id = $this->route('cupone') ?? $this->route('id');
+
         return [
-            'codigo' => 'required|string|unique:cupones,codigo,' . $id,
+            'codigo' => 'required|string|unique:cupones,codigo,'.$id,
             'tipo' => 'required|in:porcentaje,fijo',
-            'valor' => 'required|numeric|min:0',
+            'valor' => 'required|numeric|min:0'.($this->input('tipo') === 'porcentaje' ? '|max:100' : ''),
             'monto_minimo' => 'nullable|numeric|min:0',
             'fecha_inicio' => 'nullable|date',
             'fecha_fin' => 'nullable|date|after_or_equal:fecha_inicio',

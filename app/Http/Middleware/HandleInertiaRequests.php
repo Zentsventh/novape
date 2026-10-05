@@ -2,7 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\ConfiguracionSitio;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -36,7 +38,7 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $cart = session()->get('cart', []);
-        
+
         $cartTotal = 0;
         $cartCount = 0;
         foreach ($cart as $item) {
@@ -46,22 +48,18 @@ class HandleInertiaRequests extends Middleware
 
         // Usa el guard 'admin' si estamos en una ruta de admin, caso contrario el normal
         $user = $request->is('admin*') ? auth('admin')->user() : $request->user();
-        
+
         $permisos = [];
         if ($user) {
             $user->loadMissing('roles');
-            $permisos = \Illuminate\Support\Facades\Cache::remember(
-                'user_permissions_' . $user->id,
-                3600, // 1 hour
-                fn () => $user->getAllPermisos()->toArray()
-            );
+            $permisos = $user->getAllPermisos()->toArray();
         }
 
         // Detección de dispositivo server-side (User-Agent nativo — sin dependencias)
         $ua = strtolower($request->header('User-Agent', ''));
         $isMobile = (bool) preg_match('/mobile|android.*mobile|iphone|ipod|blackberry|opera mini|iemobile/i', $ua);
-        $isTablet = !$isMobile && (bool) preg_match('/tablet|ipad|android(?!.*mobile)|kindle|silk/i', $ua);
-        $isDesktop = !$isMobile && !$isTablet;
+        $isTablet = ! $isMobile && (bool) preg_match('/tablet|ipad|android(?!.*mobile)|kindle|silk/i', $ua);
+        $isDesktop = ! $isMobile && ! $isTablet;
 
         return [
             ...parent::share($request),
@@ -71,31 +69,33 @@ class HandleInertiaRequests extends Middleware
             'cart' => [
                 'items' => array_values($cart),
                 'count' => $cartCount,
-                'total' => $cartTotal
+                'total' => $cartTotal,
             ],
             'device' => [
                 'isMobile' => $isMobile,
                 'isTablet' => $isTablet,
                 'isDesktop' => $isDesktop,
             ],
-            'globalConfig' => fn () => \Illuminate\Support\Facades\Cache::remember('globalConfig', 3600, function () {
+            'globalConfig' => fn () => Cache::remember('globalConfig', 3600, function () {
                 return [
-                    'facebook_url' => \App\Models\ConfiguracionSitio::obtener('facebook_url', 'https://facebook.com/novape'),
-                    'instagram_url' => \App\Models\ConfiguracionSitio::obtener('instagram_url', 'https://instagram.com/novape'),
-                    'telefono_contacto' => \App\Models\ConfiguracionSitio::obtener('telefono_contacto', '+51 999 888 777'),
-                    'email_contacto' => \App\Models\ConfiguracionSitio::obtener('email_contacto', 'contacto@novape.com'),
-                    'logo_url' => \App\Models\ConfiguracionSitio::obtener('logo_url'),
+                    'facebook_url' => ConfiguracionSitio::obtener('facebook_url', 'https://facebook.com/novape'),
+                    'instagram_url' => ConfiguracionSitio::obtener('instagram_url', 'https://instagram.com/novape'),
+                    'telefono_contacto' => ConfiguracionSitio::obtener('telefono_contacto', '+51 999 888 777'),
+                    'email_contacto' => ConfiguracionSitio::obtener('email_contacto', 'contacto@novape.com'),
+                    'logo_url' => ConfiguracionSitio::obtener('logo_url'),
                 ];
             }),
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
+                'venta_id' => fn () => $request->session()->get('venta_id'),
             ],
             'errors' => function () use ($request) {
                 $errors = $request->session()->get('errors');
                 if ($errors) {
                     return $errors->getBag('default')->toArray();
                 }
+
                 return (object) [];
             },
         ];

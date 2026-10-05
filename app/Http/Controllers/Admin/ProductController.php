@@ -7,11 +7,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
-use App\Services\Admin\Product\ProductManagementService;
-use App\Models\Producto;
 use App\Models\Categoria;
 use App\Models\Marca;
+use App\Models\Producto;
 use App\Models\Proveedor;
+use App\Services\Admin\Product\ProductManagementService;
+use App\Support\Csv;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -27,14 +28,14 @@ class ProductController extends Controller
         $query = Producto::with(['marca', 'imagenes', 'variantes', 'categorias']);
 
         if ($request->filled('search')) {
-            $query->where(function($q) use ($request) {
-                $q->where('nombre', 'like', '%' . $request->search . '%')
-                  ->orWhere('sku_base', 'like', '%' . $request->search . '%');
+            $query->where(function ($q) use ($request) {
+                $q->where('nombre', 'like', '%'.$request->search.'%')
+                    ->orWhere('sku_base', 'like', '%'.$request->search.'%');
             });
         }
 
         if ($request->filled('categoria_id')) {
-            $query->whereHas('categorias', function($q) use ($request) {
+            $query->whereHas('categorias', function ($q) use ($request) {
                 $q->where('categoria.id', $request->categoria_id);
             });
         }
@@ -44,19 +45,19 @@ class ProductController extends Controller
         }
 
         $productos = $query->orderBy($request->input('sort', 'id'), $request->input('direction', 'desc'))
-                           ->paginate(10)->withQueryString();
+            ->paginate(10)->withQueryString();
 
         $categoriasQuery = Categoria::where('activa', true)->whereNull('categoria_padre_id');
         if ($request->filled('marca_id')) {
-            $categoriasQuery->whereHas('productos', function($q) use ($request) {
+            $categoriasQuery->whereHas('productos', function ($q) use ($request) {
                 $q->where('marca_id', $request->marca_id);
             });
         }
-        
+
         $marcasQuery = Marca::query();
         if ($request->filled('categoria_id')) {
-            $marcasQuery->whereHas('productos', function($q) use ($request) {
-                $q->whereHas('categorias', function($q2) use ($request) {
+            $marcasQuery->whereHas('productos', function ($q) use ($request) {
+                $q->whereHas('categorias', function ($q2) use ($request) {
                     $q2->where('categoria.id', $request->categoria_id);
                 });
             });
@@ -66,7 +67,7 @@ class ProductController extends Controller
             'productos' => $productos,
             'categorias' => $categoriasQuery->orderBy('nombre')->get(),
             'marcas' => $marcasQuery->orderBy('nombre')->get(),
-            'filters' => (object) $request->only(['search', 'categoria_id', 'marca_id', 'sort', 'direction'])
+            'filters' => (object) $request->only(['search', 'categoria_id', 'marca_id', 'sort', 'direction']),
         ]);
     }
 
@@ -77,13 +78,14 @@ class ProductController extends Controller
             'categorias' => Categoria::all(),
             'proveedores' => Proveedor::where('activo', true)->get(),
             'costoPromedio' => 0,
-            'listaEspecificaciones' => []
+            'listaEspecificaciones' => [],
         ]);
     }
 
     public function store(StoreProductRequest $request)
     {
         $this->productService->createProduct($request->validated(), auth()->id() ?? 1);
+
         return redirect()->route('admin.products')->with('success', 'Producto creado exitosamente.');
     }
 
@@ -94,14 +96,14 @@ class ProductController extends Controller
             'marcas' => Marca::all(),
             'categorias' => Categoria::all(),
             'proveedores' => Proveedor::where('activo', true)->get(),
-            'listaEspecificaciones' => []
+            'listaEspecificaciones' => [],
         ]);
     }
 
     public function show(int $id)
     {
         $producto = Producto::with(['categorias', 'imagenes', 'productoEspecificaciones', 'variantes', 'marca', 'proveedor'])->findOrFail($id);
-        
+
         $historialCompras = DB::table('compra_items')
             ->join('compras', 'compra_items.compra_id', '=', 'compras.id')
             ->leftJoin('proveedor', 'compras.proveedor_id', '=', 'proveedor.id')
@@ -117,9 +119,9 @@ class ProductController extends Controller
             )->orderBy('compras.fecha_compra', 'desc')->get();
 
         $comparativaProveedores = [];
-        foreach($historialCompras as $hc) {
+        foreach ($historialCompras as $hc) {
             $pid = $hc->proveedor_id ?? 0;
-            if (!isset($comparativaProveedores[$pid])) {
+            if (! isset($comparativaProveedores[$pid])) {
                 $comparativaProveedores[$pid] = [
                     'proveedor_id' => $pid,
                     'proveedor_nombre' => $hc->proveedor_nombre ?? 'Sin proveedor',
@@ -144,36 +146,31 @@ class ProductController extends Controller
     public function update(UpdateProductRequest $request, int $id)
     {
         $this->productService->updateProduct(Producto::findOrFail($id), $request->validated(), auth()->id() ?? 1);
+
         return redirect()->route('admin.products')->with('success', 'Producto actualizado exitosamente.');
     }
 
     public function destroy(int $id)
     {
         $this->productService->deleteProduct(Producto::findOrFail($id));
+
         return redirect()->route('admin.products')->with('success', 'Producto eliminado exitosamente.');
     }
-    
+
     public function export()
     {
-        $productos = Producto::with(['marca', 'variantes', 'categorias'])->get();
-        $csv = "ID,Nombre,Marca,Categoría,SKU,Stock,Precio,Estado\n";
-        
-        foreach ($productos as $p) {
-            $csv .= implode(',', [
-                $p->id,
-                '"' . str_replace('"', '""', $p->nombre) . '"',
-                '"' . ($p->marca ? $p->marca->nombre : '') . '"',
-                '"' . ($p->categorias->first() ? $p->categorias->first()->nombre : '') . '"',
-                $p->sku_base,
-                $p->variantes->sum('stock'),
-                $p->variantes->first() ? $p->variantes->first()->precio : 0,
-                $p->activo ? 'Activo' : 'Inactivo',
-            ]) . "\n";
-        }
-
-        return response($csv, 200, [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="productos_' . date('Y-m-d') . '.csv"',
+        $productos = Producto::with(['marca', 'variantes', 'categorias'])->lazyById(500);
+        $rows = $productos->map(fn ($p) => [
+            $p->id,
+            $p->nombre,
+            ($p->marca ? $p->marca->nombre : ''),
+            ($p->categorias->first() ? $p->categorias->first()->nombre : ''),
+            $p->sku_base,
+            $p->variantes->sum('stock'),
+            $p->variantes->first() ? $p->variantes->first()->precio : 0,
+            $p->activo ? 'Activo' : 'Inactivo',
         ]);
+
+        return Csv::download(['ID', 'Nombre', 'Marca', 'Categoría', 'SKU', 'Stock', 'Precio', 'Estado'], $rows, 'productos_'.date('Y-m-d').'.csv');
     }
 }

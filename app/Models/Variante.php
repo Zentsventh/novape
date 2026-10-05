@@ -4,26 +4,27 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Variante extends Model
 {
-    use SoftDeletes, HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'variante';
 
     protected $fillable = [
-        'producto_id', 
-        'sku', 
-        'precio', 
+        'producto_id',
+        'sku',
+        'precio',
         'precio_anterior',
-        'activo', 
-        'stock', 
-        'stock_reservado'
+        'activo',
+        'stock',
+        'stock_reservado',
+        'peso', 'precio_compra', 'stock_minimo', 'stock_maximo', 'stock_seguridad',
     ];
 
     protected $casts = [

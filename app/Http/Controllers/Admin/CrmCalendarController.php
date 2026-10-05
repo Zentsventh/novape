@@ -19,7 +19,7 @@ class CrmCalendarController extends Controller
         $start = $request->query('start');
         $end = $request->query('end');
 
-        $query = CrmActivity::with(['deal'])
+        $query = CrmActivity::with(['deal', 'empresa'])
             ->whereNotNull('fecha_vencimiento');
 
         if ($start && $end) {
@@ -30,13 +30,19 @@ class CrmCalendarController extends Controller
 
         $events = $activities->map(function ($activity) {
             $color = '#3b82f6'; // default blue (tarea)
-            if ($activity->tipo === 'llamada') $color = '#eab308'; // yellow
-            if ($activity->tipo === 'email') $color = '#8b5cf6'; // purple
-            if ($activity->tipo === 'reunion') $color = '#f97316'; // orange
+            if ($activity->tipo === 'llamada') {
+                $color = '#eab308';
+            } // yellow
+            if ($activity->tipo === 'email') {
+                $color = '#8b5cf6';
+            } // purple
+            if ($activity->tipo === 'reunion') {
+                $color = '#f97316';
+            } // orange
 
             return [
                 'id' => $activity->id,
-                'title' => ($activity->deal ? $activity->deal->titulo . ' - ' : '') . ucfirst($activity->tipo),
+                'title' => ($activity->deal ? $activity->deal->titulo.' - ' : ($activity->empresa ? $activity->empresa->nombre.' - ' : '')).ucfirst($activity->tipo),
                 'start' => $activity->fecha_vencimiento,
                 'allDay' => false,
                 'backgroundColor' => $color,
@@ -45,7 +51,7 @@ class CrmCalendarController extends Controller
                     'contenido' => $activity->contenido,
                     'tipo' => $activity->tipo,
                     'completada' => $activity->completada,
-                ]
+                ],
             ];
         });
 

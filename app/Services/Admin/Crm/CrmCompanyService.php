@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services\Admin\Crm;
 
+use App\Jobs\AgentResearchJob;
 use App\Models\CrmCompany;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
-use App\Jobs\AgentResearchJob;
-use App\Services\Admin\Crm\TimelineService;
-use App\Services\Admin\Crm\AutomationEngineService;
 
 class CrmCompanyService
 {
@@ -21,7 +19,7 @@ class CrmCompanyService
         $query = CrmCompany::with(['responsable'])
             ->withCount(['personas', 'deals']);
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $query->search($filters['search']);
         }
 
@@ -37,11 +35,11 @@ class CrmCompanyService
             $company = CrmCompany::create($data);
 
             // Si hay un dominio o email/website, disparamos investigación IA
-            if (!empty($company->dominio) || !empty($company->sitio_web)) {
-                AgentResearchJob::dispatch('company', $company->id, $company->dominio ?? $company->sitio_web);
+            if (config('services.enrichment.url') && config('services.enrichment.token') && (! empty($company->dominio) || ! empty($company->sitio_web))) {
+                AgentResearchJob::dispatch('company', $company->id, $company->dominio ?? $company->sitio_web)->afterCommit();
             }
-            
-            TimelineService::log($company, 'empresa_creada', "Empresa creada en el CRM.");
+
+            TimelineService::log($company, 'empresa_creada', 'Empresa creada en el CRM.');
             AutomationEngineService::trigger('company_created', $company);
 
             return $company;
@@ -56,6 +54,7 @@ class CrmCompanyService
         return DB::transaction(function () use ($id, $data) {
             $company = CrmCompany::lockForUpdate()->findOrFail($id);
             $company->update($data);
+
             return $company;
         });
     }

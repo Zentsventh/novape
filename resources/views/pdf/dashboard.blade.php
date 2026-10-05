@@ -160,7 +160,7 @@
                 <p class="value">S/ {{ number_format($costosTotal, 2) }}</p>
             </div>
             <div class="summary-card">
-                <h3>Ganancia Neta</h3>
+                <h3>Saldo operativo</h3>
                 <p class="value">S/ {{ number_format($gananciaNeta, 2) }}</p>
             </div>
         </div>
@@ -226,13 +226,13 @@
         <tbody>
             @foreach($pedidos as $p)
             <tr>
-                <td><strong>{{ $p->codigo }}</strong></td>
-                <td>{{ $p->usuario ? $p->usuario->nombres . ' ' . $p->usuario->apellidos : 'Sin registrar' }}</td>
-                <td>{{ $p->created_at->format('d/m/Y H:i') }}</td>
+                <td><strong>{{ $p['codigo'] }}</strong></td>
+                <td>{{ $p['usuario_nombre'] }}</td>
+                <td>{{ \Carbon\Carbon::parse($p['created_at'])->format('d/m/Y H:i') }}</td>
                 <td>
-                    <span class="status-badge">{{ $p->estado }}</span>
+                    <span class="status-badge">{{ $p['estado'] }}</span>
                 </td>
-                <td style="text-align: right;">S/ {{ number_format($p->total, 2) }}</td>
+                <td style="text-align: right;">S/ {{ number_format($p['total'], 2) }}</td>
             </tr>
             @endforeach
             @if(count($pedidos) === 0)

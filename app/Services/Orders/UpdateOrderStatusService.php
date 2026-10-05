@@ -6,7 +6,12 @@ namespace App\Services\Orders;
 
 use App\Jobs\SendWhatsAppNotification;
 use App\Mail\OrderStatusUpdated;
+use App\Models\CrmActivity;
+use App\Models\CrmDeal;
+use App\Models\Cupon;
+use App\Models\LoyaltyPointsHistory;
 use App\Models\Pedido;
+use App\Models\Usuario;
 use App\Services\Inventory\InventoryService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -21,7 +26,8 @@ class UpdateOrderStatusService
     /**
      * Updates an order's state and triggers related side-effects (stock, notifications).
      *
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
+     *
      * @throws \Throwable
      */
     public function execute(Pedido $pedido, array $data): void
@@ -37,6 +43,14 @@ class UpdateOrderStatusService
 
         DB::beginTransaction();
         try {
+            $pedido = Pedido::whereKey($pedido->id)->lockForUpdate()->firstOrFail();
+            $estadoAnterior = $pedido->estado;
+            if ($nuevoEstado === 'cancelado' && in_array($pedido->pago?->estado, ['completado', 'reembolso_pendiente'], true)) {
+                throw new \InvalidArgumentException('Confirma primero la anulación en Niubiz.');
+            }
+            if ($estadoAnterior === 'cancelado' && $nuevoEstado !== 'cancelado') {
+                throw new \InvalidArgumentException('No se puede reabrir un pedido cancelado.');
+            }
             $pedido->update([
                 'estado' => $nuevoEstado,
                 'tracking_number' => $data['tracking_number'] ?? $pedido->tracking_number,
@@ -48,14 +62,14 @@ class UpdateOrderStatusService
 
                 // Restaurar Beneficios del Cliente (Puntos y Cupones)
                 if ($pedido->cupon_id) {
-                    \App\Models\Cupon::where('id', $pedido->cupon_id)->where('usos_actuales', '>', 0)->decrement('usos_actuales');
+                    Cupon::where('id', $pedido->cupon_id)->where('usos_actuales', '>', 0)->decrement('usos_actuales');
                 }
 
                 if ($pedido->puntos_usados > 0 && $pedido->usuario_id) {
-                    $user = \App\Models\Usuario::find($pedido->usuario_id);
+                    $user = Usuario::find($pedido->usuario_id);
                     if ($user) {
                         $user->increment('loyalty_points', $pedido->puntos_usados);
-                        \App\Models\LoyaltyPointsHistory::create([
+                        LoyaltyPointsHistory::create([
                             'usuario_id' => $user->id,
                             'points' => $pedido->puntos_usados,
                             'type' => 'refunded',
@@ -66,17 +80,17 @@ class UpdateOrderStatusService
 
                 // Sincronizar CRM: Si se cancela el pedido, cerrar oportunidad como perdida
                 if ($pedido->usuario_id) {
-                    $deal = \App\Models\CrmDeal::where('usuario_id', $pedido->usuario_id)
-                                ->where('estado', 'open')
-                                ->first();
+                    $deal = CrmDeal::where('usuario_id', $pedido->usuario_id)
+                        ->where('estado', 'open')
+                        ->first();
 
                     if ($deal) {
                         $deal->update(['estado' => 'lost']);
-                        \App\Models\CrmActivity::create([
+                        CrmActivity::create([
                             'deal_id' => $deal->id,
+                            'usuario_id' => auth('admin')->id(),
                             'tipo' => 'system',
-                            'titulo' => 'Pedido Cancelado',
-                            'descripcion' => "El pedido {$pedido->codigo} fue cancelado y devuelto a inventario.",
+                            'contenido' => "El pedido {$pedido->codigo} fue cancelado y devuelto a inventario.",
                         ]);
                     }
                 }
@@ -85,7 +99,7 @@ class UpdateOrderStatusService
             DB::commit();
         } catch (\Throwable $e) {
             DB::rollBack();
-            Log::error('Error al actualizar estado y stock del pedido ' . $pedido->id . ': ' . $e->getMessage());
+            Log::error('Error al actualizar estado y stock del pedido '.$pedido->id.': '.$e->getMessage());
             throw $e;
         }
 
@@ -93,7 +107,7 @@ class UpdateOrderStatusService
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     private function sendNotifications(Pedido $pedido, array $data): void
     {
@@ -102,15 +116,15 @@ class UpdateOrderStatusService
                 Mail::to($pedido->usuario->email)->send(new OrderStatusUpdated($pedido));
             }
 
-            if ($pedido->usuario && !empty($pedido->usuario->telefono)) {
+            if ($pedido->usuario && ! empty($pedido->usuario->telefono)) {
                 $mensajeWa = "¡Hola {$pedido->usuario->nombres}! El estado de tu pedido {$pedido->codigo} se ha actualizado a: {$data['estado']}.";
-                if (!empty($data['tracking_number'])) {
+                if (! empty($data['tracking_number'])) {
                     $mensajeWa .= " Tu código de rastreo por {$pedido->courier_name} es: {$data['tracking_number']}.";
                 }
                 SendWhatsAppNotification::dispatch($pedido->usuario->telefono, $mensajeWa);
             }
         } catch (\Throwable $e) {
-            Log::error('No se pudo enviar notificaciones (Email/WhatsApp) de actualización de estado: ' . $e->getMessage());
+            Log::error('No se pudo enviar notificaciones (Email/WhatsApp) de actualización de estado: '.$e->getMessage());
         }
     }
 }

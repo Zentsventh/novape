@@ -136,9 +136,9 @@
 
     <div class="text-center title">
         @if($venta->tipo_comprobante === 'factura')
-            FACTURA ELECTRÓNICA
+            REGISTRO INTERNO — FACTURA
         @elseif($venta->tipo_comprobante === 'boleta')
-            BOLETA DE VENTA ELECTRÓNICA
+            REGISTRO INTERNO — BOLETA
         @else
             TICKET DE VENTA
         @endif
@@ -202,7 +202,7 @@
         </tr>
         <tr>
             <td></td>
-            <td class="text-right">I.G.V (18%)</td>
+            <td class="text-right">I.G.V ({{ $igvPorcentaje }}%)</td>
             <td class="text-right">S/ {{ number_format($igvCalculado, 2) }}</td>
         </tr>
         <tr class="total-row">
@@ -225,11 +225,9 @@
     </div>
 
     <div class="footer">
-        Representación impresa de la <br>
-        @if($venta->tipo_comprobante === 'factura') FACTURA ELECTRÓNICA @else BOLETA DE VENTA ELECTRÓNICA @endif.<br>
-        Consulte su documento en:<br>
-        <span class="bold">https://novape.me/comprobantes</span><br>
-        o en www.sunat.gob.pe
+        Registro interno de venta.<br>
+        La emisión electrónica debe confirmarse con el proveedor de facturación.<br>
+        Consulte este registro mediante el código QR.
     </div>
 
 </body>

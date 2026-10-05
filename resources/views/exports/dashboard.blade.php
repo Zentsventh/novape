@@ -24,7 +24,7 @@
             <td colspan="3">{{ number_format($costosTotal, 2) }}</td>
         </tr>
         <tr>
-            <td>Ganancia Neta (S/)</td>
+            <td>Saldo operativo (S/)</td>
             <td colspan="3">{{ number_format($gananciaNeta, 2) }}</td>
         </tr>
         <tr>
@@ -46,9 +46,9 @@
         @foreach($topProductosVendidos as $index => $producto)
         <tr>
             <td>{{ $index + 1 }}</td>
-            <td>{{ $producto->nombre }}</td>
-            <td>{{ $producto->ventas }}</td>
-            <td>{{ number_format($producto->ingresos, 2) }}</td>
+            <td>{{ $producto['nombre'] }}</td>
+            <td>{{ $producto['cantidad'] }}</td>
+            <td>{{ number_format($producto['ingresos'], 2) }}</td>
         </tr>
         @endforeach
 
@@ -65,10 +65,10 @@
         </tr>
         @foreach($pedidos as $pedido)
         <tr>
-            <td>{{ $pedido->codigo }}</td>
-            <td>{{ $pedido->usuario_nombre }}</td>
-            <td>{{ number_format($pedido->total, 2) }}</td>
-            <td>{{ ucfirst($pedido->estado) }}</td>
+            <td>{{ $pedido['codigo'] }}</td>
+            <td>{{ $pedido['usuario_nombre'] }}</td>
+            <td>{{ number_format($pedido['total'], 2) }}</td>
+            <td>{{ ucfirst($pedido['estado']) }}</td>
         </tr>
         @endforeach
     </tbody>

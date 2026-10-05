@@ -10,23 +10,26 @@ class CashFlowService
 {
     public function openRegister(array $data, int $userId): void
     {
-        $abierta = DB::table('cajas_sesiones')
-            ->where('cajero_id', $userId)
-            ->where('estado', 'abierta')
-            ->exists();
+        DB::transaction(function () use ($data, $userId) {
+            DB::table('usuario')->where('id', $userId)->lockForUpdate()->first();
+            $abierta = DB::table('cajas_sesiones')
+                ->where('cajero_id', $userId)
+                ->where('estado', 'abierta')
+                ->exists();
 
-        if ($abierta) {
-            throw new \Exception('Ya tienes una caja abierta.');
-        }
+            if ($abierta) {
+                throw new \Exception('Ya tienes una caja abierta.');
+            }
 
-        DB::table('cajas_sesiones')->insert([
-            'cajero_id' => $userId,
-            'monto_inicial' => $data['monto_inicial'],
-            'fecha_apertura' => now(),
-            'estado' => 'abierta',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+            DB::table('cajas_sesiones')->insert([
+                'cajero_id' => $userId,
+                'monto_inicial' => $data['monto_inicial'],
+                'fecha_apertura' => now(),
+                'estado' => 'abierta',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        });
     }
 
     public function closeRegister(array $data, int $userId): string
@@ -38,7 +41,7 @@ class CashFlowService
                 ->lockForUpdate()
                 ->first();
 
-            if (!$caja) {
+            if (! $caja) {
                 throw new \Exception('No tienes una caja abierta para cerrar.');
             }
 
@@ -53,7 +56,7 @@ class CashFlowService
                 ->where('caja_sesion_id', $caja->id)
                 ->where('tipo', 'ingreso')
                 ->sum('monto');
-                
+
             $egresos = DB::table('caja_movimientos')
                 ->where('caja_sesion_id', $caja->id)
                 ->where('tipo', 'egreso')
@@ -72,7 +75,7 @@ class CashFlowService
                 'monto_final_declarado' => $data['monto_final_declarado'],
                 'descuadre' => $descuadre,
                 'estado' => 'cerrada',
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
 
             return "Caja cerrada. Ventas totales: S/ {$ventasTotal}. Ingresos Extras: S/ {$ingresos}. Egresos: S/ {$egresos}. Descuadre Efectivo: S/ {$descuadre}";
@@ -81,23 +84,26 @@ class CashFlowService
 
     public function recordMovement(array $data, int $userId): void
     {
-        $caja = DB::table('cajas_sesiones')
-            ->where('cajero_id', $userId)
-            ->where('estado', 'abierta')
-            ->first();
+        DB::transaction(function () use ($data, $userId) {
+            $caja = DB::table('cajas_sesiones')
+                ->where('cajero_id', $userId)
+                ->where('estado', 'abierta')
+                ->lockForUpdate()
+                ->first();
 
-        if (!$caja) {
-            throw new \Exception('Debes abrir caja antes de registrar movimientos.');
-        }
+            if (! $caja) {
+                throw new \Exception('Debes abrir caja antes de registrar movimientos.');
+            }
 
-        DB::table('caja_movimientos')->insert([
-            'caja_sesion_id' => $caja->id,
-            'usuario_id' => $userId,
-            'tipo' => $data['tipo'],
-            'monto' => $data['monto'],
-            'concepto' => $data['concepto'],
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+            DB::table('caja_movimientos')->insert([
+                'caja_sesion_id' => $caja->id,
+                'usuario_id' => $userId,
+                'tipo' => $data['tipo'],
+                'monto' => $data['monto'],
+                'concepto' => $data['concepto'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        });
     }
 }

@@ -13,6 +13,7 @@ export default function Tasks({ tasks = [], deals = [] }) {
     const { data, setData, post, put, reset, errors, clearErrors } = useForm({
         id: null,
         deal_id: '',
+        empresa_id: '',
         tipo: 'tarea',
         contenido: '',
         fecha_vencimiento: ''
@@ -26,6 +27,7 @@ export default function Tasks({ tasks = [], deals = [] }) {
             setData({
                 id: task.id,
                 deal_id: task.deal_id || '',
+                empresa_id: task.empresa_id || '',
                 tipo: task.tipo || 'tarea',
                 contenido: task.contenido || '',
                 // Slicing to correctly format datetime-local input YYYY-MM-DDTHH:mm
@@ -169,6 +171,11 @@ export default function Tasks({ tasks = [], deals = [] }) {
                     {activity.deal && (
                         <Link href={`/admin/crm/pipeline?search=${encodeURIComponent(activity.deal.titulo)}`} className="premium-task-deal">
                             {activity.deal.titulo}
+                        </Link>
+                    )}
+                    {!activity.deal && activity.empresa && (
+                        <Link href={`/admin/crm/companies/${activity.empresa.id}`} className="premium-task-deal">
+                            {activity.empresa.nombre}
                         </Link>
                     )}
                     {activity.fecha_vencimiento && (

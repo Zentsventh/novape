@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin\Crm;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreCustomFieldRequest extends FormRequest
@@ -19,15 +20,18 @@ class StoreCustomFieldRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'model_type' => 'required|in:user,deal',
-            'name' => 'required|string|max:50',
+            'model_type' => 'required|in:user,deal,company',
+            'name' => 'required|string|max:50|regex:/^[a-zA-Z][a-zA-Z0-9_ ]*$/',
             'label' => 'required|string|max:100',
-            'type' => 'required|in:text,number,date,boolean'
+            'type' => 'required|in:text,number,date,boolean,select',
+            'options' => 'required_if:type,select|nullable|array|min:1|max:100',
+            'options.*' => 'required|string|max:255',
+            'required' => 'sometimes|boolean',
         ];
     }
 }

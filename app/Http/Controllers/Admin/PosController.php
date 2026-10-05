@@ -6,11 +6,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Pos\ProcessPosSaleRequest;
+use App\Models\ConfiguracionSitio;
 use App\Services\Admin\Pos\PosService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
-use App\Models\ConfiguracionSitio;
 
 class PosController extends Controller
 {
@@ -24,7 +25,7 @@ class PosController extends Controller
         $cajaAbierta = $this->posService->getActiveRegister($userId);
         $almacenId = $this->posService->getWarehouseIdForRegister($cajaAbierta);
         $productos = $this->posService->getProducts($almacenId);
-        
+
         $metodosPago = DB::table('metodos_pago')->where('activo', true)->get();
         $categorias = DB::table('categoria')->where('activa', true)->whereNull('categoria_padre_id')->orderBy('nombre')->pluck('nombre');
 
@@ -35,16 +36,16 @@ class PosController extends Controller
         $ventasCajaEfectivo = 0;
         $cajaIngresos = 0;
         $cajaEgresos = 0;
-        
+
         if ($cajaAbierta) {
             $ventasCajaTotal = DB::table('ventas_pos')->where('caja_sesion_id', $cajaAbierta->id)->sum('total');
             $ventasCajaEfectivo = DB::table('venta_pos_pagos')
                 ->join('ventas_pos', 'venta_pos_pagos.venta_pos_id', '=', 'ventas_pos.id')
                 ->join('metodos_pago', 'venta_pos_pagos.metodo_pago_id', '=', 'metodos_pago.id')
                 ->where('ventas_pos.caja_sesion_id', $cajaAbierta->id)
-                ->where('metodos_pago.tipo', 'fisico')
+                ->where('metodos_pago.nombre', 'LIKE', '%Efectivo%')
                 ->sum('venta_pos_pagos.monto');
-                
+
             $cajaIngresos = DB::table('caja_movimientos')->where('caja_sesion_id', $cajaAbierta->id)->where('tipo', 'ingreso')->sum('monto');
             $cajaEgresos = DB::table('caja_movimientos')->where('caja_sesion_id', $cajaAbierta->id)->where('tipo', 'egreso')->sum('monto');
         }
@@ -61,7 +62,7 @@ class PosController extends Controller
             'ventasCajaTotal' => (float) $ventasCajaTotal,
             'ventasCajaEfectivo' => (float) $ventasCajaEfectivo,
             'logoUrl' => ConfiguracionSitio::obtener('logo_url'),
-            'igv_porcentaje' => (float) ConfiguracionSitio::obtener('igv_porcentaje', '18')
+            'igv_porcentaje' => (float) ConfiguracionSitio::obtener('igv_porcentaje', '18'),
         ]);
     }
 
@@ -82,22 +83,22 @@ class PosController extends Controller
                 'metodos_pago.nombre as metodo_pago'
             );
 
-        if (!auth()->user()->esAdmin()) {
+        if (! auth()->user()->esAdmin()) {
             $query->where('ventas_pos.cajero_id', auth()->id());
         }
 
         if ($request->filled('search')) {
             $search = $request->query('search');
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('ventas_pos.codigo_ticket', 'like', "%{$search}%")
-                  ->orWhere('clientes.nombre_razon_social', 'like', "%{$search}%");
+                    ->orWhere('clientes.nombre_razon_social', 'like', "%{$search}%");
             });
         }
-        
+
         return Inertia::render('Admin/Pos/Historial', [
             'historial' => $query->orderBy('ventas_pos.created_at', 'desc')->paginate(15),
             'filters' => $request->only(['search']),
-            'logoUrl' => ConfiguracionSitio::obtener('logo_url')
+            'logoUrl' => ConfiguracionSitio::obtener('logo_url'),
         ]);
     }
 
@@ -105,18 +106,21 @@ class PosController extends Controller
     {
         try {
             $result = $this->posService->processSale($request->validated(), auth()->id());
+
             return redirect()->back()->with('success', "Venta {$result['codigo_ticket']} registrada. Total: S/ {$result['total']}")->with('venta_id', $result['venta_id']);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error("POS Error: " . $e->getMessage());
-            return redirect()->back()->withErrors(['cliente' => $e->getMessage()])->with('error', 'Error al procesar la venta: ' . $e->getMessage());
+            Log::error('POS Error: '.$e->getMessage());
+
+            return redirect()->back()->withErrors(['cliente' => $e->getMessage()])->with('error', 'Error al procesar la venta: '.$e->getMessage());
         }
     }
 
     public function buscarCliente(Request $request)
     {
-        if (!$request->query('numero_documento')) {
+        if (! $request->query('numero_documento')) {
             return response()->json(['error' => 'Documento requerido'], 400);
         }
+
         return response()->json($this->posService->findClientFromApi($request->query('tipo_documento', 'DNI'), $request->query('numero_documento')));
     }
 
@@ -129,7 +133,9 @@ class PosController extends Controller
             ->where('ventas_pos.id', $id)
             ->first();
 
-        if (!$venta) abort(404, 'Ticket no encontrado');
+        if (! $venta) {
+            abort(404, 'Ticket no encontrado');
+        }
 
         $items = DB::table('venta_pos_items')->where('venta_pos_id', $id)->get();
 
@@ -137,7 +143,7 @@ class PosController extends Controller
             'venta' => $venta,
             'items' => $items,
             'logoUrl' => ConfiguracionSitio::obtener('logo_url'),
-            'nombreTienda' => ConfiguracionSitio::obtener('nombre_tienda') ?: 'NOVAPE STORE'
+            'nombreTienda' => ConfiguracionSitio::obtener('nombre_tienda') ?: 'NOVAPE STORE',
         ]);
     }
 
@@ -145,10 +151,10 @@ class PosController extends Controller
     {
         $cajaAbierta = $this->posService->getActiveRegister(auth()->id());
         $almacenId = $this->posService->getWarehouseIdForRegister($cajaAbierta);
-        
+
         $productos = $this->posService->getProducts(
-            $almacenId, 
-            $request->input('search'), 
+            $almacenId,
+            $request->input('search'),
             $request->input('categoria')
         );
 

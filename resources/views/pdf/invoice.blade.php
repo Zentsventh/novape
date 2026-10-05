@@ -186,17 +186,17 @@
             @else
                 <h1 style="font-size: 28px; margin: 0 0 15px 0;">NOVA PE</h1>
             @endif
-            <h2>NOVAPE S.A.C.</h2>
-            <p>Av. José Carlos Mariátegui, Lote 60 Zona A</p>
+            <h2>{{ config('invoicing.company.razon_social') }}</h2>
+            <p>{{ config('invoicing.company.direccion') }}</p>
             <p>Lima - Perú</p>
-            <p>Correo electrónico: atencionalcliente@novape.me</p>
-            <p>Teléfono: +51 986 784 384</p>
+            <p>Correo electrónico: {{ config('invoicing.company.email') }}</p>
+            <p>Teléfono: {{ config('invoicing.company.telefono') }}</p>
         </div>
         
         <div class="invoice-box">
-            <p>R.U.C. N° 20123456789</p>
-            <h1>{{ strtoupper($pedido->tipo_comprobante ?? 'COMPROBANTE') }} DE VENTA ELECTRÓNICA</h1>
-            <p>{{ $pedido->codigo_pedido ?? 'B001-00005125' }}</p>
+            <p>R.U.C. N° {{ config('invoicing.company.ruc') }}</p>
+            <h1>REGISTRO INTERNO — {{ strtoupper($pedido->tipo_comprobante ?? 'VENTA') }}</h1>
+            <p>{{ $pedido->codigo }}</p>
         </div>
     </div>
 
@@ -299,7 +299,7 @@
     </div>
 
     <div class="footer-text">
-        Representación impresa de la FACTURA electrónica. Consulte su documento en <strong>https://novape.me</strong>
+        Registro interno de venta. La emisión electrónica debe confirmarse con el proveedor de facturación.
     </div>
 
 </body>

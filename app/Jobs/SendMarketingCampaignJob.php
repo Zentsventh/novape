@@ -2,11 +2,12 @@
 
 namespace App\Jobs;
 
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Queue\Queueable;
+use App\Mail\MarketingCampaignMail;
 use App\Models\MarketingCampaign;
 use App\Models\Usuario;
-use App\Mail\MarketingCampaignMail;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class SendMarketingCampaignJob implements ShouldQueue
@@ -21,7 +22,8 @@ class SendMarketingCampaignJob implements ShouldQueue
 
     public function handle(): void
     {
-        $query = Usuario::whereHas('roles', fn($q) => $q->where('nombre', 'cliente'))
+        $query = Usuario::whereHas('roles', fn ($q) => $q->where('nombre', 'cliente'))
+            ->where('estado', 'activo')
             ->whereNotNull('email');
 
         if ($this->campaign->segment === 'vip') {
@@ -32,18 +34,20 @@ class SendMarketingCampaignJob implements ShouldQueue
 
         $users = $query->get();
         $sentCount = 0;
+        $failedCount = 0;
 
         foreach ($users as $user) {
             try {
                 Mail::to($user->email)->send(new MarketingCampaignMail($this->campaign, $user));
                 $sentCount++;
             } catch (\Exception $e) {
-                // Log failed email if needed
+                $failedCount++;
+                Log::warning('Fallo de envío de campaña', ['campaign_id' => $this->campaign->id, 'user_id' => $user->id]);
             }
         }
 
         $this->campaign->update([
-            'status' => 'sent',
+            'status' => $failedCount > 0 ? 'failed' : 'sent',
             'sent_count' => $sentCount,
             'finished_at' => now(),
         ]);

@@ -6,9 +6,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\SchemalessAttributes\Casts\SchemalessAttributes;
 
 class CrmCompany extends Model
@@ -60,12 +61,12 @@ class CrmCompany extends Model
         return $this->hasMany(CrmDeal::class, 'empresa_id');
     }
 
-    public function notes()
+    public function notes(): MorphMany
     {
         return $this->morphMany(CrmNote::class, 'notable');
     }
 
-    public function timelineEvents()
+    public function timelineEvents(): MorphMany
     {
         return $this->morphMany(CrmTimelineEvent::class, 'trackable');
     }
@@ -74,13 +75,15 @@ class CrmCompany extends Model
 
     public function scopeSearch($query, ?string $search)
     {
-        if (!$search) return $query;
+        if (! $search) {
+            return $query;
+        }
 
         return $query->where(function ($q) use ($search) {
             $q->where('nombre', 'like', "%{$search}%")
-              ->orWhere('dominio', 'like', "%{$search}%")
-              ->orWhere('industria', 'like', "%{$search}%")
-              ->orWhere('email', 'like', "%{$search}%");
+                ->orWhere('dominio', 'like', "%{$search}%")
+                ->orWhere('industria', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%");
         });
     }
 

@@ -7,7 +7,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AdminNotification;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
@@ -23,7 +22,7 @@ class NotificationController extends Controller
             ->orderBy('created_at', 'desc')
             ->limit(20)
             ->get()
-            ->map(fn($n) => [
+            ->map(fn ($n) => [
                 'id' => $n->id,
                 'type' => $n->type,
                 'title' => $n->title,
@@ -43,7 +42,7 @@ class NotificationController extends Controller
      */
     public function markAsRead(int $id): JsonResponse
     {
-        $notification = AdminNotification::findOrFail($id);
+        $notification = AdminNotification::forUser(auth('admin')->id())->findOrFail($id);
         $notification->update(['read_at' => now()]);
 
         return response()->json(['success' => true]);

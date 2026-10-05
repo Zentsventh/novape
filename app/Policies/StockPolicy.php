@@ -1,29 +1,29 @@
 <?php
+
 namespace App\Policies;
 
 use App\Domain\Inventory\Entities\Stock;
-use App\Models\User;
+use App\Models\Usuario;
 
 class StockPolicy
 {
-    public function view(User $user, Stock $stock): bool
+    public function view(Usuario $user, Stock $stock): bool
     {
-        return $user->hasPermissionTo('inventory.stock.view');
+        return $user->estado === 'activo' && $user->tienePermiso('inventario.gestionar');
     }
 
-    public function create(User $user): bool
+    public function create(Usuario $user): bool
     {
-        return $user->hasPermissionTo('inventory.stock.create');
+        return $user->estado === 'activo' && $user->tienePermiso('inventario.gestionar');
     }
 
-    public function update(User $user, Stock $stock): bool
+    public function update(Usuario $user, Stock $stock): bool
     {
-        return $user->hasPermissionTo('inventory.stock.edit');
+        return $user->estado === 'activo' && $user->tienePermiso('inventario.gestionar');
     }
 
-    public function delete(User $user, Stock $stock): bool
+    public function delete(Usuario $user, Stock $stock): bool
     {
-        return $user->hasPermissionTo('inventory.stock.delete');
+        return $user->estado === 'activo' && $user->tienePermiso('inventario.gestionar');
     }
 }
-?>

@@ -29,7 +29,7 @@ class ProductPolicy
     public function create(Usuario $user): bool
     {
         // Assuming a role column or permission system; here we check admin role
-        return $user->hasRole('admin');
+        return $user->estado === 'activo' && $user->tienePermiso('crear_producto');
     }
 
     /**
@@ -37,7 +37,7 @@ class ProductPolicy
      */
     public function update(Usuario $user, Producto $product): bool
     {
-        return $user->hasRole('admin');
+        return $user->estado === 'activo' && $user->tienePermiso('editar_producto');
     }
 
     /**
@@ -45,7 +45,6 @@ class ProductPolicy
      */
     public function delete(Usuario $user, Producto $product): bool
     {
-        return $user->hasRole('admin');
+        return $user->estado === 'activo' && $user->tienePermiso('eliminar_producto');
     }
 }
-?>

@@ -1,31 +1,32 @@
 <?php
+
 namespace App\Policies;
 
-use App\Models\User;
 use App\Domain\Sales\Entities\Cart;
+use App\Models\Usuario;
 
 /**
  * Política de autorización para el carrito.
  */
 class CartPolicy
 {
-    public function view(User $user, Cart $cart): bool
+    public function view(Usuario $user, Cart $cart): bool
     {
-        return $user->hasRole('admin') || $cart->user_id === $user->id;
+        return $user->estado === 'activo' && ($user->esAdmin() || $cart->user_id == $user->id);
     }
 
-    public function create(User $user): bool
+    public function create(Usuario $user): bool
     {
-        return $user->hasPermissionTo('sales.cart.create');
+        return $user->estado === 'activo';
     }
 
-    public function update(User $user, Cart $cart): bool
+    public function update(Usuario $user, Cart $cart): bool
     {
-        return $user->hasRole('admin') || $cart->user_id === $user->id;
+        return $user->estado === 'activo' && ($user->esAdmin() || $cart->user_id == $user->id);
     }
 
-    public function delete(User $user, Cart $cart): bool
+    public function delete(Usuario $user, Cart $cart): bool
     {
-        return $user->hasRole('admin');
+        return $user->estado === 'activo' && $user->esAdmin();
     }
 }

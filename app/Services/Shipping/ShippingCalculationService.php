@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Shipping;
 
+use App\Models\Variante;
 use App\Services\ShippoService;
-use App\Models\Producto;
 
 class ShippingCalculationService
 {
@@ -21,9 +21,16 @@ class ShippingCalculationService
 
         $pesoTotalKg = 0;
         foreach ($cart as $item) {
-            $producto = Producto::find($item['id']);
-            $pesoUnidad = $producto ? (float) $producto->peso_kg : 1.0;
-            $pesoTotalKg += ($pesoUnidad * $item['cantidad']);
+            $productId = $item['id'];
+            $variants = Variante::where('producto_id', $productId)->where('activo', true);
+            if (! empty($item['variante_id'])) {
+                $variants->whereKey($item['variante_id']);
+            }
+            $pesoUnidad = (float) ($variants->orderBy('id')->value('peso') ?? 1.0);
+            if ($pesoUnidad <= 0) {
+                $pesoUnidad = 1.0;
+            }
+            $pesoTotalKg += $pesoUnidad * max(0, (int) ($item['cantidad'] ?? 0));
         }
 
         $destZip = $addressData['codigo_postal'] ?? '';
@@ -35,7 +42,7 @@ class ShippingCalculationService
             }
         }
 
-        $originZip = '15401'; 
+        $originZip = '15401';
         $costoEnvio = $this->shippoService->getShippingRate($originZip, $destZip, $pesoTotalKg);
 
         session(['checkout_shipping_cost' => $costoEnvio]);
@@ -43,18 +50,18 @@ class ShippingCalculationService
         return [
             'costo' => $costoEnvio,
             'peso_total' => $pesoTotalKg,
-            'courier' => 'Shippo'
+            'courier' => 'Shippo',
         ];
     }
 
     public function validateAddress(array $data): array
     {
         $addressData = [
-            'name' => $data['nombres'] . ' ' . $data['apellidos'],
+            'name' => $data['nombres'].' '.$data['apellidos'],
             'street1' => $data['direccion'],
             'city' => $data['provincia'] ?? 'Lima',
             'state' => $data['departamento'] ?? 'LMA',
-            'country' => 'PE'
+            'country' => 'PE',
         ];
 
         return $this->shippoService->validateAddress($addressData);

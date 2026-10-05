@@ -3,8 +3,7 @@
 namespace App\Services;
 
 use App\Models\Producto;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class ProductService
 {
@@ -34,6 +33,7 @@ class ProductService
         if ($product) {
             $product->update($data);
         }
+
         return $product;
     }
 
@@ -46,16 +46,17 @@ class ProductService
         if ($product) {
             return $product->delete();
         }
+
         return false;
     }
 
     /**
-     * Search products using Laravel Scout.
+     * Search the catalog without depending on an unconfigured Scout driver.
      */
-    public function search(string $query, int $perPage = 20): Builder
+    public function search(string $query, int $perPage = 20): LengthAwarePaginator
     {
-        // Assuming Producto uses the Searchable trait
-        return Producto::search($query)->query()->paginate($perPage);
+        return Producto::query()->where('activo', true)
+            ->where(fn ($q) => $q->where('nombre', 'like', '%'.$query.'%')->orWhere('sku_base', 'like', '%'.$query.'%'))
+            ->orderBy('nombre')->paginate(max(1, min($perPage, 100)));
     }
 }
-?>

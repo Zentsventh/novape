@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services\Admin\Settings;
 
-use App\Models\ConfiguracionSitio;
-use App\Models\Rol;
-use App\Models\Permiso;
 use App\Models\ActividadLog;
+use App\Models\ConfiguracionSitio;
+use App\Models\Permiso;
+use App\Models\Rol;
+use App\Services\Admin\Roles\RolePermissionService;
 use Illuminate\Database\Eloquent\Collection;
 
 class SystemConfigurationService
@@ -19,7 +20,7 @@ class SystemConfigurationService
 
     public function updateSettings(array $data): void
     {
-        if (!empty($data['logo_url'])) {
+        if (! empty($data['logo_url'])) {
             ConfiguracionSitio::establecer('logo_url', $data['logo_url']);
         }
         ConfiguracionSitio::establecer('nombre_sitio', $data['nombre_sitio']);
@@ -56,7 +57,7 @@ class SystemConfigurationService
     public function syncRolePermissions(array $data): void
     {
         $rol = Rol::findOrFail($data['rol_id']);
-        
+
         if ($rol->nombre === 'admin') {
             $permisosRequeridos = Permiso::pluck('id')->toArray();
             $rol->permisos()->sync($permisosRequeridos);
@@ -71,7 +72,7 @@ class SystemConfigurationService
     {
         $rol = Rol::create([
             'nombre' => strtolower($data['nombre']),
-            'descripcion' => $data['descripcion'] ?? null
+            'descripcion' => $data['descripcion'] ?? null,
         ]);
 
         ActividadLog::log('Creó un nuevo rol', 'rol', $rol->id, $rol->toArray());
@@ -80,14 +81,7 @@ class SystemConfigurationService
     public function deleteRole(int $id): void
     {
         $rol = Rol::findOrFail($id);
-
-        if ($rol->nombre === 'admin') {
-            throw new \Exception('No puedes eliminar el rol de Administrador.');
-        }
-
-        $rol->permisos()->detach();
-        $rol->delete();
-
+        app(RolePermissionService::class)->deleteRole($rol);
         ActividadLog::log('Eliminó un rol', 'rol', $id);
     }
 }

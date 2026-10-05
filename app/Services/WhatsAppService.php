@@ -8,14 +8,16 @@ use Illuminate\Support\Facades\Log;
 class WhatsAppService
 {
     protected $apiUrl;
+
     protected $apiKey;
+
     protected $sessionName;
 
     public function __construct()
     {
-        $this->apiUrl = rtrim(env('OPENWA_API_URL', 'http://localhost:2785'), '/');
-        $this->apiKey = env('OPENWA_API_KEY', '');
-        $this->sessionName = env('OPENWA_SESSION_NAME', 'default');
+        $this->apiUrl = rtrim(config('services.openwa.url', ''), '/');
+        $this->apiKey = config('services.openwa.key', '');
+        $this->sessionName = config('services.openwa.session', 'default');
     }
 
     /**
@@ -27,13 +29,13 @@ class WhatsAppService
         try {
             $response = Http::withHeaders([
                 'X-API-Key' => $this->apiKey,
-                'Accept' => 'application/json'
-            ])->get("{$this->apiUrl}/api/sessions");
+                'Accept' => 'application/json',
+            ])->connectTimeout(5)->timeout(15)->get("{$this->apiUrl}/api/sessions");
 
             if ($response->successful()) {
                 $sessions = $response->json();
 
-                if (!is_iterable($sessions)) {
+                if (! is_iterable($sessions)) {
                     return null;
                 }
 
@@ -44,7 +46,7 @@ class WhatsAppService
                 }
             }
         } catch (\Exception $e) {
-            Log::warning("No se pudo obtener el ID de sesión OpenWA: " . $e->getMessage());
+            Log::warning('No se pudo obtener el ID de sesión OpenWA: '.$e->getMessage());
         }
 
         // Fallback: usar el nombre directamente
@@ -54,27 +56,31 @@ class WhatsAppService
     /**
      * Envía un mensaje de texto vía OpenWA.
      *
-     * @param string $phone El número telefónico destino (Ej: 51999999999)
-     * @param string $message El mensaje a enviar
+     * @param  string  $phone  El número telefónico destino (Ej: 51999999999)
+     * @param  string  $message  El mensaje a enviar
      * @return bool True si se envió correctamente, False en caso de error
      */
     public function sendText(string $phone, string $message): bool
     {
         if (empty($this->apiUrl)) {
             Log::warning('OpenWA: URL no configurada, se omitió el mensaje de WhatsApp.');
+
             return false;
         }
 
         // Limpiar el número de teléfono para que solo tenga dígitos
         $cleanPhone = preg_replace('/[^0-9]/', '', $phone);
+        if (! preg_match('/^\d{9,15}$/', $cleanPhone)) {
+            return false;
+        }
 
         // Asegurar que el número tenga código de país (51 para Perú)
         if (strlen($cleanPhone) <= 9) {
-            $cleanPhone = '51' . $cleanPhone;
+            $cleanPhone = '51'.$cleanPhone;
         }
 
         // Formato requerido por OpenWA/Baileys (@c.us para contactos)
-        $chatId = $cleanPhone . '@c.us';
+        $chatId = $cleanPhone.'@c.us';
 
         // Obtener el ID de sesión
         $sessionId = $this->getSessionId();
@@ -84,22 +90,25 @@ class WhatsAppService
             $response = Http::withHeaders([
                 'X-API-Key' => $this->apiKey,
                 'Content-Type' => 'application/json',
-                'Accept' => 'application/json'
-            ])->post("{$this->apiUrl}/api/sessions/{$sessionId}/messages/send-text", [
+                'Accept' => 'application/json',
+            ])->connectTimeout(5)->timeout(15)->post("{$this->apiUrl}/api/sessions/{$sessionId}/messages/send-text", [
                 'chatId' => $chatId,
-                'text' => $message
+                'text' => $message,
             ]);
 
             if ($response->successful()) {
                 Log::info("WhatsApp enviado exitosamente a {$cleanPhone}.");
+
                 return true;
             }
 
-            Log::error("Fallo al enviar WhatsApp a {$cleanPhone}. Status: {$response->status()} Respuesta: " . $response->body());
+            Log::error("Fallo al enviar WhatsApp a {$cleanPhone}. Status: {$response->status()} Respuesta: ".$response->body());
+
             return false;
 
         } catch (\Exception $e) {
-            Log::error("Excepción al intentar enviar WhatsApp a {$cleanPhone}: " . $e->getMessage());
+            Log::error("Excepción al intentar enviar WhatsApp a {$cleanPhone}: ".$e->getMessage());
+
             return false;
         }
     }

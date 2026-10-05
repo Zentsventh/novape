@@ -5,7 +5,7 @@ import PageTransition from '@/Components/Animations/PageTransition';
 import {
     LayoutDashboard, MonitorSmartphone, ShoppingCart, Package,
     CreditCard, Wallet, Archive, Image, Users, Truck,
-    UserCog, Shield, Star, Settings, LogOut, Menu, X, Bell, Eye, Grid, Briefcase, Mail, ShieldAlert, DollarSign, Building, Zap, Tags, Map, Ticket
+    UserCog, Shield, Star, Settings, LogOut, Menu, X, Bell, Eye, Grid, Briefcase, Mail, ShieldAlert, DollarSign, Building, Zap, Tags, Map, Ticket, TrendingUp
 } from 'lucide-react';
 import { useDeviceContext } from '@/Contexts/DeviceContext';
 import '../../css/admin/admin.css';
@@ -31,25 +31,31 @@ export default function AdminLayout({ children, logoUrl }) {
             title: 'Métricas',
             items: [
                 { href: '/admin', label: 'Panel Principal', exact: true, permission: 'ver_dashboard', icon: <LayoutDashboard size={20} /> },
-                { href: '/admin/analiticas', label: 'Reportes y Analíticas', exact: true, permission: 'ver_dashboard', icon: <Grid size={20} /> },
+                { href: '/admin/analiticas', label: 'Reportes y Analíticas', exact: true, permission: 'ver_analiticas', icon: <Grid size={20} /> },
             ]
         },
         {
             title: 'Ventas y CRM',
             items: [
                 { href: '/admin/pos', label: 'Punto de Venta', permission: 'pos.vender', icon: <MonitorSmartphone size={20} /> },
-                { href: '/admin/pedidos', label: 'Pedidos', permission: 'pos.vender', icon: <ShoppingCart size={20} /> },
-                { href: '/admin/rma', label: 'Garantías y Cambios', permission: 'pos.vender', icon: <ShieldAlert size={20} /> },
+                { href: '/admin/pedidos', label: 'Pedidos', permission: 'ver_pedidos', icon: <ShoppingCart size={20} /> },
+                { href: '/admin/rma', label: 'Garantías y Cambios', permission: 'editar_pedido', icon: <ShieldAlert size={20} /> },
+                { href: '/admin/clientes', label: 'Clientes', permission: 'ver_usuarios', icon: <Users size={20} /> },
+                { href: '/admin/crm/dashboard', label: 'Resumen CRM', permission: 'crm.gestionar', icon: <Briefcase size={20} /> },
+                { href: '/admin/crm/pipeline', label: 'Oportunidades CRM', permission: 'crm.gestionar', icon: <TrendingUp size={20} /> },
                 { href: '/admin/inbox', label: 'Bandeja CRM', permission: 'gestionar_omnichannel', icon: <Briefcase size={20} /> },
             ]
         },
         {
             title: 'Catálogo y Logística',
             items: [
-                { href: '/admin/products', label: 'Productos', permission: 'inventario.gestionar', icon: <Package size={20} /> },
+                { href: '/admin/products', label: 'Productos', permission: 'ver_productos', icon: <Package size={20} /> },
+                { href: '/admin/categorias', label: 'Categorías', permission: 'gestionar_categorias', icon: <Tags size={20} /> },
+                { href: '/admin/marcas', label: 'Marcas', permission: 'gestionar_marcas', icon: <Tags size={20} /> },
+                { href: '/admin/compras', label: 'Compras', permission: 'inventario.gestionar', icon: <ShoppingCart size={20} /> },
                 { href: '/admin/inventario', label: 'Inventario', permission: 'inventario.gestionar', icon: <LayoutDashboard size={20} /> },
                 { href: '/admin/almacenes', label: 'Almacenes', permission: 'inventario.gestionar', icon: <Archive size={20} /> },
-                { href: '/admin/zonas', label: 'Zonas de Envío', permission: 'usuarios.gestionar', icon: <Map size={20} /> },
+                { href: '/admin/zonas', label: 'Zonas de Envío', permission: 'gestionar_ajustes', icon: <Map size={20} /> },
             ]
         },
         {
@@ -57,23 +63,25 @@ export default function AdminLayout({ children, logoUrl }) {
             items: [
                 { href: '/admin/compras', label: 'Compras', permission: 'inventario.gestionar', icon: <CreditCard size={20} /> },
                 { href: '/admin/proveedores', label: 'Proveedores', permission: 'inventario.gestionar', icon: <Truck size={20} /> },
-                { href: '/admin/gastos', label: 'Gastos', permission: 'reportes.ver', icon: <Wallet size={20} /> },
+                { href: '/admin/gastos', label: 'Gastos', permission: 'finanzas.gestionar', icon: <Wallet size={20} /> },
             ]
         },
         {
             title: 'Marketing y Tienda',
             items: [
                 { href: '/admin/cupones', label: 'Cupones', permission: 'gestionar_cupones', icon: <Ticket size={20} /> },
-                { href: '/admin/banners', label: 'Banners Web', permission: 'usuarios.gestionar', icon: <Image size={20} /> },
+                { href: '/admin/banners', label: 'Banners Web', permission: 'gestionar_ajustes', icon: <Image size={20} /> },
+                { href: '/admin/marketing/campaigns', label: 'Campañas', permission: 'marketing.gestionar', icon: <Mail size={20} /> },
             ]
         },
         {
             title: 'Sistema',
             items: [
-                { href: '/admin/trabajadores', label: 'Usuarios', permission: 'usuarios.gestionar', icon: <Users size={20} /> },
+                { href: '/admin/trabajadores', label: 'Trabajadores', permission: 'ver_usuarios', icon: <Users size={20} /> },
                 { href: '/admin/roles', label: 'Roles y Permisos', permission: 'usuarios.gestionar', icon: <Shield size={20} /> },
-                { href: '/admin/ajustes', label: 'Configuración', permission: 'usuarios.gestionar', icon: <Settings size={20} /> },
-                { href: '/admin/audit-logs', label: 'Registro Auditoría', permission: 'ver_dashboard', icon: <ShieldAlert size={20} /> },
+                { href: '/admin/ajustes', label: 'Configuración', permission: 'gestionar_ajustes', icon: <Settings size={20} /> },
+                { href: '/admin/metodos-pago', label: 'Métodos de pago', permission: 'gestionar_ajustes', icon: <CreditCard size={20} /> },
+                { href: '/admin/audit-logs', label: 'Registro Auditoría', permission: 'gestionar_ajustes', icon: <ShieldAlert size={20} /> },
             ]
         }
     ];
@@ -99,16 +107,17 @@ export default function AdminLayout({ children, logoUrl }) {
     const [showSearchDropdown, setShowSearchDropdown] = useState(false);
 
     useEffect(() => {
-        if (globalSearchQuery.length > 2) {
+        if (globalSearchQuery.length > 2 && hasPerm('ver_dashboard')) {
             setIsSearching(true);
             const timer = setTimeout(() => {
-                fetch(`/admin/global-search?q=${globalSearchQuery}`)
-                    .then(res => res.json())
+                fetch(`/admin/buscar?q=${encodeURIComponent(globalSearchQuery)}`)
+                    .then(res => { if (!res.ok) throw new Error('No se pudo buscar'); return res.json(); })
                     .then(data => {
                         setGlobalSearchResults(data);
                         setShowSearchDropdown(true);
                         setIsSearching(false);
-                    });
+                    })
+                    .catch(() => { setGlobalSearchResults(null); setShowSearchDropdown(false); setIsSearching(false); });
             }, 300);
             return () => clearTimeout(timer);
         } else {

@@ -5,9 +5,13 @@ import { ArrowLeft, Check, X, Box, FileText, AlertTriangle, MessageSquare } from
 
 
 export default function RmaShow({ rma }) {
-    const { auth } = usePage().props;
+    const { auth, errors = {} } = usePage().props;
     const [adminNotes, setAdminNotes] = useState(rma.admin_notes || '');
     const [status, setStatus] = useState(rma.status);
+    const allowedStatuses = [rma.status, ...({
+        pending: ['approved', 'rejected'], approved: ['received', 'rejected'],
+        received: ['processed'], processed: [], rejected: [],
+    }[rma.status] || [])];
 
     const getStatusStyle = (s) => {
         switch (s) {
@@ -145,11 +149,11 @@ export default function RmaShow({ rma }) {
                                         onChange={(e) => setStatus(e.target.value)}
                                         style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none' }}
                                     >
-                                        <option value="pending">Pendiente</option>
-                                        <option value="approved">Aprobado (Esperando envío del cliente)</option>
-                                        <option value="received">En Revisión Técnica (Recibido)</option>
-                                        <option value="processed">Procesado/Completado</option>
-                                        <option value="rejected">Rechazado</option>
+                                        <option value="pending" disabled={!allowedStatuses.includes('pending')}>Pendiente</option>
+                                        <option value="approved" disabled={!allowedStatuses.includes('approved')}>Aprobado (Esperando envío del cliente)</option>
+                                        <option value="received" disabled={!allowedStatuses.includes('received')}>En Revisión Técnica (Recibido)</option>
+                                        <option value="processed" disabled={!allowedStatuses.includes('processed')}>Procesado/Completado</option>
+                                        <option value="rejected" disabled={!allowedStatuses.includes('rejected')}>Rechazado</option>
                                     </select>
                                 </div>
 
@@ -166,6 +170,7 @@ export default function RmaShow({ rma }) {
                                     />
                                 </div>
 
+                                {errors.status && <p role="alert" style={{ color: '#dc2626' }}>{errors.status}</p>}
                                 <button type="submit" style={{ width: '100%', padding: '12px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                                     <Check size={18} />
                                     Guardar Resolución

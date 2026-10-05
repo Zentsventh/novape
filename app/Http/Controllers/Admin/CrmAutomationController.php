@@ -16,7 +16,7 @@ class CrmAutomationController extends Controller
         $automations = CrmAutomation::orderBy('created_at', 'desc')->get();
 
         return Inertia::render('Admin/CRM/Automations/Index', [
-            'automations' => $automations
+            'automations' => $automations,
         ]);
     }
 
@@ -24,10 +24,16 @@ class CrmAutomationController extends Controller
     {
         $validated = $request->validate([
             'nombre' => 'required|string|max:255',
-            'trigger_type' => 'required|string|max:50',
+            'trigger_type' => 'required|in:deal_created,deal_moved,deal_won,deal_lost,company_created',
             'condiciones' => 'nullable|array',
-            'acciones' => 'required|array',
-            'activo' => 'boolean'
+            'condiciones.*.field' => 'required|string|max:100',
+            'condiciones.*.operator' => 'required|in:==,!=,>,<,>=,<=,contains',
+            'condiciones.*.value' => 'present',
+            'acciones' => 'required|array|min:1|max:20',
+            'acciones.*.type' => 'required|in:webhook,send_email,send_coupon,create_task',
+            'acciones.*.url' => 'required_if:acciones.*.type,webhook|url:http,https|max:2000',
+            'acciones.*.message' => 'required_if:acciones.*.type,send_email,send_coupon,create_task|string|max:10000',
+            'activo' => 'boolean',
         ]);
 
         CrmAutomation::create($validated);
@@ -38,6 +44,7 @@ class CrmAutomationController extends Controller
     public function destroy(int $id)
     {
         CrmAutomation::findOrFail($id)->delete();
+
         return redirect()->back()->with('success', 'Automatización eliminada.');
     }
 }

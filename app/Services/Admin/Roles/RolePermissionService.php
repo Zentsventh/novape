@@ -5,19 +5,20 @@ declare(strict_types=1);
 namespace App\Services\Admin\Roles;
 
 use App\Models\Rol;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class RolePermissionService
 {
     public function getRoles(array $filters): LengthAwarePaginator
     {
         $query = Rol::withCount('usuarios');
-        
-        if (!empty($filters['buscar'])) {
+
+        if (! empty($filters['buscar'])) {
             $buscar = $filters['buscar'];
             $query->where('nombre', 'like', "%{$buscar}%")
-                  ->orWhere('descripcion', 'like', "%{$buscar}%");
+                ->orWhere('descripcion', 'like', "%{$buscar}%");
         }
 
         return $query->paginate(12);
@@ -31,7 +32,7 @@ class RolePermissionService
                 'descripcion' => $data['descripcion'],
             ]);
 
-            if (!empty($data['permisos'])) {
+            if (! empty($data['permisos'])) {
                 $rol->permisos()->attach($data['permisos']);
             }
 
@@ -41,6 +42,10 @@ class RolePermissionService
 
     public function updateRole(Rol $rol, array $data): Rol
     {
+        if (in_array($rol->nombre, ['admin', 'cliente', 'cajero', 'almacen'], true) && strtolower($data['nombre']) !== $rol->nombre) {
+            throw ValidationException::withMessages(['nombre' => 'No se puede renombrar un rol base.']);
+        }
+
         return DB::transaction(function () use ($rol, $data) {
             $rol->update([
                 'nombre' => strtolower($data['nombre']),
@@ -55,6 +60,9 @@ class RolePermissionService
 
     public function deleteRole(Rol $rol): void
     {
+        if ($rol->nombre === 'cliente' || $rol->usuarios()->exists()) {
+            throw ValidationException::withMessages(['rol' => 'No se puede eliminar un rol base o asignado a usuarios.']);
+        }
         if (in_array($rol->nombre, ['admin', 'cajero', 'almacen'])) {
             throw new \Exception('No se pueden eliminar los roles base del sistema.');
         }

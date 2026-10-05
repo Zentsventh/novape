@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CrmDealProduct extends Model
 {
@@ -14,15 +15,15 @@ class CrmDealProduct extends Model
         'cantidad',
         'precio_unitario',
         'descuento',
-        'subtotal'
+        'subtotal',
     ];
 
-    public function deal()
+    public function deal(): BelongsTo
     {
         return $this->belongsTo(CrmDeal::class, 'crm_deal_id');
     }
 
-    public function producto()
+    public function producto(): BelongsTo
     {
         return $this->belongsTo(Producto::class, 'producto_id');
     }

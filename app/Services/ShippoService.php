@@ -8,11 +8,12 @@ use Illuminate\Support\Facades\Log;
 class ShippoService
 {
     protected $baseUrl = 'https://api.goshippo.com';
+
     protected $apiToken;
 
     public function __construct()
     {
-        $this->apiToken = env('SHIPPO_API_KEY', 'shippo_test_...');
+        $this->apiToken = config('services.shippo.key');
     }
 
     /**
@@ -20,7 +21,7 @@ class ShippoService
      */
     public function getShippingRate($originZip, $destZip, $weightInKg)
     {
-        if (strpos($this->apiToken, 'shippo_test_') === false) {
+        if (! $this->apiToken || $this->apiToken === 'shippo_test_...') {
             // Si la key no es válida o falta, usar mock
             return $this->mockRate($originZip, $destZip, $weightInKg);
         }
@@ -29,7 +30,7 @@ class ShippoService
             // Shippo requiere un Shipment para cotizar tarifas en vivo
             $response = Http::withHeaders([
                 'Authorization' => "ShippoToken {$this->apiToken}",
-                'Content-Type' => 'application/json'
+                'Content-Type' => 'application/json',
             ])->post("{$this->baseUrl}/shipments/", [
                 'address_from' => [
                     'name' => 'Almacén Novape',
@@ -37,7 +38,7 @@ class ShippoService
                     'city' => 'Lima',
                     'state' => 'LMA',
                     'zip' => $originZip,
-                    'country' => 'PE'
+                    'country' => 'PE',
                 ],
                 'address_to' => [
                     'name' => 'Cliente',
@@ -45,7 +46,7 @@ class ShippoService
                     'city' => 'Lima', // Simplificado
                     'state' => 'LMA',
                     'zip' => $destZip,
-                    'country' => 'PE'
+                    'country' => 'PE',
                 ],
                 'parcels' => [
                     [
@@ -54,26 +55,27 @@ class ShippoService
                         'height' => '10',
                         'distance_unit' => 'in',
                         'weight' => (string) max(1, $weightInKg),
-                        'mass_unit' => 'kg' // Shippo soporta lb, kg, oz, g
-                    ]
+                        'mass_unit' => 'kg', // Shippo soporta lb, kg, oz, g
+                    ],
                 ],
-                'async' => false
+                'async' => false,
             ]);
 
             if ($response->successful()) {
                 $rates = $response->json('rates');
-                if (!empty($rates)) {
+                if (! empty($rates)) {
                     // Tomamos la tarifa más barata por defecto
                     return (float) $rates[0]['amount'];
                 }
             } else {
-                Log::error('Error cotizando con Shippo API: ' . $response->body());
+                Log::error('Error cotizando con Shippo API: '.$response->body());
             }
 
             return $this->mockRate($originZip, $destZip, $weightInKg);
 
         } catch (\Exception $e) {
-            Log::error('Excepción cotizando Shippo: ' . $e->getMessage());
+            Log::error('Excepción cotizando Shippo: '.$e->getMessage());
+
             return $this->mockRate($originZip, $destZip, $weightInKg);
         }
     }
@@ -98,7 +100,7 @@ class ShippoService
         try {
             $response = Http::withHeaders([
                 'Authorization' => "ShippoToken {$this->apiToken}",
-                'Content-Type' => 'application/json'
+                'Content-Type' => 'application/json',
             ])->post("{$this->baseUrl}/addresses/", [
                 'name' => $addressData['name'] ?? 'Cliente',
                 'street1' => $addressData['street1'],
@@ -106,7 +108,7 @@ class ShippoService
                 'state' => $addressData['state'] ?? 'LMA',
                 'zip' => $addressData['zip'] ?? '15001',
                 'country' => $addressData['country'] ?? 'PE',
-                'validate' => true
+                'validate' => true,
             ]);
 
             if ($response->successful()) {
@@ -115,17 +117,19 @@ class ShippoService
                 if ($validation) {
                     return [
                         'is_valid' => $validation['is_valid'] ?? true,
-                        'messages' => $validation['messages'] ?? []
+                        'messages' => $validation['messages'] ?? [],
                     ];
                 }
             }
+
             return ['is_valid' => true, 'messages' => []]; // Permitir si falla la API
         } catch (\Exception $e) {
-            Log::error("Error validando dirección con Shippo: " . $e->getMessage());
+            Log::error('Error validando dirección con Shippo: '.$e->getMessage());
+
             // En caso de error de conexión o API, permitimos que el proceso siga adelante sin bloquear al usuario.
             return [
                 'is_valid' => true,
-                'messages' => []
+                'messages' => [],
             ];
         }
     }
@@ -145,10 +149,12 @@ class ShippoService
                 return $response->json();
             }
 
-            Log::error("Shippo Tracking API Error: " . $response->body());
+            Log::error('Shippo Tracking API Error: '.$response->body());
+
             return null;
         } catch (\Exception $e) {
-            Log::error("Error rastreando paquete con Shippo: " . $e->getMessage());
+            Log::error('Error rastreando paquete con Shippo: '.$e->getMessage());
+
             return null;
         }
     }

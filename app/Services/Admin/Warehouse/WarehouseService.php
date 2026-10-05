@@ -62,6 +62,9 @@ class WarehouseService
 
     public function deleteWarehouse(int $id): void
     {
+        if (DB::table('movimientos_almacen')->where('almacen_id', $id)->orWhere('almacen_destino_id', $id)->exists()) {
+            throw new \InvalidArgumentException('No se puede eliminar un almacén con movimientos históricos.');
+        }
         $stock = DB::table('stock_almacen')->where('almacen_id', $id)->sum('cantidad');
         if ($stock > 0) {
             throw new \Exception('No puedes eliminar un almacén con stock. Transfiere los productos primero.');
@@ -77,7 +80,7 @@ class WarehouseService
     public function getKardex(int $id)
     {
         $almacen = DB::table('almacenes')->where('id', $id)->first();
-        if (!$almacen) {
+        if (! $almacen) {
             return null;
         }
 
@@ -101,14 +104,21 @@ class WarehouseService
     public function transferStock(array $data, int $userId): void
     {
         DB::transaction(function () use ($data, $userId) {
+            if ($data['almacen_origen_id'] == $data['almacen_destino_id'] || (int) $data['cantidad'] < 1) {
+                throw new \InvalidArgumentException('La transferencia requiere almacenes distintos y una cantidad positiva.');
+            }
+            $variante = DB::table('variante')->where('id', $data['variante_id'])->whereNull('deleted_at')->lockForUpdate()->first();
+            if (! $variante) {
+                throw new \InvalidArgumentException('La variante no está disponible.');
+            }
             $stockOrigen = DB::table('stock_almacen')
                 ->where('almacen_id', $data['almacen_origen_id'])
                 ->where('variante_id', $data['variante_id'])
                 ->lockForUpdate()
                 ->first();
 
-            if (!$stockOrigen || $stockOrigen->cantidad < $data['cantidad']) {
-                throw new \Exception("Stock insuficiente en el almacén de origen.");
+            if (! $stockOrigen || $stockOrigen->cantidad < $data['cantidad']) {
+                throw new \Exception('Stock insuficiente en el almacén de origen.');
             }
 
             DB::table('stock_almacen')->where('id', $stockOrigen->id)->decrement('cantidad', $data['cantidad']);
@@ -148,7 +158,7 @@ class WarehouseService
                 'variante_id' => $data['variante_id'],
                 'tipo' => 'entrada',
                 'cantidad' => $data['cantidad'],
-                'referencia' => 'Transferencia desde almacén ID: ' . $data['almacen_origen_id'] . ' - ' . ($data['referencia'] ?? ''),
+                'referencia' => 'Transferencia desde almacén ID: '.$data['almacen_origen_id'].' - '.($data['referencia'] ?? ''),
                 'usuario_id' => $userId,
                 'created_at' => now(),
                 'updated_at' => now(),

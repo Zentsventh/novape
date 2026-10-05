@@ -181,7 +181,7 @@
         <div class="footer">
             <div class="footer-thanks">¡Gracias por tu compra en NOVAPE!</div>
             <div class="footer-text">
-                Este documento es una representación impresa de un comprobante electrónico.<br>
+                Registro interno de venta. La emisión electrónica debe confirmarse con el proveedor de facturación.<br>
                 {{ $empresa['direccion'] }} | {{ $empresa['telefono'] }} | {{ $empresa['email'] }}<br>
                 {{ $empresa['horario'] }}
             </div>

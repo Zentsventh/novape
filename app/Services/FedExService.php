@@ -2,24 +2,27 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
 
 class FedExService
 {
     protected $baseUrl;
+
     protected $clientId;
+
     protected $clientSecret;
+
     protected $accountNumber;
 
     public function __construct()
     {
         // Sandbox environment by default
-        $this->baseUrl = env('FEDEX_BASE_URL', 'https://apis-sandbox.fedex.com');
-        $this->clientId = env('FEDEX_CLIENT_ID', 'sandbox_client_id');
-        $this->clientSecret = env('FEDEX_CLIENT_SECRET', 'sandbox_client_secret');
-        $this->accountNumber = env('FEDEX_ACCOUNT_NUMBER', 'sandbox_account');
+        $this->baseUrl = config('services.fedex.url');
+        $this->clientId = config('services.fedex.client_id');
+        $this->clientSecret = config('services.fedex.client_secret');
+        $this->accountNumber = config('services.fedex.account');
     }
 
     /**
@@ -39,7 +42,7 @@ class FedExService
                 return $response->json('access_token');
             }
 
-            Log::error('Error autenticando con FedEx: ' . $response->body());
+            Log::error('Error autenticando con FedEx: '.$response->body());
             throw new \Exception('No se pudo autenticar con FedEx.');
         });
     }
@@ -60,46 +63,49 @@ class FedExService
             $response = Http::withToken($token)
                 ->post("{$this->baseUrl}/rate/v1/rates/quotes", [
                     'accountNumber' => [
-                        'value' => $this->accountNumber
+                        'value' => $this->accountNumber,
                     ],
                     'requestedShipment' => [
                         'shipper' => [
                             'address' => [
                                 'postalCode' => $originZip,
-                                'countryCode' => 'PE'
-                            ]
+                                'countryCode' => 'PE',
+                            ],
                         ],
                         'recipient' => [
                             'address' => [
                                 'postalCode' => $destZip,
-                                'countryCode' => 'PE'
-                            ]
+                                'countryCode' => 'PE',
+                            ],
                         ],
                         'pickupType' => 'DROPOFF_AT_FEDEX_LOCATION',
                         'rateRequestType' => [
-                            'ACCOUNT', 'LIST'
+                            'ACCOUNT', 'LIST',
                         ],
                         'requestedPackageLineItems' => [
                             [
                                 'weight' => [
                                     'units' => 'KG',
-                                    'value' => $weightInKg
-                                ]
-                            ]
-                        ]
-                    ]
+                                    'value' => $weightInKg,
+                                ],
+                            ],
+                        ],
+                    ],
                 ]);
 
             if ($response->successful()) {
                 $rateDetails = $response->json('output.rateReplyDetails.0.ratedShipmentDetails.0.totalNetCharge');
+
                 return $rateDetails ?? 15.00; // Fallback
             }
 
-            Log::error('Error cotizando con FedEx API: ' . $response->body());
+            Log::error('Error cotizando con FedEx API: '.$response->body());
+
             return 15.00; // Valor seguro por defecto si falla la API
 
         } catch (\Exception $e) {
-            Log::error('Excepción cotizando FedEx: ' . $e->getMessage());
+            Log::error('Excepción cotizando FedEx: '.$e->getMessage());
+
             return 15.00;
         }
     }
@@ -111,7 +117,7 @@ class FedExService
     {
         // Tarifa base
         $baseRate = 10.00;
-        
+
         // Costo por peso adicional (S/ 2.50 por kg adicional después del 1ro)
         $weightCost = max(0, ceil($weightInKg - 1)) * 2.50;
 

@@ -11,5 +11,7 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
  * Solo usuarios autenticados con guard 'admin' pueden escuchar.
  */
 Broadcast::channel('novape-inbox', function ($admin) {
-    return $admin !== null;
+    return $admin !== null && $admin->estado === 'activo'
+        && $admin->roles()->where('nombre', '!=', 'cliente')->exists()
+        && $admin->tienePermiso('gestionar_omnichannel');
 }, ['guards' => ['admin']]);

@@ -15,12 +15,15 @@ class UpdateBannerRequest extends FormRequest
 
     public function rules(): array
     {
-        if ($this->has('activo') && !$this->has('titulo')) {
-            return [];
+        if ($this->has('activo') && ! $this->has('titulo')) {
+            return ['activo' => 'required|boolean'];
         }
 
         return [
             'titulo' => 'required|string|max:255',
+            'subtitulo' => 'nullable|string|max:255',
+            'enlace_url' => 'nullable|string|max:500',
+            'activo' => 'sometimes|boolean',
             'imagen' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'fecha_inicio' => 'nullable|date',
             'fecha_fin' => 'nullable|date|after_or_equal:fecha_inicio',

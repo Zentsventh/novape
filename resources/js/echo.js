@@ -14,6 +14,6 @@ if (import.meta.env.VITE_REVERB_APP_KEY) {
         wsPort: import.meta.env.VITE_REVERB_PORT ?? 8080,
         wssPort: import.meta.env.VITE_REVERB_PORT ?? 8080,
         forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
-        enabledTransports: ['ws', 'wss'],
+        enabledTransports: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https' ? ['wss'] : ['ws'],
     });
 }

@@ -95,7 +95,7 @@ export default function Dashboard({
                 </h1>
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
                     
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#ffffff', padding: '6px', borderRadius: '8px', border: '1px solid #E2E8F0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
+                    <div className="admin-dashboard-filters" style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#ffffff', padding: '6px', borderRadius: '8px', border: '1px solid #E2E8F0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
                         <div style={{ display: 'flex', alignItems: 'center', padding: '0 8px', gap: '6px' }}>
                             <Calendar size={14} style={{ color: '#94A3B8' }} />
                             <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ border: 'none', background: 'transparent', color: '#1E293B', outline: 'none', fontSize: '13px', fontFamily: 'inherit' }} />
@@ -191,7 +191,7 @@ export default function Dashboard({
                         <div style={{ color: '#64748B', fontSize: '12px', fontWeight: '600', letterSpacing: '0.05em' }}>INGRESOS</div>
                         <div style={{ fontSize: '24px', fontWeight: '800', color: '#1E293B', letterSpacing: '-0.02em', marginTop: '2px' }}>S/ {ventasTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                         <div style={{ fontSize: '12px', color: '#10B981', marginTop: '4px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <TrendingUp size={12} /> +12.5% vs mes anterior
+                            Ventas web y POS del período
                         </div>
                     </div>
                 </div>
@@ -209,7 +209,7 @@ export default function Dashboard({
                         <div style={{ color: '#64748B', fontSize: '12px', fontWeight: '600', letterSpacing: '0.05em' }}>COSTOS</div>
                         <div style={{ fontSize: '24px', fontWeight: '800', color: '#1E293B', letterSpacing: '-0.02em', marginTop: '2px' }}>S/ {costosTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                         <div style={{ fontSize: '12px', color: '#64748B', marginTop: '4px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <ArrowRight size={12} /> +1.2% vs mes anterior
+                            Compras recibidas y gastos registrados
                         </div>
                     </div>
                 </div>
@@ -224,10 +224,10 @@ export default function Dashboard({
                         <Activity size={24} />
                     </div>
                     <div>
-                        <div style={{ color: '#64748B', fontSize: '12px', fontWeight: '600', letterSpacing: '0.05em' }}>GANANCIA NETA</div>
+                        <div style={{ color: '#64748B', fontSize: '12px', fontWeight: '600', letterSpacing: '0.05em' }}>SALDO OPERATIVO</div>
                         <div style={{ fontSize: '24px', fontWeight: '800', color: '#1E293B', letterSpacing: '-0.02em', marginTop: '2px' }}>S/ {gananciaNeta.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                         <div style={{ fontSize: '12px', color: '#10B981', marginTop: '4px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <TrendingUp size={12} /> +18.4% vs mes anterior
+                            Ventas menos compras y gastos
                         </div>
                     </div>
                 </div>
@@ -245,14 +245,14 @@ export default function Dashboard({
                         <div style={{ color: '#64748B', fontSize: '12px', fontWeight: '600', letterSpacing: '0.05em' }}>TOTAL PEDIDOS</div>
                         <div style={{ fontSize: '24px', fontWeight: '800', color: '#1E293B', letterSpacing: '-0.02em', marginTop: '2px' }}>{totalPedidos}</div>
                         <div style={{ fontSize: '12px', color: '#10B981', marginTop: '4px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <TrendingUp size={12} /> +5.0% vs mes anterior
+                            Pedidos del período seleccionado
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* CHAT/GRAFICOS */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 350px', gap: '24px', marginBottom: '24px', alignItems: 'start' }}>
+            <div className="admin-dashboard-split" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 350px', gap: '24px', marginBottom: '24px', alignItems: 'start' }}>
                 {/* Gráfico de Ventas de la Semana */}
                 <div style={{ background: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
@@ -331,7 +331,7 @@ export default function Dashboard({
             </div>
 
             {/* LISTAS/TABLAS RECIENTES */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 350px', gap: '24px', alignItems: 'start' }}>
+            <div className="admin-dashboard-split" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 350px', gap: '24px', alignItems: 'start' }}>
                 {/* Pedidos Recientes */}
                 <div style={{ background: '#ffffff', borderRadius: '12px', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0', overflow: 'hidden' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px 24px 20px 24px' }}>
@@ -418,7 +418,7 @@ export default function Dashboard({
                 {/* Top Productos Más Vendidos */}
                 <div style={{ background: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                        <h2 style={{ fontSize: '16px', fontWeight: '700', color: '#1E293B', margin: 0 }}>Top Productos (POS)</h2>
+                        <h2 style={{ fontSize: '16px', fontWeight: '700', color: '#1E293B', margin: 0 }}>Top Productos (Web y POS)</h2>
                     </div>
                     
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>

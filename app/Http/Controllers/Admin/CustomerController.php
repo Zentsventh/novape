@@ -5,23 +5,29 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Users\StoreCustomerNoteRequest;
 use App\Http\Requests\Admin\Users\StoreCustomerRequest;
 use App\Http\Requests\Admin\Users\UpdateCustomerRequest;
-use App\Http\Requests\Admin\Users\StoreCustomerNoteRequest;
-use App\Services\Admin\Users\UserManagementService;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Illuminate\Support\Facades\DB;
-use App\Models\Usuario;
-use App\Models\Rol;
 use App\Jobs\AgentResearchJob;
+use App\Models\ActividadLog;
+use App\Models\ClienteNota;
+use App\Models\Rol;
+use App\Models\Usuario;
+use App\Services\Admin\Users\UserManagementService;
+use App\Services\GetCustomerProfileService;
+use App\Support\Csv;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class CustomerController extends Controller
 {
-    public function apiProfile(int $id, \App\Services\GetCustomerProfileService $profileService): \Illuminate\Http\JsonResponse
+    public function apiProfile(int $id, GetCustomerProfileService $profileService): JsonResponse
     {
         return response()->json($profileService->execute($id));
     }
+
     public function __construct(
         private readonly UserManagementService $userService
     ) {}
@@ -43,36 +49,37 @@ class CustomerController extends Controller
                 $color = '#eab308';
             }
             $customer->segmento = ['nombre' => $segmento, 'color' => $color];
+
             return $customer;
         });
 
         $customFieldsSchema = DB::table('crm_custom_fields_schema')->where('model_type', 'user')->get();
         $evidenceLedger = DB::table('crm_evidence_ledgers')
-                            ->where('model_type', 'user')
-                            ->where('status', 'pending')
-                            ->get();
+            ->where('model_type', 'user')
+            ->where('status', 'pending')
+            ->get();
 
         return Inertia::render('Admin/Clientes/Index', [
             'clientes' => $clientes,
             'filtros' => $filtros,
             'customFieldsSchema' => $customFieldsSchema,
-            'evidenceLedger' => $evidenceLedger
+            'evidenceLedger' => $evidenceLedger,
         ]);
     }
 
     public function create()
     {
         return Inertia::render('Admin/Clientes/Create', [
-            'roles' => Rol::all()
+            'roles' => Rol::all(),
         ]);
     }
 
     public function store(StoreCustomerRequest $request)
     {
         $user = $this->userService->createUser($request->validated(), false);
-        
+
         // Dispatch the Autonomous Agent to research this new customer
-        AgentResearchJob::dispatch('user', $user->id, $user->nombres . ' ' . $user->apellidos);
+        AgentResearchJob::dispatch('user', $user->id, $user->nombres.' '.$user->apellidos);
 
         return redirect()->route('admin.clientes')->with('success', 'Usuario creado correctamente.');
     }
@@ -81,13 +88,14 @@ class CustomerController extends Controller
     {
         return Inertia::render('Admin/Clientes/Edit', [
             'cliente' => Usuario::with('roles')->findOrFail($id),
-            'roles' => Rol::all()
+            'roles' => Rol::all(),
         ]);
     }
 
     public function update(UpdateCustomerRequest $request, int $id)
     {
         $this->userService->updateUser(Usuario::findOrFail($id), $request->validated(), false);
+
         return redirect()->route('admin.clientes')->with('success', 'Usuario actualizado correctamente.');
     }
 
@@ -95,6 +103,7 @@ class CustomerController extends Controller
     {
         try {
             $this->userService->deleteUser(Usuario::findOrFail($id), auth('admin')->id() ?? 0);
+
             return redirect()->route('admin.clientes')->with('success', 'Usuario movido a la papelera.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
@@ -117,6 +126,7 @@ class CustomerController extends Controller
                     $count++;
                 }
             }
+
             return redirect()->route('admin.clientes')->with('success', "{$count} usuarios movidos a la papelera.");
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
@@ -127,6 +137,7 @@ class CustomerController extends Controller
     {
         try {
             $this->userService->toggleBlockStatus(Usuario::findOrFail($id), auth('admin')->id() ?? 0);
+
             return redirect()->back()->with('success', 'Estado de cuenta actualizado correctamente.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
@@ -136,6 +147,7 @@ class CustomerController extends Controller
     public function resetPassword(int $id)
     {
         $newPassword = $this->userService->resetPassword(Usuario::findOrFail($id));
+
         return redirect()->back()->with('success', "Contraseña restablecida exitosamente. Nueva contraseña: {$newPassword}");
     }
 
@@ -152,7 +164,7 @@ class CustomerController extends Controller
                 $q->orderBy('last_message_at', 'desc');
             },
             'carrito.items.producto',
-            'listas.items.producto'
+            'listas.items.producto',
         ])->findOrFail($id);
 
         $pedidos = $cliente->pedidos()->with(['items.producto'])->orderBy('id', 'desc')->get();
@@ -174,43 +186,39 @@ class CustomerController extends Controller
             $q->whereHas('roles', function ($q2) {
                 $q2->where('nombre', 'cliente');
             })->orWhereDoesntHave('roles');
-        })->withCount('pedidos')->get();
+        })->withCount('pedidos')->lazyById(500);
 
-        $csv = "ID,Nombres,Apellidos,Email,Teléfono,DNI,Estado,Pedidos,Registro\n";
-        foreach ($clientes as $c) {
-            $csv .= implode(',', [
-                $c->id,
-                '"' . $c->nombres . '"',
-                '"' . $c->apellidos . '"',
-                $c->email,
-                $c->telefono,
-                $c->dni,
-                $c->estado,
-                $c->pedidos_count,
-                $c->created_at,
-            ]) . "\n";
-        }
-
-        return response($csv, 200, [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="clientes_' . date('Y-m-d') . '.csv"',
+        $rows = $clientes->map(fn ($c) => [
+            $c->id,
+            $c->nombres,
+            $c->apellidos,
+            $c->email,
+            $c->telefono,
+            $c->dni,
+            $c->estado,
+            $c->pedidos_count,
+            $c->created_at,
         ]);
+
+        return Csv::download(['ID', 'Nombres', 'Apellidos', 'Email', 'Teléfono', 'DNI', 'Estado', 'Pedidos', 'Registro'], $rows, 'clientes_'.date('Y-m-d').'.csv');
     }
 
     public function storeNota(StoreCustomerNoteRequest $request, int $id)
     {
-        \App\Models\ClienteNota::create([
+        ClienteNota::create([
             'cliente_id' => $id,
             'autor_id' => auth('admin')->id(),
             'nota' => $request->nota,
         ]);
-        \App\Models\ActividadLog::log('Añadió una nota al cliente', 'usuario', $id);
+        ActividadLog::log('Añadió una nota al cliente', 'usuario', $id);
+
         return redirect()->back()->with('success', 'Nota añadida correctamente.');
     }
 
     public function destroyNota(int $id, int $notaId)
     {
-        \App\Models\ClienteNota::where('cliente_id', $id)->findOrFail($notaId)->delete();
+        ClienteNota::where('cliente_id', $id)->findOrFail($notaId)->delete();
+
         return redirect()->back()->with('success', 'Nota eliminada correctamente.');
     }
 }

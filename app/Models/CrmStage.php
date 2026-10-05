@@ -6,6 +6,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CrmStage extends Model
 {
@@ -17,15 +19,15 @@ class CrmStage extends Model
         'pipeline_id',
         'nombre',
         'orden',
-        'color'
+        'color',
     ];
 
-    public function pipeline()
+    public function pipeline(): BelongsTo
     {
         return $this->belongsTo(CrmPipeline::class, 'pipeline_id');
     }
 
-    public function deals()
+    public function deals(): HasMany
     {
         return $this->hasMany(CrmDeal::class, 'stage_id');
     }

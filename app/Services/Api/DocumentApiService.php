@@ -11,43 +11,36 @@ class DocumentApiService
 {
     public function consultar(string $tipo, string $numero): array
     {
-        $token = env('API_PERU_TOKEN');
-        $mockData = [
-            'success' => true,
-            'data' => [
-                'numero' => $numero,
-                'nombre_completo' => 'USUARIO DE PRUEBA',
-                'nombres' => 'USUARIO',
-                'apellido_paterno' => 'DE',
-                'apellido_materno' => 'PRUEBA',
-                'direccion_completa' => 'AV. LOS INCAS 123',
-                'nombre_o_razon_social' => 'EMPRESA DE PRUEBA SAC'
-            ]
-        ];
-
-        if (!$token) {
-            return $mockData;
+        if (! in_array($tipo, ['DNI', 'RUC'], true)
+            || ! preg_match($tipo === 'DNI' ? '/^\d{8}$/' : '/^\d{11}$/', $numero)) {
+            return ['success' => false, 'message' => 'Documento inválido.'];
+        }
+        $token = config('services.apiperu.token');
+        $url = config('services.apiperu.document_url');
+        if (! $token || ! $url || $token === 'SIMULACION_TOKEN') {
+            return ['success' => false, 'message' => 'La consulta de documentos no está configurada. Ingrese los datos manualmente.'];
         }
 
         try {
-            $endpoint = $tipo === 'DNI' ? "https://apiperu.dev/api/dni/{$numero}" : "https://apiperu.dev/api/ruc/{$numero}";
-            
+            $endpoint = rtrim($url, '/').'/'.strtolower($tipo).'/'.$numero;
+
             $response = Http::withToken($token)
-                            ->withHeaders(['Accept' => 'application/json'])
-                            ->get($endpoint);
+                ->withHeaders(['Accept' => 'application/json'])
+                ->connectTimeout(5)->timeout(15)->get($endpoint);
 
             if ($response->successful()) {
                 $data = $response->json();
-                if (isset($data['success']) && $data['success'] === true) {
+                if (is_array($data) && ($data['success'] ?? false) === true && is_array($data['data'] ?? null)) {
                     return $data;
                 }
             }
 
-            return $mockData;
+            return ['success' => false, 'message' => 'No se pudo verificar el documento. Ingrese los datos manualmente.'];
 
         } catch (\Exception $e) {
-            Log::error("Error consultando API Perú: " . $e->getMessage());
-            return $mockData;
+            Log::warning('No se pudo consultar el proveedor de documentos.', ['exception' => $e::class]);
+
+            return ['success' => false, 'message' => 'No se pudo verificar el documento. Ingrese los datos manualmente.'];
         }
     }
 }

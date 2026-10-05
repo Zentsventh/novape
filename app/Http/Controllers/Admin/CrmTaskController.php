@@ -3,15 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\CrmActivity;
+use App\Models\CrmDeal;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class CrmTaskController extends Controller
 {
     public function index()
     {
-        $activities = CrmActivity::with(['deal.cliente'])
+        $activities = CrmActivity::with(['deal.cliente', 'empresa'])
             ->orderBy('fecha_vencimiento', 'asc')
             ->get()
             ->map(function ($activity) {
@@ -20,7 +22,7 @@ class CrmTaskController extends Controller
                 if ($activity->completada) {
                     $status = 'completed';
                 } elseif ($activity->fecha_vencimiento) {
-                    $dueDate = \Carbon\Carbon::parse($activity->fecha_vencimiento)->startOfDay();
+                    $dueDate = Carbon::parse($activity->fecha_vencimiento)->startOfDay();
                     $today = now()->startOfDay();
                     if ($dueDate->lt($today)) {
                         $status = 'overdue';
@@ -30,20 +32,22 @@ class CrmTaskController extends Controller
                 }
 
                 $activity->time_status = $status;
+
                 return $activity;
             });
 
-        $deals = \App\Models\CrmDeal::with('cliente')->orderBy('titulo')->get();
+        $deals = CrmDeal::with('cliente')->orderBy('titulo')->get();
 
         return Inertia::render('Admin/CRM/Tasks', [
             'tasks' => $activities,
-            'deals' => $deals
+            'deals' => $deals,
         ]);
     }
 
     public function complete(Request $request, CrmActivity $activity)
     {
-        $activity->completada = $request->input('completado') ? true : false;
+        $request->validate(['completado' => 'required|boolean']);
+        $activity->completada = $request->boolean('completado');
         $activity->save();
 
         return redirect()->back();
@@ -52,7 +56,8 @@ class CrmTaskController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'deal_id' => 'required|exists:crm_deals,id',
+            'deal_id' => 'required_without:empresa_id|nullable|exists:crm_deals,id',
+            'empresa_id' => 'nullable|exists:crm_companies,id',
             'tipo' => 'required|string',
             'contenido' => 'required|string',
             'fecha_vencimiento' => 'nullable|date',
@@ -60,6 +65,7 @@ class CrmTaskController extends Controller
 
         CrmActivity::create([
             'deal_id' => $request->deal_id,
+            'empresa_id' => $request->empresa_id,
             'usuario_id' => auth()->id() ?? 1, // Fallback si auth no está disponible en esta capa
             'tipo' => $request->tipo,
             'contenido' => $request->contenido,
@@ -73,7 +79,8 @@ class CrmTaskController extends Controller
     public function update(Request $request, CrmActivity $activity)
     {
         $request->validate([
-            'deal_id' => 'required|exists:crm_deals,id',
+            'deal_id' => 'required_without:empresa_id|nullable|exists:crm_deals,id',
+            'empresa_id' => 'nullable|exists:crm_companies,id',
             'tipo' => 'required|string',
             'contenido' => 'required|string',
             'fecha_vencimiento' => 'nullable|date',
@@ -81,6 +88,7 @@ class CrmTaskController extends Controller
 
         $activity->update([
             'deal_id' => $request->deal_id,
+            'empresa_id' => $request->empresa_id,
             'tipo' => $request->tipo,
             'contenido' => $request->contenido,
             'fecha_vencimiento' => $request->fecha_vencimiento,
@@ -92,6 +100,7 @@ class CrmTaskController extends Controller
     public function destroy(CrmActivity $activity)
     {
         $activity->delete();
+
         return redirect()->back();
     }
 }

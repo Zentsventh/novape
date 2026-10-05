@@ -16,13 +16,16 @@ class InvoiceController extends Controller
 
     public function generarFacturaPos(int $id)
     {
+        $venta = DB::table('ventas_pos')->where('id', $id)->first();
+        abort_if(! $venta, 404);
+        abort_unless(auth('admin')->user()->esAdmin() || $venta->cajero_id == auth('admin')->id(), 403);
         try {
             $pdfPath = $this->invoiceService->generatePosInvoice($id);
             $pdfName = basename($pdfPath);
 
             return response()->download($pdfPath, $pdfName, [
                 'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'inline; filename="' . $pdfName . '"'
+                'Content-Disposition' => 'inline; filename="'.$pdfName.'"',
             ]);
         } catch (\Exception $e) {
             abort(404, $e->getMessage());
@@ -33,10 +36,10 @@ class InvoiceController extends Controller
     {
         try {
             $pdfPath = $this->invoiceService->getPublicInvoicePath($codigo_ticket);
-            
+
             return response()->file($pdfPath, [
                 'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'inline; filename="' . basename($pdfPath) . '"'
+                'Content-Disposition' => 'inline; filename="'.basename($pdfPath).'"',
             ]);
         } catch (\Exception $e) {
             abort(404, $e->getMessage());

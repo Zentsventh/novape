@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin;
 
+use App\Exports\DashboardExport;
 use App\Http\Controllers\Controller;
+use App\Models\ConfiguracionSitio;
 use App\Services\Admin\Dashboard\AnalyticsService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Models\ConfiguracionSitio;
+use Maatwebsite\Excel\Facades\Excel;
 
 class DashboardController extends Controller
 {
@@ -18,6 +21,14 @@ class DashboardController extends Controller
 
     public function dashboard(Request $request)
     {
+        $request->validate([
+            'start_date' => 'sometimes|required|date_format:Y-m-d',
+            'end_date' => 'sometimes|required|date_format:Y-m-d|after_or_equal:start_date',
+            'sort_order' => 'sometimes|in:asc,desc',
+            'sort_by' => 'sometimes|in:created_at,total,codigo,estado,id',
+            'status' => 'nullable|in:pendiente,pagado,procesando,enviado,completado,cancelado',
+            'q' => 'nullable|string|max:200',
+        ]);
         $startDate = $request->query('start_date', now()->subDays(30)->toDateString());
         $endDate = $request->query('end_date', now()->toDateString());
         $sortOrder = $request->query('sort_order', 'desc');
@@ -35,15 +46,16 @@ class DashboardController extends Controller
                 'sort_order' => $sortOrder,
                 'sort_by' => $sortBy,
                 'status' => $status,
-                'q' => $q
-            ]
+                'q' => $q,
+            ],
         ]));
     }
 
     public function globalSearch(Request $request)
     {
+        $request->validate(['q' => 'nullable|string|max:200']);
         $q = (string) $request->query('q', '');
-        if (!$q) {
+        if (! $q) {
             return response()->json(['productos' => [], 'pedidos' => [], 'usuarios' => []]);
         }
 
@@ -52,6 +64,7 @@ class DashboardController extends Controller
 
     public function exportarPdf(Request $request)
     {
+        $this->validateReportFilters($request);
         $startDate = $request->query('start_date', now()->subDays(30)->toDateString());
         $endDate = $request->query('end_date', now()->toDateString());
         $status = $request->query('status');
@@ -62,20 +75,20 @@ class DashboardController extends Controller
         $logoUrl = ConfiguracionSitio::obtener('logo_url');
         $logoBase64 = null;
         if ($logoUrl) {
-            $logoPath = storage_path('app/public/' . str_replace('public/', '', $logoUrl));
-            if (!file_exists($logoPath)) {
+            $logoPath = storage_path('app/public/'.str_replace('public/', '', $logoUrl));
+            if (! file_exists($logoPath)) {
                 $logoPath = public_path('images/logofactura.png');
             }
             if (file_exists($logoPath)) {
-                $logoBase64 = 'data:' . mime_content_type($logoPath) . ';base64,' . base64_encode(file_get_contents($logoPath));
+                $logoBase64 = 'data:'.mime_content_type($logoPath).';base64,'.base64_encode(file_get_contents($logoPath));
             }
         }
 
         $data = [
             'startDate' => $startDate,
             'endDate' => $endDate,
-            'ventasWeb' => $stats['ventasTotal'] - \Illuminate\Support\Facades\DB::table('ventas_pos')->sum('total'), // Simplified for export view
-            'ventasPos' => \Illuminate\Support\Facades\DB::table('ventas_pos')->sum('total'),
+            'ventasWeb' => $stats['ventasWeb'],
+            'ventasPos' => $stats['ventasPos'],
             'ventasTotal' => $stats['ventasTotal'],
             'costosTotal' => $stats['costosTotal'],
             'gananciaNeta' => $stats['gananciaNeta'],
@@ -83,15 +96,17 @@ class DashboardController extends Controller
             'pedidos' => $stats['pedidosRecientes'],
             'logoBase64' => $logoBase64,
             'stockBajo' => array_slice($this->analyticsService->getLowStock(8), 0, 8),
-            'topProductosVendidos' => $this->analyticsService->getTopProducts($startDate, $endDate)
+            'topProductosVendidos' => $this->analyticsService->getTopProducts($startDate, $endDate),
         ];
 
-        return \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.dashboard', $data)
+        return Pdf::loadView('pdf.dashboard', $data)
             ->setPaper('A4', 'portrait')
-            ->download('reporte_dashboard_' . date('Y-m-d') . '.pdf');
+            ->download('reporte_dashboard_'.date('Y-m-d').'.pdf');
     }
+
     public function exportarExcel(Request $request)
     {
+        $this->validateReportFilters($request);
         $startDate = $request->query('start_date', now()->subDays(30)->toDateString());
         $endDate = $request->query('end_date', now()->toDateString());
         $status = $request->query('status');
@@ -107,12 +122,22 @@ class DashboardController extends Controller
             'gananciaNeta' => $stats['gananciaNeta'],
             'pedidosCount' => $stats['totalPedidos'],
             'pedidos' => $stats['pedidosRecientes'],
-            'topProductosVendidos' => $this->analyticsService->getTopProducts($startDate, $endDate)
+            'topProductosVendidos' => $this->analyticsService->getTopProducts($startDate, $endDate),
         ];
 
-        return \Maatwebsite\Excel\Facades\Excel::download(
-            new \App\Exports\DashboardExport($data), 
-            'reporte_dashboard_' . date('Y-m-d') . '.xlsx'
+        return Excel::download(
+            new DashboardExport($data),
+            'reporte_dashboard_'.date('Y-m-d').'.xlsx'
         );
+    }
+
+    private function validateReportFilters(Request $request): void
+    {
+        $request->validate([
+            'start_date' => 'sometimes|required|date_format:Y-m-d',
+            'end_date' => 'sometimes|required|date_format:Y-m-d|after_or_equal:start_date',
+            'status' => 'nullable|in:pendiente,pagado,procesando,enviado,completado,cancelado',
+            'q' => 'nullable|string|max:200',
+        ]);
     }
 }

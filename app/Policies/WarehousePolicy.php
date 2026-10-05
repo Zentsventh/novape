@@ -1,29 +1,29 @@
 <?php
+
 namespace App\Policies;
 
 use App\Domain\Inventory\Entities\Warehouse;
-use App\Models\User;
+use App\Models\Usuario;
 
 class WarehousePolicy
 {
-    public function view(User $user, Warehouse $warehouse): bool
+    public function view(Usuario $user, Warehouse $warehouse): bool
     {
-        return $user->hasPermissionTo('inventory.warehouse.view');
+        return $user->estado === 'activo' && $user->tienePermiso('inventario.gestionar');
     }
 
-    public function create(User $user): bool
+    public function create(Usuario $user): bool
     {
-        return $user->hasPermissionTo('inventory.warehouse.create');
+        return $user->estado === 'activo' && $user->tienePermiso('inventario.gestionar');
     }
 
-    public function update(User $user, Warehouse $warehouse): bool
+    public function update(Usuario $user, Warehouse $warehouse): bool
     {
-        return $user->hasPermissionTo('inventory.warehouse.edit');
+        return $user->estado === 'activo' && $user->tienePermiso('inventario.gestionar');
     }
 
-    public function delete(User $user, Warehouse $warehouse): bool
+    public function delete(Usuario $user, Warehouse $warehouse): bool
     {
-        return $user->hasPermissionTo('inventory.warehouse.delete');
+        return $user->estado === 'activo' && $user->tienePermiso('inventario.gestionar');
     }
 }
-?>

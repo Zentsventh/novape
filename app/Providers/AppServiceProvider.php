@@ -4,8 +4,15 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use App\Models\Pedido;
+use App\Observers\PedidoObserver;
+use AzureOss\Storage\Blob\BlobServiceClient;
+use AzureOss\Storage\BlobFlysystem\AzureBlobStorageAdapter;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\ServiceProvider;
+use League\Flysystem\Filesystem;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,25 +30,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Prevent N+1 issues by throwing an exception if lazy loading happens outside production
-        Model::preventLazyLoading(!$this->app->isProduction());
+        Model::preventLazyLoading(! $this->app->isProduction());
 
-        if ($this->app->environment('local') && $this->app->runningInConsole()) {
-            \Illuminate\Support\Facades\Event::listen(\Illuminate\Console\Events\CommandStarting::class, function (\Illuminate\Console\Events\CommandStarting $event) {
-                if ($event->command === 'serve') {
-                    $hotPath = public_path('hot');
-                    if (file_exists($hotPath)) {
-                        @unlink($hotPath);
-                    }
-                }
-            });
-        }
+        Pedido::observe(PedidoObserver::class);
 
-        \App\Models\Pedido::observe(\App\Observers\PedidoObserver::class);
-
-        \Illuminate\Support\Facades\Storage::extend('azure', function ($app, $config) {
-            $client = !empty($config['connection_string'])
-                ? \AzureOss\Storage\Blob\BlobServiceClient::fromConnectionString($config['connection_string'])
-                : \AzureOss\Storage\Blob\BlobServiceClient::fromConnectionString(
+        Storage::extend('azure', function ($app, $config) {
+            $client = ! empty($config['connection_string'])
+                ? BlobServiceClient::fromConnectionString($config['connection_string'])
+                : BlobServiceClient::fromConnectionString(
                     sprintf(
                         'DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s;EndpointSuffix=core.windows.net',
                         (string) ($config['name'] ?? ''),
@@ -50,14 +46,14 @@ class AppServiceProvider extends ServiceProvider
                 );
 
             $containerClient = $client->getContainerClient((string) ($config['container'] ?? 'novape-uploads'));
-            $adapter = new \AzureOss\Storage\BlobFlysystem\AzureBlobStorageAdapter(
+            $adapter = new AzureBlobStorageAdapter(
                 containerClient: $containerClient,
                 prefix: (string) ($config['prefix'] ?? ''),
                 isPublicContainer: (bool) ($config['is_public'] ?? true)
             );
 
-            return new \Illuminate\Filesystem\FilesystemAdapter(
-                new \League\Flysystem\Filesystem($adapter, $config),
+            return new FilesystemAdapter(
+                new Filesystem($adapter, $config),
                 $adapter,
                 $config
             );

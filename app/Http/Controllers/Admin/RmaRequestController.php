@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\RmaStatusUpdateMail;
 use App\Models\RmaRequest;
-use Inertia\Inertia;
+use App\Services\Admin\Warehouse\RmaProcessingService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Inertia\Inertia;
 
 class RmaRequestController extends Controller
 {
@@ -16,7 +20,7 @@ class RmaRequestController extends Controller
             ->paginate(15);
 
         return Inertia::render('Admin/Rma/Index', [
-            'rmas' => $rmas
+            'rmas' => $rmas,
         ]);
     }
 
@@ -26,7 +30,7 @@ class RmaRequestController extends Controller
             ->findOrFail($id);
 
         return Inertia::render('Admin/Rma/Show', [
-            'rma' => $rma
+            'rma' => $rma,
         ]);
     }
 
@@ -37,36 +41,18 @@ class RmaRequestController extends Controller
             'admin_notes' => 'nullable|string',
         ]);
 
-        $rma = RmaRequest::findOrFail($id);
-        
-        $rma->update([
-            'status' => $request->status,
-            'admin_notes' => $request->admin_notes,
-        ]);
-
-        // If processed and it's a return, we can optionally restore inventory
-        if ($request->status === 'processed' && $rma->type === 'return') {
-            // Find the specific item in the order to get the variant
-            $pedido = $rma->pedido()->with('items.variante')->first();
-            if ($pedido) {
-                foreach ($pedido->items as $item) {
-                    // If a specific product was selected, only restore that one
-                    if ($rma->producto_id) {
-                        if ($item->variante && $item->variante->producto_id == $rma->producto_id) {
-                            $item->variante->increment('stock', $item->cantidad);
-                        }
-                    } else {
-                        // Restore all items
-                        if ($item->variante) {
-                            $item->variante->increment('stock', $item->cantidad);
-                        }
-                    }
+        $rma = app(RmaProcessingService::class)->updateStatus(
+            (int) $id, $request->status, $request->admin_notes, (int) auth('admin')->id()
+        );
+        if ($rma->wasChanged('status')) {
+            try {
+                if ($rma->usuario) {
+                    Mail::to($rma->usuario->email)->send(new RmaStatusUpdateMail($rma));
                 }
+            } catch (\Throwable $e) {
+                Log::warning('No se pudo notificar el cambio RMA', ['rma_id' => $rma->id]);
             }
         }
-
-        // Send email notification to user
-        \Illuminate\Support\Facades\Mail::to($rma->usuario->email)->send(new \App\Mail\RmaStatusUpdateMail($rma));
 
         return redirect()->back()->with('success', 'Estado de la solicitud RMA actualizado.');
     }

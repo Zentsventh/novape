@@ -6,10 +6,9 @@ namespace App\Services\Admin\Crm;
 
 use App\Models\CrmDeal;
 use App\Models\CrmStage;
-use App\Models\CrmDealProduct;
-use App\Services\Admin\Crm\TimelineService;
-use App\Services\Admin\Crm\AutomationEngineService;
+use App\Models\Producto;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class CrmPipelineService
 {
@@ -38,14 +37,14 @@ class CrmPipelineService
     {
         DB::transaction(function () use ($deal, $data) {
             // Lock the deal to prevent race conditions when updating stage/status
-            $lockedDeal = CrmDeal::where('id', $deal->id)->lockForUpdate()->first();
-            
+            $lockedDeal = CrmDeal::where('id', $deal->id)->lockForUpdate()->firstOrFail();
+
             $oldStageId = $lockedDeal->stage_id;
             $oldEstado = $lockedDeal->estado;
 
-            $newStageId = (int)$data['stage_id'];
+            $newStageId = (int) $data['stage_id'];
             $lockedDeal->stage_id = $newStageId;
-            
+
             if (isset($data['estado'])) {
                 $lockedDeal->estado = $data['estado'];
             }
@@ -58,21 +57,24 @@ class CrmPipelineService
 
             if ($oldStageId !== $newStageId) {
                 $stage = CrmStage::find($newStageId);
-                TimelineService::log($lockedDeal, 'deal_movido', "Movido a la etapa " . ($stage ? $stage->nombre : ''), [
+                TimelineService::log($lockedDeal, 'deal_movido', 'Movido a la etapa '.($stage ? $stage->nombre : ''), [
                     'from_stage_id' => $oldStageId,
-                    'to_stage_id' => $newStageId
+                    'to_stage_id' => $newStageId,
                 ]);
-                
+
                 AutomationEngineService::trigger('deal_moved', $lockedDeal, [
                     'from_stage_id' => $oldStageId,
-                    'to_stage_id' => $newStageId
+                    'to_stage_id' => $newStageId,
                 ]);
             }
 
             if ($oldEstado !== $lockedDeal->estado) {
+                if (in_array($lockedDeal->estado, ['won', 'lost'], true)) {
+                    AutomationEngineService::trigger('deal_'.$lockedDeal->estado, $lockedDeal);
+                }
                 TimelineService::log($lockedDeal, 'estado_cambiado', "Estado cambiado a {$lockedDeal->estado}", [
                     'from_estado' => $oldEstado,
-                    'to_estado' => $lockedDeal->estado
+                    'to_estado' => $lockedDeal->estado,
                 ]);
             }
 
@@ -91,12 +93,12 @@ class CrmPipelineService
                 'tipo' => $data['tipo'],
                 'contenido' => $data['contenido'],
                 'fecha_vencimiento' => $data['fecha_vencimiento'] ?? null,
-                'completada' => false
+                'completada' => false,
             ]);
 
             TimelineService::log($deal, 'actividad_creada', "Se creó una actividad ({$data['tipo']})", [
                 'activity_id' => $activity->id,
-                'tipo' => $data['tipo']
+                'tipo' => $data['tipo'],
             ]);
 
             return $activity;
@@ -109,10 +111,17 @@ class CrmPipelineService
     public function addProduct(CrmDeal $deal, array $data): void
     {
         DB::transaction(function () use ($deal, $data) {
-            $producto = \App\Models\Producto::findOrFail($data['producto_id']);
-            $cantidad = (int)$data['cantidad'];
-            
-            $precio = $producto->precio_final ?? ($producto->precio ?? 0);
+            $deal = CrmDeal::whereKey($deal->id)->lockForUpdate()->firstOrFail();
+            $producto = Producto::findOrFail($data['producto_id']);
+            $cantidad = (int) $data['cantidad'];
+            if ($cantidad < 1) {
+                throw ValidationException::withMessages(['cantidad' => 'La cantidad debe ser mayor a cero.']);
+            }
+
+            $precio = $producto->variantes()->where('activo', true)->min('precio');
+            if ($precio === null || ! $producto->activo) {
+                throw ValidationException::withMessages(['producto_id' => 'El producto no tiene una variante activa con precio.']);
+            }
             $subtotal = $precio * $cantidad;
 
             $deal->products()->create([
@@ -120,15 +129,15 @@ class CrmPipelineService
                 'cantidad' => $cantidad,
                 'precio_unitario' => $precio,
                 'descuento' => 0,
-                'subtotal' => $subtotal
+                'subtotal' => $subtotal,
             ]);
-            
+
             $this->recalculateDealValue($deal);
 
             TimelineService::log($deal, 'producto_agregado', "Se agregó el producto {$producto->nombre}", [
                 'producto_id' => $producto->id,
                 'cantidad' => $cantidad,
-                'subtotal' => $subtotal
+                'subtotal' => $subtotal,
             ]);
         });
     }
@@ -139,6 +148,7 @@ class CrmPipelineService
     public function removeProduct(CrmDeal $deal, int $productId): void
     {
         DB::transaction(function () use ($deal, $productId) {
+            $deal = CrmDeal::whereKey($deal->id)->lockForUpdate()->firstOrFail();
             $dealProduct = $deal->products()->where('id', $productId)->with('producto')->first();
             $productName = $dealProduct && $dealProduct->producto ? $dealProduct->producto->nombre : 'producto';
 
@@ -146,7 +156,7 @@ class CrmPipelineService
             $this->recalculateDealValue($deal);
 
             TimelineService::log($deal, 'producto_eliminado', "Se eliminó el producto {$productName}", [
-                'product_id' => $productId
+                'product_id' => $productId,
             ]);
         });
     }
@@ -163,7 +173,8 @@ class CrmPipelineService
     public function updateCustomFields(CrmDeal $deal, array $fields): void
     {
         DB::transaction(function () use ($deal, $fields) {
-            $deal->custom_fields = array_merge((array)$deal->custom_fields, $fields);
+            $deal = CrmDeal::whereKey($deal->id)->lockForUpdate()->firstOrFail();
+            $deal->custom_fields = array_merge($deal->custom_fields->toArray(), $fields);
             $deal->save();
 
             TimelineService::log($deal, 'campos_actualizados', 'Campos personalizados actualizados');
@@ -180,7 +191,7 @@ class CrmPipelineService
                 'tipo' => 'tarea',
                 'contenido' => '🤖 Automatización: Generar orden de compra y enviar correo de bienvenida al cliente.',
                 'fecha_vencimiento' => now()->addDay(),
-                'completada' => false
+                'completada' => false,
             ]);
         }
 
@@ -190,7 +201,7 @@ class CrmPipelineService
                 'tipo' => 'tarea',
                 'contenido' => '🤖 Automatización: Enviar encuesta de salida para entender los motivos de pérdida.',
                 'fecha_vencimiento' => now()->addDays(2),
-                'completada' => false
+                'completada' => false,
             ]);
         }
 
@@ -202,7 +213,7 @@ class CrmPipelineService
                     'tipo' => 'tarea',
                     'contenido' => '🤖 Automatización: Llamar al cliente para agendar/preparar demostración.',
                     'fecha_vencimiento' => now()->addDay(),
-                    'completada' => false
+                    'completada' => false,
                 ]);
             }
         }

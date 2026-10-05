@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Crm\StoreCustomFieldRequest;
 use App\Models\CrmCustomFieldSchema;
-use Illuminate\Http\Request;
+use App\Services\Admin\Crm\CrmSettingsService;
 use Inertia\Inertia;
 
 class CrmCustomFieldController extends Controller
@@ -12,23 +13,15 @@ class CrmCustomFieldController extends Controller
     public function index()
     {
         $fields = CrmCustomFieldSchema::orderBy('model_type')->orderBy('name')->get();
+
         return Inertia::render('Admin/CRM/CustomFields/Index', [
-            'fields' => $fields
+            'fields' => $fields,
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreCustomFieldRequest $request)
     {
-        $validated = $request->validate([
-            'model_type' => 'required|in:deal,user',
-            'name' => 'required|string|max:50|regex:/^[a-z0-9_]+$/',
-            'label' => 'required|string|max:100',
-            'type' => 'required|in:text,number,select,boolean,date',
-            'options' => 'nullable|array',
-            'required' => 'boolean',
-        ]);
-
-        CrmCustomFieldSchema::create($validated);
+        app(CrmSettingsService::class)->storeCustomField($request->validated());
 
         return back()->with('success', 'Campo personalizado creado correctamente.');
     }
@@ -36,6 +29,7 @@ class CrmCustomFieldController extends Controller
     public function destroy(CrmCustomFieldSchema $customField)
     {
         $customField->delete();
+
         return back()->with('success', 'Campo personalizado eliminado correctamente.');
     }
 }

@@ -4,31 +4,37 @@ declare(strict_types=1);
 
 namespace App\Services\Admin\Dashboard;
 
-use App\Models\Producto;
 use App\Models\Categoria;
-use App\Models\Marca;
 use App\Models\Pedido;
-use Illuminate\Support\Facades\DB;
-use App\Models\ConfiguracionSitio;
+use App\Models\Producto;
+use App\Models\Usuario;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class AnalyticsService
 {
     public function getDashboardStats(string $startDate, string $endDate, string $sortBy, string $sortOrder, ?string $status = null, ?string $q = null): array
     {
         $dateFilterQuery = function ($query) use ($startDate, $endDate, $status, $q) {
-            if ($startDate) $query->whereDate('created_at', '>=', $startDate);
-            if ($endDate) $query->whereDate('created_at', '<=', $endDate);
-            if ($status) $query->where('estado', $status);
+            if ($startDate) {
+                $query->whereDate('created_at', '>=', $startDate);
+            }
+            if ($endDate) {
+                $query->whereDate('created_at', '<=', $endDate);
+            }
+            if ($status) {
+                $query->where('estado', $status);
+            }
             if ($q) {
-                $query->where(function($sq) use ($q) {
+                $query->where(function ($sq) use ($q) {
                     $sq->where('codigo', 'like', "%{$q}%")
-                       ->orWhereHas('usuario', function($uq) use ($q) {
-                           $uq->where('nombres', 'like', "%{$q}%")
-                              ->orWhere('apellidos', 'like', "%{$q}%");
-                       });
+                        ->orWhereHas('usuario', function ($uq) use ($q) {
+                            $uq->where('nombres', 'like', "%{$q}%")
+                                ->orWhere('apellidos', 'like', "%{$q}%");
+                        });
                 });
             }
+
             return $query;
         };
 
@@ -44,12 +50,23 @@ class AnalyticsService
         $ventasTotalQuery = Pedido::whereRaw('LOWER(estado) IN (?, ?, ?)', ['pagado', 'enviado', 'completado']);
         $ventasTotal = (float) $dateFilterQuery($ventasTotalQuery)->sum('total');
 
+        $dateOnlyQuery = function ($query) use ($startDate, $endDate) {
+            if ($startDate) {
+                $query->whereDate('created_at', '>=', $startDate);
+            }
+            if ($endDate) {
+                $query->whereDate('created_at', '<=', $endDate);
+            }
+
+            return $query;
+        };
+        $ventasWebTotal = $ventasTotal;
         $ventasPosQuery = DB::table('ventas_pos');
-        $ventasPosTotal = (float) $dateFilterQuery($ventasPosQuery)->sum('total');
+        $ventasPosTotal = (float) $dateOnlyQuery($ventasPosQuery)->sum('total');
         $ventasTotal += $ventasPosTotal;
 
-        $costosGastos = (float) $dateFilterQuery(DB::table('gastos'))->sum('monto');
-        $costosCompras = (float) $dateFilterQuery(DB::table('compras'))->sum('total');
+        $costosGastos = (float) $dateOnlyQuery(DB::table('gastos'))->sum('monto');
+        $costosCompras = (float) $dateOnlyQuery(DB::table('compras')->where('estado', 'completado'))->sum('total');
 
         $costosTotal = $costosGastos + $costosCompras;
         $gananciaNeta = $ventasTotal - $costosTotal;
@@ -72,14 +89,14 @@ class AnalyticsService
                     'total' => $p->total,
                     'estado' => $p->estado,
                     'created_at' => $p->created_at,
-                    'usuario_nombre' => $p->usuario ? $p->usuario->nombres . ' ' . $p->usuario->apellidos : 'Cliente',
+                    'usuario_nombre' => $p->usuario ? $p->usuario->nombres.' '.$p->usuario->apellidos : 'Cliente',
                 ];
             });
 
         $endDateCarbon = $endDate ? Carbon::parse($endDate) : now();
         $ventasSemana = [];
         $nombresDias = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-        
+
         for ($i = 6; $i >= 0; $i--) {
             $day = $endDateCarbon->copy()->subDays($i);
             $webSales = (float) Pedido::whereRaw('LOWER(estado) IN (?, ?, ?)', ['pagado', 'enviado', 'completado'])
@@ -88,7 +105,7 @@ class AnalyticsService
             $posSales = (float) DB::table('ventas_pos')->whereDate('created_at', $day)->sum('total');
             $ventasSemana[] = [
                 'dia' => $nombresDias[$day->dayOfWeek],
-                'total' => $webSales + $posSales
+                'total' => $webSales + $posSales,
             ];
         }
 
@@ -101,6 +118,8 @@ class AnalyticsService
             'pedidosCompletados' => $pedidosCompletados,
             'pedidosCancelados' => $pedidosCancelados,
             'ventasTotal' => $ventasTotal,
+            'ventasWeb' => $ventasWebTotal,
+            'ventasPos' => $ventasPosTotal,
             'costosTotal' => $costosTotal,
             'gananciaNeta' => $gananciaNeta,
             'ventasMes' => $ventasMes,
@@ -113,20 +132,23 @@ class AnalyticsService
 
     public function getLowStock(int $limit = 150): array
     {
-        $allLowStock = DB::select("
+        $allLowStock = DB::select('
             SELECT p.id, p.nombre, COALESCE(SUM(v.stock), 0) as stock_total
             FROM producto p
             LEFT JOIN variante v ON v.producto_id = p.id
+                AND v.deleted_at IS NULL
+            WHERE p.deleted_at IS NULL AND p.activo = 1
             GROUP BY p.id, p.nombre
             ORDER BY stock_total ASC
             LIMIT ?
-        ", [$limit]);
-        
+        ', [$limit]);
+
         $productIds = array_column($allLowStock, 'id');
         $productosData = Producto::with(['imagenes', 'marca'])->whereIn('id', $productIds)->get()->keyBy('id');
-        
+
         return collect($allLowStock)->map(function ($r) use ($productosData) {
             $p = $productosData->get($r->id);
+
             return [
                 'id' => $r->id,
                 'nombre' => $r->nombre,
@@ -140,49 +162,41 @@ class AnalyticsService
 
     public function getTopProducts(?string $startDate, ?string $endDate): array
     {
-        $topProductosVendidos = [];
         $queryTop = DB::query()
-            ->fromSub(function($query) use ($startDate, $endDate) {
+            ->fromSub(function ($query) use ($startDate, $endDate) {
                 $q1 = DB::table('venta_pos_items')
-                      ->join('ventas_pos', 'ventas_pos.id', '=', 'venta_pos_items.venta_pos_id') // Corrected join key
-                      ->select('variante_id', 'cantidad');
-                if ($startDate) $q1->whereDate('ventas_pos.created_at', '>=', $startDate);
-                if ($endDate) $q1->whereDate('ventas_pos.created_at', '<=', $endDate);
+                    ->join('ventas_pos', 'ventas_pos.id', '=', 'venta_pos_items.venta_pos_id') // Corrected join key
+                    ->select('variante_id', 'cantidad', DB::raw('venta_pos_items.cantidad * venta_pos_items.precio_unitario as ingresos'));
+                if ($startDate) {
+                    $q1->whereDate('ventas_pos.created_at', '>=', $startDate);
+                }
+                if ($endDate) {
+                    $q1->whereDate('ventas_pos.created_at', '<=', $endDate);
+                }
 
                 $q2 = DB::table('pedido_item')
-                      ->join('pedido', 'pedido.id', '=', 'pedido_item.pedido_id')
-                      ->where('pedido.estado', 'completado')
-                      ->select('variante_id', 'cantidad');
-                if ($startDate) $q2->whereDate('pedido.created_at', '>=', $startDate);
-                if ($endDate) $q2->whereDate('pedido.created_at', '<=', $endDate);
+                    ->join('pedido', 'pedido.id', '=', 'pedido_item.pedido_id')
+                    ->where('pedido.estado', 'completado')
+                    ->select('variante_id', 'cantidad', DB::raw('pedido_item.cantidad * pedido_item.precio_unitario as ingresos'));
+                if ($startDate) {
+                    $q2->whereDate('pedido.created_at', '>=', $startDate);
+                }
+                if ($endDate) {
+                    $q2->whereDate('pedido.created_at', '<=', $endDate);
+                }
 
                 $query->from($q1->unionAll($q2), 'ventas_combinadas');
             }, 'ventas_combinadas')
-            ->select('variante_id', DB::raw('SUM(cantidad) as total_vendido'))
-            ->groupBy('variante_id')
+            ->join('variante', 'variante.id', '=', 'ventas_combinadas.variante_id')
+            ->join('producto', 'producto.id', '=', 'variante.producto_id')
+            ->select('producto.id', 'producto.nombre', DB::raw('SUM(cantidad) as total_vendido'), DB::raw('SUM(ingresos) as ingresos'))
+            ->groupBy('producto.id', 'producto.nombre')
             ->orderBy('total_vendido', 'desc')
-            ->limit(15)
+            ->orderBy('producto.id')
+            ->limit(6)
             ->get();
-            
-        foreach ($queryTop as $item) {
-            $variante = \App\Models\Variante::with('producto')->find($item->variante_id);
-            $nombre = $variante && $variante->producto ? $variante->producto->nombre : 'Desconocido';
-            
-            $encontrado = false;
-            foreach ($topProductosVendidos as &$tv) {
-                if ($tv['nombre'] === $nombre) {
-                    $tv['cantidad'] += (int) $item->total_vendido;
-                    $encontrado = true;
-                    break;
-                }
-            }
-            if (!$encontrado) {
-                $topProductosVendidos[] = ['nombre' => $nombre, 'cantidad' => (int) $item->total_vendido];
-            }
-        }
-        
-        usort($topProductosVendidos, function($a, $b) { return $b['cantidad'] <=> $a['cantidad']; });
-        return array_slice($topProductosVendidos, 0, 6);
+
+        return $queryTop->map(fn ($item) => ['id' => (int) $item->id, 'nombre' => $item->nombre, 'cantidad' => (int) $item->total_vendido, 'ingresos' => (float) $item->ingresos])->all();
     }
 
     public function searchGlobal(string $query, object $user): array
@@ -195,14 +209,17 @@ class AnalyticsService
             $productos = Producto::with('variantes')
                 ->where('nombre', 'like', "%$query%")
                 ->orWhere('id', 'like', "$query%")
-                ->limit(5)->get()->map(function($p) {
+                ->limit(5)->get()->map(function ($p) {
                     $stock = 0;
-                    foreach($p->variantes as $v) $stock += $v->stock;
+                    foreach ($p->variantes as $v) {
+                        $stock += $v->stock;
+                    }
+
                     return [
                         'id' => $p->id,
                         'nombre' => $p->nombre,
                         'precio' => $p->variantes->first() ? $p->variantes->first()->precio : 0,
-                        'stock' => $stock
+                        'stock' => $stock,
                     ];
                 });
         }
@@ -210,14 +227,14 @@ class AnalyticsService
         if ($user->tienePermiso('ver_pedidos')) {
             $pedidosQuery = Pedido::with('usuario:id,nombres,apellidos')
                 ->where('id', 'like', "$query%")
-                ->orWhereHas('usuario', function($q) use ($query) {
+                ->orWhereHas('usuario', function ($q) use ($query) {
                     $q->where('nombres', 'like', "%$query%")->orWhere('email', 'like', "%$query%");
                 });
             $pedidos = $pedidosQuery->limit(5)->get(['id', 'estado', 'total', 'usuario_id']);
         }
 
         if ($user->tienePermiso('ver_usuarios')) {
-            $usuarios = \App\Models\Usuario::where('nombres', 'like', "%$query%")
+            $usuarios = Usuario::where('nombres', 'like', "%$query%")
                 ->orWhere('apellidos', 'like', "%$query%")
                 ->orWhere('email', 'like', "%$query%")
                 ->orWhere('dni', 'like', "%$query%")

@@ -10,36 +10,34 @@ use App\Services\Chatbot\Engine\Nodes\ActionNode;
 use App\Services\Chatbot\Engine\Nodes\AgentNode;
 use App\Services\Chatbot\Tools\OrderStatusTool;
 use App\Services\Chatbot\Tools\ProductSearchTool;
-use App\Services\Chatbot\Tools\UpdateContactInfoTool;
 use App\Services\Chatbot\Tools\TransferToAgentTool;
+use App\Services\Chatbot\Tools\UpdateContactInfoTool;
 
 class ChatbotService
 {
     /**
-     * @param array<int, array<string, string>> $userMessages
-     * @param int|null $conversationId
-     * @param int|null $contactId
-     * @return string
+     * @param  array<int, array<string, string>>  $userMessages
+     *
      * @throws \Exception
      */
     public function getReply(array $userMessages, ?int $conversationId = null, ?int $contactId = null): string
     {
         $apiKeys = array_values(array_filter([
-            env('GEMINI_API_KEY'),
-            env('GEMINI_API_KEY_SECONDARY')
+            config('services.gemini.key'),
+            config('services.gemini.secondary_key'),
         ]));
         if (empty($apiKeys)) {
             throw new \Exception('API Key de Gemini no configurada en el servidor.');
         }
 
         // 1. Instanciar e inyectar dependencias (Tools)
-        $actionNode = new ActionNode();
-        
-        $productSearchTool = new ProductSearchTool();
-        $orderStatusTool = new OrderStatusTool();
+        $actionNode = new ActionNode;
+
+        $productSearchTool = new ProductSearchTool;
+        $orderStatusTool = new OrderStatusTool;
         $updateContactTool = new UpdateContactInfoTool($conversationId, $contactId);
         $transferTool = new TransferToAgentTool($conversationId);
-        
+
         $actionNode->registerTool($productSearchTool);
         $actionNode->registerTool($orderStatusTool);
         $actionNode->registerTool($updateContactTool);
@@ -50,23 +48,23 @@ class ChatbotService
             [
                 'name' => $productSearchTool->getName(),
                 'description' => $productSearchTool->getDescription(),
-                'parameters' => $productSearchTool->getParametersSchema()
+                'parameters' => $productSearchTool->getParametersSchema(),
             ],
             [
                 'name' => $orderStatusTool->getName(),
                 'description' => $orderStatusTool->getDescription(),
-                'parameters' => $orderStatusTool->getParametersSchema()
+                'parameters' => $orderStatusTool->getParametersSchema(),
             ],
             [
                 'name' => $updateContactTool->getName(),
                 'description' => $updateContactTool->getDescription(),
-                'parameters' => $updateContactTool->getParametersSchema()
+                'parameters' => $updateContactTool->getParametersSchema(),
             ],
             [
                 'name' => $transferTool->getName(),
                 'description' => $transferTool->getDescription(),
-                'parameters' => $transferTool->getParametersSchema()
-            ]
+                'parameters' => $transferTool->getParametersSchema(),
+            ],
         ];
 
         $systemPrompt = $this->buildSystemPrompt();
@@ -80,7 +78,7 @@ class ChatbotService
 
         // 5. Orquestar todo en el Motor de Flujos (Workflow)
         $workflow = new ChatbotWorkflow($agentNode, $actionNode);
-        
+
         return $workflow->run($state);
     }
 
@@ -102,7 +100,8 @@ REGLAS ESTRICTAS:
 
     /**
      * Formatea los mensajes del usuario para que cumplan con el esquema de la API de Google Gemini.
-     * @param array<int, array<string, string>> $userMessages
+     *
+     * @param  array<int, array<string, string>>  $userMessages
      * @return array<int, array<string, mixed>>
      */
     private function formatMessages(array $userMessages): array
@@ -111,9 +110,10 @@ REGLAS ESTRICTAS:
         foreach ($userMessages as $msg) {
             $contents[] = [
                 'role' => $msg['role'] === 'bot' ? 'model' : $msg['role'],
-                'parts' => [['text' => $msg['text']]]
+                'parts' => [['text' => $msg['text']]],
             ];
         }
+
         return $contents;
     }
 }

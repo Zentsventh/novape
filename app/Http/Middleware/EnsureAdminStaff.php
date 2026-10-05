@@ -13,7 +13,7 @@ class EnsureAdminStaff
     public function handle(Request $request, Closure $next): Response
     {
         $user = auth()->guard('admin')->user();
-        if (!$user || !$user->roles()->where('nombre', '!=', 'cliente')->exists()) {
+        if (! $user || $user->estado !== 'activo' || ! $user->roles()->where('nombre', '!=', 'cliente')->exists()) {
             abort(403);
         }
 

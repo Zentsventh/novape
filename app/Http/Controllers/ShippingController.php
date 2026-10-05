@@ -6,11 +6,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Shipping\CalculateShippingRequest;
 use App\Http\Requests\Shipping\ValidateAddressRequest;
-use App\Services\Shipping\ShippingCalculationService;
 use App\Models\Pedido;
+use App\Services\Shipping\ShippingCalculationService;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
 
 class ShippingController extends Controller
 {
@@ -32,19 +32,22 @@ class ShippingController extends Controller
     public function validateAddress(ValidateAddressRequest $request)
     {
         $validation = $this->shippingCalculationService->validateAddress($request->validated());
+
         return response()->json($validation);
     }
 
     public function trackPage(Request $request)
     {
+        $request->validate(['codigo' => 'nullable|string|max:50']);
         Log::info('Tracking page accessed', ['user_id' => auth()->id(), 'query' => $request->query()]);
 
         $codigo = $request->query('codigo');
-        if (!$codigo) {
+        if (! $codigo) {
             return redirect('/perfil')->withErrors(['error' => 'Código de pedido no proporcionado.']);
         }
 
         $pedido = Pedido::where('codigo', $codigo)->firstOrFail();
+        abort_unless((int) $pedido->usuario_id === (int) auth()->id() || auth()->user()->esAdmin(), 403);
         $carrier = $pedido->courier_name ?: 'shippo';
         $trackingNumber = $pedido->tracking_number;
 
@@ -55,7 +58,7 @@ class ShippingController extends Controller
 
         return Inertia::render('Auth/Tracking', [
             'pedido' => $pedido,
-            'trackingData' => $trackingData
+            'trackingData' => $trackingData,
         ]);
     }
 }

@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Traits\HasPolymorphicCleanup;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\SchemalessAttributes\Casts\SchemalessAttributes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use OwenIt\Auditing\Contracts\Auditable;
-use App\Traits\HasPolymorphicCleanup;
+use Spatie\SchemalessAttributes\Casts\SchemalessAttributes;
 
 class CrmDeal extends Model implements Auditable
 {
@@ -24,7 +28,7 @@ class CrmDeal extends Model implements Auditable
         'valor',
         'estado', // 'open', 'won', 'lost'
         'fecha_cierre_esperada',
-        'omnichannel_conversation_id'
+        'omnichannel_conversation_id',
     ];
 
     protected $casts = [
@@ -33,42 +37,42 @@ class CrmDeal extends Model implements Auditable
         'custom_fields' => SchemalessAttributes::class,
     ];
 
-    public function scopeWithCustomAttributes(): \Illuminate\Database\Eloquent\Builder
+    public function scopeWithCustomAttributes(Builder $query): Builder
     {
-        return $this->withSchemalessAttributes('custom_fields');
+        return $this->custom_fields->modelScope();
     }
 
-    public function cliente()
+    public function cliente(): BelongsTo
     {
         return $this->belongsTo(Usuario::class, 'usuario_id');
     }
 
-    public function empresa()
+    public function empresa(): BelongsTo
     {
         return $this->belongsTo(CrmCompany::class, 'empresa_id');
     }
 
-    public function stage()
+    public function stage(): BelongsTo
     {
         return $this->belongsTo(CrmStage::class, 'stage_id');
     }
 
-    public function notes()
+    public function notes(): MorphMany
     {
         return $this->morphMany(CrmNote::class, 'notable');
     }
 
-    public function timelineEvents()
+    public function timelineEvents(): MorphMany
     {
         return $this->morphMany(CrmTimelineEvent::class, 'trackable');
     }
 
-    public function activities()
+    public function activities(): HasMany
     {
         return $this->hasMany(CrmActivity::class, 'deal_id')->orderBy('created_at', 'desc');
     }
 
-    public function products()
+    public function products(): HasMany
     {
         return $this->hasMany(CrmDealProduct::class);
     }
@@ -77,15 +81,23 @@ class CrmDeal extends Model implements Auditable
 
     public function getAiScoreAttribute()
     {
-        if ($this->estado === 'won') return 100;
-        if ($this->estado === 'lost') return 0;
+        if ($this->estado === 'won') {
+            return 100;
+        }
+        if ($this->estado === 'lost') {
+            return 0;
+        }
 
         $score = 50; // Base score
 
         if ($this->cliente) {
             $pedidosCount = $this->cliente->total_orders ?? $this->cliente->pedidos()->count();
-            if ($pedidosCount > 0) $score += 15;
-            if ($pedidosCount >= 5) $score += 10;
+            if ($pedidosCount > 0) {
+                $score += 15;
+            }
+            if ($pedidosCount >= 5) {
+                $score += 10;
+            }
         }
 
         if ($this->valor > 500) {

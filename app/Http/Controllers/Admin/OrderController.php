@@ -55,6 +55,7 @@ class OrderController extends Controller
 
         try {
             $this->updateOrderStatusService->execute($pedido, $request->validated());
+
             return redirect()->back()->with('success', 'Estado del pedido y envío actualizado.');
         } catch (\Throwable $e) {
             return redirect()->back()->with('error', 'Ocurrió un error al actualizar el estado del pedido.');
@@ -67,7 +68,7 @@ class OrderController extends Controller
 
         $result = $this->refundOrderService->execute($pedido);
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return redirect()->back()->with('error', $result['message']);
         }
 
@@ -85,19 +86,14 @@ class OrderController extends Controller
     public function facturaVista(int $id)
     {
         $pedido = $this->orderQueryService->getOrderForInvoice($id);
-        
+
         $pdf = $this->invoiceService->generatePdf($pedido);
 
-        return $pdf->download('factura-' . $pedido->codigo . '.pdf');
+        return $pdf->download('factura-'.$pedido->codigo.'.pdf');
     }
 
     public function export()
     {
-        $csv = $this->exportOrderService->exportCsv();
-
-        return response($csv, 200, [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="pedidos_' . date('Y-m-d') . '.csv"',
-        ]);
+        return $this->exportOrderService->exportDownload();
     }
 }

@@ -7,11 +7,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Users\StoreStaffRequest;
 use App\Http\Requests\Admin\Users\UpdateStaffRequest;
+use App\Models\Rol;
+use App\Models\Usuario;
 use App\Services\Admin\Users\UserManagementService;
+use App\Support\Csv;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use App\Models\Usuario;
-use App\Models\Rol;
 
 class StaffController extends Controller
 {
@@ -33,13 +34,14 @@ class StaffController extends Controller
     public function create()
     {
         return Inertia::render('Admin/Trabajadores/Create', [
-            'roles' => Rol::all()
+            'roles' => Rol::all(),
         ]);
     }
 
     public function store(StoreStaffRequest $request)
     {
         $this->userService->createUser($request->validated(), true);
+
         return redirect()->route('admin.trabajadores')->with('success', 'Trabajador creado correctamente.');
     }
 
@@ -47,13 +49,14 @@ class StaffController extends Controller
     {
         return Inertia::render('Admin/Trabajadores/Edit', [
             'trabajador' => Usuario::with('roles')->findOrFail($id),
-            'roles' => Rol::all()
+            'roles' => Rol::all(),
         ]);
     }
 
     public function update(UpdateStaffRequest $request, int $id)
     {
         $this->userService->updateUser(Usuario::findOrFail($id), $request->validated(), true);
+
         return redirect()->route('admin.trabajadores')->with('success', 'Trabajador actualizado correctamente.');
     }
 
@@ -61,6 +64,7 @@ class StaffController extends Controller
     {
         try {
             $this->userService->deleteUser(Usuario::findOrFail($id), auth('admin')->id() ?? 0);
+
             return redirect()->route('admin.trabajadores')->with('success', 'Trabajador movido a la papelera.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
@@ -71,6 +75,7 @@ class StaffController extends Controller
     {
         try {
             $this->userService->toggleBlockStatus(Usuario::findOrFail($id), auth('admin')->id() ?? 0);
+
             return redirect()->back()->with('success', 'Estado de cuenta actualizado correctamente.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
@@ -80,6 +85,7 @@ class StaffController extends Controller
     public function resetPassword(int $id)
     {
         $newPassword = $this->userService->resetPassword(Usuario::findOrFail($id));
+
         return redirect()->back()->with('success', "Contraseña restablecida exitosamente. Nueva contraseña: {$newPassword}");
     }
 
@@ -100,26 +106,20 @@ class StaffController extends Controller
     {
         $clientes = Usuario::whereHas('roles', function ($q) {
             $q->where('nombre', '!=', 'cliente');
-        })->withCount('pedidos')->get();
+        })->withCount('pedidos')->lazyById(500);
 
-        $csv = "ID,Nombres,Apellidos,Email,Teléfono,DNI,Estado,Pedidos,Registro\n";
-        foreach ($clientes as $c) {
-            $csv .= implode(',', [
-                $c->id,
-                '"' . $c->nombres . '"',
-                '"' . $c->apellidos . '"',
-                $c->email,
-                $c->telefono,
-                $c->dni,
-                $c->estado,
-                $c->pedidos_count,
-                $c->created_at,
-            ]) . "\n";
-        }
-
-        return response($csv, 200, [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="trabajadores_' . date('Y-m-d') . '.csv"',
+        $rows = $clientes->map(fn ($c) => [
+            $c->id,
+            $c->nombres,
+            $c->apellidos,
+            $c->email,
+            $c->telefono,
+            $c->dni,
+            $c->estado,
+            $c->pedidos_count,
+            $c->created_at,
         ]);
+
+        return Csv::download(['ID', 'Nombres', 'Apellidos', 'Email', 'Teléfono', 'DNI', 'Estado', 'Pedidos', 'Registro'], $rows, 'trabajadores_'.date('Y-m-d').'.csv');
     }
 }

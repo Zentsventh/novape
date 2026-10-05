@@ -61,8 +61,10 @@ return [
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 (PHP_VERSION_ID >= 80500 ? Mysql::ATTR_SSL_CA : PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA') ? base_path(env('MYSQL_ATTR_SSL_CA')) : null,
-                (PHP_VERSION_ID >= 80400 ? Mysql::ATTR_SSL_VERIFY_SERVER_CERT : PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT) => false,
-            ], fn($value) => $value !== null) : [],
+                // Only configure SSL verification when explicitly requested.
+                // Passing false unconditionally can break non-TLS MariaDB connections.
+                (PHP_VERSION_ID >= 80400 ? Mysql::ATTR_SSL_VERIFY_SERVER_CERT : PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT) => env('MYSQL_ATTR_SSL_VERIFY_SERVER_CERT'),
+            ], fn ($value) => $value !== null) : [],
         ],
 
         'mariadb' => [

@@ -35,8 +35,12 @@ class ProcessSunatInvoiceJob implements ShouldQueue
     public function handle(SunatService $sunatService): void
     {
         // Verificar que el pedido aún exista y esté pagado
-        if (!$this->pedido->exists || $this->pedido->estado !== 'Pagado') {
+        if (! $this->pedido->exists || ! in_array(strtolower($this->pedido->estado), ['pagado', 'procesando', 'enviado', 'completado'], true)) {
             Log::info("ProcessSunatInvoiceJob: El pedido {$this->pedido->codigo} no existe o no está pagado. Cancelando job.");
+
+            return;
+        }
+        if ($this->pedido->facturado_sunat) {
             return;
         }
 
@@ -44,17 +48,20 @@ class ProcessSunatInvoiceJob implements ShouldQueue
         // Asumiendo que SunatService o el Pedido guardan estado del comprobante.
         // Si el modelo Pedido no tiene un campo 'comprobante_emitido', asumimos que
         // SunatService->emitirComprobante() maneja la idempotencia o lanza excepción si ya existe.
-        
+
         Log::info("ProcessSunatInvoiceJob: Iniciando emisión de comprobante para pedido {$this->pedido->codigo}");
-        
-        $sunatService->emitirComprobante($this->pedido);
-        
+
+        $result = $sunatService->emitirComprobante($this->pedido);
+        if (! ($result['success'] ?? false)) {
+            throw new \RuntimeException($result['error'] ?? $result['message'] ?? 'La emisión no fue confirmada por el proveedor.');
+        }
+
         Log::info("ProcessSunatInvoiceJob: Comprobante emitido exitosamente para pedido {$this->pedido->codigo}");
     }
 
     public function failed(Throwable $exception): void
     {
-        Log::error("ProcessSunatInvoiceJob falló permanentemente para el pedido {$this->pedido->codigo}: " . $exception->getMessage());
+        Log::error("ProcessSunatInvoiceJob falló permanentemente para el pedido {$this->pedido->codigo}: ".$exception->getMessage());
         // Aquí se podría notificar a Slack/Email al administrador sobre el fallo crítico en facturación
     }
 }

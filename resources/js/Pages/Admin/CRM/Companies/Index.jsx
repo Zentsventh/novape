@@ -445,7 +445,7 @@ export default function Index({ companies = { data: [], links: [] }, filters = {
                             <label className="premium-label">Dominio web</label>
                             <input type="text" name="dominio" className="premium-form-input" placeholder="example.com" />
                             <span className="premium-hint">
-                                Usaremos el dominio para que la IA investigue la empresa.
+                                El dominio identifica la empresa. La investigación automática requiere un proveedor configurado.
                             </span>
                         </div>
                         <div className="premium-form-group">

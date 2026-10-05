@@ -21,8 +21,8 @@ class StorePurchaseRequest extends FormRequest
         return [
             'proveedor_id' => 'required|exists:proveedor,id',
             'items' => 'required|array|min:1',
-            'items.*.producto_id' => 'required|integer',
-            'items.*.variante_id' => 'required|integer',
+            'items.*.producto_id' => 'required|integer|exists:producto,id',
+            'items.*.variante_id' => 'required|integer|distinct|exists:variante,id',
             'items.*.cantidad' => 'required|integer|min:1',
             'items.*.costo_unitario' => 'required|numeric|min:0',
             'notas' => 'nullable|string',

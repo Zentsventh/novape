@@ -1,8 +1,13 @@
 <?php
 
+use App\Http\Middleware\CheckPermission;
+use App\Http\Middleware\CheckRole;
+use App\Http\Middleware\EnsureAdminStaff;
+use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -15,15 +20,16 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
 
-        $middleware->redirectGuestsTo(function (\Illuminate\Http\Request $request) {
+        $middleware->redirectGuestsTo(function (Request $request) {
             if ($request->is('admin') || $request->is('admin/*')) {
                 return route('admin.login');
             }
+
             return route('login');
         });
 
         $middleware->web(append: [
-            \App\Http\Middleware\HandleInertiaRequests::class,
+            HandleInertiaRequests::class,
         ]);
         $middleware->validateCsrfTokens(except: [
             '/checkout/niubiz/callback',
@@ -31,12 +37,11 @@ return Application::configure(basePath: dirname(__DIR__))
             '/api/documento/consultar',
             '/api/webhooks/*',
             '/logout',
-            '/admin/logout'
         ]);
         $middleware->alias([
-            'role' => \App\Http\Middleware\CheckRole::class,
-            'permiso' => \App\Http\Middleware\CheckPermission::class,
-            'admin.staff' => \App\Http\Middleware\EnsureAdminStaff::class,
+            'role' => CheckRole::class,
+            'permiso' => CheckPermission::class,
+            'admin.staff' => EnsureAdminStaff::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

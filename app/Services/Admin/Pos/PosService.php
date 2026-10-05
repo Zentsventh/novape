@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services\Admin\Pos;
 
-use Illuminate\Support\Facades\DB;
 use App\Models\ConfiguracionSitio;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class PosService
 {
@@ -35,20 +37,21 @@ class PosService
                 // Keep default
             }
         }
+
         return $almacenId;
     }
 
-    public function getProducts(int $almacenId, ?string $search = null, ?string $categoria = null): \Illuminate\Support\Collection
+    public function getProducts(int $almacenId, ?string $search = null, ?string $categoria = null): Collection
     {
         $query = DB::table('producto')
             ->join('variante', 'variante.producto_id', '=', 'producto.id')
-            ->join('stock_almacen', function($join) use ($almacenId) {
+            ->join('stock_almacen', function ($join) use ($almacenId) {
                 $join->on('stock_almacen.variante_id', '=', 'variante.id')
-                     ->where('stock_almacen.almacen_id', '=', $almacenId);
+                    ->where('stock_almacen.almacen_id', '=', $almacenId);
             })
             ->leftJoin('producto_imagen', function ($join) {
                 $join->on('producto_imagen.producto_id', '=', 'producto.id')
-                     ->where('producto_imagen.orden', '=', 0);
+                    ->where('producto_imagen.orden', '=', 0);
             })
             ->leftJoin('marca', 'marca.id', '=', 'producto.marca_id')
             ->leftJoin('producto_categoria', 'producto_categoria.producto_id', '=', 'producto.id')
@@ -57,11 +60,12 @@ class PosService
             ->whereNull('variante.deleted_at')
             ->where('stock_almacen.cantidad', '>', 0)
             ->where('producto.activo', true);
+        $query->where('variante.activo', true);
 
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('producto.nombre', 'like', "%{$search}%")
-                  ->orWhere('variante.sku', 'like', "%{$search}%");
+                    ->orWhere('variante.sku', 'like', "%{$search}%");
             });
         }
 
@@ -75,77 +79,99 @@ class PosService
             'variante.id as variante_id',
             'variante.sku',
             'variante.precio',
-            'variante.stock',
+            'stock_almacen.cantidad as stock',
             'variante.atributos',
             'producto_imagen.url as imagen',
             'marca.nombre as marca_nombre',
             'categoria.nombre as categoria_nombre'
-        )->orderBy('producto.nombre')->limit(50)->get();
+        )->orderBy('producto.nombre')->limit(150)->get()->unique('variante_id')->take(50)->values();
     }
 
     public function processSale(array $data, int $userId): array
     {
-        $caja = $this->getActiveRegister($userId);
-        if (!$caja) {
-            throw new \Exception('Debes aperturar caja antes de realizar ventas.');
-        }
-
-        $subtotalBrutoValidation = 0;
-        foreach ($data['items'] as $item) {
-            $subtotalBrutoValidation += $item['precio_unitario'] * $item['cantidad'];
-        }
-        $descuentoValidation = (float) ($data['descuento'] ?? 0);
-        $subtotalNetoValidation = max(0, $subtotalBrutoValidation - $descuentoValidation);
-        $totalValidation = $subtotalNetoValidation * 1.18;
-
         $tipoComprobante = $data['tipo_comprobante'] ?? 'ticket';
-        $this->validateSunatRules($tipoComprobante, $totalValidation, $data['cliente'] ?? []);
 
-        $cliente_id = $this->resolveClient($tipoComprobante, $data['cliente'] ?? null);
-
-        return DB::transaction(function () use ($data, $caja, $cliente_id, $tipoComprobante, $userId) {
+        return DB::transaction(function () use ($data, $tipoComprobante, $userId) {
+            $caja = DB::table('cajas_sesiones')->where('cajero_id', $userId)
+                ->where('estado', 'abierta')->lockForUpdate()->first();
+            if (! $caja) {
+                throw new \InvalidArgumentException('Debes aperturar caja antes de realizar ventas.');
+            }
             $almacenId = $this->getWarehouseIdForRegister($caja);
             $subtotalBruto = 0;
             $itemsValidados = [];
+            $variantIds = array_column($data['items'], 'variante_id');
+            if (count($variantIds) !== count(array_unique($variantIds))) {
+                throw new \InvalidArgumentException('Agrupa las cantidades de cada variante en una sola línea.');
+            }
+            $items = $data['items'];
+            usort($items, fn ($a, $b) => $a['variante_id'] <=> $b['variante_id']);
 
-            foreach ($data['items'] as $item) {
-                $variante = DB::table('variante')->where('id', $item['variante_id'])->lockForUpdate()->first();
-                if (!$variante) throw new \Exception("Variante no encontrada.");
+            foreach ($items as $item) {
+                if ((int) $item['cantidad'] < 1) {
+                    throw new \InvalidArgumentException('La cantidad debe ser positiva.');
+                }
+                $variante = DB::table('variante')->where('id', $item['variante_id'])->where('activo', true)->whereNull('deleted_at')->lockForUpdate()->first();
+                if (! $variante) {
+                    throw new \Exception('Variante no encontrada.');
+                }
+                $producto = DB::table('producto')->where('id', $variante->producto_id)
+                    ->whereNull('deleted_at')->where('activo', true)->first();
+                if (! $producto) {
+                    throw new \InvalidArgumentException('El producto no está disponible para venta.');
+                }
 
                 $stockAlmacen = DB::table('stock_almacen')
                     ->where('almacen_id', $almacenId)
                     ->where('variante_id', $item['variante_id'])
                     ->lockForUpdate()
                     ->first();
-                
-                $cantidadLocal = $stockAlmacen ? clone $stockAlmacen->cantidad : 0;
-                
-                if ($cantidadLocal < $item['cantidad']) {
-                    throw new \Exception("Stock local insuficiente para el producto: " . $item['producto_nombre']);
+
+                $cantidadLocal = $stockAlmacen ? (int) $stockAlmacen->cantidad : 0;
+                if ($almacenId === (int) ConfiguracionSitio::obtener('almacen_ecommerce_id', 1) &&
+                    Schema::hasTable('reservas_stock')) {
+                    $cantidadLocal -= (int) DB::table('reservas_stock')->where('variante_id', $item['variante_id'])
+                        ->where('expires_at', '>', now())->sum('cantidad');
                 }
 
-                $precioReal = $variante->precio; 
+                if ($cantidadLocal < $item['cantidad']) {
+                    throw new \Exception('Stock local insuficiente para el producto: '.$item['producto_nombre']);
+                }
+
+                $precioReal = $variante->precio;
                 $subtotalBruto += $precioReal * $item['cantidad'];
-                
+
                 $itemsValidados[] = [
                     'variante_id' => $item['variante_id'],
-                    'producto_nombre' => $item['producto_nombre'],
+                    'producto_nombre' => $producto->nombre,
                     'cantidad' => $item['cantidad'],
                     'precio_unitario' => $precioReal,
                 ];
             }
 
             $descuento = floatval($data['descuento'] ?? 0);
-            $total = max(0, $subtotalBruto - $descuento);
-
-            if (isset($data['pagos']) && is_array($data['pagos']) && count($data['pagos']) > 0) {
-                $sumaPagos = array_sum(array_column($data['pagos'], 'monto'));
-                if (round((float)$sumaPagos, 2) !== round($total, 2)) {
-                    throw new \Exception("La suma de los pagos múltiples no coincide con el total de la venta.");
+            if ($descuento < 0 || $descuento > $subtotalBruto) {
+                throw new \InvalidArgumentException('El descuento debe estar entre cero y el importe de la venta.');
+            }
+            $total = round($subtotalBruto - $descuento, 2);
+            $this->validateSunatRules($tipoComprobante, $total, $data['cliente'] ?? []);
+            $cliente_id = $this->resolveClient($tipoComprobante, $data['cliente'] ?? null);
+            $pagos = ! empty($data['pagos']) ? $data['pagos'] : [['metodo_pago_id' => $data['metodo_pago_id'], 'monto' => $total]];
+            foreach ($pagos as $pago) {
+                if (! isset($pago['monto'], $pago['metodo_pago_id']) || $pago['monto'] < 0 ||
+                    ! DB::table('metodos_pago')->where('id', $pago['metodo_pago_id'])->where('activo', true)->exists()) {
+                    throw new \InvalidArgumentException('Los pagos requieren un importe válido y un método activo.');
                 }
             }
 
-            $igvPorcentaje = (float)(ConfiguracionSitio::obtener('igv_porcentaje', '18'));
+            if (isset($data['pagos']) && is_array($data['pagos']) && count($data['pagos']) > 0) {
+                $sumaPagos = array_sum(array_column($data['pagos'], 'monto'));
+                if (round((float) $sumaPagos, 2) !== round($total, 2)) {
+                    throw new \Exception('La suma de los pagos múltiples no coincide con el total de la venta.');
+                }
+            }
+
+            $igvPorcentaje = (float) (ConfiguracionSitio::obtener('igv_porcentaje', '18'));
             $factor = 1 + ($igvPorcentaje / 100);
             $subtotal = round($total / $factor, 2);
             $igv = round($total - $subtotal, 2);
@@ -156,20 +182,22 @@ class PosService
                 ->lockForUpdate()
                 ->first();
 
-            if (!$serie) throw new \Exception('No hay una serie activa configurada para este comprobante.');
+            if (! $serie) {
+                throw new \Exception('No hay una serie activa configurada para este comprobante.');
+            }
 
             $nuevoCorrelativo = $serie->correlativo_actual + 1;
-            $codigoTicket = $serie->serie . '-' . str_pad((string)$nuevoCorrelativo, 6, '0', STR_PAD_LEFT);
-            
+            $codigoTicket = $serie->serie.'-'.str_pad((string) $nuevoCorrelativo, 6, '0', STR_PAD_LEFT);
+
             DB::table('comprobantes_series')->where('id', $serie->id)->increment('correlativo_actual');
-            
+
             $ventaId = DB::table('ventas_pos')->insertGetId([
                 'codigo_ticket' => $codigoTicket,
                 'cajero_id' => $userId,
                 'caja_sesion_id' => $caja->id,
                 'cliente_id' => $cliente_id,
                 'metodo_pago_id' => $data['metodo_pago_id'],
-                'subtotal' => $subtotalBruto,
+                'subtotal' => $subtotal,
                 'descuento' => $descuento,
                 'igv' => $igv,
                 'total' => $total,
@@ -216,7 +244,7 @@ class PosService
                     ->where('almacen_id', $almacenId)
                     ->where('variante_id', $item['variante_id'])
                     ->first();
-                
+
                 if ($stockAlmacen) {
                     DB::table('stock_almacen')->where('id', $stockAlmacen->id)->decrement('cantidad', $item['cantidad']);
                 } else {
@@ -229,14 +257,14 @@ class PosService
                     ]);
                 }
 
-                DB::statement("UPDATE variante SET stock = (SELECT COALESCE(SUM(cantidad), 0) FROM stock_almacen WHERE variante_id = ?) WHERE id = ?", [$item['variante_id'], $item['variante_id']]);
+                DB::statement('UPDATE variante SET stock = (SELECT COALESCE(SUM(cantidad), 0) FROM stock_almacen WHERE variante_id = ?) WHERE id = ?', [$item['variante_id'], $item['variante_id']]);
 
                 DB::table('movimientos_almacen')->insert([
                     'almacen_id' => $almacenId,
                     'variante_id' => $item['variante_id'],
                     'tipo' => 'salida',
                     'cantidad' => -$item['cantidad'],
-                    'referencia' => 'Venta POS - ' . $codigoTicket,
+                    'referencia' => 'Venta POS - '.$codigoTicket,
                     'usuario_id' => $userId,
                     'created_at' => now(),
                     'updated_at' => now(),
@@ -250,7 +278,7 @@ class PosService
     private function validateSunatRules(string $tipoComprobante, float $total, array $cliente): void
     {
         if ($tipoComprobante === 'factura') {
-            if (empty($cliente['numero_documento']) || strlen($cliente['numero_documento']) !== 11) {
+            if (($cliente['tipo_documento'] ?? '') !== 'RUC' || ! preg_match('/^\d{11}$/', $cliente['numero_documento'] ?? '')) {
                 throw new \Exception('La Factura exige un RUC válido de 11 dígitos.');
             }
             if (empty($cliente['nombre_razon_social'])) {
@@ -265,7 +293,7 @@ class PosService
 
     private function resolveClient(string $tipoComprobante, ?array $clienteData): ?int
     {
-        if ($tipoComprobante === 'ticket' || !$clienteData || empty($clienteData['numero_documento'])) {
+        if ($tipoComprobante === 'ticket' || ! $clienteData || empty($clienteData['numero_documento'])) {
             return null;
         }
 
@@ -274,8 +302,9 @@ class PosService
             DB::table('clientes')->where('id', $clienteRow->id)->update([
                 'nombre_razon_social' => $clienteData['nombre_razon_social'] ?? $clienteRow->nombre_razon_social,
                 'direccion' => $clienteData['direccion'] ?? $clienteRow->direccion,
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
+
             return $clienteRow->id;
         }
 
@@ -300,7 +329,7 @@ class PosService
                     'nombre_razon_social' => $cliente->nombre_razon_social,
                     'direccion' => $cliente->direccion,
                     'tipo_documento' => $cliente->tipo_documento,
-                ]
+                ],
             ];
         }
 
@@ -314,11 +343,11 @@ class PosService
                         'data' => [
                             'nombre_razon_social' => $response->json()['nombre'] ?? '',
                             'direccion' => '',
-                            'tipo_documento' => 'DNI'
-                        ]
+                            'tipo_documento' => 'DNI',
+                        ],
                     ];
                 }
-            } else if ($tipoDocumento === 'RUC') {
+            } elseif ($tipoDocumento === 'RUC') {
                 $response = Http::timeout(5)->get("https://api.apis.net.pe/v1/ruc?numero={$numeroDocumento}");
                 if ($response->successful()) {
                     return [
@@ -327,13 +356,13 @@ class PosService
                         'data' => [
                             'nombre_razon_social' => $response->json()['nombre'] ?? '',
                             'direccion' => $response->json()['direccion'] ?? '',
-                            'tipo_documento' => 'RUC'
-                        ]
+                            'tipo_documento' => 'RUC',
+                        ],
                     ];
                 }
             }
         } catch (\Exception $e) {
-            Log::error('Error consultando API externa: ' . $e->getMessage());
+            Log::error('Error consultando API externa: '.$e->getMessage());
         }
 
         return ['success' => false, 'error' => 'No encontrado en API, ingrese los datos manualmente.'];

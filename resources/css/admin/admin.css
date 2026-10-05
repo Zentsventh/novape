@@ -216,6 +216,7 @@ body { background: var(--admin-bg); margin: 0; padding: 0; }
    ==================================================== */
 .admin-main {
     flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     margin-left: var(--admin-sidebar-width);
@@ -989,6 +990,7 @@ select.admin-form-input { appearance: auto; cursor: pointer; }
 }
 
 @media (max-width: 1200px) {
+    .admin-dashboard-split { grid-template-columns: minmax(0, 1fr) !important; }
     .admin-stats-row { grid-template-columns: repeat(2, 1fr); }
     .admin-dashboard-grid { grid-template-columns: 1fr 1fr; }
 }
@@ -1041,6 +1043,7 @@ select.admin-form-input { appearance: auto; cursor: pointer; }
 
 /* ====== RESPONSIVE: MOBILE (≤ 768px) ====== */
 @media (max-width: 768px) {
+    .admin-dashboard-filters { flex-wrap: wrap; max-width: 100%; }
     :root { --admin-sidebar-width: 0px; }
     
     .admin-sidebar { 

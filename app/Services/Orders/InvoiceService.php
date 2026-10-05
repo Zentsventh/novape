@@ -6,32 +6,33 @@ namespace App\Services\Orders;
 
 use App\Helpers\NumberToWords;
 use App\Models\Pedido;
+use Barryvdh\DomPDF\PDF;
+use Illuminate\Support\Facades\URL;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class InvoiceService
 {
     /**
-     * @return \Barryvdh\DomPDF\PDF
+     * @return PDF
      */
     public function generatePdf(Pedido $pedido)
     {
         $logoPath = public_path('images/logofactura.png');
         $logoBase64 = null;
         if (file_exists($logoPath)) {
-            $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+            $logoBase64 = 'data:image/png;base64,'.base64_encode(file_get_contents($logoPath));
         } else {
             $logoPath = public_path('images/logo.png');
             if (file_exists($logoPath)) {
-                $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+                $logoBase64 = 'data:image/png;base64,'.base64_encode(file_get_contents($logoPath));
             }
         }
 
         $qrBase64 = null;
         if (class_exists(QrCode::class)) {
-            $filename = 'factura-' . $pedido->codigo . '.pdf';
-            $qrContent = 'Comprobante: ' . $filename . ' | Hash: ' . md5((string) $pedido->id . $pedido->codigo_pedido . time());
+            $qrContent = URL::signedRoute('comprobante.ecommerce.publico', ['codigo' => $pedido->codigo]);
             $qrSvg = QrCode::size(150)->generate($qrContent);
-            $qrBase64 = 'data:image/svg+xml;base64,' . base64_encode($qrSvg);
+            $qrBase64 = 'data:image/svg+xml;base64,'.base64_encode($qrSvg);
         }
 
         $letras = null;

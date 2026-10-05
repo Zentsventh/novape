@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class LoyaltyPointsHistory extends Model
 {
@@ -15,7 +16,7 @@ class LoyaltyPointsHistory extends Model
         'description',
     ];
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(Usuario::class, 'usuario_id');
     }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CrmPipeline extends Model
 {
@@ -14,10 +15,10 @@ class CrmPipeline extends Model
     protected $fillable = [
         'nombre',
         'descripcion',
-        'is_default'
+        'is_default',
     ];
 
-    public function stages()
+    public function stages(): HasMany
     {
         return $this->hasMany(CrmStage::class, 'pipeline_id')->orderBy('orden');
     }

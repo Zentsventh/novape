@@ -24,39 +24,49 @@ class ProveedorController extends Controller
 
         return Inertia::render('Admin/Proveedores/Index', [
             'proveedores' => $proveedores->withQueryString(),
-            'filters' => (object) $filters
+            'filters' => (object) $filters,
         ]);
     }
 
     public function create()
     {
         return Inertia::render('Admin/Proveedores/Form', [
-            'proveedor' => null
+            'proveedor' => null,
         ]);
     }
 
     public function store(StoreSupplierRequest $request)
     {
         $this->supplierService->createSupplier($request->validated());
+
         return redirect()->route('proveedores.index')->with('success', 'Proveedor creado exitosamente.');
     }
 
     public function edit(int $id)
     {
         return Inertia::render('Admin/Proveedores/Form', [
-            'proveedor' => Proveedor::findOrFail($id)
+            'proveedor' => Proveedor::findOrFail($id),
         ]);
+    }
+
+    public function show(int $id)
+    {
+        Proveedor::findOrFail($id);
+
+        return redirect()->route('proveedores.edit', $id);
     }
 
     public function update(StoreSupplierRequest $request, int $id)
     {
         $this->supplierService->updateSupplier(Proveedor::findOrFail($id), $request->validated());
+
         return redirect()->route('proveedores.index')->with('success', 'Proveedor actualizado exitosamente.');
     }
 
     public function destroy(int $id)
     {
         $this->supplierService->deleteSupplier(Proveedor::findOrFail($id));
+
         return redirect()->route('proveedores.index')->with('success', 'Proveedor eliminado exitosamente.');
     }
 }

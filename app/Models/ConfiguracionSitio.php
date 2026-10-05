@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class ConfiguracionSitio extends Model
 {
     protected $table = 'configuracion_sitio';
+
     public $timestamps = false;
 
     protected $fillable = ['clave', 'valor', 'descripcion'];
@@ -28,7 +30,7 @@ class ConfiguracionSitio extends Model
             return self::$allConfigsMemo;
         }
 
-        self::$allConfigsMemo = \Illuminate\Support\Facades\Cache::rememberForever('config_all_values', function () {
+        self::$allConfigsMemo = Cache::rememberForever('config_all_values', function () {
             return static::pluck('valor', 'clave')->toArray();
         });
 
@@ -41,6 +43,7 @@ class ConfiguracionSitio extends Model
     public static function obtener($clave, $default = null)
     {
         $all = self::loadAll();
+
         return $all[$clave] ?? $default;
     }
 
@@ -50,9 +53,10 @@ class ConfiguracionSitio extends Model
     public static function establecer($clave, $valor)
     {
         // Invalidate both the old individual cache and the batch cache
-        \Illuminate\Support\Facades\Cache::forget("config_{$clave}");
-        \Illuminate\Support\Facades\Cache::forget('config_all_values');
+        Cache::forget("config_{$clave}");
+        Cache::forget('config_all_values');
         self::$allConfigsMemo = null;
+        Cache::forget('globalConfig');
 
         return static::updateOrCreate(
             ['clave' => $clave],

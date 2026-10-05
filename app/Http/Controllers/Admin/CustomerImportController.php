@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Usuario;
-use App\Models\Rol;
 use App\Models\AdminNotification;
+use App\Models\Rol;
+use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class CustomerImportController extends Controller
@@ -36,14 +37,15 @@ class CustomerImportController extends Controller
         $file = $request->file('file');
         $handle = fopen($file->getRealPath(), 'r');
 
-        if (!$handle) {
+        if (! $handle) {
             return response()->json(['error' => 'No se pudo leer el archivo'], 422);
         }
 
         // Leer headers
         $headers = fgetcsv($handle, 0, ',');
-        if (!$headers) {
+        if (! $headers) {
             fclose($handle);
+
             return response()->json(['error' => 'El archivo CSV está vacío'], 422);
         }
 
@@ -86,16 +88,32 @@ class CustomerImportController extends Controller
             'file' => 'required|file|mimes:csv,txt|max:5120',
             'mapping' => 'required|array',
             'mapping.nombres' => 'required|string',
+            'mapping.*' => 'nullable|string|max:255',
         ]);
 
         $file = $request->file('file');
         $mapping = $request->input('mapping');
         $handle = fopen($file->getRealPath(), 'r');
 
+        if (! $handle) {
+            return response()->json(['error' => 'No se pudo leer el archivo'], 422);
+        }
         // Skip header
         $headers = fgetcsv($handle, 0, ',');
+        if (! $headers || $headers === [null]) {
+            fclose($handle);
+
+            return response()->json(['error' => 'El archivo CSV está vacío'], 422);
+        }
         $headers[0] = preg_replace('/^\x{FEFF}/u', '', $headers[0]);
         $headers = array_map('trim', $headers);
+        foreach ($mapping as $column) {
+            if ($column && ! in_array($column, $headers, true)) {
+                fclose($handle);
+
+                return response()->json(['error' => 'El mapeo contiene una columna que no existe en el archivo'], 422);
+            }
+        }
 
         $imported = 0;
         $skipped = 0;
@@ -119,10 +137,26 @@ class CustomerImportController extends Controller
                 $telefono = $row[$mapping['telefono'] ?? ''] ?? null;
                 $dni = $row[$mapping['dni'] ?? ''] ?? null;
 
+                $validation = Validator::make([
+                    'nombres' => $nombres, 'apellidos' => $apellidos, 'email' => $email ?: null,
+                    'telefono' => $telefono ?: null, 'dni' => $dni ?: null,
+                ], [
+                    'nombres' => 'required|string|max:255', 'apellidos' => 'nullable|string|max:255',
+                    'email' => 'nullable|email|max:255', 'telefono' => 'nullable|string|max:20',
+                    'dni' => 'nullable|digits:8',
+                ]);
+                if ($validation->fails()) {
+                    $errors[] = "Fila {$rowNum}: ".$validation->errors()->first();
+                    $skipped++;
+
+                    continue;
+                }
+
                 // Validación básica
                 if (empty($nombres)) {
                     $errors[] = "Fila {$rowNum}: Nombre vacío, omitida.";
                     $skipped++;
+
                     continue;
                 }
 
@@ -130,12 +164,14 @@ class CustomerImportController extends Controller
                 if ($email && Usuario::where('email', $email)->exists()) {
                     $errors[] = "Fila {$rowNum}: Email '{$email}' ya existe, omitida.";
                     $skipped++;
+
                     continue;
                 }
 
                 if ($dni && Usuario::where('dni', $dni)->exists()) {
                     $errors[] = "Fila {$rowNum}: DNI '{$dni}' ya existe, omitida.";
                     $skipped++;
+
                     continue;
                 }
 
@@ -146,7 +182,7 @@ class CustomerImportController extends Controller
                     'telefono' => $telefono ?: null,
                     'dni' => $dni ?: null,
                     'estado' => 'activo',
-                    'password_hash' => Hash::make('novape2026'),
+                    'password_hash' => Hash::make(Str::random(32)),
                 ]);
 
                 if ($clienteRol) {
@@ -160,7 +196,7 @@ class CustomerImportController extends Controller
             fclose($handle);
 
             // Notificación al admin
-            AdminNotification::send('import_csv', "Importación CSV completada", "{$imported} clientes importados, {$skipped} omitidos.", [
+            AdminNotification::send('import_csv', 'Importación CSV completada', "{$imported} clientes importados, {$skipped} omitidos.", [
                 'icon' => 'upload',
                 'color' => 'green',
                 'link' => '/admin/clientes',
@@ -176,7 +212,8 @@ class CustomerImportController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             fclose($handle);
-            return response()->json(['error' => 'Error al procesar: ' . $e->getMessage()], 500);
+
+            return response()->json(['error' => 'Error al procesar: '.$e->getMessage()], 500);
         }
     }
 
@@ -186,7 +223,7 @@ class CustomerImportController extends Controller
     private function suggestFieldMapping(array $headers): array
     {
         $map = [];
-        $normalize = fn($s) => mb_strtolower(trim(str_replace(['_', '-', ' '], '', $s)));
+        $normalize = fn ($s) => mb_strtolower(trim(str_replace(['_', '-', ' '], '', $s)));
 
         $patterns = [
             'nombres' => ['nombres', 'nombre', 'name', 'firstname', 'primernombre'],

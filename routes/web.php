@@ -1,46 +1,62 @@
 <?php
 
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\CartController;
-use App\Http\Controllers\CheckoutController;
-use App\Http\Controllers\InvoiceController;
-use App\Http\Controllers\Admin\InventarioController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\AnaliticasController;
-use App\Http\Controllers\PageController;
-use App\Http\Controllers\SitemapController;
-use App\Http\Controllers\ChatbotController;
-use App\Http\Controllers\ReclamoController;
-use App\Http\Controllers\Auth\GoogleAuthController;
-use App\Http\Controllers\ShippingController;
-
-use App\Http\Controllers\CompareController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ListaDeseoController;
-
-use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\ProductController;
-use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\BrandController;
-use App\Http\Controllers\Admin\OrderController;
-use App\Http\Controllers\Admin\CustomerController;
-use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\AlmacenController;
-use App\Http\Controllers\Admin\GastoController;
-use App\Http\Controllers\Admin\PosController;
-use App\Http\Controllers\Admin\CajaController;
-use App\Http\Controllers\Admin\CompraController;
-use App\Http\Controllers\Admin\ZonaController;
-use App\Http\Controllers\Admin\MetodoPagoController;
-use App\Http\Controllers\Admin\ProveedorController;
-use App\Http\Controllers\Admin\CuponController;
+use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\BannerController;
-use App\Http\Controllers\Admin\StaffController;
-use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\BrandController;
+use App\Http\Controllers\Admin\CajaController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\CompraController;
+use App\Http\Controllers\Admin\CrmAutomationController;
+use App\Http\Controllers\Admin\CrmCalendarController;
+use App\Http\Controllers\Admin\CrmCaseController;
+use App\Http\Controllers\Admin\CrmCompanyController;
+use App\Http\Controllers\Admin\CrmCustomFieldController;
+use App\Http\Controllers\Admin\CrmDashboardController;
+use App\Http\Controllers\Admin\CrmExportController;
+use App\Http\Controllers\Admin\CrmPipelineController;
+use App\Http\Controllers\Admin\CrmSearchController;
+use App\Http\Controllers\Admin\CrmSettingsController;
+use App\Http\Controllers\Admin\CrmTaskController;
+use App\Http\Controllers\Admin\CuponController;
+use App\Http\Controllers\Admin\CustomerController;
+use App\Http\Controllers\Admin\CustomerImportController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\GastoController;
+use App\Http\Controllers\Admin\InventarioController;
 use App\Http\Controllers\Admin\InvoiceController as AdminInvoiceController;
-
-use App\Models\ConfiguracionSitio;
+use App\Http\Controllers\Admin\MarketingCampaignController;
+use App\Http\Controllers\Admin\MetodoPagoController;
+use App\Http\Controllers\Admin\NotificationController;
+use App\Http\Controllers\Admin\Omnichannel\InboxController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\PosController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ProveedorController;
+use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\StaffController;
+use App\Http\Controllers\Admin\ZonaController;
+use App\Http\Controllers\AnaliticasController;
+use App\Http\Controllers\Api\Omnichannel\ConversationApiController;
+use App\Http\Controllers\Api\Omnichannel\WhatsAppWebhookController;
+use App\Http\Controllers\Auth\GoogleAuthController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CompareController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\ListaDeseoController;
+use App\Http\Controllers\NiubizController;
+use App\Http\Controllers\PageController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReclamoController;
+use App\Http\Controllers\RmaRequestController;
+use App\Http\Controllers\ShippingController;
+use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -105,18 +121,17 @@ Route::controller(CartController::class)->prefix('cart')->group(function () {
 
 Route::get('/carrito', fn () => Inertia::render('Cart'))->name('cart.page');
 
-
 Route::controller(ShippingController::class)->prefix('api/shipping')->group(function () {
     Route::post('/calculate', 'calculate')->middleware('throttle:10,1')->name('shipping.calculate');
     Route::post('/validate-address', 'validateAddress')->name('shipping.validate-address');
 });
 
-Route::controller(\App\Http\Controllers\CheckoutController::class)->group(function () {
+Route::controller(CheckoutController::class)->group(function () {
     Route::get('/checkout', 'checkout')->name('checkout');
     Route::post('/api/checkout/apply-coupon', 'applyCoupon');
 });
 
-Route::controller(\App\Http\Controllers\NiubizController::class)->group(function () {
+Route::controller(NiubizController::class)->group(function () {
     Route::post('/api/checkout/niubiz/session', 'createSession');
     Route::post('/api/checkout/niubiz/authorize', 'authorizeTransaction')->name('checkout.niubiz.authorize');
     Route::get('/checkout/niubiz/success', 'success')->name('checkout.niubiz.success');
@@ -130,8 +145,8 @@ Route::controller(CompareController::class)->prefix('comparador')->group(functio
 });
 
 // Comprobantes Públicos
-Route::get('/comprobante/{codigo_ticket}', [AdminInvoiceController::class, 'verComprobantePublico'])->name('comprobante.publico');
-Route::get('/comprobante/ecommerce/{codigo}', [InvoiceController::class, 'verComprobanteEcommerce'])->name('comprobante.ecommerce.publico');
+Route::get('/comprobante/{codigo_ticket}', [AdminInvoiceController::class, 'verComprobantePublico'])->name('comprobante.publico')->middleware('signed');
+Route::get('/comprobante/ecommerce/{codigo}', [InvoiceController::class, 'verComprobanteEcommerce'])->name('comprobante.ecommerce.publico')->middleware('signed');
 
 // ==========================================
 // PERFIL DE USUARIO PRIVADO
@@ -145,12 +160,12 @@ Route::middleware('auth')->group(function () {
         Route::post('/celular/solicitar-codigo', 'requestPhoneUpdateOtp')->middleware('throttle:3,1')->name('perfil.celular.solicitar');
         Route::post('/celular/verificar-codigo', 'verifyPhoneUpdateOtp')->name('perfil.celular.verificar');
         Route::post('/password', 'updatePassword')->middleware('throttle:5,1')->name('perfil.password');
-        
+
         // Direcciones
         Route::post('/direccion', 'storeDireccion')->middleware('throttle:5,1')->name('perfil.direccion.store');
         Route::post('/direccion/{id}/principal', 'setPrincipalDireccion')->name('perfil.direccion.principal');
         Route::delete('/direccion/{id}', 'destroyDireccion')->name('perfil.direccion.destroy');
-        
+
         // Tarjetas y Cuenta
         Route::post('/tarjetas', 'storeTarjeta')->middleware('throttle:5,1')->name('perfil.tarjetas.store');
         Route::delete('/tarjetas/{id}', 'destroyTarjeta')->name('perfil.tarjetas.destroy');
@@ -173,7 +188,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/factura/ecommerce/{id}/descargar', [InvoiceController::class, 'descargarComprobante'])->name('factura.ecommerce.descargar');
 
     // Devoluciones / RMA
-    Route::controller(\App\Http\Controllers\RmaRequestController::class)->group(function () {
+    Route::controller(RmaRequestController::class)->group(function () {
         Route::get('/perfil/devoluciones', 'index')->name('perfil.rma.index');
         Route::post('/perfil/devoluciones', 'store')->name('perfil.rma.store');
         Route::get('/perfil/devoluciones/{id}', 'show')->name('perfil.rma.show');
@@ -186,8 +201,8 @@ Route::middleware('auth')->group(function () {
 
 Route::controller(AdminAuthController::class)->prefix('admin')->group(function () {
     Route::get('/login', 'showLogin')->name('admin.login')->middleware('guest:admin');
-    Route::post('/login', 'login')->middleware(['guest:admin','throttle:5,1']);
-    Route::any('/logout', 'logout')->name('admin.logout')->middleware('auth:admin');
+    Route::post('/login', 'login')->middleware(['guest:admin', 'throttle:5,1']);
+    Route::post('/logout', 'logout')->name('admin.logout')->middleware('auth:admin');
 });
 
 Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'])->group(function () {
@@ -201,33 +216,33 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
 
     Route::get('/analiticas', [AnaliticasController::class, 'index'])->name('admin.analiticas')->middleware('permiso:ver_analiticas');
 
-    Route::get('/audit-logs', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('admin.audits')->middleware('permiso:gestionar_ajustes');
+    Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('admin.audits')->middleware('permiso:gestionar_ajustes');
 
     // Notificaciones
-    Route::controller(\App\Http\Controllers\Admin\NotificationController::class)->prefix('notificaciones')->group(function () {
+    Route::controller(NotificationController::class)->prefix('notificaciones')->group(function () {
         Route::get('/', 'index')->name('admin.notificaciones');
         Route::post('/{id}/read', 'markAsRead')->name('admin.notificaciones.read');
         Route::post('/read-all', 'markAllAsRead')->name('admin.notificaciones.read_all');
     });
 
     // Importación de Clientes
-    Route::controller(\App\Http\Controllers\Admin\CustomerImportController::class)->prefix('clientes/importar')->middleware('permiso:usuarios.gestionar')->group(function () {
+    Route::controller(CustomerImportController::class)->prefix('clientes/importar')->middleware('permiso:usuarios.gestionar')->group(function () {
         Route::get('/', 'index')->name('admin.clientes.import');
         Route::post('/preview', 'preview')->name('admin.clientes.import.preview');
         Route::post('/process', 'process')->name('admin.clientes.import.process');
     });
 
-    Route::controller(\App\Http\Controllers\Admin\CrmDashboardController::class)->prefix('crm')->middleware('permiso:crm.gestionar')->group(function () {
+    Route::controller(CrmDashboardController::class)->prefix('crm')->middleware('permiso:crm.gestionar')->group(function () {
         Route::get('/dashboard', 'index')->name('admin.crm.dashboard');
     });
 
-    Route::controller(\App\Http\Controllers\Admin\CrmCustomFieldController::class)->prefix('crm/custom-fields')->middleware('permiso:crm.gestionar')->group(function () {
+    Route::controller(CrmCustomFieldController::class)->prefix('crm/custom-fields')->middleware('permiso:crm.gestionar')->group(function () {
         Route::get('/', 'index')->name('admin.crm.custom_fields.index');
         Route::post('/', 'store')->name('admin.crm.custom_fields.store');
         Route::delete('/{customField}', 'destroy')->name('admin.crm.custom_fields.destroy');
     });
 
-    Route::controller(\App\Http\Controllers\Admin\CrmTaskController::class)->prefix('crm')->middleware('permiso:crm.gestionar')->group(function () {
+    Route::controller(CrmTaskController::class)->prefix('crm')->middleware('permiso:crm.gestionar')->group(function () {
         Route::get('/tasks', 'index')->name('admin.crm.tasks');
         Route::post('/tasks', 'store')->name('admin.crm.tasks.store');
         Route::put('/tasks/{activity}', 'update')->name('admin.crm.tasks.update');
@@ -235,11 +250,11 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
         Route::delete('/tasks/{activity}', 'destroy')->name('admin.crm.tasks.destroy');
     });
 
-    Route::controller(\App\Http\Controllers\Admin\CrmSearchController::class)->prefix('crm')->middleware('permiso:crm.gestionar')->group(function () {
+    Route::controller(CrmSearchController::class)->prefix('crm')->middleware('permiso:crm.gestionar')->group(function () {
         Route::get('/search', 'search')->name('admin.crm.search');
     });
 
-    Route::controller(\App\Http\Controllers\Admin\CrmCaseController::class)->prefix('crm')->middleware('permiso:crm.gestionar')->group(function () {
+    Route::controller(CrmCaseController::class)->prefix('crm')->middleware('permiso:crm.gestionar')->group(function () {
         Route::get('/cases', 'index')->name('admin.crm.cases');
         Route::post('/cases', 'store')->name('admin.crm.cases.store');
         Route::get('/cases/{crmCase}', 'show')->name('admin.crm.cases.show');
@@ -248,36 +263,36 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
         Route::delete('/cases/{crmCase}', 'destroy')->name('admin.crm.cases.destroy');
     });
 
-    Route::controller(\App\Http\Controllers\Admin\CrmCalendarController::class)->prefix('crm')->middleware('permiso:crm.gestionar')->group(function () {
+    Route::controller(CrmCalendarController::class)->prefix('crm')->middleware('permiso:crm.gestionar')->group(function () {
         Route::get('/calendar', 'index')->name('admin.crm.calendar');
         Route::get('/calendar/events', 'events')->name('admin.crm.calendar.events');
     });
 
-    Route::controller(\App\Http\Controllers\Admin\CrmExportController::class)->prefix('crm')->middleware('permiso:crm.gestionar')->group(function () {
+    Route::controller(CrmExportController::class)->prefix('crm')->middleware('permiso:crm.gestionar')->group(function () {
         Route::get('/export', 'export')->name('admin.crm.export');
     });
 
-    Route::controller(\App\Http\Controllers\Admin\CrmAutomationController::class)->prefix('crm/automations')->middleware('permiso:crm.gestionar')->group(function () {
+    Route::controller(CrmAutomationController::class)->prefix('crm/automations')->middleware('permiso:crm.gestionar')->group(function () {
         Route::get('/', 'index')->name('admin.crm.automations.index');
         Route::post('/', 'store')->name('admin.crm.automations.store');
         Route::delete('/{id}', 'destroy')->name('admin.crm.automations.destroy');
     });
 
-    Route::controller(\App\Http\Controllers\Admin\CrmPipelineController::class)->prefix('crm')->middleware('permiso:crm.gestionar')->group(function () {
+    Route::controller(CrmPipelineController::class)->prefix('crm')->middleware('permiso:crm.gestionar')->group(function () {
         Route::get('/pipeline', 'index')->name('admin.crm.pipeline');
         Route::post('/deals', 'store')->name('admin.crm.deals.store');
         Route::put('/deals/{id}/move', 'move')->name('admin.crm.deals.move');
         Route::get('/deals/{id}', 'show')->name('admin.crm.deals.show');
         Route::post('/deals/{id}/custom-fields', 'updateCustomFields')->name('admin.crm.deals.updateCustomFields');
         Route::post('/deals/{id}/activities', 'storeActivity')->name('admin.crm.deals.activities.store');
-        
+
         // Cotizador Integrado
         Route::post('/deals/{id}/products', 'addProduct')->name('admin.crm.deals.products.add');
         Route::delete('/deals/{id}/products/{productId}', 'removeProduct')->name('admin.crm.deals.products.remove');
         Route::get('/deals/{id}/quote', 'generateQuote')->name('admin.crm.deals.quote');
     });
 
-    Route::controller(\App\Http\Controllers\Admin\CrmCompanyController::class)->prefix('crm/companies')->middleware('permiso:crm.gestionar')->group(function () {
+    Route::controller(CrmCompanyController::class)->prefix('crm/companies')->middleware('permiso:crm.gestionar')->group(function () {
         Route::get('/', 'index')->name('admin.crm.companies.index');
         Route::post('/', 'store')->name('admin.crm.companies.store');
         Route::get('/{id}', 'show')->name('admin.crm.companies.show');
@@ -285,7 +300,7 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
         Route::delete('/{id}', 'destroy')->name('admin.crm.companies.destroy');
     });
 
-    Route::controller(\App\Http\Controllers\Admin\CrmSettingsController::class)->prefix('crm/settings')->middleware('permiso:crm.gestionar')->group(function () {
+    Route::controller(CrmSettingsController::class)->prefix('crm/settings')->middleware('permiso:crm.gestionar')->group(function () {
         Route::get('/objects', 'objects')->name('admin.crm.settings.objects');
         Route::post('/objects/fields', 'storeField')->name('admin.crm.settings.fields.store');
         Route::delete('/objects/fields/{id}', 'destroyField')->name('admin.crm.settings.fields.destroy');
@@ -293,14 +308,14 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
     });
 
     // Devoluciones / RMA
-    Route::controller(\App\Http\Controllers\Admin\RmaRequestController::class)->prefix('rma')->middleware('permiso:editar_pedido')->group(function () {
+    Route::controller(App\Http\Controllers\Admin\RmaRequestController::class)->prefix('rma')->middleware('permiso:editar_pedido')->group(function () {
         Route::get('/', 'index')->name('admin.rma.index');
         Route::get('/{id}', 'show')->name('admin.rma.show');
         Route::put('/{id}/status', 'updateStatus')->name('admin.rma.update_status');
     });
 
     // Marketing Cloud
-    Route::controller(\App\Http\Controllers\Admin\MarketingCampaignController::class)->prefix('marketing/campaigns')->middleware('permiso:marketing.gestionar')->group(function () {
+    Route::controller(MarketingCampaignController::class)->prefix('marketing/campaigns')->middleware('permiso:marketing.gestionar')->group(function () {
         Route::get('/', 'index')->name('admin.marketing.campaigns');
         Route::get('/create', 'create')->name('admin.marketing.campaigns.create');
         Route::post('/', 'store')->name('admin.marketing.campaigns.store');
@@ -468,29 +483,29 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
     // OMNICHANNEL INBOX
     // ==========================================
     Route::middleware(['permiso:gestionar_omnichannel'])->group(function () {
-        Route::get('/inbox', [\App\Http\Controllers\Admin\Omnichannel\InboxController::class, 'index'])->name('admin.inbox');
+        Route::get('/inbox', [InboxController::class, 'index'])->name('admin.inbox');
 
         // API del Inbox (JSON, usadas por React via fetch)
         Route::prefix('api/omnichannel')->group(function () {
-            Route::get('/conversations', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'conversations']);
-            Route::get('/conversations/{conversation}/messages', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'messages']);
-            Route::post('/conversations/{conversation}/messages', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'sendMessage'])->middleware('throttle:30,1');
-            Route::post('/conversations/{conversation}/assign', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'assignAgent']);
-            Route::post('/conversations/{conversation}/unassign', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'unassignAgent']);
-            Route::post('/conversations/{conversation}/resolve', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'resolveConversation']);
-            Route::post('/conversations/{conversation}/reopen', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'reopenConversation']);
-            Route::post('/conversations/{conversation}/transfer-to-bot', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'transferToBot']);
-            Route::post('/conversations/{conversation}/notes', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'addInternalNote']);
-            Route::get('/conversations/{conversation}/contact-profile', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'contactProfile']);
-            Route::get('/canned-responses', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'cannedResponses']);
+            Route::get('/conversations', [ConversationApiController::class, 'conversations']);
+            Route::get('/conversations/{conversation}/messages', [ConversationApiController::class, 'messages']);
+            Route::post('/conversations/{conversation}/messages', [ConversationApiController::class, 'sendMessage'])->middleware('throttle:30,1');
+            Route::post('/conversations/{conversation}/assign', [ConversationApiController::class, 'assignAgent']);
+            Route::post('/conversations/{conversation}/unassign', [ConversationApiController::class, 'unassignAgent']);
+            Route::post('/conversations/{conversation}/resolve', [ConversationApiController::class, 'resolveConversation']);
+            Route::post('/conversations/{conversation}/reopen', [ConversationApiController::class, 'reopenConversation']);
+            Route::post('/conversations/{conversation}/transfer-to-bot', [ConversationApiController::class, 'transferToBot']);
+            Route::post('/conversations/{conversation}/notes', [ConversationApiController::class, 'addInternalNote']);
+            Route::get('/conversations/{conversation}/contact-profile', [ConversationApiController::class, 'contactProfile']);
+            Route::get('/canned-responses', [ConversationApiController::class, 'cannedResponses']);
 
             // Enterprise routes
-            Route::post('/conversations/{conversation}/transfer', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'transferConversation']);
-            Route::post('/conversations/{conversation}/close', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'closeConversation']);
-            Route::get('/agent-status', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'getAgentStatus']);
-            Route::post('/agent-status', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'updateAgentStatus']);
-            Route::get('/supervisor/dashboard', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'supervisorDashboard']);
-            Route::get('/available-agents', [\App\Http\Controllers\Api\Omnichannel\ConversationApiController::class, 'availableAgents']);
+            Route::post('/conversations/{conversation}/transfer', [ConversationApiController::class, 'transferConversation']);
+            Route::post('/conversations/{conversation}/close', [ConversationApiController::class, 'closeConversation']);
+            Route::get('/agent-status', [ConversationApiController::class, 'getAgentStatus']);
+            Route::post('/agent-status', [ConversationApiController::class, 'updateAgentStatus']);
+            Route::get('/supervisor/dashboard', [ConversationApiController::class, 'supervisorDashboard']);
+            Route::get('/available-agents', [ConversationApiController::class, 'availableAgents']);
         });
     });
 });
@@ -499,7 +514,6 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
 // WEBHOOKS OMNICHANNEL (Público — sin auth)
 // ==========================================
 Route::prefix('api/webhooks')->group(function () {
-    Route::get('/whatsapp', [\App\Http\Controllers\Api\Omnichannel\WhatsAppWebhookController::class, 'verify']);
-    Route::post('/whatsapp', [\App\Http\Controllers\Api\Omnichannel\WhatsAppWebhookController::class, 'handle'])->middleware('throttle:10,1');
+    Route::get('/whatsapp', [WhatsAppWebhookController::class, 'verify']);
+    Route::post('/whatsapp', [WhatsAppWebhookController::class, 'handle'])->middleware('throttle:10,1');
 });
-
