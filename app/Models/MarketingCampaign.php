@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class MarketingCampaign extends Model
 {
@@ -32,6 +32,7 @@ class MarketingCampaign extends Model
         'finished_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<Usuario, $this> */
     public function author(): BelongsTo
     {
         return $this->belongsTo(Usuario::class, 'author_id');

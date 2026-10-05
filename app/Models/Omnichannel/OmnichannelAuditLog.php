@@ -22,11 +22,13 @@ class OmnichannelAuditLog extends Model
         'meta_data' => 'array',
     ];
 
+    /** @return BelongsTo<OmnichannelConversation, $this> */
     public function conversation(): BelongsTo
     {
         return $this->belongsTo(OmnichannelConversation::class, 'conversation_id');
     }
 
+    /** @return BelongsTo<Usuario, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(Usuario::class, 'user_id');

@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 use OwenIt\Auditing\Contracts\Auditable;
 
 class Producto extends Model implements Auditable
 {
-    use SoftDeletes, HasFactory, \OwenIt\Auditing\Auditable;
+    use HasFactory, \OwenIt\Auditing\Auditable, SoftDeletes;
 
     protected $table = 'producto';
 
@@ -32,7 +32,7 @@ class Producto extends Model implements Auditable
         'garantias',
         'fuente_url',
         'fuente_consultada_at',
-        'sku_base'
+        'sku_base',
     ];
 
     protected $casts = [
@@ -52,7 +52,7 @@ class Producto extends Model implements Auditable
                 $slug = $baseSlug;
                 $count = 1;
                 while (static::withTrashed()->where('slug', $slug)->where('id', '!=', $producto->id)->exists()) {
-                    $slug = $baseSlug . '-' . $count;
+                    $slug = $baseSlug.'-'.$count;
                     $count++;
                 }
                 $producto->slug = $slug;
@@ -60,6 +60,8 @@ class Producto extends Model implements Auditable
         });
 
         $clearCache = function () {
+            \Illuminate\Support\Facades\Cache::forget('home_category_product_ids_v2');
+            \Illuminate\Support\Facades\Cache::forget('home_weekly_product_ids_v2');
             Cache::forget('home_categorias');
             Cache::forget('home_mejor_semana');
         };
@@ -68,31 +70,37 @@ class Producto extends Model implements Auditable
         static::deleted($clearCache);
     }
 
+    /** @return BelongsTo<Marca, $this> */
     public function marca(): BelongsTo
     {
         return $this->belongsTo(Marca::class, 'marca_id');
     }
 
+    /** @return BelongsTo<Proveedor, $this> */
     public function proveedor(): BelongsTo
     {
         return $this->belongsTo(Proveedor::class, 'proveedor_id');
     }
 
+    /** @return BelongsToMany<Categoria, $this> */
     public function categorias(): BelongsToMany
     {
         return $this->belongsToMany(Categoria::class, 'producto_categoria', 'producto_id', 'categoria_id');
     }
 
+    /** @return HasMany<Variante, $this> */
     public function variantes(): HasMany
     {
         return $this->hasMany(Variante::class, 'producto_id');
     }
 
+    /** @return HasMany<ProductoImagen, $this> */
     public function imagenes(): HasMany
     {
         return $this->hasMany(ProductoImagen::class, 'producto_id')->orderBy('orden');
     }
 
+    /** @return HasMany<ProductoEspecificacion, $this> */
     public function productoEspecificaciones(): HasMany
     {
         return $this->hasMany(ProductoEspecificacion::class, 'producto_id');

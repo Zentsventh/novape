@@ -3,6 +3,7 @@
 namespace App\Services\Omnichannel;
 
 use App\Models\CrmCase;
+use App\Models\Omnichannel\OmnichannelAuditLog;
 use App\Models\Omnichannel\OmnichannelConversation;
 use App\Models\Omnichannel\OmnichannelQueue;
 use App\Models\Usuario;
@@ -22,6 +23,7 @@ class TicketAssignmentService
             if (in_array($conversation->status, ['resolved', 'closed'])) {
                 $conversation->update(['status' => 'human_active']);
             }
+
             return;
         }
 
@@ -30,8 +32,8 @@ class TicketAssignmentService
 
             // 1. Obtener todos los agentes ONLINE con sus límites y conteo de chats activos
             $availableAgent = Usuario::whereHas('roles', function ($query) {
-                    $query->whereIn('rol.id', [1, 2]); // Admin o Staff
-                })
+                $query->where('nombre', 'admin')->orWhereHas('permisos', fn ($p) => $p->where('nombre', 'gestionar_omnichannel'));
+            })
                 ->whereHas('omnichannelConfig', function ($query) {
                     $query->where('status', 'online');
                 })
@@ -44,7 +46,8 @@ class TicketAssignmentService
                 // 2. Filtrar los que ya llegaron a su límite máximo
                 ->filter(function ($agent) {
                     $max = $agent->omnichannelConfig ? $agent->omnichannelConfig->max_chats : 5;
-                    return $agent->active_chats_count < $max;
+
+                    return $agent->getAttribute('active_chats_count') < $max;
                 })
                 // 3. Ordenar por los que tienen menos carga (Round-Robin)
                 ->sortBy('active_chats_count')
@@ -62,7 +65,7 @@ class TicketAssignmentService
 
                 // Crear o vincular Caso CRM
                 $this->createCaseForConversation($conversation, $availableAgent->id);
-                
+
                 // Aquí se podría disparar un Evento / WebSocket a $availableAgent
             } else {
                 // No hay asesores disponibles: Mandar a la Cola
@@ -83,33 +86,33 @@ class TicketAssignmentService
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error en TicketAssignmentService: ' . $e->getMessage());
+            Log::error('Error en TicketAssignmentService: '.$e->getMessage());
         }
     }
 
     public function createCaseForConversation(OmnichannelConversation $conversation, ?int $agentId): void
     {
-        if (!$conversation->contact || !$conversation->contact->usuario_id) {
+        if (! $conversation->contact || ! $conversation->contact->usuario_id) {
             return;
         }
 
         // Verifica si el cliente ya tiene un caso abierto asociado a esta conversación o genérico
         $existingCase = CrmCase::where('cliente_id', $conversation->contact->usuario_id)
-            ->where(function($q) use ($conversation) {
+            ->where(function ($q) use ($conversation) {
                 $q->where('omnichannel_conversation_id', $conversation->id)
-                  ->orWhereIn('estado', ['abierto', 'en_progreso']);
+                    ->orWhereIn('estado', ['abierto', 'en_progreso']);
             })
             ->first();
 
-        if (!$existingCase) {
+        if (! $existingCase) {
             CrmCase::create([
-                'titulo'      => 'Soporte vía Chat Omnicanal (' . strtoupper($conversation->channel) . ')',
-                'descripcion' => 'Transferido desde el Chatbot. Último mensaje: ' . $conversation->last_message_preview,
-                'tipo'        => 'consulta',
-                'estado'      => 'abierto',
-                'prioridad'   => 'media',
-                'cliente_id'  => $conversation->contact->usuario_id,
-                'asignado_a'  => $agentId,
+                'titulo' => 'Soporte vía Chat Omnicanal ('.strtoupper($conversation->channel).')',
+                'descripcion' => 'Transferido desde el Chatbot. Último mensaje: '.$conversation->last_message_preview,
+                'tipo' => 'consulta',
+                'estado' => 'abierto',
+                'prioridad' => 'media',
+                'cliente_id' => $conversation->contact->usuario_id,
+                'asignado_a' => $agentId,
                 'omnichannel_conversation_id' => $conversation->id,
             ]);
         }
@@ -121,7 +124,7 @@ class TicketAssignmentService
     public function processQueueForAgent(Usuario $agent): void
     {
         // 1. Verificar si está online
-        if (!$agent->omnichannelConfig || $agent->omnichannelConfig->status !== 'online') {
+        if (! $agent->omnichannelConfig || $agent->omnichannelConfig->status !== 'online') {
             return;
         }
 
@@ -147,7 +150,7 @@ class TicketAssignmentService
 
         foreach ($queueItems as $item) {
             $conversation = $item->conversation;
-            
+
             // Asignar
             $conversation->update([
                 'assigned_user_id' => $agent->id,
@@ -176,7 +179,7 @@ class TicketAssignmentService
                 'status' => 'human_active',
             ]);
 
-            \App\Models\Omnichannel\OmnichannelAuditLog::create([
+            OmnichannelAuditLog::create([
                 'conversation_id' => $conversation->id,
                 'user_id' => $fromUser->id,
                 'action' => 'transfer',
@@ -184,8 +187,8 @@ class TicketAssignmentService
                 'meta_data' => [
                     'from' => $fromUser->id,
                     'to' => $toUser->id,
-                    'reason' => $reason
-                ]
+                    'reason' => $reason,
+                ],
             ]);
 
             // Re-asignar el Caso CRM también
@@ -200,7 +203,7 @@ class TicketAssignmentService
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error en Transferencia: ' . $e->getMessage());
+            Log::error('Error en Transferencia: '.$e->getMessage());
         }
     }
 
@@ -218,15 +221,15 @@ class TicketAssignmentService
                 'status' => 'closed',
                 'closed_at' => now(),
                 'closed_by' => $closedBy->id,
-                'close_reason' => $reason
+                'close_reason' => $reason,
             ]);
 
-            \App\Models\Omnichannel\OmnichannelAuditLog::create([
+            OmnichannelAuditLog::create([
                 'conversation_id' => $conversation->id,
                 'user_id' => $closedBy->id,
                 'action' => 'close',
                 'description' => "Conversación cerrada. Motivo: {$reason}",
-                'meta_data' => ['reason' => $reason]
+                'meta_data' => ['reason' => $reason],
             ]);
 
             $case = CrmCase::where('omnichannel_conversation_id', $conversation->id)
@@ -246,7 +249,7 @@ class TicketAssignmentService
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error al cerrar conversación: ' . $e->getMessage());
+            Log::error('Error al cerrar conversación: '.$e->getMessage());
         }
     }
 }

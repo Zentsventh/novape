@@ -26,6 +26,8 @@ class RolePermissionService
 
     public function createRole(array $data): Rol
     {
+        abort_unless(auth('admin')->user()?->esAdmin(), 403);
+
         return DB::transaction(function () use ($data) {
             $rol = Rol::create([
                 'nombre' => strtolower($data['nombre']),
@@ -46,6 +48,8 @@ class RolePermissionService
             throw ValidationException::withMessages(['nombre' => 'No se puede renombrar un rol base.']);
         }
 
+        abort_unless(auth('admin')->user()?->esAdmin(), 403);
+
         return DB::transaction(function () use ($rol, $data) {
             $rol->update([
                 'nombre' => strtolower($data['nombre']),
@@ -60,6 +64,7 @@ class RolePermissionService
 
     public function deleteRole(Rol $rol): void
     {
+        abort_unless(auth('admin')->user()?->esAdmin(), 403);
         if ($rol->nombre === 'cliente' || $rol->usuarios()->exists()) {
             throw ValidationException::withMessages(['rol' => 'No se puede eliminar un rol base o asignado a usuarios.']);
         }

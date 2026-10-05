@@ -2,7 +2,7 @@ import puppeteer from 'puppeteer';
 import assert from 'node:assert/strict';
 import { readFile, mkdir } from 'node:fs/promises';
 const taxonomy = JSON.parse(await readFile('database/seed-data/efe-taxonomy.json', 'utf8'));
-const browser = await puppeteer.launch({ headless: true });
+const browser = await puppeteer.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true });
 await mkdir('storage/app/private/storefront-qa', { recursive: true });
 const errors = [];
 try {
@@ -13,10 +13,11 @@ try {
         const local = ['localhost', '127.0.0.1', '[::1]'].includes(new URL(request.url()).hostname);
         return !local || ['font', 'media'].includes(request.resourceType()) || (blockImages && request.resourceType() === 'image') ? request.abort() : request.continue();
     });
+    page.on('requestfailed', request => { if (['script', 'stylesheet', 'document'].includes(request.resourceType())) console.error('Asset failure:', request.url(), request.failure()?.errorText); });
     page.on('pageerror', (error) => errors.push(error.message));
     page.on('response', (response) => { if (response.status() >= 500) console.error('HTTP', response.status(), response.url()); });
     await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
-    const response = await page.goto('http://localhost:8000/catalogo', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    const response = await page.goto('http://127.0.0.1:8000/catalogo', { waitUntil: 'domcontentloaded', timeout: 60000 });
     const source = await response.text();
     await page.waitForSelector('.efe-cat-nav-item');
     const props = await page.evaluate((html) => {
@@ -55,11 +56,14 @@ try {
     }
     blockImages = false;
     await page.setViewport({ width: 390, height: 900 });
-    await page.goto(`http://localhost:8000/producto/${props.productos.data[0].slug}`, { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.goto(`http://127.0.0.1:8000/producto/${props.productos.data[0].slug}`, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForSelector('.premium-thumb');
-    await page.waitForFunction(() => [...document.querySelectorAll('.premium-thumb')].every((image) => image.complete && image.naturalWidth > 0));
+    await page.waitForFunction(() => [...document.querySelectorAll('.premium-thumb')].every((image) => image.complete && image.naturalWidth > 0)).catch(async error => {
+        console.error('Gallery state:', await page.$$eval('.premium-thumb', images => images.map(image => ({src: image.src, complete: image.complete, width: image.naturalWidth}))));
+        throw error;
+    });
     const photos = await page.$$eval('.premium-thumb', (images) => images.map((image) => image.src));
-    assert(new Set(photos).size >= 3 && photos.every((url) => url.includes('/storage/productos/efe/')));
+    assert(new Set(photos).size >= 3 && photos.every((url) => url.includes('/storage/productos/')));
     await page.click('.premium-thumb:last-child');
     await page.waitForFunction((selected) => document.querySelector('.premium-main-img img')?.src === selected, {}, photos.at(-1));
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);

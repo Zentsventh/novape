@@ -19,6 +19,7 @@ class ProcessPosSaleRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'operation_key' => 'required|uuid',
             'items' => 'required|array|min:1',
             'items.*.variante_id' => 'required|integer|distinct|exists:variante,id',
             'items.*.cantidad' => 'required|integer|min:1',

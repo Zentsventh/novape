@@ -10,6 +10,7 @@ use App\Models\Producto;
 use App\Models\ProductoEspecificacion;
 use App\Models\ProductoImagen;
 use App\Models\Variante;
+use App\Services\Inventory\StockAvailability;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -127,6 +128,7 @@ class ProductManagementService
             ]);
         }
 
+        StockAvailability::assertRemaining($variante->id, (int) $almacenEcommerceId, (int) ($stockAlmacen->cantidad ?? 0) + $cantidad);
         if ($stockAlmacen) {
             DB::table('stock_almacen')->where('id', $stockAlmacen->id)->increment('cantidad', $cantidad);
         } else {

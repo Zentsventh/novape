@@ -3,9 +3,8 @@
 namespace App\Events\Omnichannel;
 
 use App\Models\Omnichannel\OmnichannelMessage;
-use Illuminate\Broadcasting\Channel;
+use App\Services\Omnichannel\ConversationAccess;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -37,7 +36,7 @@ class NewMessageReceived implements ShouldBroadcast
 
     public function broadcastOn(): array
     {
-        return [new PrivateChannel('novape-inbox')];
+        return ConversationAccess::channels((int) $this->messageData['conversation_id']);
     }
 
     public function broadcastAs(): string

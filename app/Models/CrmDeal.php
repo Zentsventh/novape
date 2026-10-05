@@ -11,12 +11,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Carbon;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\SchemalessAttributes\Casts\SchemalessAttributes;
 
+/** @property Carbon|null $fecha_cierre_real */
 class CrmDeal extends Model implements Auditable
 {
-    use HasFactory, HasPolymorphicCleanup, \OwenIt\Auditing\Auditable;
+    use HasFactory, HasPolymorphicCleanup, \OwenIt\Auditing\Auditable, \Illuminate\Database\Eloquent\SoftDeletes;
 
     protected $table = 'crm_deals';
 
@@ -33,6 +35,7 @@ class CrmDeal extends Model implements Auditable
 
     protected $casts = [
         'fecha_cierre_esperada' => 'datetime',
+        'fecha_cierre_real' => 'datetime',
         'valor' => 'decimal:2',
         'custom_fields' => SchemalessAttributes::class,
     ];
@@ -42,36 +45,43 @@ class CrmDeal extends Model implements Auditable
         return $this->custom_fields->modelScope();
     }
 
+    /** @return BelongsTo<Usuario, $this> */
     public function cliente(): BelongsTo
     {
         return $this->belongsTo(Usuario::class, 'usuario_id');
     }
 
+    /** @return BelongsTo<CrmCompany, $this> */
     public function empresa(): BelongsTo
     {
         return $this->belongsTo(CrmCompany::class, 'empresa_id');
     }
 
+    /** @return BelongsTo<CrmStage, $this> */
     public function stage(): BelongsTo
     {
         return $this->belongsTo(CrmStage::class, 'stage_id');
     }
 
+    /** @return MorphMany<CrmNote, $this> */
     public function notes(): MorphMany
     {
         return $this->morphMany(CrmNote::class, 'notable');
     }
 
+    /** @return MorphMany<CrmTimelineEvent, $this> */
     public function timelineEvents(): MorphMany
     {
         return $this->morphMany(CrmTimelineEvent::class, 'trackable');
     }
 
+    /** @return HasMany<CrmActivity, $this> */
     public function activities(): HasMany
     {
         return $this->hasMany(CrmActivity::class, 'deal_id')->orderBy('created_at', 'desc');
     }
 
+    /** @return HasMany<CrmDealProduct, $this> */
     public function products(): HasMany
     {
         return $this->hasMany(CrmDealProduct::class);

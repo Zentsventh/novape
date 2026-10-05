@@ -4,18 +4,16 @@ declare(strict_types=1);
 
 namespace App\Services\Orders;
 
-use App\Jobs\SendWhatsAppNotification;
-use App\Mail\OrderStatusUpdated;
 use App\Models\CrmActivity;
 use App\Models\CrmDeal;
 use App\Models\Cupon;
 use App\Models\LoyaltyPointsHistory;
 use App\Models\Pedido;
 use App\Models\Usuario;
+use App\Services\Admin\Crm\CrmPipelineService;
 use App\Services\Inventory\InventoryService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
 class UpdateOrderStatusService
 {
@@ -32,33 +30,29 @@ class UpdateOrderStatusService
      */
     public function execute(Pedido $pedido, array $data): void
     {
-        $estadoAnterior = $pedido->estado;
-        $nuevoEstado = $data['estado'];
-        if ($nuevoEstado === 'cancelado' && in_array($pedido->pago?->estado, ['completado', 'reembolso_pendiente'], true)) {
-            throw new \InvalidArgumentException('Confirma primero la anulación en Niubiz.');
-        }
-        if ($estadoAnterior === 'cancelado' && $nuevoEstado !== 'cancelado') {
-            throw new \InvalidArgumentException('No se puede reabrir un pedido cancelado.');
+        $nuevoEstado = strtolower($data['estado']);
+        if (! $pedido->exists) {
+            OrderTransitions::validate($pedido, $nuevoEstado);
         }
 
         DB::beginTransaction();
         try {
             $pedido = Pedido::whereKey($pedido->id)->lockForUpdate()->firstOrFail();
-            $estadoAnterior = $pedido->estado;
-            if ($nuevoEstado === 'cancelado' && in_array($pedido->pago?->estado, ['completado', 'reembolso_pendiente'], true)) {
-                throw new \InvalidArgumentException('Confirma primero la anulación en Niubiz.');
-            }
-            if ($estadoAnterior === 'cancelado' && $nuevoEstado !== 'cancelado') {
-                throw new \InvalidArgumentException('No se puede reabrir un pedido cancelado.');
-            }
+            $estadoAnterior = strtolower($pedido->estado);
+            OrderTransitions::validate($pedido, $nuevoEstado);
+            $consumed = $pedido->stock_consumed_at !== null;
             $pedido->update([
                 'estado' => $nuevoEstado,
                 'tracking_number' => $data['tracking_number'] ?? $pedido->tracking_number,
                 'courier_name' => $data['courier_name'] ?? $pedido->courier_name,
             ]);
+            if ($nuevoEstado === 'cancelado') {
+                DB::table('checkout_benefit_reservations')->where('pedido_id', $pedido->id)->delete();
+            }
 
-            if ($nuevoEstado === 'cancelado' && $estadoAnterior !== 'cancelado' && strtolower($estadoAnterior) !== 'pendiente') {
-                $this->inventoryService->returnStockForOrder($pedido, auth()->guard('admin')->id() ?? 1, 'Cancelación Administrativa');
+            if ($nuevoEstado === 'cancelado' && $estadoAnterior !== 'cancelado' && $consumed) {
+                $this->inventoryService->returnStockForOrder($pedido, (int) auth('admin')->id(), 'Cancelación Administrativa');
+                $pedido->update(['stock_returned_at' => now()]);
 
                 // Restaurar Beneficios del Cliente (Puntos y Cupones)
                 if ($pedido->cupon_id) {
@@ -79,13 +73,11 @@ class UpdateOrderStatusService
                 }
 
                 // Sincronizar CRM: Si se cancela el pedido, cerrar oportunidad como perdida
-                if ($pedido->usuario_id) {
-                    $deal = CrmDeal::where('usuario_id', $pedido->usuario_id)
-                        ->where('estado', 'open')
-                        ->first();
+                if ($pedido->crm_deal_id) {
+                    $deal = CrmDeal::whereKey($pedido->crm_deal_id)->lockForUpdate()->first();
 
                     if ($deal) {
-                        $deal->update(['estado' => 'lost']);
+                        app(CrmPipelineService::class)->updateDealStage($deal, ['stage_id' => $deal->stage_id, 'estado' => 'lost']);
                         CrmActivity::create([
                             'deal_id' => $deal->id,
                             'usuario_id' => auth('admin')->id(),
@@ -96,6 +88,9 @@ class UpdateOrderStatusService
                 }
             }
 
+            if ($estadoAnterior !== $nuevoEstado) {
+                OrderNotificationOutbox::record($pedido);
+            }
             DB::commit();
         } catch (\Throwable $e) {
             DB::rollBack();
@@ -103,28 +98,5 @@ class UpdateOrderStatusService
             throw $e;
         }
 
-        DB::afterCommit(fn () => $this->sendNotifications($pedido, $data));
-    }
-
-    /**
-     * @param  array<string, mixed>  $data
-     */
-    private function sendNotifications(Pedido $pedido, array $data): void
-    {
-        try {
-            if ($pedido->usuario && filter_var($pedido->usuario->email, FILTER_VALIDATE_EMAIL)) {
-                Mail::to($pedido->usuario->email)->send(new OrderStatusUpdated($pedido));
-            }
-
-            if ($pedido->usuario && ! empty($pedido->usuario->telefono)) {
-                $mensajeWa = "¡Hola {$pedido->usuario->nombres}! El estado de tu pedido {$pedido->codigo} se ha actualizado a: {$data['estado']}.";
-                if (! empty($data['tracking_number'])) {
-                    $mensajeWa .= " Tu código de rastreo por {$pedido->courier_name} es: {$data['tracking_number']}.";
-                }
-                SendWhatsAppNotification::dispatch($pedido->usuario->telefono, $mensajeWa);
-            }
-        } catch (\Throwable $e) {
-            Log::error('No se pudo enviar notificaciones (Email/WhatsApp) de actualización de estado: '.$e->getMessage());
-        }
     }
 }

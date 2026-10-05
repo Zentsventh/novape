@@ -14,6 +14,13 @@ export default function TwentyCrmLayout({ children, title, headerActions }) {
     const { url, props } = usePage();
     const user = props.auth?.user;
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    useEffect(() => { setMobileMenuOpen(false); }, [url]);
+    useEffect(() => {
+        const close = event => { if (event.key === 'Escape') setMobileMenuOpen(false); };
+        window.addEventListener('keydown', close);
+        return () => window.removeEventListener('keydown', close);
+    }, []);
     const [paletteOpen, setPaletteOpen] = useState(false);
     const [notificaciones, setNotificaciones] = useState([]);
     const [showNotifs, setShowNotifs] = useState(false);
@@ -57,6 +64,9 @@ export default function TwentyCrmLayout({ children, title, headerActions }) {
 
     // Minimalist navigation inspired by Twenty CRM
     const navItems = [
+        { href: '/admin/equipo', label: 'Equipo', icon: <Users size={18} /> },
+        { href: '/admin/asistente', label: 'Asistente del panel', icon: <Zap size={18} /> },
+        { href: '/admin/chatbot/conocimiento', label: 'Conocimiento del chatbot', icon: <Zap size={18} /> },
         { href: '/admin/crm/dashboard', label: 'Inicio', icon: <Home size={18} /> },
         { href: '/admin/crm/pipeline', label: 'Oportunidades', icon: <Target size={18} /> },
         { href: '/admin/crm/calendar', label: 'Calendario', icon: <Calendar size={18} /> },
@@ -73,11 +83,18 @@ export default function TwentyCrmLayout({ children, title, headerActions }) {
     ];
 
     const isActive = (href) => url.startsWith(href);
+    const canAccess = (href) => {
+        if (['/admin/equipo', '/admin/asistente'].includes(href)) return true;
+        if (user?.roles?.some(role => role.nombre === 'admin')) return true;
+        const permission = href === '/admin/chatbot/conocimiento' ? 'gestionar_ajustes' : href === '/admin/inbox' ? 'gestionar_omnichannel' : href === '/admin/clientes' ? 'ver_usuarios' : 'crm.gestionar';
+        return user?.permisos?.includes(permission);
+    };
 
     return (
         <div className="twenty-layout">
             {/* Sidebar */}
-            <aside className={`twenty-sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
+            {mobileMenuOpen && <button className="twenty-mobile-backdrop" aria-label="Cerrar menú CRM" onClick={() => setMobileMenuOpen(false)}/>}
+            <aside className={`twenty-sidebar ${sidebarCollapsed ? 'collapsed' : ''} ${mobileMenuOpen ? 'mobile-open' : ''}`}>
                 <div className="twenty-sidebar-header">
                     <div style={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'center' }}>
                         {!sidebarCollapsed && (
@@ -112,7 +129,7 @@ export default function TwentyCrmLayout({ children, title, headerActions }) {
 
                 <nav className="twenty-nav">
                     {!sidebarCollapsed && <div className="twenty-nav-group-title">Vistas CRM</div>}
-                    {navItems.map((item) => (
+                    {navItems.filter(item => canAccess(item.href)).map((item) => (
                         <Link
                             key={item.href}
                             href={item.href}
@@ -126,7 +143,7 @@ export default function TwentyCrmLayout({ children, title, headerActions }) {
                     ))}
                     
                     {!sidebarCollapsed && <div className="twenty-nav-group-title" style={{ marginTop: '24px' }}>Ajustes</div>}
-                    {settingsItems.map((item) => (
+                    {settingsItems.filter(item => canAccess(item.href)).map((item) => (
                         <Link
                             key={item.href}
                             href={item.href}
@@ -190,7 +207,11 @@ export default function TwentyCrmLayout({ children, title, headerActions }) {
                 <header className="twenty-topbar">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                         <button 
-                            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                            onClick={() => {
+                                if (window.matchMedia('(max-width: 768px)').matches) { setSidebarCollapsed(false); setMobileMenuOpen(!mobileMenuOpen); }
+                                else setSidebarCollapsed(!sidebarCollapsed);
+                            }}
+                            aria-label="Abrir o cerrar menú CRM"
                             className="twenty-btn-icon"
                             title={sidebarCollapsed ? "Expandir menú" : "Colapsar menú"}
                         >

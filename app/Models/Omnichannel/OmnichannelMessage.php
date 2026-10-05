@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Omnichannel;
 
+use App\Models\Usuario;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -24,18 +25,21 @@ class OmnichannelMessage extends Model
         'is_internal_note' => 'boolean',
     ];
 
+    /** @return BelongsTo<OmnichannelConversation, $this> */
     public function conversation(): BelongsTo
     {
         return $this->belongsTo(OmnichannelConversation::class, 'conversation_id');
     }
 
+    /** @return BelongsTo<OmnichannelContact, $this> */
     public function contact(): BelongsTo
     {
         return $this->belongsTo(OmnichannelContact::class, 'contact_id');
     }
 
+    /** @return BelongsTo<Usuario, $this> */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\Usuario::class, 'user_id');
+        return $this->belongsTo(Usuario::class, 'user_id');
     }
 }

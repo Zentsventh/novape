@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models\Omnichannel;
 
+use App\Models\Usuario;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class OmnichannelContact extends Model
 {
@@ -25,16 +26,19 @@ class OmnichannelContact extends Model
         'last_interaction_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<Usuario, $this> */
     public function usuario(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\Usuario::class, 'usuario_id');
+        return $this->belongsTo(Usuario::class, 'usuario_id');
     }
 
+    /** @return HasMany<OmnichannelConversation, $this> */
     public function conversations(): HasMany
     {
         return $this->hasMany(OmnichannelConversation::class, 'contact_id');
     }
 
+    /** @return HasMany<OmnichannelMessage, $this> */
     public function messages(): HasMany
     {
         return $this->hasMany(OmnichannelMessage::class, 'contact_id');
@@ -47,8 +51,9 @@ class OmnichannelContact extends Model
     {
         $words = explode(' ', trim($this->name));
         if (count($words) >= 2) {
-            return strtoupper(mb_substr($words[0], 0, 1) . mb_substr($words[1], 0, 1));
+            return strtoupper(mb_substr($words[0], 0, 1).mb_substr($words[1], 0, 1));
         }
+
         return strtoupper(mb_substr($this->name, 0, 2));
     }
 }

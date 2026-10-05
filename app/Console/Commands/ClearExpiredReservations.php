@@ -27,15 +27,15 @@ class ClearExpiredReservations extends Command
      */
     public function handle()
     {
-        // $expiredReservations = \App\Models\ReservaStock::where('expires_at', '<=', now())->get();
+        $expiredReservations = \App\Models\ReservaStock::where('expires_at', '<=', now())->get();
         
-        // $count = $expiredReservations->count();
-        // if ($count > 0) {
-        //     \App\Models\ReservaStock::where('expires_at', '<=', now())->delete();
-        //     $this->info("Se han liberado $count reservas de stock expiradas.");
-        //     \Illuminate\Support\Facades\Log::info("Cron: Se liberaron $count reservas de stock expiradas.");
-        // } else {
+        $count = $expiredReservations->count();
+        if ($count > 0) {
+            \App\Models\ReservaStock::where('expires_at', '<=', now())->delete();
+            $this->info("Se han liberado $count reservas de stock expiradas.");
+            \Illuminate\Support\Facades\Log::info("Cron: Se liberaron $count reservas de stock expiradas.");
+        } else {
             $this->info('No hay reservas expiradas para limpiar.');
-        // }
+        }
     }
 }

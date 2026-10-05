@@ -1,11 +1,12 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Head, Link, useForm, router } from '@inertiajs/react';
 import AdminLayout from '../../../Layouts/AdminLayout';
+import RemoteSelect from '../../../Components/Admin/RemoteSelect';
 import '../../../../css/admin/admin.css';
 import { useConfirm } from '@/Contexts/ConfirmContext';
 import { Building2, ArrowRightLeft, MapPin, Package, CheckCircle, AlertCircle, Plus, Trash2, ClipboardList, Search, Filter } from 'lucide-react';
 
-export default function AlmacenesIndex({ almacenes, productos, categorias, marcas, stocks, logoUrl }) {
+export default function AlmacenesIndex({ almacenes, categorias, marcas, logoUrl }) {
     const confirmDialog = useConfirm();
 
     const [showModal, setShowModal] = useState(false);
@@ -14,13 +15,13 @@ export default function AlmacenesIndex({ almacenes, productos, categorias, marca
     // Filtros
     const [filterCategoria, setFilterCategoria] = useState('');
     const [filterMarca, setFilterMarca] = useState('');
-    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedVariant, setSelectedVariant] = useState(null);
 
-    const { data: dataA, setData: setDataA, post: postA, processing: procA, reset: resetA } = useForm({
+    const { data: dataA, setData: setDataA, post: postA, processing: procA, reset: resetA, errors: errorsA } = useForm({
         nombre: '', direccion: '', activo: true
     });
 
-    const { data: dataT, setData: setDataT, post: postT, processing: procT, reset: resetT } = useForm({
+    const { data: dataT, setData: setDataT, post: postT, processing: procT, reset: resetT, errors: errorsT } = useForm({
         almacen_origen_id: '', almacen_destino_id: '', variante_id: '', cantidad: '', referencia: ''
     });
 
@@ -40,30 +41,7 @@ export default function AlmacenesIndex({ almacenes, productos, categorias, marca
         }
     };
 
-    // Filter products
-    const filteredProductos = useMemo(() => {
-        return productos.filter(p => {
-            if (filterCategoria && p.category_id != filterCategoria) return false;
-            if (filterMarca && p.marca_id != filterMarca) return false;
-            if (searchQuery) {
-                const search = searchQuery.toLowerCase();
-                const nombreMatch = p.nombre && p.nombre.toLowerCase().includes(search);
-                const skuMatch = p.sku && p.sku.toLowerCase().includes(search);
-                if (!nombreMatch && !skuMatch) return false;
-            }
-            return true;
-        });
-    }, [productos, filterCategoria, filterMarca, searchQuery]);
-
-    // Calculate max available stock for selected product and origin warehouse
-    const maxAvailable = useMemo(() => {
-        if (!dataT.almacen_origen_id || !dataT.variante_id) return null;
-        const stockInfo = stocks.find(s => 
-            s.almacen_id == dataT.almacen_origen_id && 
-            s.variante_id == dataT.variante_id
-        );
-        return stockInfo ? stockInfo.cantidad : 0;
-    }, [stocks, dataT.almacen_origen_id, dataT.variante_id]);
+    const maxAvailable = dataT.almacen_origen_id && dataT.variante_id && selectedVariant ? selectedVariant.disponible ?? null : null;
 
     return (
         <AdminLayout logoUrl={logoUrl}>
@@ -183,6 +161,7 @@ export default function AlmacenesIndex({ almacenes, productos, categorias, marca
                             Nuevo Almacén
                         </h2>
                         <form onSubmit={submitAlmacen} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                            {Object.keys(errorsA).length > 0 && <div role="alert" style={{color: '#B91C1C', marginBottom: 16}}>{Object.entries(errorsA).map(([key, message]) => <p key={key}>{message}</p>)}</div>}
                             <div>
                                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '13px', color: '#64748B' }}>Nombre del almacén</label>
                                 <input 
@@ -242,13 +221,15 @@ export default function AlmacenesIndex({ almacenes, productos, categorias, marca
                             Transferencia de Stock Inter-Almacén
                         </h2>
                         <form onSubmit={submitTransfer} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                            {Object.keys(errorsT).length > 0 && <div role="alert" style={{color: '#B91C1C', marginBottom: 16}}>{Object.entries(errorsT).map(([key, message]) => <p key={key}>{message}</p>)}</div>}
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', background: '#F8FAFC', padding: '20px', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '13px', color: '#64748B' }}>Desde (Origen)</label>
                                     <select 
                                         value={dataT.almacen_origen_id} 
                                         onChange={e => {
-                                            setDataT(prev => ({...prev, almacen_origen_id: e.target.value, almacen_destino_id: prev.almacen_destino_id === e.target.value ? '' : prev.almacen_destino_id}));
+                                            setSelectedVariant(null);
+                                            setDataT(prev => ({...prev, almacen_origen_id: e.target.value, variante_id: '', cantidad: '', almacen_destino_id: prev.almacen_destino_id === e.target.value ? '' : prev.almacen_destino_id}));
                                         }} 
                                         style={{ width: '100%', boxSizing: 'border-box', padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', outline: 'none', background: '#fff', color: '#1E293B', fontSize: '14px', fontFamily: 'inherit' }} 
                                         required
@@ -293,28 +274,11 @@ export default function AlmacenesIndex({ almacenes, productos, categorias, marca
                                         {marcas && marcas.map(m => <option key={m.id} value={m.id}>{m.nombre}</option>)}
                                     </select>
                                 </div>
-                                <div style={{ position: 'relative', marginBottom: '16px' }}>
-                                    <input 
-                                        type="text" 
-                                        placeholder="Buscar por nombre o SKU..." 
-                                        value={searchQuery} 
-                                        onChange={e => {setSearchQuery(e.target.value); setDataT('variante_id', '');}} 
-                                        style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px 10px 36px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '13px', outline: 'none', fontFamily: 'inherit' }} 
-                                    />
-                                    <Search size={14} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8' }} />
-                                </div>
-                                
-                                <select 
-                                    value={dataT.variante_id} 
-                                    onChange={e => setDataT('variante_id', e.target.value)} 
-                                    style={{ width: '100%', boxSizing: 'border-box', padding: '12px', borderRadius: '8px', border: '2px solid #004797', fontWeight: '600', color: '#1E293B', outline: 'none', cursor: 'pointer', background: '#F0F9FF' }} 
-                                    required
-                                >
-                                    <option value="">-- Seleccione el producto ({filteredProductos.length} encontrados) --</option>
-                                    {filteredProductos.map(p => (
-                                        <option key={p.variante_id} value={p.variante_id}>{p.sku} | {p.nombre}</option>
-                                    ))}
-                                </select>
+                                <RemoteSelect label="Producto a transferir" endpoint="/admin/selectores/variantes"
+                                    value={dataT.variante_id} required placeholder="Seleccione una variante?"
+                                    params={{categoria_id: filterCategoria, marca_id: filterMarca, almacen_id: dataT.almacen_origen_id}}
+                                    getLabel={row => `${row.sku} | ${row.nombre}${row.disponible != null ? ` | ${row.disponible} disponibles` : ''}`}
+                                    onChange={(value, row) => { setDataT('variante_id', value); setSelectedVariant(row); }} />
                             </div>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>

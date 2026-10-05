@@ -6,7 +6,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\CrmAutomation;
+use App\Services\Admin\Crm\PublicWebhookUrl;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class CrmAutomationController extends Controller
@@ -31,11 +33,20 @@ class CrmAutomationController extends Controller
             'condiciones.*.value' => 'present',
             'acciones' => 'required|array|min:1|max:20',
             'acciones.*.type' => 'required|in:webhook,send_email,send_coupon,create_task',
-            'acciones.*.url' => 'required_if:acciones.*.type,webhook|url:http,https|max:2000',
+            'acciones.*.url' => 'required_if:acciones.*.type,webhook|url:https|max:2000',
             'acciones.*.message' => 'required_if:acciones.*.type,send_email,send_coupon,create_task|string|max:10000',
             'activo' => 'boolean',
         ]);
 
+        foreach ($validated['acciones'] as $action) {
+            if ($action['type'] === 'webhook') {
+                try {
+                    PublicWebhookUrl::resolve($action['url']);
+                } catch (\InvalidArgumentException $e) {
+                    throw ValidationException::withMessages(['acciones' => $e->getMessage()]);
+                }
+            }
+        }
         CrmAutomation::create($validated);
 
         return redirect()->back()->with('success', 'Automatización creada exitosamente.');

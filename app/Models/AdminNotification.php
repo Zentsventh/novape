@@ -20,6 +20,7 @@ class AdminNotification extends Model
         'read_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<Usuario, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(Usuario::class, 'user_id');

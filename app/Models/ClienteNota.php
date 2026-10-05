@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ClienteNota extends Model
 {
@@ -17,12 +18,14 @@ class ClienteNota extends Model
         'nota',
     ];
 
-    public function cliente(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    /** @return BelongsTo<Usuario, $this> */
+    public function cliente(): BelongsTo
     {
         return $this->belongsTo(Usuario::class, 'cliente_id');
     }
 
-    public function autor(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    /** @return BelongsTo<Usuario, $this> */
+    public function autor(): BelongsTo
     {
         return $this->belongsTo(Usuario::class, 'autor_id');
     }

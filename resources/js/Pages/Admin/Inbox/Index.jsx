@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import TwentyCrmLayout from '../../../Layouts/TwentyCrmLayout';
 import { 
     MessageSquare, Send, Paperclip, Check, CheckCheck, 
@@ -565,10 +565,19 @@ export default function InboxIndexWrapper() {
 // COMPONENTE PRINCIPAL
 // ═══════════════════════════════════════════════════════════════
 function InboxIndex() {
+    const { auth } = usePage().props;
+    const inboxChannel = auth?.user?.roles?.some(r => r.nombre === "admin") ? "novape-inbox.supervisors" : `novape-inbox.agent.${auth?.user?.id}`;
     const [conversations, setConversations] = useState([]);
     const [activeConv, setActiveConv] = useState(null);
     const [messages, setMessages] = useState([]);
     const [messageInput, setMessageInput] = useState('');
+    useEffect(() => {
+        const handler = event => {
+            if (Number(event.detail.conversationId) === Number(activeConv?.id)) setMessageInput(event.detail.text);
+        };
+        window.addEventListener('panel-assistant:draft', handler);
+        return () => window.removeEventListener('panel-assistant:draft', handler);
+    }, [activeConv?.id]);
     const [contactProfile, setContactProfile] = useState(null);
     const [filter, setFilter] = useState('all');
     const [statusFilter, setStatusFilter] = useState('open');
@@ -609,7 +618,7 @@ function InboxIndex() {
 
         // Escuchar eventos de broadcasting
         if (window.Echo) {
-            window.Echo.private('novape-inbox')
+            window.Echo.private(inboxChannel)
                 .listen('.conversation.updated', (e) => {
                     updateConversationInList(e.conversationData);
                 })
@@ -623,16 +632,17 @@ function InboxIndex() {
 
         // ─── Polling fallback (cada 8s) ───────────────────────
         pollingRef.current = setInterval(() => {
+            if (document.hidden) return;
             fetchConversationsSilent();
             // Si hay una conversación activa, refrescar sus mensajes
             if (activeConvRef.current) {
                 fetchMessagesSilent(activeConvRef.current.id);
             }
-        }, 8000);
+        }, 30000);
 
         return () => {
             if (window.Echo) {
-                window.Echo.leave('novape-inbox');
+                window.Echo.leave(inboxChannel);
             }
             if (pollingRef.current) {
                 clearInterval(pollingRef.current);
@@ -1143,9 +1153,9 @@ function InboxIndex() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         {/* Agent Status Selector */}
                         <AgentStatusDropdown status={agentStatus} onChange={handleChangeAgentStatus} />
-                        <button className="inbox-sidebar__refresh-btn" onClick={openSupervisorPanel} title="Supervisor Dashboard">
+                        {auth?.user?.roles?.some(r => r.nombre === 'admin') && <button className="inbox-sidebar__refresh-btn" onClick={openSupervisorPanel} title="Supervisor Dashboard">
                             <Activity size={16} />
-                        </button>
+                        </button>}
                         <button className="inbox-sidebar__refresh-btn" onClick={fetchConversations} title="Actualizar">
                             <RefreshCw size={16} />
                         </button>
@@ -1289,6 +1299,7 @@ function InboxIndex() {
                                 </div>
                             </div>
                             <div className="inbox-chat__header-actions">
+                                <button className="inbox-chat__header-btn" title="Asistente privado del panel" onClick={() => window.dispatchEvent(new CustomEvent('panel-assistant:open', { detail: { id: activeConv.id, contactName: activeConv.contactName } }))}><Bot size={16}/> Asistente</button>
                                 {!['resolved', 'closed'].includes(activeConv.status) ? (
                                     <button className="inbox-chat__header-btn resolve" onClick={handleResolve} title="Marcar como Resuelto">
                                         <CheckCircle2 size={16} /> Resolver

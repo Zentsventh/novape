@@ -9,6 +9,7 @@ use App\Jobs\SendMarketingCampaignJob;
 use App\Models\MarketingCampaign;
 use App\Models\Usuario;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class MarketingCampaignController extends Controller
@@ -47,6 +48,15 @@ class MarketingCampaignController extends Controller
         return Inertia::render('Admin/Marketing/Create');
     }
 
+    public function report(MarketingCampaign $campaign)
+    {
+        return Inertia::render('Admin/Marketing/Report', [
+            'campaign' => $campaign,
+            'deliveries' => DB::table('marketing_deliveries')->where('campaign_id', $campaign->id)
+                ->select('id', 'email', 'status', 'attempts', 'sent_at', 'error')->orderByDesc('id')->paginate(30),
+        ]);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -74,7 +84,7 @@ class MarketingCampaignController extends Controller
         if (in_array(config('mail.default'), ['log', 'array'], true)) {
             return redirect()->back()->with('error', 'Configura un proveedor de correo antes de enviar campañas.');
         }
-        $updated = MarketingCampaign::where('id', $campaign->id)->where('status', 'draft')
+        $updated = MarketingCampaign::where('id', $campaign->id)->whereIn('status', ['draft', 'failed'])
             ->update(['status' => 'sending', 'started_at' => now()]);
         if (! $updated) {
             return redirect()->back()->with('error', 'Esta campaña ya no es un borrador.');

@@ -186,15 +186,15 @@
             @else
                 <h1 style="font-size: 28px; margin: 0 0 15px 0;">NOVA PE</h1>
             @endif
-            <h2>{{ config('invoicing.company.razon_social') }}</h2>
-            <p>{{ config('invoicing.company.direccion') }}</p>
+            <h2>{{ $empresa['razon_social'] }}</h2>
+            <p>{{ $empresa['direccion'] }}</p>
             <p>Lima - Perú</p>
-            <p>Correo electrónico: {{ config('invoicing.company.email') }}</p>
-            <p>Teléfono: {{ config('invoicing.company.telefono') }}</p>
+            <p>Correo electrónico: {{ $empresa['email'] }}</p>
+            <p>Teléfono: {{ $empresa['telefono'] }}</p>
         </div>
         
         <div class="invoice-box">
-            <p>R.U.C. N° {{ config('invoicing.company.ruc') }}</p>
+            <p>R.U.C. N° {{ $empresa['ruc'] }}</p>
             <h1>REGISTRO INTERNO — {{ strtoupper($pedido->tipo_comprobante ?? 'VENTA') }}</h1>
             <p>{{ $pedido->codigo }}</p>
         </div>
@@ -211,7 +211,7 @@
             </tr>
             <tr>
                 <td class="label">Señor(es)</td>
-                <td colspan="3">: {{ strtoupper($pedido->nombre_facturacion ?? ($pedido->usuario->nombres . ' ' . $pedido->usuario->apellidos)) }}</td>
+                <td colspan="3">: {{ strtoupper($pedido->nombre_facturacion ?? trim(($pedido->usuario?->nombres ?? '') . ' ' . ($pedido->usuario?->apellidos ?? '')) ?: 'Cliente') }}</td>
             </tr>
             <tr>
                 <td class="label">{{ strtoupper($pedido->tipo_comprobante ?? 'RUC/DNI') }}</td>
@@ -241,8 +241,8 @@
             <tr>
                 <td class="text-center">{{ number_format($item->cantidad, 2) }}</td>
                 <td class="text-center">UNIDAD</td>
-                <td class="text-center">{{ $item->variante->sku ?? 'STD' }}</td>
-                <td>{{ $item->variante->producto->nombre ?? 'Producto' }}</td>
+                <td class="text-center">{{ $item->sku ?? $item->variante?->sku ?? 'STD' }}</td>
+                <td>{{ $item->producto_nombre ?? $item->variante?->producto?->nombre ?? 'Producto' }}</td>
                 <td class="text-right">{{ number_format($item->precio_unitario, 2) }}</td>
                 <td class="text-right">{{ number_format($item->subtotal, 2) }}</td>
             </tr>
@@ -256,12 +256,12 @@
             <tr>
                 <td class="label">SUB TOTAL</td>
                 <td style="width: 30px;">S/</td>
-                <td>{{ number_format(($pedido->total - $pedido->costo_envio) / 1.18, 2) }}</td>
+                <td>{{ number_format(($pedido->total - $pedido->costo_envio) / (1 + $igvPorcentaje / 100), 2) }}</td>
             </tr>
             <tr>
                 <td class="label">I.G.V</td>
                 <td>S/</td>
-                <td>{{ number_format((($pedido->total - $pedido->costo_envio) / 1.18) * 0.18, 2) }}</td>
+                <td>{{ number_format((($pedido->total - $pedido->costo_envio) / (1 + $igvPorcentaje / 100)) * ($igvPorcentaje / 100), 2) }}</td>
             </tr>
             @if($pedido->costo_envio > 0)
             <tr>

@@ -22,16 +22,46 @@ class DocumentApiService
         }
 
         try {
-            $endpoint = rtrim($url, '/').'/'.strtolower($tipo).'/'.$numero;
+            if (str_contains($url, 'apis.net.pe')) {
+                $path = $tipo === 'DNI' ? '/reniec/dni' : '/sunat/ruc';
+                $endpoint = rtrim($url, '/') . $path . '?numero=' . $numero;
+                
+                $response = Http::withToken($token)
+                    ->withHeaders(['Accept' => 'application/json'])
+                    ->connectTimeout(5)->timeout(15)->get($endpoint);
+                    
+                if ($response->successful()) {
+                    $data = $response->json();
+                    if ($tipo === 'DNI' && isset($data['nombres'])) {
+                        return [
+                            'success' => true,
+                            'data' => [
+                                'nombres' => $data['nombres'] ?? '',
+                                'apellido_paterno' => $data['apellidoPaterno'] ?? '',
+                                'apellido_materno' => $data['apellidoMaterno'] ?? '',
+                            ]
+                        ];
+                    } elseif ($tipo === 'RUC' && isset($data['razonSocial'])) {
+                        return [
+                            'success' => true,
+                            'data' => [
+                                'nombre_o_razon_social' => $data['razonSocial'] ?? '',
+                            ]
+                        ];
+                    }
+                }
+            } else {
+                $endpoint = rtrim($url, '/').'/'.strtolower($tipo).'/'.$numero;
 
-            $response = Http::withToken($token)
-                ->withHeaders(['Accept' => 'application/json'])
-                ->connectTimeout(5)->timeout(15)->get($endpoint);
+                $response = Http::withToken($token)
+                    ->withHeaders(['Accept' => 'application/json'])
+                    ->connectTimeout(5)->timeout(15)->get($endpoint);
 
-            if ($response->successful()) {
-                $data = $response->json();
-                if (is_array($data) && ($data['success'] ?? false) === true && is_array($data['data'] ?? null)) {
-                    return $data;
+                if ($response->successful()) {
+                    $data = $response->json();
+                    if (is_array($data) && ($data['success'] ?? false) === true && is_array($data['data'] ?? null)) {
+                        return $data;
+                    }
                 }
             }
 

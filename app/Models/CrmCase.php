@@ -33,36 +33,43 @@ class CrmCase extends Model
         'fecha_vencimiento' => 'datetime',
     ];
 
+    /** @return BelongsTo<Usuario, $this> */
     public function cliente(): BelongsTo
     {
         return $this->belongsTo(Usuario::class, 'cliente_id');
     }
 
+    /** @return BelongsTo<Usuario, $this> */
     public function asignadoA(): BelongsTo
     {
         return $this->belongsTo(Usuario::class, 'asignado_a');
     }
 
+    /** @return BelongsTo<Pedido, $this> */
     public function pedido(): BelongsTo
     {
         return $this->belongsTo(Pedido::class, 'pedido_id');
     }
 
+    /** @return BelongsTo<CrmDeal, $this> */
     public function deal(): BelongsTo
     {
         return $this->belongsTo(CrmDeal::class, 'deal_id');
     }
 
+    /** @return BelongsTo<OmnichannelConversation, $this> */
     public function omnichannelConversation(): BelongsTo
     {
         return $this->belongsTo(OmnichannelConversation::class, 'omnichannel_conversation_id');
     }
 
+    /** @return MorphMany<CrmNote, $this> */
     public function notas(): MorphMany
     {
         return $this->morphMany(CrmNote::class, 'notable')->latest();
     }
 
+    /** @return MorphMany<CrmTimelineEvent, $this> */
     public function actividades(): MorphMany
     {
         return $this->morphMany(CrmTimelineEvent::class, 'trackable')->latest();

@@ -46,26 +46,31 @@ class CrmCompany extends Model
 
     // ── Relationships ──
 
+    /** @return BelongsTo<Usuario, $this> */
     public function responsable(): BelongsTo
     {
         return $this->belongsTo(Usuario::class, 'usuario_responsable_id');
     }
 
+    /** @return HasMany<Usuario, $this> */
     public function personas(): HasMany
     {
         return $this->hasMany(Usuario::class, 'empresa_id');
     }
 
+    /** @return HasMany<CrmDeal, $this> */
     public function deals(): HasMany
     {
         return $this->hasMany(CrmDeal::class, 'empresa_id');
     }
 
+    /** @return MorphMany<CrmNote, $this> */
     public function notes(): MorphMany
     {
         return $this->morphMany(CrmNote::class, 'notable');
     }
 
+    /** @return MorphMany<CrmTimelineEvent, $this> */
     public function timelineEvents(): MorphMany
     {
         return $this->morphMany(CrmTimelineEvent::class, 'trackable');

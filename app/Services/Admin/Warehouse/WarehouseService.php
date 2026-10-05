@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Admin\Warehouse;
 
+use App\Services\Inventory\StockAvailability;
 use Illuminate\Support\Facades\DB;
 
 class WarehouseService
@@ -23,30 +24,10 @@ class WarehouseService
             $almacen->total_skus = $stockPorAlmacen[$almacen->id]->total_skus ?? 0;
         }
 
-        $productos = DB::table('producto')
-            ->join('variante', 'variante.producto_id', '=', 'producto.id')
-            ->leftJoin('producto_categoria', 'producto_categoria.producto_id', '=', 'producto.id')
-            ->leftJoin('categoria', 'categoria.id', '=', 'producto_categoria.categoria_id')
-            ->leftJoin('categoria as padre', 'categoria.categoria_padre_id', '=', 'padre.id')
-            ->whereNull('producto.deleted_at')
-            ->whereNull('variante.deleted_at')
-            ->where('producto.activo', true)
-            ->select(
-                'producto.nombre',
-                'producto.marca_id',
-                'variante.id as variante_id',
-                'variante.sku',
-                DB::raw('COALESCE(padre.id, categoria.id) as category_id')
-            )
-            ->distinct()
-            ->orderBy('producto.nombre')
-            ->get();
-
         $categorias = DB::table('categoria')->where('activa', true)->whereNull('categoria_padre_id')->orderBy('nombre')->get();
         $marcas = DB::table('marca')->orderBy('nombre')->get();
-        $stocks = DB::table('stock_almacen')->select('almacen_id', 'variante_id', 'cantidad')->get();
 
-        return compact('almacenes', 'productos', 'categorias', 'marcas', 'stocks');
+        return compact('almacenes', 'categorias', 'marcas');
     }
 
     public function createWarehouse(array $data): void
@@ -121,6 +102,7 @@ class WarehouseService
                 throw new \Exception('Stock insuficiente en el almacén de origen.');
             }
 
+            StockAvailability::assertRemaining((int) $data['variante_id'], (int) $data['almacen_origen_id'], (int) $stockOrigen->cantidad - (int) $data['cantidad']);
             DB::table('stock_almacen')->where('id', $stockOrigen->id)->decrement('cantidad', $data['cantidad']);
 
             $stockDestino = DB::table('stock_almacen')

@@ -246,7 +246,7 @@ export default function TwentyKanban({ stages = [], deals, onDragEnd, onDealClic
                                     <div className="premium-column-indicator" style={{ backgroundColor: stage.color || '#004797' }}></div>
                                     {stage.nombre}
                                     <span className="premium-column-count">
-                                        {groupedDeals[stage.id]?.length || 0}
+                                        {stage.deals_count ?? groupedDeals[stage.id]?.length ?? 0}
                                     </span>
                                 </div>
                                 <button className="premium-btn-icon">
@@ -334,7 +334,7 @@ export default function TwentyKanban({ stages = [], deals, onDragEnd, onDealClic
                                                                                 if (onDealDelete) onDealDelete(deal.id);
                                                                             }}
                                                                         >
-                                                                            <Trash2 size={14} /> Eliminar
+                                                                            <Trash2 size={14} /> Archivar
                                                                         </button>
                                                                     </div>
                                                                 )}

@@ -41,10 +41,7 @@ class ProfileController extends Controller
                 ->where(function ($q) {
                     $q->whereNotIn('slug', ['cyber-bombas', 'retiro-inmediato'])->orWhereNull('slug');
                 })
-                ->with(['subcategorias', 'productos' => function ($query) {
-                    $query->where('producto.activo', 1)
-                          ->with(['marca', 'variantes', 'imagenes']);
-                }])
+                ->with(['subcategorias'])
                 ->get();
         });
 
@@ -59,6 +56,7 @@ class ProfileController extends Controller
             'pointsHistory' => $pointsHistory,
             'activeTabParam' => $tab,
             'categoriaProductos' => $categoriaProductos,
+            'session_id' => $request->session()->getId(),
         ]);
     }
 

@@ -8,6 +8,9 @@ export default function RmaShow({ rma }) {
     const { auth, errors = {} } = usePage().props;
     const [adminNotes, setAdminNotes] = useState(rma.admin_notes || '');
     const [status, setStatus] = useState(rma.status);
+    const eligible = (rma.pedido?.items || []).filter(i => !rma.producto_id || i.variante?.producto_id === rma.producto_id);
+    const [lines, setLines] = useState(() => Object.fromEntries(eligible.map(i => [i.id, {cantidad: 0, condicion: 'no_vendible'}])));
+    const [saving, setSaving] = useState(false);
     const allowedStatuses = [rma.status, ...({
         pending: ['approved', 'rejected'], approved: ['received', 'rejected'],
         received: ['processed'], processed: [], rejected: [],
@@ -26,10 +29,13 @@ export default function RmaShow({ rma }) {
 
     const handleUpdate = (e) => {
         e.preventDefault();
+        if (saving) return;
+        setSaving(true);
         router.put(`/admin/rma/${rma.id}/status`, {
             status,
-            admin_notes: adminNotes
-        });
+            admin_notes: adminNotes,
+            ...(status === 'processed' && rma.type === 'return' ? {items: eligible.filter(i => Number(lines[i.id]?.cantidad) > 0).map(i => ({pedido_item_id: i.id, cantidad: Number(lines[i.id].cantidad), condicion: lines[i.id].condicion}))} : {})
+        }, {onFinish: () => setSaving(false)});
     };
 
     return (
@@ -170,8 +176,21 @@ export default function RmaShow({ rma }) {
                                     />
                                 </div>
 
+                                {status === 'processed' && rma.type === 'return' && rma.status !== 'processed' && <fieldset style={{marginBottom: 20}}>
+                                    <legend>Artículos recibidos</legend>
+                                    <p>Indica la cantidad recibida. Solo los artículos aptos vuelven al stock de venta.</p>
+                                    {eligible.map(i => <div key={i.id} style={{marginBottom: 12}}>
+                                        <label>{i.producto_nombre || i.variante?.producto?.nombre} / {i.sku || i.variante?.sku}
+                                            <input type="number" min="0" max={i.cantidad} value={lines[i.id]?.cantidad || 0} onChange={e => setLines(prev => ({...prev, [i.id]: {...prev[i.id], cantidad: e.target.value}}))}/>
+                                        </label>
+                                        <select aria-label="Condición del artículo" value={lines[i.id]?.condicion} onChange={e => setLines(prev => ({...prev, [i.id]: {...prev[i.id], condicion: e.target.value}}))}>
+                                            <option value="no_vendible">No apto para venta</option><option value="vendible">Apto para venta</option>
+                                        </select>
+                                    </div>)}
+                                </fieldset>}
+                                {Object.entries(errors).filter(([key]) => key.startsWith('items')).map(([key, value]) => <p key={key} role="alert" style={{color: '#dc2626'}}>{value}</p>)}
                                 {errors.status && <p role="alert" style={{ color: '#dc2626' }}>{errors.status}</p>}
-                                <button type="submit" style={{ width: '100%', padding: '12px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                                <button type="submit" disabled={saving} style={{ width: '100%', padding: '12px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                                     <Check size={18} />
                                     Guardar Resolución
                                 </button>

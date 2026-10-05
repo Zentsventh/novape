@@ -15,27 +15,31 @@ class WhatsAppMediaService
     {
         try {
             // 1. Obtener la URL real del media
-            $metaResponse = Http::withoutVerifying()->withToken($accessToken)
+            $metaResponse = Http::withOptions([])->withToken($accessToken)
                 ->get("https://graph.facebook.com/v21.0/{$mediaId}");
 
-            if (!$metaResponse->successful()) {
+            if (! $metaResponse->successful()) {
                 Log::error('WA_MEDIA_META_ERROR', ['media_id' => $mediaId, 'response' => $metaResponse->json()]);
+
                 return null;
             }
 
             $mediaUrl = $metaResponse->json('url');
-            if (!$mediaUrl) return null;
+            if (! $mediaUrl) {
+                return null;
+            }
 
             // 2. Descargar el archivo binario
-            $fileResponse = Http::withoutVerifying()->withToken($accessToken)->get($mediaUrl);
-            if (!$fileResponse->successful()) {
+            $fileResponse = Http::withOptions([])->withToken($accessToken)->get($mediaUrl);
+            if (! $fileResponse->successful()) {
                 Log::error('WA_MEDIA_DOWNLOAD_ERROR', ['media_id' => $mediaId]);
+
                 return null;
             }
 
             // 3. Determinar extensión y guardar
             $extension = $this->getExtensionFromMime($mimeType);
-            $filename = 'omnichannel/media/' . date('Y/m/') . Str::uuid() . '.' . $extension;
+            $filename = 'omnichannel/media/'.date('Y/m/').Str::uuid().'.'.$extension;
 
             $disk = config('filesystems.default', 'public');
             Storage::disk($disk)->put($filename, $fileResponse->body());
@@ -43,6 +47,7 @@ class WhatsAppMediaService
             return Storage::disk($disk)->url($filename);
         } catch (\Exception $e) {
             Log::error('WA_MEDIA_EXCEPTION', ['media_id' => $mediaId, 'error' => $e->getMessage()]);
+
             return null;
         }
     }

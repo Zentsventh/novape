@@ -63,22 +63,19 @@ class CrmSettingsService
         $table = match ($modelType) {
             'deal' => 'crm_deals', 'company' => 'crm_companies', default => 'usuario'
         };
-        $modelQuery = DB::table($table)->where('id', $modelId);
+        $modelQuery = DB::table($table)->where('id', $modelId)->whereNull('deleted_at');
 
         $model = $modelQuery->lockForUpdate()->first();
 
         if (! $model) {
             throw ValidationException::withMessages(['model_id' => 'El registro ya no existe.']);
         }
-        if ($model) {
-            $customFields = $model->custom_fields ? json_decode($model->custom_fields, true) : [];
-            $customFields[$fieldName] = $suggestedValue;
+        $customFields = $model->custom_fields ? json_decode($model->custom_fields, true) : [];
+        $customFields[$fieldName] = $suggestedValue;
 
-            $modelQuery->update([
-                'custom_fields' => json_encode($customFields),
-            ]);
-        }
-
+        $modelQuery->update([
+            'custom_fields' => json_encode($customFields),
+        ]);
         DB::table('crm_evidence_ledgers')->where('id', $ledgerItem->id)->update(['status' => 'accepted']);
     }
 

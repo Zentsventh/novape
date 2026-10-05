@@ -17,6 +17,8 @@ class Categoria extends Model
         parent::boot();
 
         $clearCache = function () {
+            \Illuminate\Support\Facades\Cache::forget('home_category_product_ids_v2');
+            \Illuminate\Support\Facades\Cache::forget('home_weekly_product_ids_v2');
             \Illuminate\Support\Facades\Cache::forget('home_categorias');
             \Illuminate\Support\Facades\Cache::forget('home_mejor_semana');
             \Illuminate\Support\Facades\Cache::forget('catalog_categorias_base');

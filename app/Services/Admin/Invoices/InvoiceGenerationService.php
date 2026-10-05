@@ -84,6 +84,13 @@ class InvoiceGenerationService
             throw new \Exception('Venta no encontrada');
         }
 
+        $snapshot = json_decode($venta->invoice_snapshot ?? 'null', true) ?? [];
+        if (isset($snapshot['cliente'])) {
+            $venta->cliente_nombre = $snapshot['cliente']['nombre_razon_social'] ?? null;
+            $venta->cliente_doc = $snapshot['cliente']['numero_documento'] ?? null;
+            $venta->cliente_tipo_doc = $snapshot['cliente']['tipo_documento'] ?? null;
+            $venta->cliente_direccion = $snapshot['cliente']['direccion'] ?? null;
+        }
         $items = DB::table('venta_pos_items')->where('venta_pos_id', $id)->get();
 
         $igvPorcentaje = 0.18;
@@ -145,7 +152,7 @@ class InvoiceGenerationService
             'docCliente' => $docCliente,
             'qrBase64' => $qrBase64,
             'logoBase64' => $logoBase64,
-            'empresa' => config('invoicing.company'),
+            'empresa' => $snapshot['empresa'] ?? config('invoicing.company'),
         ];
 
         $pdfName = "{$venta->codigo_ticket}.pdf";
@@ -179,13 +186,14 @@ class InvoiceGenerationService
 
     public function downloadInvoicePdf(Pedido $pedido)
     {
-        $igvPorcentaje = 0.18;
-        $total = (float) $pedido->total;
+        $snapshot = $pedido->invoice_snapshot ?? [];
+        $igvPorcentaje = (float) ($snapshot['igv_porcentaje'] ?? $pedido->igv_porcentaje ?? 18) / 100;
+        $total = (float) ($snapshot['total'] ?? $pedido->total);
         $operacionesGravadas = round($total / (1 + $igvPorcentaje), 2);
         $igvCalculado = round($total - $operacionesGravadas, 2);
 
-        $nombreCliente = $pedido->nombre_facturacion ?? ($pedido->usuario ? $pedido->usuario->nombres.' '.$pedido->usuario->apellidos : 'Cliente General');
-        $docCliente = $pedido->documento_cliente ?? ($pedido->usuario ? $pedido->usuario->dni : '00000000');
+        $nombreCliente = $snapshot['nombre_cliente'] ?? $pedido->nombre_facturacion ?? ($pedido->usuario ? $pedido->usuario->nombres.' '.$pedido->usuario->apellidos : 'Cliente General');
+        $docCliente = $snapshot['documento_cliente'] ?? $pedido->documento_cliente ?? ($pedido->usuario ? $pedido->usuario->dni : '00000000');
         $tipoDocCliente = $pedido->tipo_comprobante === 'factura' ? 'RUC' : 'DNI';
 
         $importeEnLetras = $this->numeroALetras($total);
@@ -215,7 +223,7 @@ class InvoiceGenerationService
             'tipo_comprobante' => strtoupper($pedido->tipo_comprobante ?? 'BOLETA'),
             'qrBase64' => $qrBase64,
             'logoBase64' => $logoBase64,
-            'empresa' => config('invoicing.company'),
+            'empresa' => $snapshot['empresa'] ?? config('invoicing.company'),
         ];
 
         $html = view('pdf.comprobante_ecommerce', $data)->render();

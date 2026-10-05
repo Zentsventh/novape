@@ -1,4 +1,4 @@
-﻿// Read-only layout regression. Uses local compiled assets and synthetic customer data.
+// Read-only layout regression. Uses local compiled assets and synthetic customer data.
 // Run after npm run build: node tests/browser/storefront-responsive.mjs [base URL]
 import puppeteer from 'puppeteer';
 import {createServer} from 'node:http';
@@ -35,7 +35,6 @@ try {
   try {
    const u=new URL(req.url());
    // Animation frames do not affect layout; keep the matrix's memory bounded.
-   if(u.pathname.startsWith('/images/paradox/')) {await req.respond({status:200,contentType:'image/gif',body:Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7','base64')});return;}
    if(req.isNavigationRequest()) {await req.respond({status:200,contentType:'text/html; charset=utf-8',body:currentHtml.replaceAll(base,origin)});return;}
    if(u.pathname.startsWith('/build/')||u.pathname.startsWith('/images/')||u.pathname.startsWith('/storage/')) {
     const ext=u.pathname.split('.').pop();

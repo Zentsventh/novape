@@ -25,7 +25,7 @@ class UsuarioFactory extends Factory
             'tipo_documento' => 'DNI',
             'dni' => $this->faker->unique()->numerify('########'),
             'telefono' => $this->faker->phoneNumber(),
-            'estado' => 1,
+            'estado' => 'activo',
             'has_set_password' => true,
         ];
     }

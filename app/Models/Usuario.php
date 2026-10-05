@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 namespace App\Models;
+
 /**
  * @property int $id
  * @property string $email
@@ -10,20 +11,21 @@ namespace App\Models;
  * @property bool $has_set_password
  */
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Omnichannel\OmnichannelAgentConfig;
+use App\Models\Omnichannel\OmnichannelContact;
+use App\Models\Omnichannel\OmnichannelConversation;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
+use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\SchemalessAttributes\Casts\SchemalessAttributes;
 use Spatie\SchemalessAttributes\SchemalessAttributesTrait;
-use App\Models\CrmCompany;
-use App\Models\CrmCase;
-use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * @property int $id
@@ -33,14 +35,16 @@ use OwenIt\Auditing\Contracts\Auditable;
  */
 class Usuario extends Authenticatable implements Auditable
 {
-    use HasFactory, Notifiable, SoftDeletes, SchemalessAttributesTrait, \OwenIt\Auditing\Auditable;
+    use HasFactory, Notifiable, \OwenIt\Auditing\Auditable, SchemalessAttributesTrait, SoftDeletes;
 
     protected $table = 'usuario';
+
+    protected $auditExclude = ['password_hash', 'google_id', 'remember_token'];
 
     protected $fillable = [
         'nombres', 'apellidos', 'tipo_documento', 'dni', 'email', 'telefono', 'telefono_secundario',
         'password_hash', 'estado', 'google_id', 'fecha_nacimiento', 'has_set_password',
-        'rfm_score', 'ltv', 'last_order_date', 'total_orders', 'segmento', 'empresa_id'
+        'rfm_score', 'ltv', 'last_order_date', 'total_orders', 'segmento', 'empresa_id',
     ];
 
     protected $casts = [
@@ -68,73 +72,85 @@ class Usuario extends Authenticatable implements Auditable
         return 'password_hash';
     }
 
+    /** @return BelongsToMany<Rol, $this> */
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Rol::class, 'usuario_rol', 'usuario_id', 'rol_id');
     }
 
+    /** @return HasMany<Pedido, $this> */
     public function pedidos(): HasMany
     {
         return $this->hasMany(Pedido::class, 'usuario_id');
     }
 
+    /** @return HasMany<ClienteNota, $this> */
     public function notas(): HasMany
     {
         return $this->hasMany(ClienteNota::class, 'cliente_id');
     }
 
+    /** @return HasMany<DireccionUsuario, $this> */
     public function direcciones(): HasMany
     {
         return $this->hasMany(DireccionUsuario::class, 'usuario_id');
     }
 
+    /** @return HasOne<Carrito, $this> */
     public function carrito(): HasOne
     {
         return $this->hasOne(Carrito::class, 'usuario_id');
     }
 
+    /** @return HasMany<UsuarioTarjeta, $this> */
     public function tarjetas(): HasMany
     {
         return $this->hasMany(UsuarioTarjeta::class, 'usuario_id');
     }
 
+    /** @return HasMany<UsuarioDatosReembolso, $this> */
     public function datosReembolso(): HasMany
     {
         return $this->hasMany(UsuarioDatosReembolso::class, 'usuario_id');
     }
 
+    /** @return HasMany<UsuarioLista, $this> */
     public function listas(): HasMany
     {
         return $this->hasMany(UsuarioLista::class, 'usuario_id');
     }
 
-
-
+    /** @return HasMany<CrmCase, $this> */
     public function crmCases(): HasMany
     {
         return $this->hasMany(CrmCase::class, 'asignado_a');
     }
 
+    /** @return HasMany<CrmDeal, $this> */
     public function crmDeals(): HasMany
     {
         return $this->hasMany(CrmDeal::class, 'usuario_id');
     }
 
+    /** @return HasMany<OmnichannelContact, $this> */
     public function omnichannelContacts(): HasMany
     {
-        return $this->hasMany(\App\Models\Omnichannel\OmnichannelContact::class, 'usuario_id');
+        return $this->hasMany(OmnichannelContact::class, 'usuario_id');
     }
 
+    /** @return HasOne<OmnichannelAgentConfig, $this> */
     public function omnichannelConfig(): HasOne
     {
-        return $this->hasOne(\App\Models\Omnichannel\OmnichannelAgentConfig::class, 'usuario_id');
+        return $this->hasOne(OmnichannelAgentConfig::class, 'usuario_id');
     }
 
+    /** @return HasMany<OmnichannelConversation, $this> */
     public function omnichannelConversations(): HasMany
     {
-        return $this->hasMany(\App\Models\Omnichannel\OmnichannelConversation::class, 'assigned_user_id');
+        return $this->hasMany(OmnichannelConversation::class, 'assigned_user_id');
     }
 
+    /** @return BelongsTo<CrmCompany, $this> */
     public function empresa(): BelongsTo
     {
         return $this->belongsTo(CrmCompany::class, 'empresa_id');
@@ -142,7 +158,7 @@ class Usuario extends Authenticatable implements Auditable
 
     public function getNombreCompletoAttribute(): string
     {
-        return $this->nombres . ' ' . $this->apellidos;
+        return $this->nombres.' '.$this->apellidos;
     }
 
     public function esAdmin(): bool

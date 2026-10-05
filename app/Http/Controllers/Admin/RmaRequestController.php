@@ -26,7 +26,7 @@ class RmaRequestController extends Controller
 
     public function show($id)
     {
-        $rma = RmaRequest::with(['usuario', 'pedido.items.variante.producto', 'producto'])
+        $rma = RmaRequest::with(['usuario', 'pedido.items.variante.producto', 'producto', 'items'])
             ->findOrFail($id);
 
         return Inertia::render('Admin/Rma/Show', [
@@ -38,16 +38,20 @@ class RmaRequestController extends Controller
     {
         $request->validate([
             'status' => 'required|in:pending,approved,rejected,received,processed',
-            'admin_notes' => 'nullable|string',
+            'admin_notes' => 'nullable|string|max:5000',
+            'items' => 'nullable|array|min:1',
+            'items.*.pedido_item_id' => 'required|integer|distinct',
+            'items.*.cantidad' => 'required|integer|min:1',
+            'items.*.condicion' => 'required|in:vendible,no_vendible',
         ]);
 
         $rma = app(RmaProcessingService::class)->updateStatus(
-            (int) $id, $request->status, $request->admin_notes, (int) auth('admin')->id()
+            (int) $id, $request->status, $request->admin_notes, (int) auth('admin')->id(), $request->input('items')
         );
         if ($rma->wasChanged('status')) {
             try {
                 if ($rma->usuario) {
-                    Mail::to($rma->usuario->email)->send(new RmaStatusUpdateMail($rma));
+                    Mail::to($rma->usuario->email)->queue((new RmaStatusUpdateMail($rma))->afterCommit());
                 }
             } catch (\Throwable $e) {
                 Log::warning('No se pudo notificar el cambio RMA', ['rma_id' => $rma->id]);

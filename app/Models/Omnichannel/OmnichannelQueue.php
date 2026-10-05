@@ -20,6 +20,7 @@ class OmnichannelQueue extends Model
         'queued_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<OmnichannelConversation, $this> */
     public function conversation(): BelongsTo
     {
         return $this->belongsTo(OmnichannelConversation::class, 'conversation_id');

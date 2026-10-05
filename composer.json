@@ -6,23 +6,24 @@
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
-        "php": "^8.2",
-        "barryvdh/laravel-dompdf": "^3.1",
+        "php": "^8.3",
         "azure-oss/storage-blob-flysystem": "^2.2",
+        "barryvdh/laravel-dompdf": "^3.1",
         "greenter/greenter": "^5.3",
-        "greenter/ws": "*",
+        "greenter/ws": "^5.3",
         "inertiajs/inertia-laravel": "^3.1",
         "intervention/image": "^3.0",
         "laravel/framework": "^12.0",
         "laravel/reverb": "^1.11",
         "laravel/socialite": "^5.16",
         "laravel/tinker": "^2.10.1",
-        "maatwebsite/excel": "^3.1",
+        "maatwebsite/excel": "^4.0",
         "owen-it/laravel-auditing": "^14.0",
         "simplesoftwareio/simple-qrcode": "^4.2",
+        "smalot/pdfparser": "2.12",
         "spatie/browsershot": "^5.4",
         "spatie/laravel-schemaless-attributes": "^2.6",
-        "tightenco/ziggy": "*"
+        "tightenco/ziggy": "^2.6"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -96,6 +97,9 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
+        },
+        "platform": {
+            "php": "8.3.0"
         }
     },
     "minimum-stability": "stable",

@@ -196,6 +196,7 @@ function Badge({ children, color }) {
    Main Component
    ═══════════════════════════════════════════════ */
 export default function Index({
+    metricErrors = [],
     chartVentas = [],
     chartEstados = [],
     topProductos = [],
@@ -238,6 +239,7 @@ export default function Index({
     return (
         <AdminLayout logoUrl={null}>
             <Head title="Analíticas" />
+            {metricErrors.length > 0 && <p role="alert" style={{padding: 16, color: "#B45309"}}>Hay métricas no disponibles. No interpretes los valores vacíos como cero; revisa el registro de errores.</p>}
 
             {/* ───── Page Header ───── */}
             <div style={{ marginBottom: '28px' }}>
@@ -391,7 +393,7 @@ export default function Index({
                 {/* Product Profitability */}
                 <Card>
                     <SectionTitle subtitle="Top 5 por ingresos generados">
-                        Rentabilidad por Producto
+                        Ingresos por Producto
                     </SectionTitle>
                     <div style={{ height: '220px', marginTop: '12px' }}>
                         <ResponsiveContainer>

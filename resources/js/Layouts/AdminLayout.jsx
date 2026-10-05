@@ -3,7 +3,7 @@ import { Link, usePage, router } from '@inertiajs/react';
 import { AnimatePresence } from 'framer-motion';
 import PageTransition from '@/Components/Animations/PageTransition';
 import {
-    LayoutDashboard, MonitorSmartphone, ShoppingCart, Package,
+    LayoutDashboard, MonitorSmartphone, ShoppingCart, Package, MessageSquare,
     CreditCard, Wallet, Archive, Image, Users, Truck,
     UserCog, Shield, Star, Settings, LogOut, Menu, X, Bell, Eye, Grid, Briefcase, Mail, ShieldAlert, DollarSign, Building, Zap, Tags, Map, Ticket, TrendingUp
 } from 'lucide-react';
@@ -27,6 +27,11 @@ export default function AdminLayout({ children, logoUrl }) {
     };
 
     const navCategories = [
+        { title: 'Comunicación', items: [
+            { href: '/admin/equipo', label: 'Equipo', icon: <Users size={18} /> },
+            { href: '/admin/asistente', label: 'Asistente del panel', icon: <MessageSquare size={18} /> },
+            { href: '/admin/chatbot/conocimiento', label: 'Conocimiento del chatbot', permission: 'gestionar_ajustes', icon: <Zap size={18} /> },
+        ] },
         {
             title: 'Métricas',
             items: [
@@ -52,7 +57,6 @@ export default function AdminLayout({ children, logoUrl }) {
                 { href: '/admin/products', label: 'Productos', permission: 'ver_productos', icon: <Package size={20} /> },
                 { href: '/admin/categorias', label: 'Categorías', permission: 'gestionar_categorias', icon: <Tags size={20} /> },
                 { href: '/admin/marcas', label: 'Marcas', permission: 'gestionar_marcas', icon: <Tags size={20} /> },
-                { href: '/admin/compras', label: 'Compras', permission: 'inventario.gestionar', icon: <ShoppingCart size={20} /> },
                 { href: '/admin/inventario', label: 'Inventario', permission: 'inventario.gestionar', icon: <LayoutDashboard size={20} /> },
                 { href: '/admin/almacenes', label: 'Almacenes', permission: 'inventario.gestionar', icon: <Archive size={20} /> },
                 { href: '/admin/zonas', label: 'Zonas de Envío', permission: 'gestionar_ajustes', icon: <Map size={20} /> },
@@ -108,18 +112,19 @@ export default function AdminLayout({ children, logoUrl }) {
 
     useEffect(() => {
         if (globalSearchQuery.length > 2 && hasPerm('ver_dashboard')) {
+            const controller = new AbortController();
             setIsSearching(true);
             const timer = setTimeout(() => {
-                fetch(`/admin/buscar?q=${encodeURIComponent(globalSearchQuery)}`)
+                fetch(`/admin/buscar?q=${encodeURIComponent(globalSearchQuery)}`, { signal: controller.signal })
                     .then(res => { if (!res.ok) throw new Error('No se pudo buscar'); return res.json(); })
                     .then(data => {
                         setGlobalSearchResults(data);
                         setShowSearchDropdown(true);
                         setIsSearching(false);
                     })
-                    .catch(() => { setGlobalSearchResults(null); setShowSearchDropdown(false); setIsSearching(false); });
+                    .catch(() => { if (controller.signal.aborted) return; setGlobalSearchResults(null); setShowSearchDropdown(false); setIsSearching(false); });
             }, 300);
-            return () => clearTimeout(timer);
+            return () => { clearTimeout(timer); controller.abort(); };
         } else {
             setGlobalSearchResults(null);
             setShowSearchDropdown(false);
@@ -135,7 +140,7 @@ export default function AdminLayout({ children, logoUrl }) {
 
     useEffect(() => {
         fetchNotificaciones();
-        const interval = setInterval(fetchNotificaciones, 15000);
+        const interval = setInterval(() => { if (!document.hidden) fetchNotificaciones(); }, 30000);
         return () => clearInterval(interval);
     }, []);
 

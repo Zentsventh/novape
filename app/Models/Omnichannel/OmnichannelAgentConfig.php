@@ -21,6 +21,7 @@ class OmnichannelAgentConfig extends Model
         'skills' => 'array',
     ];
 
+    /** @return BelongsTo<Usuario, $this> */
     public function usuario(): BelongsTo
     {
         return $this->belongsTo(Usuario::class, 'usuario_id');

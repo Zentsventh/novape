@@ -2,6 +2,20 @@
 @source "../js";
 @source "../views";
 
+/* Import self‑hosted fonts */
+@import "./home/fonts.css";
+
+/* Loading fallback style */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+
 /* ============================
    NOVAPE - DESIGN SYSTEM
    Inspirado en EFE.com.pe
@@ -151,4 +165,32 @@
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--color-primary);
+}
+/* ------------------------------------------------------------
+   Spinner premium styles – used by LoadingSpinner component
+   ------------------------------------------------------------ */
+.spinner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  animation: spin 1s linear infinite;
+}
+.spinner-svg {
+  width: 100%;
+  height: 100%;
+}
+.spinner-circle {
+  stroke: var(--color-primary, #3b82f6); /* azul premium */
+  stroke-linecap: round;
+  animation: dash 1.5s ease-in-out infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes dash {
+  0%   { stroke-dasharray: 1, 150; stroke-dashoffset: 0; }
+  50%  { stroke-dasharray: 90, 150; stroke-dashoffset: -35; }
+  100% { stroke-dasharray: 90, 150; stroke-dashoffset: -124; }
 }

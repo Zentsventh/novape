@@ -8,55 +8,32 @@ use App\Models\Pedido;
 
 class OrderStatusTool implements ToolInterface
 {
-    public function getName(): string
-    {
-        return 'consultar_estado_pedido';
-    }
+    public function __construct(private ?int $verifiedCustomerId = null) {}
+
+    public function getName(): string { return 'consultar_estado_pedido'; }
 
     public function getDescription(): string
     {
-        return 'Consulta el estado actual de un pedido utilizando su código único.';
+        return 'Consulta un pedido del cliente autenticado. Un código de pedido por sí solo no acredita identidad.';
     }
 
     public function getParametersSchema(): array
     {
-        return [
-            'type' => 'OBJECT',
-            'properties' => [
-                'codigo_pedido' => [
-                    'type' => 'STRING',
-                    'description' => 'El código del pedido (ej. PED-0001)'
-                ]
-            ],
-            'required' => ['codigo_pedido']
-        ];
+        return ['type' => 'OBJECT', 'properties' => ['codigo_pedido' => ['type' => 'STRING']], 'required' => ['codigo_pedido']];
     }
 
     public function execute(array $args): mixed
     {
-        $codigo = $args['codigo_pedido'] ?? '';
-
-        if (empty(trim($codigo))) {
-            return ['error' => 'Código de pedido requerido.'];
+        if (! $this->verifiedCustomerId) {
+            return ['message' => 'Inicia sesión en tu cuenta de la tienda para consultar tus pedidos, o solicita ayuda de un asesor para verificar tu identidad.'];
+        }
+        $code = trim((string) ($args['codigo_pedido'] ?? ''));
+        $order = Pedido::where('usuario_id', $this->verifiedCustomerId)->where('codigo', $code)->first();
+        if (! $order) {
+            return ['message' => 'No se encontró ese pedido en tu cuenta.'];
         }
 
-        try {
-            $pedido = Pedido::where('codigo', $codigo)->first();
-
-            if (!$pedido) {
-                return ['message' => 'No se encontró ningún pedido con el código: ' . $codigo];
-            }
-
-            return [
-                'codigo' => $pedido->codigo,
-                'estado' => $pedido->estado,
-                'fecha_creacion' => $pedido->created_at->format('Y-m-d H:i'),
-                'total_pagado' => $pedido->total,
-                'courier' => $pedido->courier_name ?? 'No asignado',
-                'tracking' => $pedido->tracking_number ?? 'N/A'
-            ];
-        } catch (\Exception $e) {
-            return ['error' => 'Ocurrió un error al consultar la base de datos de pedidos.'];
-        }
+        return ['codigo' => $order->codigo, 'estado' => $order->estado, 'fecha_creacion' => $order->created_at->format('Y-m-d H:i'),
+            'total_pagado' => $order->total, 'courier' => $order->courier_name ?? 'Por asignar', 'tracking' => $order->tracking_number];
     }
 }

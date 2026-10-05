@@ -1,25 +1,28 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Head, usePage, Link } from '@inertiajs/react';
 import FadeIn from '../Components/Animations/FadeIn';
 import SlideUp from '../Components/Animations/SlideUp';
 
 /* Componentes del Home */
 import Header from '../Components/Home/Header';
-import CategoryNavBar from '../Components/Home/CategoryNavBar';
-import CategoryDrawer from '../Components/Home/CategoryDrawer';
-import HeroCarousel from '../Components/Home/HeroCarousel';
-import MejorSemanaSection from '../Components/Home/MejorSemanaSection';
-import CategorySection from '../Components/Home/CategorySection';
-import Footer from '../Components/Home/Footer';
-import GsapCanvas from '../Components/Home/GsapCanvas';
+import LoadingSpinner from '../Components/LoadingSpinner';
+const CategoryNavBar = React.lazy(() => import('../Components/Home/CategoryNavBar'));
+const CategoryDrawer = React.lazy(() => import('../Components/Home/CategoryDrawer'));
+const HeroCarousel = React.lazy(() => import('../Components/Home/HeroCarousel'));
+const MejorSemanaSection = React.lazy(() => import('../Components/Home/MejorSemanaSection'));
+const CategorySection = React.lazy(() => import('../Components/Home/CategorySection'));
+const Footer = React.lazy(() => import('../Components/Home/Footer'));
+const QuickViewModal = React.lazy(() => import('../Components/Home/QuickViewModal'));
+
+
 import { useLocation } from '@/Contexts/LocationContext';
 
 import CartDrawer from '../Components/Home/CartDrawer';
 import Toast from '../Components/Home/Toast';
 import RecentlyViewed from '../Components/Home/RecentlyViewed';
 // Banners removed as per user request
-import QuickViewModal from '../Components/Home/QuickViewModal';
-import AddToListModal from '../Components/Home/AddToListModal';
+
+const AddToListModal = React.lazy(() => import('../Components/Home/AddToListModal'));
 import { router } from '@inertiajs/react';
 import ErrorBoundary from '../Components/ErrorBoundary';
 
@@ -123,10 +126,12 @@ export default function Home({ appName, categoriaProductos = [], mejorSemana = [
 
             {hasCategorias ? (
                 <SlideUp delay={0.1}>
-                    <CategoryNavBar
-                        categorias={categoriaProductos}
-                        onOpenCategories={() => setIsCatOpen(true)}
-                    />
+                    <Suspense fallback={<LoadingSpinner />}>
+                        <CategoryNavBar
+                            categorias={categoriaProductos}
+                            onOpenCategories={() => setIsCatOpen(true)}
+                        />
+                    </Suspense>
                 </SlideUp>
             ) : (
                 <div className="efe-empty-state">No hay categorias disponibles.</div>
@@ -147,18 +152,20 @@ export default function Home({ appName, categoriaProductos = [], mejorSemana = [
 
             {hasBanners ? (
                 <FadeIn delay={0.3}>
-                    <HeroCarousel banners={banners} />
+                    <Suspense fallback={<LoadingSpinner />}>
+                        <HeroCarousel banners={banners} />
+                    </Suspense>
                 </FadeIn>
             ) : (
                 <div className="efe-empty-state">No hay banners activos.</div>
             )}
 
-            {/* Animación GSAP Debajo del Banner */}
-            <GsapCanvas />
 
             {hasMejorSemana ? (
                 <SlideUp delay={0.5}>
-                    <MejorSemanaSection productos={mejorSemana} />
+                    <Suspense fallback={<LoadingSpinner />}>
+                        <MejorSemanaSection productos={mejorSemana} />
+                    </Suspense>
                 </SlideUp>
             ) : (
                 <div className="efe-empty-state">No hay promociones activas.</div>
@@ -167,7 +174,9 @@ export default function Home({ appName, categoriaProductos = [], mejorSemana = [
             {hasCategorias ? (
                 categoriaProductos.filter((cat) => cat.productos?.length > 0).map((cat, index) => (
                     <SlideUp key={cat.id} delay={0.3 + (index * 0.05)}>
-                        <CategorySection categoria={cat} index={index} />
+                        <Suspense fallback={<LoadingSpinner />}>
+                            <CategorySection categoria={cat} index={index} />
+                        </Suspense>
                     </SlideUp>
                 ))
             ) : (
@@ -179,7 +188,9 @@ export default function Home({ appName, categoriaProductos = [], mejorSemana = [
             </SlideUp>
 
             <FadeIn delay={0.8}>
-                <Footer />
+                <Suspense fallback={<div className="loading">Cargando pie…</div>}>
+                    <Footer />
+                </Suspense>
             </FadeIn>
 
             
@@ -189,18 +200,22 @@ export default function Home({ appName, categoriaProductos = [], mejorSemana = [
                 cart={cart} 
             />
 
-            <CategoryDrawer 
-                isOpen={isCatOpen} 
-                onClose={() => setIsCatOpen(false)} 
-                categorias={categoriaProductos} 
-            />
+            <Suspense fallback={<LoadingSpinner />}>
+                <CategoryDrawer 
+                    isOpen={isCatOpen} 
+                    onClose={() => setIsCatOpen(false)} 
+                    categorias={categoriaProductos} 
+                />
+            </Suspense>
 
-            <QuickViewModal 
-                isOpen={isQuickViewOpen}
-                onClose={() => setIsQuickViewOpen(false)}
-                product={quickViewProduct}
-                onAddToCart={handleQuickViewAddToCart}
-            />
+            <Suspense fallback={<LoadingSpinner />}>
+                <QuickViewModal 
+                    isOpen={isQuickViewOpen}
+                    onClose={() => setIsQuickViewOpen(false)}
+                    product={quickViewProduct}
+                    onAddToCart={handleQuickViewAddToCart}
+                />
+            </Suspense>
 
             {/* Cintillo 2: Fijo inferior (Fixed bottom) */}
             <div className="efe-cintillo-bottom">

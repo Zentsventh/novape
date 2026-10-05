@@ -16,7 +16,7 @@ class PedidoItem extends Model
         'pedido_id',
         'variante_id',
         'cantidad',
-        'precio_unitario',
+        'precio_unitario', 'costo_unitario', 'almacen_id', 'producto_nombre', 'sku',
     ];
 
     protected $casts = [
@@ -26,16 +26,19 @@ class PedidoItem extends Model
         'updated_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<Pedido, $this> */
     public function pedido(): BelongsTo
     {
         return $this->belongsTo(Pedido::class, 'pedido_id');
     }
 
+    /** @return BelongsTo<Variante, $this> */
     public function variante(): BelongsTo
     {
         return $this->belongsTo(Variante::class, 'variante_id');
     }
 
+    /** @return HasOneThrough<Producto, Variante, $this> */
     public function producto(): HasOneThrough
     {
         return $this->hasOneThrough(Producto::class, Variante::class, 'id', 'id', 'variante_id', 'producto_id');

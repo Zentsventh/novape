@@ -67,7 +67,11 @@ class ChatbotService
             ],
         ];
 
-        $systemPrompt = $this->buildSystemPrompt();
+        $question = '';
+        foreach (array_reverse($userMessages) as $message) {
+            if (($message['role'] ?? '') === 'user') { $question = $message['text']; break; }
+        }
+        $systemPrompt = $this->buildSystemPrompt().app(KnowledgeService::class)->prompt($question);
 
         // 3. Crear el AgentNode
         $agentNode = new AgentNode($apiKeys, $systemPrompt, $toolsSchema);
@@ -95,7 +99,7 @@ REGLAS ESTRICTAS:
 5. Si el usuario te proporciona datos personales (nombre, DNI, celular, correo) o si identificaste el motivo principal por el cual escribe, DEBES usar la herramienta `actualizar_datos_cliente` para guardar la información.
 6. Sé conciso y claro en tus respuestas de texto. Usa formato simple de viñetas si listas productos.
 7. Si una herramienta no devuelve resultados, dile amablemente al cliente que no encontraste información.
-8. Políticas: Envíos en 24-48h a todo el Perú. Devoluciones hasta 7 días por falla de fábrica. Pagos vía Yape, Plin y Tarjetas.";
+8. Las políticas comerciales se consultan en el conocimiento aprobado adjunto; si faltan, consulta a un asesor. No inventes plazos de entrega, garantías ni medios de pago.";
     }
 
     /**

@@ -24,16 +24,19 @@ class CrmActivity extends Model
         'completada' => 'boolean',
     ];
 
+    /** @return BelongsTo<CrmDeal, $this> */
     public function deal(): BelongsTo
     {
         return $this->belongsTo(CrmDeal::class, 'deal_id');
     }
 
+    /** @return BelongsTo<Usuario, $this> */
     public function autor(): BelongsTo
     {
         return $this->belongsTo(Usuario::class, 'usuario_id');
     }
 
+    /** @return BelongsTo<CrmCompany, $this> */
     public function empresa(): BelongsTo
     {
         return $this->belongsTo(CrmCompany::class, 'empresa_id');

@@ -37,13 +37,9 @@ class HomeController extends Controller
     public function catalogo(Request $request): Response
     {
         $filters = $request->only(['categoria', 'subcategoria', 'categoria_id', 'marca', 'precio_min', 'precio_max', 'q', 'sort']);
-        $page = $request->query('page', 1);
-
-        $cacheKey = 'catalogo_' . md5(json_encode($filters) . '_page_' . $page);
-
-        $data = \Illuminate\Support\Facades\Cache::remember($cacheKey, 3600, function () use ($filters) {
-            return $this->catalogQueryService->getCatalogData($filters);
-        });
+        // Category metadata stays cached in the query service; prices, stock and
+        // image references must reflect the current catalog on each request.
+        $data = $this->catalogQueryService->getCatalogData($filters);
 
         return Inertia::render('Catalogo', array_merge($data, [
             'filtros' => $filters,
@@ -67,11 +63,7 @@ class HomeController extends Controller
 
     public function producto(string $slugOrId): Response
     {
-        $cacheKey = 'producto_' . $slugOrId;
-
-        $data = \Illuminate\Support\Facades\Cache::remember($cacheKey, 3600, function () use ($slugOrId) {
-            return $this->catalogQueryService->getProductData($slugOrId);
-        });
+        $data = $this->catalogQueryService->getProductData($slugOrId);
 
         return Inertia::render('Producto', array_merge($data, [
             'reviews' => [],

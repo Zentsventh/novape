@@ -250,6 +250,13 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
         Route::delete('/tasks/{activity}', 'destroy')->name('admin.crm.tasks.destroy');
     });
 
+    Route::controller(\App\Http\Controllers\Admin\SelectorController::class)->group(function () {
+        Route::get('/selectores/variantes', 'variants')->middleware('permiso:inventario.gestionar');
+        Route::get('/crm/selectores/contactos', 'contacts')->middleware('permiso:crm.gestionar');
+        Route::get('/crm/selectores/empresas', 'companies')->middleware('permiso:crm.gestionar');
+        Route::get('/crm/selectores/oportunidades', 'deals')->middleware('permiso:crm.gestionar');
+    });
+
     Route::controller(CrmSearchController::class)->prefix('crm')->middleware('permiso:crm.gestionar')->group(function () {
         Route::get('/search', 'search')->name('admin.crm.search');
     });
@@ -280,13 +287,17 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
 
     Route::controller(CrmPipelineController::class)->prefix('crm')->middleware('permiso:crm.gestionar')->group(function () {
         Route::get('/pipeline', 'index')->name('admin.crm.pipeline');
+        Route::put('/deals/{id}', 'update')->name('admin.crm.deals.update');
+        Route::delete('/deals/{id}', 'destroy')->name('admin.crm.deals.destroy');
         Route::post('/deals', 'store')->name('admin.crm.deals.store');
         Route::put('/deals/{id}/move', 'move')->name('admin.crm.deals.move');
         Route::get('/deals/{id}', 'show')->name('admin.crm.deals.show');
+        Route::get('/deals/{id}/json', 'getJson')->name('admin.crm.deals.json');
         Route::post('/deals/{id}/custom-fields', 'updateCustomFields')->name('admin.crm.deals.updateCustomFields');
         Route::post('/deals/{id}/activities', 'storeActivity')->name('admin.crm.deals.activities.store');
 
         // Cotizador Integrado
+        Route::get('/quote-variants', 'searchVariants')->name('admin.crm.quote.variants');
         Route::post('/deals/{id}/products', 'addProduct')->name('admin.crm.deals.products.add');
         Route::delete('/deals/{id}/products/{productId}', 'removeProduct')->name('admin.crm.deals.products.remove');
         Route::get('/deals/{id}/quote', 'generateQuote')->name('admin.crm.deals.quote');
@@ -320,6 +331,7 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
         Route::get('/create', 'create')->name('admin.marketing.campaigns.create');
         Route::post('/', 'store')->name('admin.marketing.campaigns.store');
         Route::post('/{campaign}/send', 'send')->name('admin.marketing.campaigns.send');
+        Route::get('/{campaign}/report', 'report')->name('admin.marketing.campaigns.report');
     });
 
     Route::controller(AlmacenController::class)->prefix('almacenes')->middleware('permiso:inventario.gestionar')->group(function () {
@@ -482,6 +494,31 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
     // ==========================================
     // OMNICHANNEL INBOX
     // ==========================================
+    Route::middleware('permiso:gestionar_ajustes')->controller(\App\Http\Controllers\Admin\ChatbotKnowledgeController::class)->group(function () {
+        Route::get('/chatbot/conocimiento', 'index')->name('admin.chatbot.knowledge');
+        Route::get('/api/chatbot-knowledge', 'sources');
+        Route::post('/api/chatbot-knowledge', 'store');
+        Route::post('/api/chatbot-knowledge/preview', 'preview');
+        Route::get('/api/chatbot-knowledge/{id}', 'show')->whereNumber('id');
+        Route::put('/api/chatbot-knowledge/{id}', 'update')->whereNumber('id');
+        Route::delete('/api/chatbot-knowledge/{id}', 'destroy')->whereNumber('id');
+    });
+    Route::get('/equipo', [\App\Http\Controllers\Admin\TeamChatController::class, 'index'])->name('admin.equipo');
+    Route::get('/asistente', [\App\Http\Controllers\Admin\PanelAssistantController::class, 'index'])->name('admin.asistente');
+    Route::prefix('api/team')->controller(\App\Http\Controllers\Admin\TeamChatController::class)->group(function () {
+        Route::get('/workers', 'workers');
+        Route::get('/threads', 'threads');
+        Route::post('/threads', 'create')->middleware('throttle:team-create');
+        Route::get('/threads/{thread}/messages', 'messages');
+        Route::post('/threads/{thread}/messages', 'send')->middleware('throttle:team-send');
+        Route::post('/threads/{thread}/read', 'read');
+    });
+    Route::prefix('api/panel-assistant')->controller(\App\Http\Controllers\Admin\PanelAssistantController::class)->group(function () {
+        Route::get('/sessions', 'sessions');
+        Route::get('/sessions/{session}/messages', 'history');
+        Route::post('/ask', 'ask')->middleware('throttle:panel-assistant');
+    });
+
     Route::middleware(['permiso:gestionar_omnichannel'])->group(function () {
         Route::get('/inbox', [InboxController::class, 'index'])->name('admin.inbox');
 
@@ -489,7 +526,7 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
         Route::prefix('api/omnichannel')->group(function () {
             Route::get('/conversations', [ConversationApiController::class, 'conversations']);
             Route::get('/conversations/{conversation}/messages', [ConversationApiController::class, 'messages']);
-            Route::post('/conversations/{conversation}/messages', [ConversationApiController::class, 'sendMessage'])->middleware('throttle:30,1');
+            Route::post('/conversations/{conversation}/messages', [ConversationApiController::class, 'sendMessage'])->middleware('throttle:inbox-send');
             Route::post('/conversations/{conversation}/assign', [ConversationApiController::class, 'assignAgent']);
             Route::post('/conversations/{conversation}/unassign', [ConversationApiController::class, 'unassignAgent']);
             Route::post('/conversations/{conversation}/resolve', [ConversationApiController::class, 'resolveConversation']);

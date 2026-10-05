@@ -12,21 +12,60 @@ use Illuminate\Validation\ValidationException;
 
 class CrmPipelineService
 {
-    public function getPipelineData(): array
+    public function getPipelineData(array $filters = []): array
     {
-        return CrmStage::with(['deals.cliente', 'deals.empresa'])->orderBy('orden')->get()->toArray();
+        $query = CrmDeal::with(['cliente', 'empresa'])->orderByDesc('updated_at')->orderByDesc('id');
+        if (! empty($filters['q'])) {
+            $term = mb_substr($filters['q'], 0, 100);
+            $query->where(fn ($q) => $q->where('titulo', 'like', '%'.$term.'%')
+                ->orWhereHas('cliente', fn ($c) => $c->where('nombres', 'like', '%'.$term.'%')->orWhere('apellidos', 'like', '%'.$term.'%'))
+                ->orWhereHas('empresa', fn ($c) => $c->where('nombre', 'like', '%'.$term.'%')));
+        }
+        $page = $query->paginate(60)->withQueryString();
+        $stages = CrmStage::withCount('deals')->orderBy('orden')->get();
+        foreach ($stages as $stage) {
+            $stage->setRelation('deals', $page->getCollection()->where('stage_id', $stage->id)->values());
+        }
+
+        return ['stages' => $stages->toArray(), 'pagination' => $page->toArray()];
     }
 
     public function storeDeal(array $data): CrmDeal
     {
         return DB::transaction(function () use ($data) {
             $data['estado'] = $data['estado'] ?? 'open';
+            $data['valor'] = $data['valor'] ?? 0;
             $deal = CrmDeal::create($data);
 
             TimelineService::log($deal, 'deal_creado', "Oportunidad creada: {$deal->titulo}");
             AutomationEngineService::trigger('deal_created', $deal);
 
             return $deal;
+        });
+    }
+
+    public function updateDeal(CrmDeal $deal, array $data): void
+    {
+        DB::transaction(function () use ($deal, $data) {
+            $locked = CrmDeal::whereKey($deal->id)->lockForUpdate()->firstOrFail();
+            if (array_key_exists('valor', $data)) $data['valor'] ??= 0;
+            $before = $locked->only(['titulo', 'valor', 'empresa_id', 'usuario_id', 'fecha_cierre_esperada']);
+            $locked->fill(\Illuminate\Support\Arr::except($data, ['stage_id', 'estado']));
+            // Quoted line totals remain authoritative when the opportunity has products.
+            if ($locked->products()->exists()) $locked->valor = $locked->products()->sum('subtotal');
+            $locked->save();
+            $after = $locked->only(array_keys($before));
+            if ($before !== $after) TimelineService::log($locked, 'deal_actualizado', 'Oportunidad actualizada', ['before' => $before, 'after' => $after]);
+            $this->updateDealStage($locked, ['stage_id' => $data['stage_id'], 'estado' => $data['estado'] ?? $locked->estado]);
+        });
+    }
+
+    public function archiveDeal(CrmDeal $deal): void
+    {
+        DB::transaction(function () use ($deal) {
+            $locked = CrmDeal::whereKey($deal->id)->lockForUpdate()->firstOrFail();
+            TimelineService::log($locked, 'deal_archivado', 'Oportunidad archivada');
+            $locked->delete();
         });
     }
 
@@ -50,9 +89,12 @@ class CrmPipelineService
             }
 
             if ($lockedDeal->estado === 'won' || $lockedDeal->estado === 'lost') {
-                $lockedDeal->fecha_cierre_esperada = now();
+                $lockedDeal->fecha_cierre_real ??= now();
             }
 
+            if ($lockedDeal->estado === 'open') {
+                $lockedDeal->fecha_cierre_real = null;
+            }
             $lockedDeal->save();
 
             if ($oldStageId !== $newStageId) {
@@ -118,7 +160,8 @@ class CrmPipelineService
                 throw ValidationException::withMessages(['cantidad' => 'La cantidad debe ser mayor a cero.']);
             }
 
-            $precio = $producto->variantes()->where('activo', true)->min('precio');
+            $variant = $producto->variantes()->where('activo', true)->whereKey($data['variante_id'] ?? 0)->first();
+            $precio = $variant?->precio;
             if ($precio === null || ! $producto->activo) {
                 throw ValidationException::withMessages(['producto_id' => 'El producto no tiene una variante activa con precio.']);
             }
@@ -126,6 +169,9 @@ class CrmPipelineService
 
             $deal->products()->create([
                 'producto_id' => $producto->id,
+                'variante_id' => $variant->id,
+                'sku' => $variant->sku,
+                'producto_nombre' => $producto->nombre,
                 'cantidad' => $cantidad,
                 'precio_unitario' => $precio,
                 'descuento' => 0,
@@ -174,7 +220,7 @@ class CrmPipelineService
     {
         DB::transaction(function () use ($deal, $fields) {
             $deal = CrmDeal::whereKey($deal->id)->lockForUpdate()->firstOrFail();
-            $deal->custom_fields = array_merge($deal->custom_fields->toArray(), $fields);
+            $deal->setAttribute('custom_fields', array_merge($deal->custom_fields?->toArray() ?? [], $fields));
             $deal->save();
 
             TimelineService::log($deal, 'campos_actualizados', 'Campos personalizados actualizados');
@@ -206,7 +252,7 @@ class CrmPipelineService
         }
 
         if ($oldStageId !== $newStageId && $newEstado === 'open') {
-            $stage = clone CrmStage::find($newStageId);
+            $stage = CrmStage::find($newStageId);
             if ($stage && (stripos($stage->nombre, 'contacto') !== false || stripos($stage->nombre, 'reunión') !== false)) {
                 $deal->activities()->create([
                     'usuario_id' => $authorId,

@@ -22,7 +22,7 @@ const ubigeo = ubigeoData.reniec;
 export default function Profile({ usuario = {}, pedidos = [], direcciones = [], tarjetas = [], datosReembolso = null, listas = [], sesiones = [], pointsHistory = [], activeTabParam = 'home', categoriaProductos = [] }) {
     const confirmDialog = useConfirm();
 
-    const { auth, flash, errors: pageErrors, cart } = usePage().props;
+    const { auth, flash, errors: pageErrors, cart, session_id } = usePage().props;
     const user = auth?.user || usuario;
     const [currentView, setCurrentView] = useState(activeTabParam === 'ordenes' ? 'compras' : activeTabParam);
     const [isCartOpen, setIsCartOpen] = useState(false);
@@ -946,7 +946,7 @@ export default function Profile({ usuario = {}, pedidos = [], direcciones = [], 
                 </div>
             )}
             {sesiones.map(sesion => {
-                const isCurrent = sesion.id === usePage().props.session_id;
+                const isCurrent = sesion.id === session_id;
                 return (
                     <div key={sesion.id} style={{ background: '#ffffff', borderRadius: '16px', padding: '20px 24px', border: isCurrent ? '1px solid #BAE6FD' : '1px solid #E2E8F0', boxShadow: isCurrent ? '0 4px 20px rgba(0, 71, 151, 0.06)' : '0 4px 20px rgba(0, 0, 0, 0.03)', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: 'all 0.2s ease' }}>
                         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>

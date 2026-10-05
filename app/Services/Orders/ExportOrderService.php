@@ -14,7 +14,7 @@ class ExportOrderService
     {
         $rows = Pedido::with('usuario')->lazyById(500)->map(fn ($p) => [
             $p->id, $p->codigo, $p->usuario ? $p->usuario->nombres.' '.$p->usuario->apellidos : 'N/A',
-            $p->usuario?->email ?? '', $p->total, $p->estado, $p->created_at,
+            $p->usuario->email ?? '', $p->total, $p->estado, $p->created_at,
         ]);
 
         return Csv::download(['ID', 'Código', 'Cliente', 'Email', 'Total', 'Estado', 'Fecha'], $rows, 'pedidos_'.date('Y-m-d').'.csv');

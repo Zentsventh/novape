@@ -2,19 +2,19 @@
 
 namespace App\Jobs;
 
-use App\Mail\MarketingCampaignMail;
 use App\Models\MarketingCampaign;
 use App\Models\Usuario;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
 
 class SendMarketingCampaignJob implements ShouldQueue
 {
     use Queueable;
 
-    public $timeout = 3600;
+    public int $timeout = 60;
+
+    public int $tries = 3;
 
     public function __construct(
         public MarketingCampaign $campaign
@@ -22,6 +22,9 @@ class SendMarketingCampaignJob implements ShouldQueue
 
     public function handle(): void
     {
+        if ($this->campaign->fresh()?->status !== 'sending') {
+            return;
+        }
         $query = Usuario::whereHas('roles', fn ($q) => $q->where('nombre', 'cliente'))
             ->where('estado', 'activo')
             ->whereNotNull('email');
@@ -32,24 +35,21 @@ class SendMarketingCampaignJob implements ShouldQueue
             $query->where('last_order_date', '<', now()->subDays(90));
         }
 
-        $users = $query->get();
-        $sentCount = 0;
-        $failedCount = 0;
-
-        foreach ($users as $user) {
-            try {
-                Mail::to($user->email)->send(new MarketingCampaignMail($this->campaign, $user));
-                $sentCount++;
-            } catch (\Exception $e) {
-                $failedCount++;
-                Log::warning('Fallo de envío de campaña', ['campaign_id' => $this->campaign->id, 'user_id' => $user->id]);
+        $query->select('id', 'email')->chunkById(200, function ($users) {
+            foreach ($users as $user) {
+                DB::table('marketing_deliveries')->insertOrIgnore([
+                    'campaign_id' => $this->campaign->id, 'usuario_id' => $user->id, 'email' => $user->email,
+                    'status' => 'pending', 'created_at' => now(), 'updated_at' => now(),
+                ]);
             }
-        }
-
-        $this->campaign->update([
-            'status' => $failedCount > 0 ? 'failed' : 'sent',
-            'sent_count' => $sentCount,
-            'finished_at' => now(),
-        ]);
+        });
+        $this->campaign->update(['target_count' => DB::table('marketing_deliveries')->where('campaign_id', $this->campaign->id)->count()]);
+        DB::table('marketing_deliveries')->where('campaign_id', $this->campaign->id)->where('status', 'pending')
+            ->orderBy('id')->chunkById(200, function ($rows) {
+                foreach ($rows as $row) {
+                    SendMarketingRecipientJob::dispatch($row->id);
+                }
+            });
+        SendMarketingRecipientJob::refreshCampaign($this->campaign->id);
     }
 }

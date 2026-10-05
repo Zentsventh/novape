@@ -2,21 +2,29 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use App\Models\Pedido;
-use Illuminate\Support\Str;
+use App\Models\ReservaStock;
+use App\Models\TransaccionPago;
 use App\Services\Checkout\CheckoutService;
 use App\Services\Shipping\ShippingCalculationService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class NiubizController extends Controller
 {
     private $baseUrl;
+
     private $merchantId;
+
     private $user;
+
     private $password;
+
     private $checkoutService;
+
     private ShippingCalculationService $shippingCalculationService;
 
     public function __construct(CheckoutService $checkoutService, ShippingCalculationService $shippingCalculationService)
@@ -24,8 +32,8 @@ class NiubizController extends Controller
         $this->checkoutService = $checkoutService;
         $this->shippingCalculationService = $shippingCalculationService;
         $env = config('services.niubiz.env', 'sandbox');
-        $this->baseUrl = $env === 'production' 
-            ? 'https://apiprod.vnforapps.com' 
+        $this->baseUrl = $env === 'production'
+            ? 'https://apiprod.vnforapps.com'
             : 'https://apisandbox.vnforappstest.com';
 
         $this->merchantId = config('services.niubiz.merchant_id');
@@ -36,13 +44,13 @@ class NiubizController extends Controller
     private function generateToken()
     {
         $response = Http::withBasicAuth($this->user, $this->password)
-                        ->get("{$this->baseUrl}/api.security/v1/security");
+            ->get("{$this->baseUrl}/api.security/v1/security");
 
         if ($response->successful()) {
-            return $response->body(); 
+            return $response->body();
         }
 
-        throw new \Exception("Error al generar Token de Niubiz: " . $response->body());
+        throw new \Exception('Error al generar Token de Niubiz: '.$response->body());
     }
 
     public function createSession(Request $request)
@@ -50,7 +58,7 @@ class NiubizController extends Controller
         try {
             $user = auth()->user();
             $items = session('cart', []);
-            
+
             $couponCode = $request->input('coupon', null);
             $shippingAddress = $request->validate([
                 'deliveryType' => ['required', 'in:domicilio,tienda'],
@@ -66,7 +74,7 @@ class NiubizController extends Controller
                 'codigo_postal' => '',
             ])['costo'];
             $usePoints = filter_var($request->input('usePoints', false), FILTER_VALIDATE_BOOLEAN);
-            
+
             // Usar CheckoutService para calcular total exacto aplicando descuentos
             $checkoutData = $this->checkoutService->validateAndCalculateTotal($items, $couponCode, $shippingCost, $usePoints);
             $montoTotal = $checkoutData['totalConDescuento'];
@@ -104,7 +112,7 @@ class NiubizController extends Controller
 
             // Crear la Sesión
             $response = Http::withHeaders(['Authorization' => $securityToken])
-                                ->post("{$this->baseUrl}/api.ecommerce/v2/ecommerce/token/session/{$this->merchantId}", [
+                ->post("{$this->baseUrl}/api.ecommerce/v2/ecommerce/token/session/{$this->merchantId}", [
                     'channel' => 'web',
                     'amount' => (float) round($montoTotal, 2),
                     'antifraud' => [
@@ -114,13 +122,13 @@ class NiubizController extends Controller
                             'MDD21' => 'Lima',
                             'MDD32' => 'DNI',
                             'MDD75' => $user ? 'Registrado' : 'Invitado',
-                            'MDD77' => '1'
-                        ]
-                    ]
+                            'MDD77' => '1',
+                        ],
+                    ],
                 ]);
 
-            if (!$response->successful()) {
-                throw new \Exception("Error al crear Sesión de Niubiz: " . $response->body());
+            if (! $response->successful()) {
+                throw new \Exception('Error al crear Sesión de Niubiz: '.$response->body());
             }
 
             $sessionData = $response->json();
@@ -134,34 +142,61 @@ class NiubizController extends Controller
                 'merchantId' => $this->merchantId,
                 'purchaseNumber' => $purchaseNumber,
                 'amount' => (float) round($montoTotal, 2),
-                'env' => config('services.niubiz.env', 'sandbox')
+                'env' => config('services.niubiz.env', 'sandbox'),
             ]);
 
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             throw $e;
         } catch (\Exception $e) {
-            Log::error('Niubiz Session Error: ' . $e->getMessage());
+            Log::error('Niubiz Session Error: '.$e->getMessage());
+
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
     public function authorizeTransaction(Request $request)
     {
+        $attemptId = null;
         try {
             $transactionToken = $request->input('transactionToken');
-            
+
             $amount = session('niubiz_amount');
             $purchaseNumber = session('niubiz_purchaseNumber');
             $codigoPedido = session('checkout_pedido');
 
-            if (!$amount || !$purchaseNumber || !$codigoPedido) {
+            if (! $amount || ! $purchaseNumber || ! $codigoPedido) {
                 return redirect()->route('checkout')->with('error', 'Sesión de pago expirada o inválida.');
             }
 
+            if (! is_string($transactionToken) || $transactionToken === '') {
+                throw new \InvalidArgumentException('Falta el token de transacción.');
+            }
+            $order = Pedido::where('codigo', $codigoPedido)->firstOrFail();
+            $existing = DB::table('payment_reconciliations')->where('purchase_number', $purchaseNumber)->first();
+            if ($existing) {
+                if ($existing->reference_hash !== hash('sha256', $transactionToken) || $existing->pedido_id !== $order->id) {
+                    throw new \RuntimeException('La operación no coincide con el intento original.');
+                }
+                if ($existing->status === 'applied') {
+                    return redirect()->route('checkout.niubiz.success')->with('success', 'Este pago ya fue registrado.');
+                }
+
+                return redirect()->route('checkout')->with('error', 'Este pago está en verificación. No repitas el cobro; contacta a soporte con el código '.$order->codigo.'.');
+            }
+            if (strtolower($order->estado) !== 'pendiente' || abs((float) $order->total - (float) $amount) > 0.01) {
+                throw new \RuntimeException('El pedido ya no está pendiente o su importe cambió. Genera una nueva sesión de pago.');
+            }
+            if (! DB::table('checkout_benefit_reservations')->where('pedido_id', $order->id)->where('expires_at', '>', now())->exists()) {
+                throw new \RuntimeException('La reserva de pago expiró. Genera una nueva sesión antes de cobrar.');
+            }
+            $attemptId = DB::table('payment_reconciliations')->insertGetId([
+                'purchase_number' => $purchaseNumber, 'pedido_id' => $order->id, 'amount' => $amount,
+                'status' => 'authorizing', 'reference_hash' => hash('sha256', $transactionToken), 'created_at' => now(), 'updated_at' => now(),
+            ]);
             $securityToken = $this->generateToken();
 
             $response = Http::withHeaders(['Authorization' => $securityToken])
-                                ->post("{$this->baseUrl}/api.authorization/v3/authorization/ecommerce/{$this->merchantId}", [
+                ->post("{$this->baseUrl}/api.authorization/v3/authorization/ecommerce/{$this->merchantId}", [
                     'channel' => 'web',
                     'captureType' => 'manual',
                     'countable' => true,
@@ -169,54 +204,60 @@ class NiubizController extends Controller
                         'tokenId' => $transactionToken,
                         'purchaseNumber' => $purchaseNumber,
                         'amount' => $amount,
-                        'currency' => 'PEN'
-                    ]
+                        'currency' => 'PEN',
+                    ],
                 ]);
 
             $authData = $response->json();
             Log::info('Niubiz authorization result', ['purchase_number' => $purchaseNumber, 'action_code' => $authData['dataMap']['ACTION_CODE'] ?? null]);
-            
-            if (isset($authData['dataMap']['ACTION_CODE']) && $authData['dataMap']['ACTION_CODE'] === '000') {
-                if (!$this->checkoutService->processSuccessfulPayment($codigoPedido, $amount, $transactionToken)) {
+
+            if ($response->successful() && isset($authData['dataMap']['ACTION_CODE']) && $authData['dataMap']['ACTION_CODE'] === '000') {
+                DB::table('payment_reconciliations')->where('id', $attemptId)->update(['status' => 'approved', 'approved_at' => now(), 'updated_at' => now()]);
+                if (! $this->checkoutService->processSuccessfulPayment($codigoPedido, $amount, $transactionToken)) {
                     throw new \RuntimeException('El pedido no está pendiente de pago.');
                 }
-                \App\Models\ReservaStock::where('session_id', session()->getId())->delete();
-                
+                DB::table('payment_reconciliations')->where('id', $attemptId)->update(['status' => 'applied', 'updated_at' => now()]);
+                ReservaStock::where('session_id', session()->getId())->delete();
+
                 $correoDestino = auth()->check() ? auth()->user()->email : ($request->input('customerEmail') ?? null);
                 $this->checkoutService->finalizeSuccessAction($codigoPedido, $correoDestino);
-                
+
                 session()->forget(['cart', 'checkout_pedido', 'niubiz_amount', 'niubiz_purchaseNumber', 'niubiz_attempt', 'checkout_cupon_id', 'checkout_monto']);
 
                 return redirect()->route('checkout.niubiz.success')->with('success', 'Pago aprobado correctamente.');
             } else {
-                $errorMessage = $authData['dataMap']['ACTION_DESCRIPTION'] ?? 'Transacción rechazada';
-                
+                $errorMessage = $authData['dataMap']['ACTION_DESCRIPTION'] ?? 'Respuesta de pago no confirmada';
+                DB::table('payment_reconciliations')->where('id', $attemptId)->update(['status' => isset($authData['dataMap']['ACTION_CODE']) ? 'declined' : 'needs_review', 'error' => $errorMessage, 'updated_at' => now()]);
+
                 $pedidoId = Pedido::where('codigo', $codigoPedido)->value('id');
                 if ($pedidoId) {
-                    \App\Models\TransaccionPago::create([
+                    TransaccionPago::create([
                         'pedido_id' => $pedidoId,
                         'referencia_pasarela' => $transactionToken,
                         'pasarela' => 'niubiz',
                         'monto' => $amount,
                         'estado' => 'fallido',
-                        'error_message' => $errorMessage
+                        'error_message' => $errorMessage,
                     ]);
                 }
 
-                return redirect()->route('checkout')->with('error', 'Pago Denegado: ' . $errorMessage);
+                return redirect()->route('checkout')->with('error', 'Pago Denegado: '.$errorMessage);
             }
 
         } catch (\Exception $e) {
-            Log::error('Niubiz Auth Error: ' . $e->getMessage());
-            return redirect()->route('checkout')->with('error', 'Ocurrió un error al procesar el pago: ' . $e->getMessage());
+            if ($attemptId) {
+                DB::table('payment_reconciliations')->where('id', $attemptId)->where('status', '!=', 'applied')->update(['status' => 'needs_review', 'error' => mb_substr($e->getMessage(), 0, 1000), 'updated_at' => now()]);
+            }
+            Log::error('Niubiz Auth Error: '.$e->getMessage());
+
+            return redirect()->route('checkout')->with('error', 'Ocurrió un error al procesar el pago: '.$e->getMessage());
         }
     }
 
     public function success()
     {
         return inertia('CheckoutSuccess', [
-            'orderId' => session('success') ? 'COMPLETADA' : 'NUEVA-ORDEN'
+            'orderId' => session('success') ? 'COMPLETADA' : 'NUEVA-ORDEN',
         ]);
     }
 }
-

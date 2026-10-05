@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CrmNote extends Model
 {
@@ -19,7 +19,7 @@ class CrmNote extends Model
         'notable_id',
         'notable_type',
         'contenido',
-        'usuario_id'
+        'usuario_id',
     ];
 
     public function notable(): MorphTo
@@ -27,6 +27,7 @@ class CrmNote extends Model
         return $this->morphTo();
     }
 
+    /** @return BelongsTo<Usuario, $this> */
     public function autor(): BelongsTo
     {
         return $this->belongsTo(Usuario::class, 'usuario_id');

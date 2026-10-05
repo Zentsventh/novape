@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace App\Services\Analytics;
 
-use Illuminate\Support\Facades\DB;
 use App\Models\Pedido;
+use App\Services\Orders\OrderTransitions;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class AnalyticsService
 {
+    private array $errors = [];
+
     /**
      * Returns all metrics needed for the Analíticas dashboard.
      * Each sub-method is wrapped in its own try/catch so a single
@@ -19,6 +22,7 @@ class AnalyticsService
      */
     public function getDashboardMetrics(): array
     {
+        $this->errors = [];
         // ----- Ventas mensuales (últimos 6 meses) -----
         $chartVentas = $this->safe(fn () => $this->buildChartVentas(), []);
 
@@ -31,33 +35,34 @@ class AnalyticsService
         // ----- KPIs básicos -----
         $kpis = $this->safe(fn () => $this->buildKpis(), [
             'ingresosHistorico' => 0,
-            'pedidosMes'        => 0,
-            'ticketPromedio'    => 0,
+            'pedidosMes' => 0,
+            'ticketPromedio' => 0,
         ]);
 
         // ----- Métricas avanzadas -----
-        $retention        = $this->safe(fn () => $this->getRetentionMetrics(), ['repeatRate' => 0, 'clv' => 0]);
-        $productProfit    = $this->safe(fn () => $this->getProductProfitability(), []);
-        $returnRates      = $this->safe(fn () => $this->getReturnRates(), []);
+        $retention = $this->safe(fn () => $this->getRetentionMetrics(), ['repeatRate' => 0, 'clv' => 0]);
+        $productProfit = $this->safe(fn () => $this->getProductProfitability(), []);
+        $returnRates = $this->safe(fn () => $this->getReturnRates(), []);
         $categoryAnalysis = $this->safe(fn () => $this->getTopCategories(), []);
-        $cartAbandon      = $this->safe(fn () => $this->getCartAbandonmentRate(), ['totalCarts' => 0, 'abandoned' => 0, 'rate' => 0]);
-        $channelComp      = $this->safe(fn () => $this->getChannelComparison(), ['web' => ['total' => 0, 'pct' => 0], 'pos' => ['total' => 0, 'pct' => 0]]);
-        $geoHeat          = $this->safe(fn () => $this->getGeographicHeatmap(), []);
-        $peakHeat         = $this->safe(fn () => $this->getPeakHoursHeatmap(), []);
+        $cartAbandon = $this->safe(fn () => $this->getCartAbandonmentRate(), ['totalCarts' => 0, 'abandoned' => 0, 'rate' => 0]);
+        $channelComp = $this->safe(fn () => $this->getChannelComparison(), ['web' => ['total' => 0, 'pct' => 0], 'pos' => ['total' => 0, 'pct' => 0]]);
+        $geoHeat = $this->safe(fn () => $this->getGeographicHeatmap(), []);
+        $peakHeat = $this->safe(fn () => $this->getPeakHoursHeatmap(), []);
 
         return [
-            'chartVentas'       => $chartVentas,
-            'chartEstados'      => $chartEstados,
-            'topProductos'      => $topProductos,
-            'kpis'              => $kpis,
-            'retention'         => $retention,
-            'productProfit'     => $productProfit,
-            'returnRates'       => $returnRates,
-            'categoryAnalysis'  => $categoryAnalysis,
-            'cartAbandonment'   => $cartAbandon,
+            'metricErrors' => $this->errors,
+            'chartVentas' => $chartVentas,
+            'chartEstados' => $chartEstados,
+            'topProductos' => $topProductos,
+            'kpis' => $kpis,
+            'retention' => $retention,
+            'productProfit' => $productProfit,
+            'returnRates' => $returnRates,
+            'categoryAnalysis' => $categoryAnalysis,
+            'cartAbandonment' => $cartAbandon,
             'channelComparison' => $channelComp,
             'geographicHeatmap' => $geoHeat,
-            'peakHoursHeatmap'  => $peakHeat,
+            'peakHoursHeatmap' => $peakHeat,
         ];
     }
 
@@ -70,9 +75,11 @@ class AnalyticsService
         try {
             return $fn();
         } catch (\Throwable $e) {
-            Log::warning('AnalyticsService partial error: ' . $e->getMessage(), [
+            $this->errors[] = 'Una métrica no pudo calcularse. Sus valores no están disponibles.';
+            Log::warning('AnalyticsService partial error: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return $default;
         }
     }
@@ -86,33 +93,35 @@ class AnalyticsService
         $chartVentas = [];
         for ($i = 5; $i >= 0; $i--) {
             $mes = Carbon::now()->subMonths($i);
-            $totalMes = Pedido::where('estado', 'completado')
+            $totalMes = Pedido::whereRaw('LOWER(estado) IN (?, ?, ?, ?)', OrderTransitions::REVENUE_STATES)
                 ->whereYear('created_at', $mes->year)
                 ->whereMonth('created_at', $mes->month)
                 ->sum('total');
             $chartVentas[] = [
-                'mes'   => ucfirst($mes->translatedFormat('M Y')),
+                'mes' => ucfirst($mes->translatedFormat('M Y')),
                 'total' => (float) $totalMes,
             ];
         }
+
         return $chartVentas;
     }
 
     private function buildChartEstados(): array
     {
         return Pedido::select('estado', DB::raw('count(*) as count'))
-            ->groupBy('estado')
+            ->groupBy('estado')->toBase()
             ->get()
             ->map(function ($item) {
                 $colores = [
-                    'pendiente'  => '#F59E0B',
+                    'pendiente' => '#F59E0B',
                     'procesando' => '#3B82F6',
-                    'enviado'    => '#8B5CF6',
+                    'enviado' => '#8B5CF6',
                     'completado' => '#10B981',
-                    'cancelado'  => '#EF4444',
+                    'cancelado' => '#EF4444',
                 ];
+
                 return [
-                    'name'  => ucfirst($item->estado),
+                    'name' => ucfirst($item->estado),
                     'value' => $item->count,
                     'color' => $colores[$item->estado] ?? '#6B7280',
                 ];
@@ -130,33 +139,33 @@ class AnalyticsService
                 DB::raw('SUM(pedido_item.cantidad) as total_vendido'),
                 DB::raw('SUM(pedido_item.cantidad * pedido_item.precio_unitario) as ingresos')
             )
-            ->where('pedido.estado', 'completado')
+            ->whereRaw('LOWER(pedido.estado) IN (?, ?, ?, ?)', OrderTransitions::REVENUE_STATES)
             ->groupBy('producto.id', 'producto.nombre')
             ->orderBy('total_vendido', 'desc')
             ->limit(5)
             ->get()
             ->map(fn ($p) => [
-                'nombre'   => mb_strimwidth($p->nombre, 0, 25, '...'),
-                'ventas'   => (int) $p->total_vendido,
+                'nombre' => mb_strimwidth($p->nombre, 0, 25, '...'),
+                'ventas' => (int) $p->total_vendido,
                 'ingresos' => (float) $p->ingresos,
             ])->toArray();
     }
 
     private function buildKpis(): array
     {
-        $totalIngresosHistorico = (float) Pedido::where('estado', 'completado')->sum('total');
+        $totalIngresosHistorico = (float) Pedido::whereRaw('LOWER(estado) IN (?, ?, ?, ?)', OrderTransitions::REVENUE_STATES)->sum('total');
 
         $totalPedidosMesActual = Pedido::whereMonth('created_at', Carbon::now()->month)
             ->whereYear('created_at', Carbon::now()->year)
             ->count();
 
-        $completadosMesCount = Pedido::where('estado', 'completado')
+        $completadosMesCount = Pedido::whereRaw('LOWER(estado) IN (?, ?, ?, ?)', OrderTransitions::REVENUE_STATES)
             ->whereMonth('created_at', Carbon::now()->month)
             ->whereYear('created_at', Carbon::now()->year)
             ->count();
 
         $ticketPromedio = $completadosMesCount > 0
-            ? (float) Pedido::where('estado', 'completado')
+            ? (float) Pedido::whereRaw('LOWER(estado) IN (?, ?, ?, ?)', OrderTransitions::REVENUE_STATES)
                 ->whereMonth('created_at', Carbon::now()->month)
                 ->whereYear('created_at', Carbon::now()->year)
                 ->sum('total') / $completadosMesCount
@@ -164,8 +173,8 @@ class AnalyticsService
 
         return [
             'ingresosHistorico' => round($totalIngresosHistorico, 2),
-            'pedidosMes'        => $totalPedidosMesActual,
-            'ticketPromedio'    => round($ticketPromedio, 2),
+            'pedidosMes' => $totalPedidosMesActual,
+            'ticketPromedio' => round($ticketPromedio, 2),
         ];
     }
 
@@ -178,20 +187,19 @@ class AnalyticsService
      */
     private function getRetentionMetrics(): array
     {
-        $totalCustomers = Pedido::where('estado', 'completado')
+        $totalCustomers = Pedido::whereRaw('LOWER(estado) IN (?, ?, ?, ?)', OrderTransitions::REVENUE_STATES)
             ->distinct('usuario_id')
             ->count('usuario_id');
 
-        $repeatCustomers = Pedido::where('estado', 'completado')
+        $repeatCustomers = Pedido::whereRaw('LOWER(estado) IN (?, ?, ?, ?)', OrderTransitions::REVENUE_STATES)
             ->select('usuario_id')
             ->groupBy('usuario_id')
-            ->havingRaw('COUNT(*) > 1')
-            ->get()
-            ->count();
+            ->havingRaw('COUNT(*) > 1')->toBase();
+        $repeatCustomers = DB::query()->fromSub($repeatCustomers, 'repeat_customers')->count();
 
         $repeatRate = $totalCustomers > 0 ? ($repeatCustomers / $totalCustomers) * 100 : 0;
 
-        $totalRevenuePerCustomer = Pedido::where('estado', 'completado')
+        $totalRevenuePerCustomer = Pedido::whereRaw('LOWER(estado) IN (?, ?, ?, ?)', OrderTransitions::REVENUE_STATES)
             ->select('usuario_id', DB::raw('SUM(total) as revenue'))
             ->groupBy('usuario_id')
             ->pluck('revenue');
@@ -200,7 +208,7 @@ class AnalyticsService
 
         return [
             'repeatRate' => round($repeatRate, 2),
-            'clv'        => round((float) $clv, 2),
+            'clv' => round((float) $clv, 2),
         ];
     }
 
@@ -213,7 +221,7 @@ class AnalyticsService
             ->join('pedido', 'pedido.id', '=', 'pedido_item.pedido_id')
             ->join('variante', 'variante.id', '=', 'pedido_item.variante_id')
             ->join('producto', 'producto.id', '=', 'variante.producto_id')
-            ->where('pedido.estado', 'completado')
+            ->whereRaw('LOWER(pedido.estado) IN (?, ?, ?, ?)', OrderTransitions::REVENUE_STATES)
             ->select(
                 'producto.id',
                 'producto.nombre',
@@ -225,9 +233,9 @@ class AnalyticsService
             ->limit(5)
             ->get()
             ->map(fn ($p) => [
-                'id'       => $p->id,
-                'nombre'   => mb_strimwidth($p->nombre, 0, 25, '...'),
-                'profit'   => round((float) $p->profit, 2),
+                'id' => $p->id,
+                'nombre' => mb_strimwidth($p->nombre, 0, 25, '...'),
+                'profit' => round((float) $p->profit, 2),
                 'unidades' => (int) $p->unidades,
             ])->toArray();
     }
@@ -237,27 +245,10 @@ class AnalyticsService
      */
     private function getReturnRates(): array
     {
-        // El proyecto usa 'devolucions' (tabla de devoluciones real)
-        if (Schema::hasTable('devolucions')) {
-            $returns = DB::table('devolucions')
-                ->join('pedido', 'pedido.id', '=', 'devolucions.pedido_id')
-                ->select(DB::raw('COUNT(devolucions.id) as total_devoluciones'))
-                ->first();
+        $returned = DB::table('rma_requests')->where('type', 'return')->where('status', 'processed')->distinct()->count('pedido_id');
+        $orders = Pedido::whereRaw('LOWER(estado) IN (?, ?, ?, ?)', OrderTransitions::REVENUE_STATES)->count();
 
-            $totalPedidos = Pedido::where('estado', 'completado')->count();
-            $rate = $totalPedidos > 0 ? (($returns->total_devoluciones ?? 0) / $totalPedidos) * 100 : 0;
-
-            return [
-                ['nombre' => 'Devoluciones', 'devoluciones' => (int) ($returns->total_devoluciones ?? 0), 'porcentaje' => round($rate, 2)],
-            ];
-        }
-
-        if (Schema::hasTable('rma')) {
-            // fallback to rma table if it exists
-            return [];
-        }
-
-        return [];
+        return [['nombre' => 'Pedidos con devolución procesada', 'devoluciones' => $returned, 'porcentaje' => $orders ? round($returned / $orders * 100, 2) : 0]];
     }
 
     /**
@@ -272,19 +263,19 @@ class AnalyticsService
             ->join('producto', 'producto.id', '=', 'variante.producto_id')
             ->join('producto_categoria', 'producto_categoria.producto_id', '=', 'producto.id')
             ->join('categoria', 'categoria.id', '=', 'producto_categoria.categoria_id')
-            ->where('pedido.estado', 'completado')
+            ->whereRaw('LOWER(pedido.estado) IN (?, ?, ?, ?)', OrderTransitions::REVENUE_STATES)
             ->select(
                 'categoria.id',
                 'categoria.nombre',
-                DB::raw('SUM(pedido_item.cantidad * pedido_item.precio_unitario) as ingresos')
+                DB::raw('SUM(pedido_item.cantidad * pedido_item.precio_unitario / (SELECT COUNT(*) FROM producto_categoria pc WHERE pc.producto_id = producto.id)) as ingresos')
             )
             ->groupBy('categoria.id', 'categoria.nombre')
             ->orderBy('ingresos', 'desc')
             ->limit(5)
             ->get()
             ->map(fn ($c) => [
-                'id'       => $c->id,
-                'nombre'   => $c->nombre,
+                'id' => $c->id,
+                'nombre' => $c->nombre,
                 'ingresos' => round((float) $c->ingresos, 2),
             ])->toArray();
     }
@@ -296,20 +287,16 @@ class AnalyticsService
      */
     private function getCartAbandonmentRate(): array
     {
-        $totalCarts = DB::table('carrito')->count();
-
-        // Carritos que nunca se convirtieron en pedido
-        $abandoned = DB::table('carrito')
-            ->leftJoin('pedido', 'pedido.usuario_id', '=', 'carrito.usuario_id')
-            ->whereNull('pedido.id')
-            ->count();
-
+        $carts = DB::table('carrito')->whereExists(fn ($q) => $q->selectRaw('1')->from('carrito_item')->whereColumn('carrito_item.carrito_id', 'carrito.id'));
+        $totalCarts = (clone $carts)->count();
+        $abandoned = (clone $carts)->where('carrito.updated_at', '<', now()->subDay())
+            ->whereNotExists(fn ($q) => $q->selectRaw('1')->from('pedido')->whereColumn('pedido.usuario_id', 'carrito.usuario_id')->whereColumn('pedido.created_at', '>=', 'carrito.updated_at')->whereRaw('LOWER(pedido.estado) IN (?, ?, ?, ?)', OrderTransitions::REVENUE_STATES))->count();
         $rate = $totalCarts > 0 ? ($abandoned / $totalCarts) * 100 : 0;
 
         return [
             'totalCarts' => $totalCarts,
-            'abandoned'  => $abandoned,
-            'rate'       => round($rate, 2),
+            'abandoned' => $abandoned,
+            'rate' => round($rate, 2),
         ];
     }
 
@@ -320,7 +307,7 @@ class AnalyticsService
      */
     private function getChannelComparison(): array
     {
-        $webTotal = (float) Pedido::where('estado', 'completado')->sum('total');
+        $webTotal = (float) Pedido::whereRaw('LOWER(estado) IN (?, ?, ?, ?)', OrderTransitions::REVENUE_STATES)->sum('total');
 
         $posTotal = Schema::hasTable('ventas_pos')
             ? (float) DB::table('ventas_pos')->sum('total')
@@ -352,15 +339,15 @@ class AnalyticsService
      */
     private function getPeakHoursHeatmap(): array
     {
-        $raw = Pedido::where('estado', 'completado')
+        $raw = Pedido::whereRaw('LOWER(estado) IN (?, ?, ?, ?)', OrderTransitions::REVENUE_STATES)
             ->select(
-                DB::raw('DAYOFWEEK(created_at) as day'),
-                DB::raw('HOUR(created_at) as hour'),
+                DB::raw(DB::getDriverName() === 'sqlite' ? "CAST(strftime('%w', created_at) AS INTEGER) + 1 as day" : 'DAYOFWEEK(created_at) as day'),
+                DB::raw(DB::getDriverName() === 'sqlite' ? "CAST(strftime('%H', created_at) AS INTEGER) as hour" : 'HOUR(created_at) as hour'),
                 DB::raw('COUNT(*) as count')
             )
             ->groupBy('day', 'hour')
             ->orderBy('day')
-            ->orderBy('hour')
+            ->orderBy('hour')->toBase()
             ->get();
 
         $matrix = [];
@@ -370,6 +357,7 @@ class AnalyticsService
         foreach ($raw as $row) {
             $matrix[$row->day][$row->hour] = $row->count;
         }
+
         return $matrix;
     }
 }

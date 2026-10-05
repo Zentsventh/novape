@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 
 class CarritoItem extends Model
 {
@@ -14,7 +15,7 @@ class CarritoItem extends Model
     protected $fillable = [
         'carrito_id',
         'variante_id',
-        'cantidad'
+        'cantidad',
     ];
 
     protected $casts = [
@@ -23,13 +24,21 @@ class CarritoItem extends Model
         'updated_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<Carrito, $this> */
     public function carrito(): BelongsTo
     {
         return $this->belongsTo(Carrito::class, 'carrito_id');
     }
 
+    /** @return BelongsTo<Variante, $this> */
     public function variante(): BelongsTo
     {
         return $this->belongsTo(Variante::class, 'variante_id');
+    }
+
+    /** @return HasOneThrough<Producto, Variante, $this> */
+    public function producto(): HasOneThrough
+    {
+        return $this->hasOneThrough(Producto::class, Variante::class, 'id', 'id', 'variante_id', 'producto_id');
     }
 }

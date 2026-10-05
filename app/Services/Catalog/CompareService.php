@@ -9,7 +9,7 @@ use App\Models\Producto;
 class CompareService
 {
     /**
-     * @param array<int> $compareIds
+     * @param  array<int>  $compareIds
      * @return array<string, mixed>
      */
     public function getCompareData(array $compareIds): array
@@ -17,10 +17,11 @@ class CompareService
         $productos = collect();
         if (count($compareIds) > 0) {
             $productos = Producto::whereIn('id', $compareIds)
-                ->with(['marca', 'imagenes', 'variantes', 'productoEspecificaciones.especificacion'])
+                ->with(['marca', 'imagenes', 'variantes', 'productoEspecificaciones'])
                 ->get()
                 ->map(function ($prod) {
                     $variante = $prod->variantes->first();
+
                     return [
                         'id' => $prod->id,
                         'nombre' => $prod->nombre,
@@ -30,10 +31,10 @@ class CompareService
                         'descripcion' => $prod->descripcion,
                         'especificaciones' => $prod->productoEspecificaciones->map(function ($pe) {
                             return [
-                                'nombre' => $pe->especificacion->nombre,
-                                'valor' => $pe->valor
+                                'nombre' => $pe->clave,
+                                'valor' => $pe->valor,
                             ];
-                        })->toArray()
+                        })->toArray(),
                     ];
                 });
         }
@@ -41,7 +42,7 @@ class CompareService
         $todasEspecificaciones = [];
         foreach ($productos as $prod) {
             foreach ($prod['especificaciones'] as $esp) {
-                if (!in_array($esp['nombre'], $todasEspecificaciones)) {
+                if (! in_array($esp['nombre'], $todasEspecificaciones)) {
                     $todasEspecificaciones[] = $esp['nombre'];
                 }
             }

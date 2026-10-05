@@ -415,3 +415,23 @@
 }
 
 :root { --twenty-background-tertiary: var(--twenty-bg-hover); --twenty-background-secondary: var(--twenty-bg-surface); }
+
+.twenty-mobile-backdrop { display: none; }
+@media (max-width: 768px) {
+    .twenty-layout { height: 100dvh; }
+    .twenty-sidebar, .twenty-sidebar.collapsed {
+        position: fixed;
+        inset: 0 auto 0 0;
+        width: 250px;
+        transform: translateX(-100%);
+        transition: transform .2s ease;
+        z-index: 1200;
+    }
+    .twenty-sidebar.mobile-open { transform: translateX(0); }
+    .twenty-mobile-backdrop { display: block; position: fixed; inset: 0; border: 0; background: #0f172a80; z-index: 1190; }
+    .twenty-main { width: 100%; min-width: 0; }
+    .twenty-topbar { padding: 0 12px; }
+    .twenty-topbar-title { font-size: 16px; }
+    .twenty-topbar-actions { gap: 8px; }
+    .twenty-content-area { min-width: 0; }
+}

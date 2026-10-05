@@ -6,9 +6,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class ConfiguracionSitio extends Model
 {
+    public const SECRET_KEYS = ['whatsapp_token', 'whatsapp_verify_token', 'whatsapp_app_secret'];
+
     protected $table = 'configuracion_sitio';
 
     public $timestamps = false;
@@ -18,7 +21,6 @@ class ConfiguracionSitio extends Model
     /**
      * In-memory cache of all config values (loaded once per request).
      */
-    private static ?array $allConfigsMemo = null;
 
     /**
      * Load ALL config values in a single query and cache them.
@@ -26,15 +28,12 @@ class ConfiguracionSitio extends Model
      */
     private static function loadAll(): array
     {
-        if (self::$allConfigsMemo !== null) {
-            return self::$allConfigsMemo;
-        }
-
-        self::$allConfigsMemo = Cache::rememberForever('config_all_values', function () {
+        $load = function () {
             return static::pluck('valor', 'clave')->toArray();
-        });
+        };
 
-        return self::$allConfigsMemo;
+        return DB::transactionLevel() > 0
+            ? $load() : Cache::remember('config_all_values', 60, $load);
     }
 
     /**
@@ -44,7 +43,10 @@ class ConfiguracionSitio extends Model
     {
         $all = self::loadAll();
 
-        return $all[$clave] ?? $default;
+        $value = $all[$clave] ?? $default;
+
+        return is_string($value) && str_starts_with($value, 'encrypted:v1:')
+            ? decrypt(substr($value, 13), false) : $value;
     }
 
     /**
@@ -52,16 +54,16 @@ class ConfiguracionSitio extends Model
      */
     public static function establecer($clave, $valor)
     {
-        // Invalidate both the old individual cache and the batch cache
-        Cache::forget("config_{$clave}");
-        Cache::forget('config_all_values');
-        self::$allConfigsMemo = null;
-        Cache::forget('globalConfig');
-
-        return static::updateOrCreate(
+        if (in_array($clave, self::SECRET_KEYS, true) && $valor !== null && $valor !== '') {
+            $valor = 'encrypted:v1:'.encrypt((string) $valor, false);
+        }
+        $record = static::updateOrCreate(
             ['clave' => $clave],
             ['valor' => $valor]
         );
+        DB::afterCommit(fn () => self::clearMemo());
+
+        return $record;
     }
 
     /**
@@ -69,6 +71,7 @@ class ConfiguracionSitio extends Model
      */
     public static function clearMemo(): void
     {
-        self::$allConfigsMemo = null;
+        Cache::forget('config_all_values');
+        Cache::forget('globalConfig');
     }
 }

@@ -23,22 +23,14 @@ class PosService
 
     public function getWarehouseIdForRegister(?object $cajaAbierta): int
     {
-        $almacenId = 1;
-        if ($cajaAbierta) {
-            try {
-                $cajaFisica = DB::table('cajas')->where('id', $cajaAbierta->caja_id)->first();
-                if ($cajaFisica && isset($cajaFisica->sucursal_id)) {
-                    $sucursal = DB::table('sucursales')->where('id', $cajaFisica->sucursal_id)->first();
-                    if ($sucursal && isset($sucursal->almacen_id)) {
-                        $almacenId = $sucursal->almacen_id;
-                    }
-                }
-            } catch (\Exception $e) {
-                // Keep default
-            }
+        if (! $cajaAbierta) {
+            return 0;
+        }
+        if (empty($cajaAbierta->caja_id) || empty($cajaAbierta->almacen_id)) {
+            throw new \InvalidArgumentException('Cierra esta sesión antigua y abre una caja física con almacén configurado.');
         }
 
-        return $almacenId;
+        return (int) $cajaAbierta->almacen_id;
     }
 
     public function getProducts(int $almacenId, ?string $search = null, ?string $categoria = null): Collection
@@ -92,6 +84,21 @@ class PosService
         $tipoComprobante = $data['tipo_comprobante'] ?? 'ticket';
 
         return DB::transaction(function () use ($data, $tipoComprobante, $userId) {
+            // Serialize requests from the same cashier, including retries after closing.
+            DB::table('usuario')->where('id', $userId)->lockForUpdate()->first();
+            $operationKey = $data['operation_key'] ?? null;
+            if (! $operationKey) {
+                throw new \InvalidArgumentException('Falta el identificador de la operación. Recarga el POS.');
+            }
+            $hash = hash('sha256', json_encode($data, JSON_THROW_ON_ERROR));
+            $existing = DB::table('ventas_pos')->where('operation_key', $operationKey)->first();
+            if ($existing) {
+                if ((int) $existing->cajero_id !== $userId || $existing->operation_hash !== $hash) {
+                    throw new \InvalidArgumentException('El identificador ya corresponde a otra venta.');
+                }
+
+                return ['venta_id' => $existing->id, 'codigo_ticket' => $existing->codigo_ticket, 'total' => (float) $existing->total];
+            }
             $caja = DB::table('cajas_sesiones')->where('cajero_id', $userId)
                 ->where('estado', 'abierta')->lockForUpdate()->first();
             if (! $caja) {
@@ -146,12 +153,17 @@ class PosService
                     'producto_nombre' => $producto->nombre,
                     'cantidad' => $item['cantidad'],
                     'precio_unitario' => $precioReal,
+                    'costo_unitario' => $variante->precio_compra,
+                    'sku' => $variante->sku,
                 ];
             }
 
             $descuento = floatval($data['descuento'] ?? 0);
             if ($descuento < 0 || $descuento > $subtotalBruto) {
                 throw new \InvalidArgumentException('El descuento debe estar entre cero y el importe de la venta.');
+            }
+            if ($descuento > 0 && ! auth('admin')->user()?->esAdmin() && ! auth('admin')->user()?->tienePermiso('pos.descontar')) {
+                throw new \InvalidArgumentException('Necesitas autorización para aplicar descuentos.');
             }
             $total = round($subtotalBruto - $descuento, 2);
             $this->validateSunatRules($tipoComprobante, $total, $data['cliente'] ?? []);
@@ -193,6 +205,9 @@ class PosService
 
             $ventaId = DB::table('ventas_pos')->insertGetId([
                 'codigo_ticket' => $codigoTicket,
+                'operation_key' => $operationKey,
+                'operation_hash' => $hash,
+                'invoice_snapshot' => json_encode(['cliente' => $data['cliente'] ?? [], 'empresa' => config('invoicing.company'), 'igv_porcentaje' => $igvPorcentaje], JSON_THROW_ON_ERROR),
                 'cajero_id' => $userId,
                 'caja_sesion_id' => $caja->id,
                 'cliente_id' => $cliente_id,
@@ -235,6 +250,8 @@ class PosService
                     'producto_nombre' => $item['producto_nombre'],
                     'cantidad' => $item['cantidad'],
                     'precio_unitario' => $item['precio_unitario'],
+                    'costo_unitario' => $item['costo_unitario'],
+                    'sku' => $item['sku'],
                     'subtotal' => $item['precio_unitario'] * $item['cantidad'],
                     'created_at' => now(),
                     'updated_at' => now(),

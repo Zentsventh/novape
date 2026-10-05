@@ -124,7 +124,9 @@
                 <tr>
                     <td>{{ $item->cantidad }}</td>
                     <td>
-                        @if($item->variante && $item->variante->producto)
+                        @if($item->producto_nombre)
+                            {{ $item->producto_nombre }}
+                        @elseif($item->variante && $item->variante->producto)
                             {{ $item->variante->producto->nombre }}
                             @if($item->variante->talla || $item->variante->color)
                                 <span style="color: #999;"> — {{ $item->variante->talla }} {{ $item->variante->color }}</span>

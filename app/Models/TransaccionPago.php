@@ -17,9 +17,10 @@ class TransaccionPago extends Model
         'pasarela',
         'monto',
         'estado',
-        'error_message'
+        'error_message',
     ];
 
+    /** @return BelongsTo<Pedido, $this> */
     public function pedido(): BelongsTo
     {
         return $this->belongsTo(Pedido::class, 'pedido_id');

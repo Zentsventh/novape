@@ -61,6 +61,8 @@ class ProcessWhatsAppMessageJob implements ShouldQueue
             $systemPrompt .= "\n\n" . $settings->custom_instructions;
         }
 
+        $systemPrompt .= app(\App\Services\Chatbot\KnowledgeService::class)->prompt($inboundMessage->content ?? '');
+
         // Llamar a Gemini
         $response = $gemini->generateResponse(
             $systemPrompt,

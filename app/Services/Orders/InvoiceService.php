@@ -17,6 +17,13 @@ class InvoiceService
      */
     public function generatePdf(Pedido $pedido)
     {
+        $pedido = clone $pedido;
+        $snapshot = $pedido->invoice_snapshot ?? [];
+        foreach (['nombre_cliente' => 'nombre_facturacion', 'documento_cliente' => 'documento_cliente', 'direccion_cliente' => 'direccion_facturacion', 'total' => 'total', 'subtotal' => 'subtotal', 'descuento' => 'descuento', 'costo_envio' => 'costo_envio'] as $source => $target) {
+            if (array_key_exists($source, $snapshot)) {
+                $pedido->setAttribute($target, $snapshot[$source]);
+            }
+        }
         $logoPath = public_path('images/logofactura.png');
         $logoBase64 = null;
         if (file_exists($logoPath)) {
@@ -42,6 +49,8 @@ class InvoiceService
 
         return \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.invoice', [
             'pedido' => $pedido,
+            'empresa' => $pedido->invoice_snapshot['empresa'] ?? config('invoicing.company'),
+            'igvPorcentaje' => (float) ($pedido->invoice_snapshot['igv_porcentaje'] ?? $pedido->igv_porcentaje ?? 18),
             'logoBase64' => $logoBase64,
             'qrBase64' => $qrBase64,
             'letras' => $letras,

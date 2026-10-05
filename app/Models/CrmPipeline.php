@@ -18,6 +18,7 @@ class CrmPipeline extends Model
         'is_default',
     ];
 
+    /** @return HasMany<CrmStage, $this> */
     public function stages(): HasMany
     {
         return $this->hasMany(CrmStage::class, 'pipeline_id')->orderBy('orden');

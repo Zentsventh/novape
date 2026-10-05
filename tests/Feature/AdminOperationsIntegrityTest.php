@@ -12,6 +12,7 @@ use App\Services\Inventory\InventoryService;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
@@ -62,10 +63,15 @@ class AdminOperationsIntegrityTest extends TestCase
             $t->integer('usuario_id');
             $t->timestamps();
         });
+        Schema::create('usuario', function (Blueprint $t) {
+            $t->id();
+        });
+        DB::table('usuario')->insert(['id' => 1]);
         Schema::create('cajas_sesiones', function (Blueprint $t) {
             $t->id();
             $t->integer('cajero_id');
             $t->integer('caja_id')->nullable();
+            $t->integer('almacen_id')->nullable();
             $t->string('estado');
         });
         Schema::create('cajas', function (Blueprint $t) {
@@ -93,6 +99,9 @@ class AdminOperationsIntegrityTest extends TestCase
         });
         Schema::create('ventas_pos', function (Blueprint $t) {
             $t->id();
+            $t->string('operation_key')->nullable()->unique();
+            $t->string('operation_hash')->nullable();
+            $t->json('invoice_snapshot')->nullable();
             $t->string('codigo_ticket');
             $t->integer('cajero_id');
             $t->integer('caja_sesion_id');
@@ -116,6 +125,8 @@ class AdminOperationsIntegrityTest extends TestCase
             $t->id();
             $t->integer('venta_pos_id');
             $t->integer('variante_id');
+            $t->decimal('costo_unitario')->nullable();
+            $t->string('sku')->nullable();
             $t->string('producto_nombre');
             $t->integer('cantidad');
             $t->decimal('precio_unitario');
@@ -146,12 +157,31 @@ class AdminOperationsIntegrityTest extends TestCase
             $t->id();
             $t->string('codigo');
             $t->string('estado');
+            $t->timestamp('stock_consumed_at')->nullable();
         });
         Schema::create('pedido_item', function (Blueprint $t) {
             $t->id();
             $t->integer('pedido_id');
             $t->integer('variante_id');
             $t->integer('cantidad');
+        });
+        Schema::create('rma_items', function (Blueprint $t) {
+            $t->id();
+            $t->integer('rma_request_id');
+            $t->integer('pedido_item_id');
+            $t->integer('cantidad');
+            $t->string('condicion');
+            $t->timestamps();
+        });
+        Schema::create('inventory_returns', function (Blueprint $t) {
+            $t->id();
+            $t->integer('pedido_item_id');
+            $t->string('operation_key')->unique();
+            $t->integer('cantidad');
+            $t->boolean('restocked')->default(true);
+            $t->integer('almacen_id');
+            $t->integer('usuario_id')->nullable();
+            $t->timestamps();
         });
         Schema::create('rma_requests', function (Blueprint $t) {
             $t->id();
@@ -166,7 +196,7 @@ class AdminOperationsIntegrityTest extends TestCase
         DB::table('producto')->insert(['id' => 1, 'nombre' => 'Producto real', 'activo' => true]);
         DB::table('variante')->insert(['id' => 1, 'producto_id' => 1, 'sku' => 'SKU-1', 'precio' => 590, 'precio_compra' => 300, 'stock' => 5]);
         DB::table('stock_almacen')->insert(['almacen_id' => 1, 'variante_id' => 1, 'cantidad' => 5]);
-        DB::table('cajas_sesiones')->insert(['id' => 1, 'cajero_id' => 1, 'estado' => 'abierta']);
+        DB::table('cajas_sesiones')->insert(['id' => 1, 'cajero_id' => 1, 'estado' => 'abierta', 'caja_id' => 1, 'almacen_id' => 1]);
         DB::table('metodos_pago')->insert(['id' => 1, 'activo' => true]);
         foreach (['ticket' => 'T001', 'boleta' => 'B001', 'factura' => 'F001'] as $type => $series) {
             DB::table('comprobantes_series')->insert(['tipo_comprobante' => $type, 'serie' => $series, 'activo' => true, 'correlativo_actual' => 0]);
@@ -176,6 +206,7 @@ class AdminOperationsIntegrityTest extends TestCase
     private function sale(array $changes = []): array
     {
         return array_replace([
+            'operation_key' => (string) Str::uuid(),
             'items' => [['variante_id' => 1, 'cantidad' => 1, 'precio_unitario' => 0.01, 'producto_nombre' => 'Nombre manipulado']],
             'metodo_pago_id' => 1, 'tipo_comprobante' => 'ticket', 'descuento' => 0,
         ], $changes);
@@ -203,6 +234,33 @@ class AdminOperationsIntegrityTest extends TestCase
             $this->assertDatabaseCount('ventas_pos', 0);
             $this->assertDatabaseHas('stock_almacen', ['cantidad' => 5]);
         }
+    }
+
+    public function test_pos_retry_after_register_closure_does_not_duplicate_sale_or_stock(): void
+    {
+        $data = $this->sale();
+        $service = app(PosService::class);
+        $first = $service->processSale($data, 1);
+        DB::table('cajas_sesiones')->update(['estado' => 'cerrada']);
+        $this->assertSame($first, $service->processSale($data, 1));
+        $this->assertDatabaseCount('ventas_pos', 1);
+        $this->assertDatabaseHas('stock_almacen', ['cantidad' => 4]);
+        $this->expectException(\InvalidArgumentException::class);
+        $service->processSale(array_replace($data, ['descuento' => 1]), 1);
+    }
+
+    public function test_non_sellable_partial_return_and_cancellation_restore_only_remaining_units(): void
+    {
+        DB::table('pedido')->insert(['id' => 1, 'codigo' => 'PARTIAL', 'estado' => 'completado', 'stock_consumed_at' => now()]);
+        DB::table('pedido_item')->insert(['pedido_id' => 1, 'variante_id' => 1, 'cantidad' => 3]);
+        DB::table('rma_requests')->insert(['id' => 1, 'pedido_id' => 1, 'type' => 'return', 'status' => 'received']);
+        app(RmaProcessingService::class)->updateStatus(1, 'processed', null, 1, [['pedido_item_id' => 1, 'cantidad' => 1, 'condicion' => 'no_vendible']]);
+        $this->assertDatabaseHas('stock_almacen', ['cantidad' => 5]);
+        $this->assertDatabaseHas('inventory_returns', ['cantidad' => 1, 'restocked' => false]);
+        $order = Pedido::with('items')->findOrFail(1);
+        DB::transaction(fn () => app(InventoryService::class)->returnStockForOrder($order, 1, 'Cancelación'));
+        $this->assertDatabaseHas('stock_almacen', ['cantidad' => 7]);
+        $this->assertEquals(3, DB::table('inventory_returns')->sum('cantidad'));
     }
 
     public function test_identification_rule_uses_actual_total_including_discount(): void
@@ -289,12 +347,12 @@ class AdminOperationsIntegrityTest extends TestCase
 
     public function test_rma_restores_warehouse_and_global_stock_only_once(): void
     {
-        DB::table('pedido')->insert(['id' => 1, 'codigo' => 'PED-1', 'estado' => 'completado']);
+        DB::table('pedido')->insert(['id' => 1, 'codigo' => 'PED-1', 'estado' => 'completado', 'stock_consumed_at' => now()]);
         DB::table('pedido_item')->insert(['pedido_id' => 1, 'variante_id' => 1, 'cantidad' => 2]);
         DB::table('rma_requests')->insert(['id' => 1, 'pedido_id' => 1, 'producto_id' => 1, 'type' => 'return', 'status' => 'received']);
         $service = app(RmaProcessingService::class);
-        $service->updateStatus(1, 'processed', null, 1);
-        $service->updateStatus(1, 'processed', null, 1);
+        $service->updateStatus(1, 'processed', null, 1, [['pedido_item_id' => 1, 'cantidad' => 2, 'condicion' => 'vendible']]);
+        $service->updateStatus(1, 'processed', null, 1, [['pedido_item_id' => 1, 'cantidad' => 2, 'condicion' => 'vendible']]);
         $this->assertDatabaseHas('stock_almacen', ['cantidad' => 7]);
         $this->assertDatabaseHas('variante', ['stock' => 7]);
         $this->assertDatabaseCount('movimientos_almacen', 1);
@@ -307,15 +365,15 @@ class AdminOperationsIntegrityTest extends TestCase
     {
         DB::table('rma_requests')->insert(['id' => 1, 'pedido_id' => 1, 'type' => 'return', 'status' => 'pending']);
         $this->expectException(ValidationException::class);
-        app(RmaProcessingService::class)->updateStatus(1, 'processed', null, 1);
+        app(RmaProcessingService::class)->updateStatus(1, 'processed', null, 1, [['pedido_item_id' => 1, 'cantidad' => 2, 'condicion' => 'vendible']]);
     }
 
     public function test_cancellation_does_not_restock_items_already_returned_by_rma(): void
     {
-        DB::table('pedido')->insert(['id' => 1, 'codigo' => 'PED-1', 'estado' => 'completado']);
+        DB::table('pedido')->insert(['id' => 1, 'codigo' => 'PED-1', 'estado' => 'completado', 'stock_consumed_at' => now()]);
         DB::table('pedido_item')->insert(['pedido_id' => 1, 'variante_id' => 1, 'cantidad' => 2]);
         DB::table('rma_requests')->insert(['id' => 1, 'pedido_id' => 1, 'producto_id' => 1, 'type' => 'return', 'status' => 'received']);
-        app(RmaProcessingService::class)->updateStatus(1, 'processed', null, 1);
+        app(RmaProcessingService::class)->updateStatus(1, 'processed', null, 1, [['pedido_item_id' => 1, 'cantidad' => 2, 'condicion' => 'vendible']]);
         $pedido = Pedido::with('items')->findOrFail(1);
         DB::transaction(fn () => app(InventoryService::class)->returnStockForOrder($pedido, 1, 'Cancelación'));
         $this->assertDatabaseHas('stock_almacen', ['cantidad' => 7]);

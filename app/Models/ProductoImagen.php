@@ -32,6 +32,24 @@ class ProductoImagen extends Model
                     return $value;
                 }
             }
+            // Retain compatibility while legacy JPG/PNG references are converted.
+            // Never rewrite an existing image or an external provider URL.
+            $relative = ltrim(substr($value, 8), '/');
+            $public = \Illuminate\Support\Facades\Storage::disk('public');
+            if (!$public->exists($relative)) {
+                $converted = str_ends_with(strtolower($relative), '_resultado.webp') ? $relative
+                    : preg_replace('/\.(jpe?g|png|webp)$/i', '_resultado.webp', $relative);
+                if ($public->exists($converted)) return '/storage/'.$converted;
+                // Shared photos may be moved once while several products still
+                // reference the previous folder. Resolve an existing association.
+                $filename = basename($converted);
+                $candidates = \Illuminate\Support\Facades\DB::table('producto_imagen')
+                    ->where('url', 'like', '%/'.$filename)->limit(10)->pluck('url');
+                foreach ($candidates as $candidate) {
+                    if (str_starts_with($candidate, '/storage/') && basename($candidate) === $filename
+                        && $public->exists(ltrim(substr($candidate, 8), '/'))) return $candidate;
+                }
+            }
             return $value;
         }
 

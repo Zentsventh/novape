@@ -4,8 +4,9 @@ import TwentyCrmLayout from '../../../Layouts/TwentyCrmLayout';
 import { CheckCircle, Circle, Clock, PhoneCall, Mail, FileText, Calendar, AlertCircle, Trash2, Search, Filter, Plus, Edit2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import TwentyRecordDrawer from '../../../Components/Admin/CRM/TwentyRecordDrawer';
+import RemoteSelect from '../../../Components/Admin/RemoteSelect';
 
-export default function Tasks({ tasks = [], deals = [] }) {
+export default function Tasks({ tasks = [] }) {
     const [loadingId, setLoadingId] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [filterType, setFilterType] = useState('todas');
@@ -781,17 +782,9 @@ export default function Tasks({ tasks = [], deals = [] }) {
                     </div>
 
                     <div className="premium-form-group">
-                        <label className="premium-label">Trato Asociado</label>
-                        <select
-                            className="premium-input"
-                            value={data.deal_id}
-                            onChange={e => setData('deal_id', e.target.value)}
-                        >
-                            <option value="" disabled>Seleccione un trato...</option>
-                            {deals.map(d => (
-                                <option key={d.id} value={d.id}>{d.titulo}</option>
-                            ))}
-                        </select>
+                        <RemoteSelect label="Oportunidad asociada" endpoint="/admin/crm/selectores/oportunidades"
+                            value={data.deal_id} onChange={value => setData('deal_id', value)}
+                            getLabel={row => row.titulo || row.nombre} required={!data.empresa_id} />
                         {errors.deal_id && <span className="twenty-error" style={{color: '#ef4444', fontSize: '12px', marginTop: '2px'}}>{errors.deal_id}</span>}
                     </div>
 

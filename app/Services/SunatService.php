@@ -52,7 +52,10 @@ class SunatService
 
         // Determinar si es Boleta (DNI) o Factura (RUC) basándonos en los datos del pedido o checkout
         // Aquí asumimos que tienes un campo en `checkout_facturacion` o usas el DNI del usuario
-        $esFactura = $pedido->tipo_comprobante === 'factura';
+        $esFactura = strtolower($pedido->tipo_comprobante ?? '') === 'factura';
+        $snapshot = $pedido->invoice_snapshot ?? [];
+        $igvRate = (float) ($snapshot['igv_porcentaje'] ?? $pedido->igv_porcentaje ?? 18);
+        $taxFactor = 1 + $igvRate / 100;
         $tipoDoc = $esFactura ? '01' : '03'; // 01=Factura, 03=Boleta
         $serie = $esFactura ? 'F001' : 'B001';
         $correlativo = str_pad((string) $pedido->id, 6, '0', STR_PAD_LEFT);
@@ -65,38 +68,50 @@ class SunatService
             'numero' => $correlativo,
             'sunat_transaction' => '1',
             'cliente_tipo_de_documento' => $esFactura ? '6' : '1', // 6=RUC, 1=DNI
-            'cliente_numero_de_documento' => $pedido->documento_cliente ?? $pedido->usuario?->dni,
-            'cliente_denominacion' => $pedido->nombre_facturacion ?? $pedido->usuario?->nombre_completo,
-            'cliente_direccion' => 'LIMA',
+            'cliente_numero_de_documento' => $snapshot['documento_cliente'] ?? $pedido->documento_cliente ?? $pedido->usuario?->dni,
+            'cliente_denominacion' => $snapshot['nombre_cliente'] ?? $pedido->nombre_facturacion ?? $pedido->usuario?->nombre_completo,
+            'cliente_direccion' => $snapshot['direccion_cliente'] ?? $pedido->direccion_facturacion ?? '',
             'cliente_email' => $pedido->usuario ? $pedido->usuario->email : '',
             'fecha_de_emision' => date('Y-m-d'),
             'moneda' => '1', // Soles
-            'porcentaje_de_igv' => 18.00,
-            'total_gravada' => round($pedido->total / 1.18, 2),
-            'total_igv' => round($pedido->total - ($pedido->total / 1.18), 2),
+            'porcentaje_de_igv' => $igvRate,
+            'total_gravada' => round($pedido->total / $taxFactor, 2),
+            'total_igv' => round($pedido->total - ($pedido->total / $taxFactor), 2),
             'total' => $pedido->total,
             'enviar_automaticamente_a_la_sunat' => true,
             'enviar_automaticamente_al_cliente' => true,
             'items' => [],
         ];
 
-        // Rellenar Items
-        foreach ($pedido->items as $item) {
-            $precioSinIgv = $item->precio_unitario / 1.18;
+        // Allocate the order discount across lines so their totals reconcile.
+        $gross = (float) $pedido->items->sum(fn ($item) => $item->precio_unitario * $item->cantidad);
+        $shipping = (float) ($snapshot['costo_envio'] ?? $pedido->costo_envio);
+        $merchandise = round((float) $pedido->total - $shipping, 2);
+        if ($gross <= 0 || $merchandise < 0 || $merchandise > $gross + 0.01) {
+            return ['success' => false, 'error' => 'El importe del pedido no concilia con sus artículos.'];
+        }
+        $remaining = $merchandise;
+        foreach ($pedido->items->values() as $index => $item) {
+            $lineTotal = $index === $pedido->items->count() - 1 ? $remaining : round($merchandise * ($item->precio_unitario * $item->cantidad) / $gross, 2);
+            $remaining = round($remaining - $lineTotal, 2);
+            $net = round($lineTotal / $taxFactor, 2);
             $payload['items'][] = [
-                'unidad_de_medida' => 'NIU', // Producto
-                'codigo' => $item->variante ? $item->variante->sku : 'P01',
-                'descripcion' => $item->variante ? $item->variante->producto->nombre : 'Producto',
-                'cantidad' => $item->cantidad,
-                'valor_unitario' => round($precioSinIgv, 2),
-                'precio_unitario' => $item->precio_unitario,
-                'subtotal' => round($precioSinIgv * $item->cantidad, 2),
-                'tipo_de_igv' => '1',
-                'igv' => round(($item->precio_unitario - $precioSinIgv) * $item->cantidad, 2),
-                'total' => $item->precio_unitario * $item->cantidad,
+                'unidad_de_medida' => 'NIU', 'codigo' => $item->sku ?? $item->variante->sku ?? 'P01',
+                'descripcion' => $item->producto_nombre ?? $item->variante->producto->nombre ?? 'Producto',
+                'cantidad' => $item->cantidad, 'valor_unitario' => round($lineTotal / $item->cantidad / $taxFactor, 6),
+                'precio_unitario' => round($lineTotal / $item->cantidad, 6), 'subtotal' => $net,
+                'tipo_de_igv' => '1', 'igv' => round($lineTotal - $net, 2), 'total' => $lineTotal,
                 'anticipo_regularizacion' => false,
             ];
         }
+        if ($shipping > 0) {
+            $net = round($shipping / $taxFactor, 2);
+            $payload['items'][] = ['unidad_de_medida' => 'ZZ', 'codigo' => 'ENVIO', 'descripcion' => 'Servicio de envío',
+                'cantidad' => 1, 'valor_unitario' => $net, 'precio_unitario' => $shipping, 'subtotal' => $net,
+                'tipo_de_igv' => '1', 'igv' => round($shipping - $net, 2), 'total' => $shipping, 'anticipo_regularizacion' => false];
+        }
+        $payload['total_gravada'] = round(array_sum(array_column($payload['items'], 'subtotal')), 2);
+        $payload['total_igv'] = round(array_sum(array_column($payload['items'], 'igv')), 2);
 
         // La aceptación depende exclusivamente de la respuesta del proveedor.
         try {

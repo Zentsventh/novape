@@ -38,6 +38,7 @@ class Variante extends Model
         'deleted_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<Producto, $this> */
     public function producto(): BelongsTo
     {
         return $this->belongsTo(Producto::class, 'producto_id');

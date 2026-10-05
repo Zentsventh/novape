@@ -22,11 +22,13 @@ class CrmStage extends Model
         'color',
     ];
 
+    /** @return BelongsTo<CrmPipeline, $this> */
     public function pipeline(): BelongsTo
     {
         return $this->belongsTo(CrmPipeline::class, 'pipeline_id');
     }
 
+    /** @return HasMany<CrmDeal, $this> */
     public function deals(): HasMany
     {
         return $this->hasMany(CrmDeal::class, 'stage_id');

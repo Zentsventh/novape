@@ -23,7 +23,7 @@ class PosController extends Controller
     {
         $userId = auth()->id();
         $cajaAbierta = $this->posService->getActiveRegister($userId);
-        $almacenId = $this->posService->getWarehouseIdForRegister($cajaAbierta);
+        $almacenId = $cajaAbierta && empty($cajaAbierta->almacen_id) ? 0 : $this->posService->getWarehouseIdForRegister($cajaAbierta);
         $productos = $this->posService->getProducts($almacenId);
 
         $metodosPago = DB::table('metodos_pago')->where('activo', true)->get();
@@ -52,6 +52,8 @@ class PosController extends Controller
 
         return Inertia::render('Admin/Pos/Index', [
             'productos' => $productos,
+            'cajaRequiereCierre' => $cajaAbierta && empty($cajaAbierta->almacen_id),
+            'cajas' => DB::table('cajas')->join('sucursales', 'sucursales.id', '=', 'cajas.sucursal_id')->whereNull('cajas.deleted_at')->whereNull('sucursales.deleted_at')->whereNotNull('sucursales.almacen_id')->select('cajas.id', 'cajas.nombre', 'sucursales.nombre as sucursal_nombre')->get(),
             'categorias' => $categorias,
             'metodosPago' => $metodosPago,
             'ventasHoy' => (float) $ventasHoy,
@@ -137,6 +139,13 @@ class PosController extends Controller
             abort(404, 'Ticket no encontrado');
         }
 
+        abort_unless(auth()->user()->esAdmin() || (int) $venta->cajero_id === (int) auth()->id(), 403);
+        $snapshot = $venta->invoice_snapshot ? json_decode($venta->invoice_snapshot, true) : [];
+        foreach (['nombre_razon_social' => 'cliente_nombre', 'numero_documento' => 'cliente_doc', 'direccion' => 'cliente_direccion'] as $source => $target) {
+            if (isset($snapshot['cliente'][$source])) {
+                $venta->$target = $snapshot['cliente'][$source];
+            }
+        }
         $items = DB::table('venta_pos_items')->where('venta_pos_id', $id)->get();
 
         return view('admin.pos.ticket', [
@@ -150,7 +159,7 @@ class PosController extends Controller
     public function buscarProductos(Request $request)
     {
         $cajaAbierta = $this->posService->getActiveRegister(auth()->id());
-        $almacenId = $this->posService->getWarehouseIdForRegister($cajaAbierta);
+        $almacenId = $cajaAbierta && empty($cajaAbierta->almacen_id) ? 0 : $this->posService->getWarehouseIdForRegister($cajaAbierta);
 
         $productos = $this->posService->getProducts(
             $almacenId,

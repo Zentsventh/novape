@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models\Omnichannel;
 
+use App\Models\Usuario;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class OmnichannelConversation extends Model
 {
@@ -29,26 +30,31 @@ class OmnichannelConversation extends Model
         'auto_assigned' => 'boolean',
     ];
 
+    /** @return BelongsTo<OmnichannelContact, $this> */
     public function contact(): BelongsTo
     {
         return $this->belongsTo(OmnichannelContact::class, 'contact_id');
     }
 
+    /** @return BelongsTo<Usuario, $this> */
     public function assignedUser(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\Usuario::class, 'assigned_user_id');
+        return $this->belongsTo(Usuario::class, 'assigned_user_id');
     }
 
+    /** @return BelongsTo<Usuario, $this> */
     public function resolvedByUser(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\Usuario::class, 'resolved_by');
+        return $this->belongsTo(Usuario::class, 'resolved_by');
     }
 
+    /** @return BelongsTo<Usuario, $this> */
     public function botPausedByUser(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\Usuario::class, 'bot_paused_by');
+        return $this->belongsTo(Usuario::class, 'bot_paused_by');
     }
 
+    /** @return HasMany<OmnichannelMessage, $this> */
     public function messages(): HasMany
     {
         return $this->hasMany(OmnichannelMessage::class, 'conversation_id');

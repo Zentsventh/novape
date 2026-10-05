@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace App\Mail;
 
+use App\Models\Pedido;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use App\Models\Pedido;
 
 class OrderStatusUpdated extends Mailable
 {
@@ -20,13 +19,13 @@ class OrderStatusUpdated extends Mailable
 
     public function __construct(Pedido $pedido)
     {
-        $this->pedido = $pedido;
+        $this->pedido = (object) ['codigo' => $pedido->codigo, 'estado' => $pedido->estado, 'usuario' => $pedido->usuario ? (object) ['nombres' => $pedido->usuario->nombres] : null];
     }
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Actualización de Pedido #' . $this->pedido->codigo . ' - NOVAPE',
+            subject: 'Actualización de Pedido #'.$this->pedido->codigo.' - NOVAPE',
         );
     }
 

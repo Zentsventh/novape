@@ -4,15 +4,19 @@ declare(strict_types=1);
 
 namespace App\Jobs\Omnichannel;
 
+use App\Events\Omnichannel\ConversationUpdated;
+use App\Events\Omnichannel\MessageStatusUpdated;
+use App\Events\Omnichannel\NewMessageReceived;
+use App\Models\ConfiguracionSitio;
+use App\Models\CrmDeal;
+use App\Models\CrmPipeline;
+use App\Models\Omnichannel\ChatbotConfig;
 use App\Models\Omnichannel\OmnichannelContact;
 use App\Models\Omnichannel\OmnichannelConversation;
 use App\Models\Omnichannel\OmnichannelMessage;
-use App\Models\Omnichannel\ChatbotConfig;
+use App\Models\Usuario;
 use App\Services\Omnichannel\WhatsAppMediaService;
 use App\Services\Omnichannel\WhatsAppService;
-use App\Events\Omnichannel\NewMessageReceived;
-use App\Events\Omnichannel\ConversationUpdated;
-use App\Events\Omnichannel\MessageStatusUpdated;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -20,6 +24,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class ProcessIncomingWebhookJob implements ShouldQueue
 {
@@ -34,7 +39,9 @@ class ProcessIncomingWebhookJob implements ShouldQueue
 
     public function handle(WhatsAppService $whatsapp, WhatsAppMediaService $mediaService): void
     {
-        if (($this->change['field'] ?? '') !== 'messages') return;
+        if (($this->change['field'] ?? '') !== 'messages') {
+            return;
+        }
 
         $value = $this->change['value'] ?? [];
         $phoneNumberId = $value['metadata']['phone_number_id'] ?? null;
@@ -53,6 +60,25 @@ class ProcessIncomingWebhookJob implements ShouldQueue
     }
 
     protected function processIncomingMessage(array $message, array $value, ?string $phoneNumberId, WhatsAppService $whatsapp, WhatsAppMediaService $mediaService): void
+    {
+        $from = $message['from'] ?? null;
+        $messageId = $message['id'] ?? null;
+        if (! is_string($from) || ! preg_match('/^\d{6,20}$/', $from) || ! is_string($messageId) || $messageId === '') {
+            Log::warning('WhatsApp message rejected: missing valid sender or identifier.');
+
+            return;
+        }
+        DB::table('omnichannel_contact_locks')->insertOrIgnore(['phone_number' => $from]);
+        DB::transaction(function () use ($from, $messageId, $message, $value, $phoneNumberId, $whatsapp, $mediaService) {
+            DB::table('omnichannel_contact_locks')->where('phone_number', $from)->lockForUpdate()->first();
+            if (OmnichannelMessage::where('channel', 'whatsapp')->where('direction', 'inbound')->where('external_message_id', $messageId)->exists()) {
+                return;
+            }
+            $this->persistIncomingMessage($message, $value, $phoneNumberId, $whatsapp, $mediaService);
+        });
+    }
+
+    protected function persistIncomingMessage(array $message, array $value, ?string $phoneNumberId, WhatsAppService $whatsapp, WhatsAppMediaService $mediaService): void
     {
         $from = $message['from'] ?? null;
         $messageId = $message['id'] ?? null;
@@ -76,7 +102,7 @@ class ProcessIncomingWebhookJob implements ShouldQueue
             $mediaFileSize = $mediaObject['file_size'] ?? null;
 
             if ($mediaId) {
-                $accessToken = \App\Models\ConfiguracionSitio::obtener('whatsapp_token', config('omnichannel.whatsapp.token'));
+                $accessToken = ConfiguracionSitio::obtener('whatsapp_token', config('omnichannel.whatsapp.token'));
                 $mediaUrl = $mediaService->downloadAndStoreMedia($mediaId, $accessToken, $mediaMimeType ?? 'application/octet-stream');
             }
         }
@@ -96,32 +122,32 @@ class ProcessIncomingWebhookJob implements ShouldQueue
 
         if ($conversation->wasRecentlyCreated) {
             // Crear Deal automáticamente en CRM
-            $pipeline = \App\Models\CrmPipeline::with('stages')->where('is_default', true)->first();
-            if (!$pipeline) {
-                $pipeline = \App\Models\CrmPipeline::with('stages')->first();
+            $pipeline = CrmPipeline::with('stages')->where('is_default', true)->first();
+            if (! $pipeline) {
+                $pipeline = CrmPipeline::with('stages')->first();
             }
 
             if ($pipeline && $pipeline->stages->count() > 0) {
                 // Buscar si ya existe usuario con este número, si no, crear lead
-                $usuario = \App\Models\Usuario::where('telefono', $from)->first();
-                
-                if (!$usuario) {
-                    $usuario = \App\Models\Usuario::create([
+                $usuario = Usuario::where('telefono', $from)->first();
+
+                if (! $usuario) {
+                    $usuario = Usuario::create([
                         'nombres' => $contactName,
                         'apellidos' => '(WhatsApp)',
-                        'email' => 'wa_' . $from . '@novape.com', // Placeholder obligatorio
+                        'email' => 'wa_'.$from.'@novape.com', // Placeholder obligatorio
                         'telefono' => $from,
-                        'password_hash' => bcrypt(\Illuminate\Support\Str::random(16)),
+                        'password_hash' => bcrypt(Str::random(16)),
                         'has_set_password' => false,
                     ]);
                 }
 
-                \App\Models\CrmDeal::create([
+                CrmDeal::create([
                     'usuario_id' => $usuario->id,
                     'stage_id' => $pipeline->stages->first()->id,
-                    'titulo' => 'Lead de WhatsApp: ' . $contactName,
+                    'titulo' => 'Lead de WhatsApp: '.$contactName,
                     'valor' => 0,
-                    'omnichannel_conversation_id' => $conversation->id
+                    'omnichannel_conversation_id' => $conversation->id,
                 ]);
             }
         }
@@ -150,14 +176,16 @@ class ProcessIncomingWebhookJob implements ShouldQueue
         $conversation->refresh();
 
         // Broadcast en tiempo real al panel
-        broadcast(new NewMessageReceived($inboundMessage))->toOthers();
-        broadcast(new ConversationUpdated($conversation))->toOthers();
+        DB::afterCommit(function () use ($inboundMessage, $conversation) {
+            broadcast(new NewMessageReceived($inboundMessage))->toOthers();
+            broadcast(new ConversationUpdated($conversation))->toOthers();
+        });
 
         // Respuesta automática del bot
         if ($conversation->status === 'bot_active' && $from && $type === 'text') {
             $settings = ChatbotConfig::first();
             if ($settings && $settings->is_bot_active) {
-                \App\Jobs\Omnichannel\ProcessWhatsAppMessageJob::dispatch($inboundMessage->id);
+                ProcessWhatsAppMessageJob::dispatch($inboundMessage->id)->afterCommit();
             }
         }
     }
@@ -185,7 +213,9 @@ class ProcessIncomingWebhookJob implements ShouldQueue
         $messageId = $status['id'] ?? null;
         $newStatus = $status['status'] ?? null; // 'sent', 'delivered', 'read', 'failed'
 
-        if (!$messageId || !$newStatus) return;
+        if (! $messageId || ! $newStatus) {
+            return;
+        }
 
         $msg = OmnichannelMessage::where('external_message_id', $messageId)->first();
         if ($msg) {

@@ -12,6 +12,14 @@ class CashFlowService
     {
         DB::transaction(function () use ($data, $userId) {
             DB::table('usuario')->where('id', $userId)->lockForUpdate()->first();
+            $physical = DB::table('cajas')->where('id', $data['caja_id'])->whereNull('deleted_at')->lockForUpdate()->first();
+            $branch = $physical ? DB::table('sucursales')->where('id', $physical->sucursal_id)->whereNull('deleted_at')->first() : null;
+            if (! $branch || ! $branch->almacen_id || ! DB::table('almacenes')->where('id', $branch->almacen_id)->exists()) {
+                throw new \InvalidArgumentException('La caja necesita una sucursal y almacén válidos.');
+            }
+            if (DB::table('cajas_sesiones')->where('caja_id', $physical->id)->where('estado', 'abierta')->exists()) {
+                throw new \InvalidArgumentException('Esta caja física ya está abierta por otro cajero.');
+            }
             $abierta = DB::table('cajas_sesiones')
                 ->where('cajero_id', $userId)
                 ->where('estado', 'abierta')
@@ -23,6 +31,8 @@ class CashFlowService
 
             DB::table('cajas_sesiones')->insert([
                 'cajero_id' => $userId,
+                'caja_id' => $physical->id,
+                'almacen_id' => $branch->almacen_id,
                 'monto_inicial' => $data['monto_inicial'],
                 'fecha_apertura' => now(),
                 'estado' => 'abierta',

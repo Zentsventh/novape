@@ -29,10 +29,28 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        foreach (['panel-assistant' => 15, 'team-create' => 20, 'team-send' => 60, 'inbox-send' => 30] as $name => $maximum) {
+            \Illuminate\Support\Facades\RateLimiter::for($name, fn (\Illuminate\Http\Request $request) => \Illuminate\Cache\RateLimiting\Limit::perMinute($maximum)
+                ->by($name.':'.(auth('admin')->id() ?? $request->ip())));
+        }
         // Prevent N+1 issues by throwing an exception if lazy loading happens outside production
         Model::preventLazyLoading(! $this->app->isProduction());
 
         Pedido::observe(PedidoObserver::class);
+
+        \Illuminate\Support\Facades\Queue::looping(function (\Illuminate\Queue\Events\Looping $event) {
+            try {
+                foreach (explode(',', $event->queue) as $queue) {
+                    \Illuminate\Support\Facades\Cache::put(
+                        \App\Services\Admin\Operations\PanelHealthService::workerKey($event->connectionName, trim($queue)),
+                        now()->timestamp,
+                        600
+                    );
+                }
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        });
 
         Storage::extend('azure', function ($app, $config) {
             $client = ! empty($config['connection_string'])

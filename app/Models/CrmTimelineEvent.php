@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class CrmTimelineEvent extends Model
 {
@@ -18,7 +18,7 @@ class CrmTimelineEvent extends Model
         'event_type',
         'descripcion',
         'metadata',
-        'usuario_id'
+        'usuario_id',
     ];
 
     protected $casts = [
@@ -30,6 +30,7 @@ class CrmTimelineEvent extends Model
         return $this->morphTo();
     }
 
+    /** @return BelongsTo<Usuario, $this> */
     public function actor(): BelongsTo
     {
         return $this->belongsTo(Usuario::class, 'usuario_id');

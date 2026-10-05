@@ -12,17 +12,22 @@ class CrmDealProduct extends Model
     protected $fillable = [
         'crm_deal_id',
         'producto_id',
+        'variante_id',
+        'sku',
+        'producto_nombre',
         'cantidad',
         'precio_unitario',
         'descuento',
         'subtotal',
     ];
 
+    /** @return BelongsTo<CrmDeal, $this> */
     public function deal(): BelongsTo
     {
         return $this->belongsTo(CrmDeal::class, 'crm_deal_id');
     }
 
+    /** @return BelongsTo<Producto, $this> */
     public function producto(): BelongsTo
     {
         return $this->belongsTo(Producto::class, 'producto_id');

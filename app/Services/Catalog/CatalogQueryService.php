@@ -6,7 +6,10 @@ namespace App\Services\Catalog;
 
 use App\Models\Categoria;
 use App\Models\ConfiguracionSitio;
+use App\Models\Marca;
+use App\Models\Pedido;
 use App\Models\Producto;
+use App\Models\Variante;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -14,66 +17,54 @@ use Illuminate\Support\Facades\DB;
 
 class CatalogQueryService
 {
-    private static array $ecommerceStocksMemo = [];
-    private static ?int $almacenEcommerceIdMemo = null;
+    private array $ecommerceStocksMemo = [];
+
+    private ?int $almacenEcommerceIdMemo = null;
 
     public function getHomeData(): array
     {
-        $categoriaProductos = Cache::remember('home_categorias', 3600, function () {
-            $categorias = Categoria::whereNull('categoria_padre_id')
-                ->where('activa', true)->orderBy('orden')->orderBy('id')
-                ->where(function ($q) {
-                    $q->whereNotIn('slug', ['cyber-bombas', 'retiro-inmediato'])->orWhereNull('slug');
-                })
-                ->get();
-
-            // Cargar solo 10 productos por categoría (no todos)
-            $catIds = $categorias->pluck('id')->toArray();
-            $productosPorCat = [];
-            foreach ($catIds as $catId) {
-                $productosPorCat[$catId] = Producto::where('activo', 1)
-                    ->whereHas('categorias', fn($q) => $q->where('categoria.id', $catId))
-                    ->with(['marca', 'variantes', 'imagenes', 'categorias'])
-                    ->limit(10)
-                    ->get();
+        $categorias = $this->getCachedBaseCategories();
+        // Cache only membership. Mutable images, prices and stock are loaded in batches.
+        $idsByCategory = Cache::remember('home_category_product_ids_v2', 3600, function () use ($categorias) {
+            $ids = [];
+            foreach ($categorias as $category) {
+                $ids[$category->id] = Producto::where('activo', true)
+                    ->whereHas('categorias', fn ($q) => $q->where('categoria.id', $category->id))
+                    ->orderBy('id')->limit(10)->pluck('id')->all();
             }
-
-            $allVarianteIds = collect($productosPorCat)->flatten()->map(fn($p) => $p->variantes->first()?->id)->filter()->toArray();
-            $this->preloadStocks($allVarianteIds);
-
-            return $categorias->map(function ($cat) use ($productosPorCat) {
-                $prods = $productosPorCat[$cat->id] ?? collect();
-                return [
-                    ...($this->getCategoryMenu()->firstWhere('id', $cat->id) ?? []),
-                    'descripcion' => $cat->descripcion,
-                    'productos' => $prods->map(fn($prod) => $this->formatProducto($prod)),
-                ];
-            });
+            return $ids;
         });
-
-        $mejorSemana = Cache::remember('home_mejor_semana', 3600, function () {
-            $productos = Producto::where('activo', 1)
-                ->whereHas('categorias', fn($q) => $q->where('categoria.activa', true))
-                ->with(['marca', 'variantes', 'imagenes'])
-                ->orderBy('created_at', 'desc')
-                ->take(10)
-                ->get();
-                
-            $varianteIds = $productos->map(fn($p) => $p->variantes->first()?->id)->filter()->toArray();
-            $this->preloadStocks($varianteIds);
-
-            return $productos->map(fn($prod) => $this->formatProducto($prod));
+        $products = Producto::where('activo', true)->whereIn('id', collect($idsByCategory)->flatten()->unique()->all())
+            ->with(['marca', 'variantes', 'imagenes', 'categorias'])->get()->keyBy('id');
+        $weeklyIds = Cache::remember('home_weekly_product_ids_v2', 3600, fn () => Producto::where('activo', true)
+            ->whereHas('categorias', fn ($q) => $q->where('categoria.activa', true))
+            ->orderByDesc('created_at')->orderByDesc('id')->limit(10)->pluck('id')->all());
+        $weeklyProducts = Producto::where('activo', true)->whereIn('id', $weeklyIds)
+            ->with(['marca', 'variantes', 'imagenes'])->get()->keyBy('id');
+        $this->preloadStocks($products->values()->merge($weeklyProducts->values())
+            ->map(fn ($product) => $product->variantes->first()?->id)->filter()->unique()->all());
+        $menu = $this->getCategoryMenu();
+        $categoriaProductos = $categorias->map(function ($category) use ($idsByCategory, $products, $menu) {
+            return [
+                ...($menu->firstWhere('id', $category->id) ?? []),
+                'descripcion' => $category->descripcion,
+                'productos' => collect($idsByCategory[$category->id] ?? [])->map(fn ($id) => $products->get($id))
+                    ->filter()->map(fn ($product) => $this->formatProducto($product))->values(),
+            ];
         });
+        $mejorSemana = collect($weeklyIds)->map(fn ($id) => $weeklyProducts->get($id))->filter()
+            ->map(fn ($product) => $this->formatProducto($product))->values();
 
         $banners = Cache::remember('home_banners', 3600, function () {
             $now = now()->toDateTimeString();
+
             return DB::table('banners')
                 ->where('activo', 1)
                 ->where('posicion', 'hero')
-                ->where(function($q) use ($now) {
+                ->where(function ($q) use ($now) {
                     $q->whereNull('fecha_inicio')->orWhere('fecha_inicio', '<=', $now);
                 })
-                ->where(function($q) use ($now) {
+                ->where(function ($q) use ($now) {
                     $q->whereNull('fecha_fin')->orWhere('fecha_fin', '>=', $now);
                 })
                 ->orderBy('orden')
@@ -99,53 +90,55 @@ class CatalogQueryService
 
         $categorias = $this->getCachedBaseCategories();
 
-        $query = Producto::where('activo', 1)->whereHas('categorias', fn($q) => $q->where('categoria.activa', true))->with(['marca', 'variantes', 'imagenes', 'categorias']);
+        $query = Producto::where('activo', 1)->whereHas('categorias', fn ($q) => $q->where('categoria.activa', true))->with(['marca', 'variantes', 'imagenes', 'categorias']);
 
         $categoriaActiva = null;
         $subcategoriaActiva = null;
 
         // Resolver categorías usando las ya cacheadas (0 queries extra)
-        if (!empty($filters['categoria_id'])) {
+        if (! empty($filters['categoria_id'])) {
             $selected = Categoria::where('activa', true)->find((int) $filters['categoria_id']);
             if ($selected) {
                 $root = $selected;
-                while ($root->categoria_padre_id) $root = $root->padre;
+                while ($root->categoria_padre_id) {
+                    $root = $root->padre;
+                }
                 $categoriaActiva = $root;
                 $subcategoriaActiva = $selected->id === $root->id ? null : $selected;
-                $query->whereHas('categorias', fn($q) => $q->where('categoria.id', $selected->id));
+                $query->whereHas('categorias', fn ($q) => $q->where('categoria.id', $selected->id));
             } else {
                 $query->whereRaw('1 = 0');
             }
         } elseif ($subcategoriaParam && $categoriaParam) {
-            $catPadre = $categorias->first(fn($c) => $c->nombre === $categoriaParam);
+            $catPadre = $categorias->first(fn ($c) => $c->nombre === $categoriaParam);
             if ($catPadre) {
-                $subcat = $catPadre->subcategorias->first(fn($s) => $s->nombre === $subcategoriaParam);
+                $subcat = $catPadre->subcategorias->first(fn ($s) => $s->nombre === $subcategoriaParam);
                 if ($subcat) {
                     $subcategoriaActiva = $subcat;
                     $categoriaActiva = $catPadre;
-                    $query->whereHas('categorias', fn($q) => $q->where('categoria.id', $subcat->id));
+                    $query->whereHas('categorias', fn ($q) => $q->where('categoria.id', $subcat->id));
                 }
             }
         } elseif ($subcategoriaParam) {
             foreach ($categorias as $cat) {
-                $subcat = $cat->subcategorias->first(fn($s) => $s->nombre === $subcategoriaParam);
+                $subcat = $cat->subcategorias->first(fn ($s) => $s->nombre === $subcategoriaParam);
                 if ($subcat) {
                     $subcategoriaActiva = $subcat;
                     $categoriaActiva = $cat;
-                    $query->whereHas('categorias', fn($q) => $q->where('categoria.id', $subcat->id));
+                    $query->whereHas('categorias', fn ($q) => $q->where('categoria.id', $subcat->id));
                     break;
                 }
             }
         } elseif ($categoriaParam) {
-            $cat = $categorias->first(fn($c) => $c->nombre === $categoriaParam);
+            $cat = $categorias->first(fn ($c) => $c->nombre === $categoriaParam);
             if ($cat) {
                 $categoriaActiva = $cat;
                 $catIds = $cat->subcategorias->pluck('id')->push($cat->id)->toArray();
-                $query->whereHas('categorias', fn($q) => $q->whereIn('categoria.id', $catIds));
+                $query->whereHas('categorias', fn ($q) => $q->whereIn('categoria.id', $catIds));
             }
         }
 
-        if (!$categoriaActiva && !$subcategoriaActiva && $searchQuery) {
+        if (! $categoriaActiva && ! $subcategoriaActiva && $searchQuery) {
             $matchedCat = Categoria::where('nombre', 'like', $searchQuery)->first();
             if ($matchedCat) {
                 if (is_null($matchedCat->categoria_padre_id)) {
@@ -164,35 +157,36 @@ class CatalogQueryService
         $marcaCounts = (clone $query)->withoutEagerLoads()
             ->whereNotNull('marca_id')
             ->select('marca_id', DB::raw('count(*) as count'))
-            ->groupBy('marca_id')
+            ->groupBy('marca_id')->toBase()
             ->get();
 
         $marcasIds = $marcaCounts->pluck('marca_id')->filter()->toArray();
-        $marcas = empty($marcasIds) ? collect() : \App\Models\Marca::whereIn('id', $marcasIds)->get()->keyBy('id');
+        $marcas = empty($marcasIds) ? collect() : Marca::whereIn('id', $marcasIds)->get()->keyBy('id');
 
-        $marcasDisponibles = $marcaCounts->map(function($item) use ($marcas) {
+        $marcasDisponibles = $marcaCounts->map(function ($item) use ($marcas) {
             $marca = $marcas->get($item->marca_id);
+
             return [
                 'nombre' => $marca ? $marca->nombre : 'Sin marca',
-                'count' => $item->count
+                'count' => $item->count,
             ];
-        })->filter(fn($m) => $m['nombre'] !== 'Sin marca')->sortByDesc('count')->values();
+        })->filter(fn ($m) => $m['nombre'] !== 'Sin marca')->sortByDesc('count')->values();
 
         if ($marcaFilter) {
-            $query->whereHas('marca', fn($q) => $q->where('nombre', $marcaFilter));
+            $query->whereHas('marca', fn ($q) => $q->where('nombre', $marcaFilter));
         }
 
         if ($precioMin !== null && $precioMin !== '') {
-            $query->whereHas('variantes', fn($q) => $q->where('precio', '>=', (float)$precioMin));
+            $query->whereHas('variantes', fn ($q) => $q->where('precio', '>=', (float) $precioMin));
         }
         if ($precioMax !== null && $precioMax !== '') {
-            $query->whereHas('variantes', fn($q) => $q->where('precio', '<=', (float)$precioMax));
+            $query->whereHas('variantes', fn ($q) => $q->where('precio', '<=', (float) $precioMax));
         }
 
         if ($sort === 'precio_asc' || $sort === 'precio_desc') {
             $direction = $sort === 'precio_asc' ? 'asc' : 'desc';
             $query->orderBy(
-                \App\Models\Variante::select('precio')
+                Variante::select('precio')
                     ->whereColumn('producto_id', 'producto.id')
                     ->orderBy('precio', 'asc')
                     ->limit(1),
@@ -201,7 +195,7 @@ class CatalogQueryService
         } elseif ($sort === 'descuento') {
             $query->orderBy('id', 'desc');
         } else {
-            if (!$searchQuery) {
+            if (! $searchQuery) {
                 $query->orderBy('id', 'desc');
             }
         }
@@ -209,19 +203,19 @@ class CatalogQueryService
         $paginator = $query->paginate(24)->withQueryString();
         $productosModelos = collect($paginator->items());
 
-        $varianteIds = $productosModelos->map(fn($p) => $p->variantes->first()?->id)->filter()->toArray();
+        $varianteIds = $productosModelos->map(fn ($p) => $p->variantes->first()?->id)->filter()->toArray();
         $this->preloadStocks($varianteIds);
 
-        $productosFormateados = $productosModelos->map(fn($prod) => $this->formatProducto($prod))->values();
+        $productosFormateados = $productosModelos->map(fn ($prod) => $this->formatProducto($prod))->values();
 
         $now = now()->toDateTimeString();
         $lateralBanners = DB::table('banners')
             ->where('activo', 1)
             ->where('posicion', 'lateral')
-            ->where(function($q) use ($now) {
+            ->where(function ($q) use ($now) {
                 $q->whereNull('fecha_inicio')->orWhere('fecha_inicio', '<=', $now);
             })
-            ->where(function($q) use ($now) {
+            ->where(function ($q) use ($now) {
                 $q->whereNull('fecha_fin')->orWhere('fecha_fin', '>=', $now);
             })
             ->orderBy('orden')
@@ -233,7 +227,7 @@ class CatalogQueryService
                 'current_page' => $paginator->currentPage(),
                 'last_page' => $paginator->lastPage(),
                 'total' => $paginator->total(),
-                'links' => $paginator->linkCollection()->toArray()
+                'links' => $paginator->linkCollection()->toArray(),
             ],
             'categorias' => $this->getCategoryMenu(),
             'marcasDisponibles' => $marcasDisponibles,
@@ -249,19 +243,19 @@ class CatalogQueryService
             return ['productos' => [], 'marcas' => [], 'categorias' => [], 'sugerencias' => []];
         }
 
-        $query = Producto::where('activo', 1)->whereHas('categorias', fn($q) => $q->where('categoria.activa', true))->with(['marca', 'variantes', 'imagenes', 'categorias']);
+        $query = Producto::where('activo', 1)->whereHas('categorias', fn ($q) => $q->where('categoria.activa', true))->with(['marca', 'variantes', 'imagenes', 'categorias']);
         $this->applySmartSearch($query, $q);
 
         $productos = $query->limit(8)->get();
-        
-        $varianteIds = $productos->take(6)->map(fn($p) => $p->variantes->first()?->id)->filter()->toArray();
+
+        $varianteIds = $productos->take(6)->map(fn ($p) => $p->variantes->first()?->id)->filter()->toArray();
         $this->preloadStocks($varianteIds);
 
-        $formateados = $productos->take(6)->map(fn($p) => $this->formatProducto($p));
+        $formateados = $productos->take(6)->map(fn ($p) => $this->formatProducto($p));
 
         $marcas = $productos->pluck('marca.nombre')->filter()->unique()->values();
         if ($marcas->count() < 3) {
-            $topMarcas = \App\Models\Marca::withCount('productos')
+            $topMarcas = Marca::withCount('productos')
                 ->orderBy('productos_count', 'desc')
                 ->limit(4)
                 ->pluck('nombre');
@@ -286,71 +280,73 @@ class CatalogQueryService
 
         $sugerencias = [];
         if ($categorias->count() > 0) {
-            $sugerencias[] = $q . ' en ' . $categorias->first();
+            $sugerencias[] = $q.' en '.$categorias->first();
         }
         if ($marcas->count() > 0) {
-            $sugerencias[] = $marcas->first() . ' ' . $q;
+            $sugerencias[] = $marcas->first().' '.$q;
         }
 
         return [
             'productos' => $formateados,
             'marcas' => $marcas,
             'categorias' => $categorias,
-            'sugerencias' => $sugerencias
+            'sugerencias' => $sugerencias,
         ];
     }
 
     public function getProductData(string $slugOrId): array
     {
         $producto = Producto::with([
-                'marca', 
-                'variantes', 
-                'imagenes', 
-                'productoEspecificaciones',
-                'categorias'
-            ])
+            'marca',
+            'variantes',
+            'imagenes',
+            'productoEspecificaciones',
+            'categorias',
+        ])
             ->where('activo', true)
-            ->where(function($query) use ($slugOrId) {
+            ->where(function ($query) use ($slugOrId) {
                 $query->where('slug', $slugOrId)->orWhere('id', $slugOrId);
             })
             ->firstOrFail();
 
         $categoriasIds = $producto->categorias->pluck('id')->toArray();
         $recomendados = collect();
-        if (!empty($categoriasIds)) {
+        if (! empty($categoriasIds)) {
             $recomendadosQuery = Producto::where('activo', 1)
                 ->where('id', '!=', $producto->id)
-                ->whereHas('categorias', fn($q) => $q->whereIn('categoria.id', $categoriasIds))
+                ->whereHas('categorias', fn ($q) => $q->whereIn('categoria.id', $categoriasIds))
                 ->with(['marca', 'variantes', 'imagenes'])
                 ->inRandomOrder()
                 ->limit(4)
                 ->get();
-            $recomendados = $recomendadosQuery->map(fn($p) => $this->formatProducto($p));
         }
 
         $categorias = $this->getCachedBaseCategories();
 
         $varianteIds = collect([$producto])->merge($recomendadosQuery ?? collect())
-            ->map(fn($p) => $p->variantes->first()?->id)->filter()->toArray();
+            ->map(fn ($p) => $p->variantes->first()?->id)->filter()->toArray();
         $this->preloadStocks($varianteIds);
+        $recomendados = ($recomendadosQuery ?? collect())->map(fn ($p) => $this->formatProducto($p));
 
         return [
             'producto' => $this->formatProducto($producto),
             'detalles' => [
-                'especificaciones' => $producto->productoEspecificaciones->map(fn($pe) => ['nombre' => $pe->clave, 'valor' => $pe->valor]),
-                'todas_imagenes' => $producto->imagenes->pluck('url')
+                'especificaciones' => $producto->productoEspecificaciones->map(fn ($pe) => ['nombre' => $pe->clave, 'valor' => $pe->valor]),
+                'todas_imagenes' => $producto->imagenes->pluck('url'),
             ],
             'recomendados' => $recomendados,
-            'categorias' => $this->getCategoryMenu()
+            'categorias' => $this->getCategoryMenu(),
         ];
     }
 
     public function getTrackingData(string $codigo): ?array
     {
         $codigo = trim($codigo);
-        if ($codigo === '') return null;
+        if ($codigo === '') {
+            return null;
+        }
 
-        $query = \App\Models\Pedido::with(['envio']);
+        $query = Pedido::with(['envio']);
         if (ctype_digit($codigo)) {
             $query->where('id', (int) $codigo)->orWhere('codigo', $codigo);
         } else {
@@ -375,10 +371,12 @@ class CatalogQueryService
     private function applySmartSearch(Builder $query, string $search): Builder
     {
         $search = mb_strtolower(trim($search), 'UTF-8');
-        if (empty($search)) return $query;
+        if (empty($search)) {
+            return $query;
+        }
 
         $stopWords = [' de ', ' para ', ' con ', ' el ', ' la ', ' los ', ' las ', ' un ', ' una ', ' unos ', ' unas ', ' en '];
-        $cleanSearch = str_replace($stopWords, ' ', ' ' . $search . ' ');
+        $cleanSearch = str_replace($stopWords, ' ', ' '.$search.' ');
         $cleanSearch = trim(preg_replace('/\s+/', ' ', $cleanSearch));
 
         $rawTerms = array_filter(explode(' ', $cleanSearch));
@@ -394,29 +392,34 @@ class CatalogQueryService
         foreach ($rawTerms as $term) {
             $variations = [$term];
             if (strlen($term) > 3) {
-                if (substr($term, -2) === 'es') $variations[] = substr($term, 0, -2);
-                elseif (substr($term, -1) === 's') $variations[] = substr($term, 0, -1);
+                if (substr($term, -2) === 'es') {
+                    $variations[] = substr($term, 0, -2);
+                } elseif (substr($term, -1) === 's') {
+                    $variations[] = substr($term, 0, -1);
+                }
             }
             foreach ($variations as $var) {
-                if (isset($synonyms[$var])) $variations = array_merge($variations, $synonyms[$var]);
+                if (isset($synonyms[$var])) {
+                    $variations = array_merge($variations, $synonyms[$var]);
+                }
             }
             $expandedTermsGroup[] = array_unique($variations);
         }
 
-        $query->where(function($q) use ($expandedTermsGroup) {
+        $query->where(function ($q) use ($expandedTermsGroup) {
             foreach ($expandedTermsGroup as $variations) {
-                $q->where(function($subQ) use ($variations) {
+                $q->where(function ($subQ) use ($variations) {
                     foreach ($variations as $var) {
-                        $subQ->orWhere('producto.nombre', 'like', '%' . $var . '%')
-                             ->orWhere('producto.descripcion', 'like', '%' . $var . '%')
-                             ->orWhereHas('marca', fn($m) => $m->where('nombre', 'like', '%' . $var . '%'))
-                             ->orWhereHas('categorias', fn($c) => $c->where('categoria.nombre', 'like', '%' . $var . '%'));
+                        $subQ->orWhere('producto.nombre', 'like', '%'.$var.'%')
+                            ->orWhere('producto.descripcion', 'like', '%'.$var.'%')
+                            ->orWhereHas('marca', fn ($m) => $m->where('nombre', 'like', '%'.$var.'%'))
+                            ->orWhereHas('categorias', fn ($c) => $c->where('categoria.nombre', 'like', '%'.$var.'%'));
                     }
                 });
             }
         });
 
-        $escapedSearch = DB::getPdo()->quote('%' . $search . '%');
+        $escapedSearch = DB::getPdo()->quote('%'.$search.'%');
         $exactSearch = DB::getPdo()->quote($search);
         $query->orderByRaw("CASE WHEN producto.nombre = {$exactSearch} THEN 1 WHEN producto.nombre LIKE {$escapedSearch} THEN 2 ELSE 3 END ASC");
 
@@ -434,7 +437,7 @@ class CatalogQueryService
                 ->where(function ($q) {
                     $q->whereNotIn('slug', ['cyber-bombas', 'retiro-inmediato'])->orWhereNull('slug');
                 })
-                ->with(['subcategorias' => fn($q) => $q->where('activa', true)->orderBy('orden')])
+                ->with(['subcategorias' => fn ($q) => $q->where('activa', true)->orderBy('orden')])
                 ->get();
         });
     }
@@ -443,7 +446,7 @@ class CatalogQueryService
     {
         return Cache::remember('home_categorias_menu', 3600, function () {
             $categories = Categoria::where('activa', true)->orderBy('orden')->orderBy('id')->get(['id', 'nombre', 'slug', 'categoria_padre_id']);
-            $children = $categories->groupBy(fn($category) => $category->categoria_padre_id ?? 0);
+            $children = $categories->groupBy(fn ($category) => $category->categoria_padre_id ?? 0);
             $brands = DB::table('producto_categoria as pc')
                 ->join('producto as p', 'p.id', '=', 'pc.producto_id')
                 ->join('marca as m', 'm.id', '=', 'p.marca_id')
@@ -452,28 +455,20 @@ class CatalogQueryService
             $node = function ($category) use (&$node, $children, $brands) {
                 return ['id' => $category->id, 'nombre' => $category->nombre, 'slug' => $category->slug,
                     'subcategorias' => ($children[$category->id] ?? collect())->map($node)->values(),
-                    'marcas' => ($brands[$category->id] ?? collect())->map(fn($brand) => ['id' => $brand->id, 'nombre' => $brand->nombre])->values()];
+                    'marcas' => ($brands[$category->id] ?? collect())->map(fn ($brand) => ['id' => $brand->id, 'nombre' => $brand->nombre])->values()];
             };
+
             return ($children[0] ?? collect())->map($node)->values();
         });
     }
 
     private function preloadStocks(array $varianteIds): void
     {
-        if (self::$almacenEcommerceIdMemo === null) {
-            self::$almacenEcommerceIdMemo = (int) ConfiguracionSitio::obtener('almacen_ecommerce_id', 1);
-        }
-        $toLoad = array_diff($varianteIds, array_keys(self::$ecommerceStocksMemo));
-        if (!empty($toLoad)) {
-            $stocks = DB::table('stock_almacen')
-                ->where('almacen_id', self::$almacenEcommerceIdMemo)
-                ->whereIn('variante_id', $toLoad)
-                ->pluck('cantidad', 'variante_id')
-                ->toArray();
-            foreach($toLoad as $id) {
-                self::$ecommerceStocksMemo[$id] = $stocks[$id] ?? 0;
-            }
-        }
+        $this->almacenEcommerceIdMemo = (int) ConfiguracionSitio::obtener('almacen_ecommerce_id', 1);
+        if (!$varianteIds) return;
+        $stocks = DB::table('stock_almacen')->where('almacen_id', $this->almacenEcommerceIdMemo)
+            ->whereIn('variante_id', $varianteIds)->pluck('cantidad', 'variante_id')->all();
+        foreach ($varianteIds as $id) $this->ecommerceStocksMemo[$id] = $stocks[$id] ?? 0;
     }
 
     private function formatProducto(Producto $prod): object
@@ -492,12 +487,12 @@ class CatalogQueryService
             $vId = $variante->id;
             // Usar solo el memo precargado por preloadStocks(); si no está, asumir 0
             // en lugar de hacer una query individual (eliminando N+1)
-            if (array_key_exists($vId, self::$ecommerceStocksMemo)) {
-                $stock = self::$ecommerceStocksMemo[$vId];
+            if (array_key_exists($vId, $this->ecommerceStocksMemo)) {
+                $stock = $this->ecommerceStocksMemo[$vId];
             }
         }
 
-        return (object)[
+        return (object) [
             'id' => $prod->id,
             'nombre' => $prod->nombre,
             'slug' => $prod->slug ?? null,
@@ -510,7 +505,7 @@ class CatalogQueryService
             'precio_anterior' => $precio_anterior,
             'descuento' => $descuento,
             'stock' => $stock,
-            'categorias' => $prod->relationLoaded('categorias') && $prod->categorias ? $prod->categorias->pluck('slug')->toArray() : [],
+            'categorias' => $prod->relationLoaded('categorias') ? $prod->categorias->pluck('slug')->toArray() : [],
             'retiro_tienda' => (bool) $prod->retiro_tienda,
             'envio_domicilio' => (bool) $prod->envio_domicilio,
         ];

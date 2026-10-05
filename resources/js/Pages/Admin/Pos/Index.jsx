@@ -7,7 +7,7 @@ import { useConfirm } from '@/Contexts/ConfirmContext';
 import Swal from 'sweetalert2';
 
 
-export default function PosIndex({ productos, metodosPago, categorias = [], ventasHoy, ticketsHoy, cajaAbierta, ventasCajaTotal, ventasCajaEfectivo, logoUrl, igv_porcentaje = 18 }) {
+export default function PosIndex({ productos, metodosPago, categorias = [], ventasHoy, ticketsHoy, cajaAbierta, ventasCajaTotal, ventasCajaEfectivo, logoUrl, igv_porcentaje = 18, cajas = [], cajaRequiereCierre = false }) {
     const confirmDialog = useConfirm();
 
     const { flash, errors, auth } = usePage().props;
@@ -25,6 +25,11 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
 
     // Caja states
     const [showCierre, setShowCierre] = useState(false);
+    const [cajaId, setCajaId] = useState(cajas[0]?.id || '');
+    const sellingRef = useRef(false);
+    const operationRef = useRef(null);
+    const [isSelling, setIsSelling] = useState(false);
+    const canDiscount = auth?.user?.roles?.some(r => r.nombre === 'admin') || auth?.user?.permisos?.includes('pos.descontar');
     const [montoInicial, setMontoInicial] = useState('');
     const [montoDeclarado, setMontoDeclarado] = useState('');
     const [isAperturando, setIsAperturando] = useState(false);
@@ -34,7 +39,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
     
     // Ventas pausadas
     const [showPausadas, setShowPausadas] = useState(false);
-    const [ventasPausadas, setVentasPausadas] = useState(() => JSON.parse(localStorage.getItem('pos_ventas_pausadas')) || []);
+    const [ventasPausadas, setVentasPausadas] = useState(() => (() => { try { return JSON.parse(localStorage.getItem(`pos_ventas_pausadas_${auth?.user?.id}`)) || []; } catch { return []; } })());
 
     const { cajaIngresos = 0, cajaEgresos = 0 } = usePage().props;
     const searchInputRef = useRef(null);
@@ -52,7 +57,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
         e.preventDefault();
         if (isAperturando) return;
         setIsAperturando(true);
-        router.post('/admin/caja/aperturar', { monto_inicial: montoInicial }, {
+        router.post('/admin/caja/aperturar', { monto_inicial: montoInicial, caja_id: cajaId }, {
             onFinish: () => setIsAperturando(false)
         });
     };
@@ -85,13 +90,14 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
     }, [productos, categorias]);
 
     useEffect(() => {
+        const controller = new AbortController();
         const fetchProducts = async () => {
             try {
                 const params = new URLSearchParams();
                 if (searchTerm) params.append('search', searchTerm);
                 if (selectedCategory && selectedCategory !== 'Todas') params.append('categoria', selectedCategory);
                 
-                const res = await fetch(`/admin/pos/buscar-productos?${params.toString()}`);
+                const res = await fetch(`/admin/pos/buscar-productos?${params.toString()}`, { signal: controller.signal });
                 const json = await res.json();
                 if (json.success) {
                     setProductList(json.data);
@@ -105,8 +111,8 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
             fetchProducts();
         }, 300);
 
-        return () => clearTimeout(timer);
-    }, [searchTerm, selectedCategory]);
+        return () => { clearTimeout(timer); controller.abort(); };
+    }, [searchTerm, selectedCategory, cajaAbierta?.id]);
 
     const agregarAlCarrito = (producto) => {
         const idx = carrito.findIndex(i => i.variante_id === producto.variante_id);
@@ -228,7 +234,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
         };
         const actualizadas = [...ventasPausadas, nuevaPausada];
         setVentasPausadas(actualizadas);
-        localStorage.setItem('pos_ventas_pausadas', JSON.stringify(actualizadas));
+        localStorage.setItem(`pos_ventas_pausadas_${auth?.user?.id}`, JSON.stringify(actualizadas));
         
         setCarrito([]);
         setClienteDoc('');
@@ -244,7 +250,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
         
         const actualizadas = ventasPausadas.filter(v => v.id !== ventaPausada.id);
         setVentasPausadas(actualizadas);
-        localStorage.setItem('pos_ventas_pausadas', JSON.stringify(actualizadas));
+        localStorage.setItem(`pos_ventas_pausadas_${auth?.user?.id}`, JSON.stringify(actualizadas));
         setShowPausadas(false);
     };
 
@@ -272,13 +278,18 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
     };
 
     const completarVenta = () => {
+        if (sellingRef.current || !cajaAbierta || cajaRequiereCierre) return;
         const sumaPagos = pagos.reduce((sum, p) => sum + Number(p.monto), 0);
         if (Math.abs(sumaPagos - total) > 0.05) {
             alert(`La suma de los pagos (S/ ${sumaPagos.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}) debe ser igual al total de la venta (S/ ${total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}).`);
             return;
         }
 
+        sellingRef.current = true;
+        setIsSelling(true);
+        operationRef.current ||= crypto.randomUUID();
         router.post('/admin/pos/venta', {
+            operation_key: operationRef.current,
             items: carrito.map(i => ({
                 variante_id: i.variante_id,
                 producto_nombre: i.producto_nombre,
@@ -297,9 +308,8 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
             }
         }, {
             onSuccess: (page) => {
-                if (page.props.flash && page.props.flash.venta_id) {
-                    window.open(`/admin/pos/ticket/${page.props.flash.venta_id}`, '_blank', 'width=400,height=600');
-                }
+                if (!page.props.flash?.venta_id) return;
+                operationRef.current = null;
                 setCarrito([]);
                 setClienteDoc('');
                 setClienteNombre('');
@@ -309,6 +319,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                 setShowCheckoutModal(false);
                 setPagos([{ metodo_pago_id: metodosPago?.[0]?.id || '', monto: 0 }]);
             },
+            onFinish: () => { sellingRef.current = false; setIsSelling(false); },
             onError: (errs) => {
                 console.error("Validation errors:", errs);
                 alert('No se pudo guardar la venta:\n' + Object.values(errs).join('\n'));
@@ -417,6 +428,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
 
     return (
         <AdminLayout logoUrl={logoUrl}>
+            {cajaRequiereCierre && <p role="alert" style={{padding: 16, background: '#FFF4CC'}}>Esta sesión antigua no tiene almacén. Cierra el turno y abre una caja física para continuar.</p>}
             <Head title="Terminal POS" />
 
             {/* Header KPIs */}
@@ -607,6 +619,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                                 type="number"
                                 placeholder="0.00"
                                 value={descuentoValor}
+                                disabled={!canDiscount}
                                 onChange={e => setDescuentoValor(e.target.value)}
                                 min="0"
                                 step={descuentoTipo === 'porcentaje' ? "1" : "0.50"}
@@ -773,6 +786,13 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                         <p style={{ color: '#4B5563', marginBottom: '25px', fontSize: '14px' }}>Para empezar a vender, debes aperturar tu turno ingresando el dinero base que hay actualmente en caja.</p>
 
                         <form onSubmit={aperturarCaja}>
+                            <label htmlFor="physical-register">Caja y sucursal</label>
+                            <select id="physical-register" required value={cajaId} onChange={e => setCajaId(e.target.value)} style={{width: "100%", marginBottom: 16, padding: 10}}>
+                                <option value="">Selecciona una caja</option>
+                                {cajas.map(c => <option key={c.id} value={c.id}>{c.sucursal_nombre} / {c.nombre}</option>)}
+                            </select>
+                            {!cajas.length && <p role="alert">Configura una caja con almacén en Sucursales antes de vender.</p>}
+                            {errors.caja_id && <p role="alert">{errors.caja_id}</p>}
                             <div style={{ textAlign: 'left', marginBottom: '20px' }}>
                                 <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#374151' }}>Monto Inicial (Efectivo Base) S/</label>
                                 <input
@@ -786,7 +806,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                                     style={{ width: '100%', padding: '12px', border: '2px solid #E5E7EB', borderRadius: '8px', fontSize: '18px', fontWeight: 'bold' }}
                                 />
                             </div>
-                            <button type="submit" disabled={isAperturando} style={{ width: '100%', padding: '12px', background: 'var(--admin-text-main)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: isAperturando ? 'not-allowed' : 'pointer', opacity: isAperturando ? 0.7 : 1 }}>
+                            <button type="submit" disabled={isAperturando || !cajaId} style={{ width: '100%', padding: '12px', background: 'var(--admin-text-main)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: isAperturando ? 'not-allowed' : 'pointer', opacity: isAperturando ? 0.7 : 1 }}>
                                 {isAperturando ? 'Aperturando...' : 'Aperturar Caja'}
                             </button>
                         </form>
@@ -1043,6 +1063,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                             <button
                                 type="button"
                                 onClick={completarVenta}
+                                disabled={isSelling || cajaRequiereCierre}
                                 style={{ flex: 1, padding: '12px', background: '#0F172A', color: 'white', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
                             >
                                 <DollarSign size={18} />

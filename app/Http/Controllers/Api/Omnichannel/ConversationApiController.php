@@ -4,20 +4,26 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\Omnichannel;
 
-use App\Http\Controllers\Controller;
-use App\Models\Omnichannel\OmnichannelConversation;
-use App\Models\Omnichannel\OmnichannelMessage;
-use App\Models\Omnichannel\CannedResponse;
-use App\Services\Omnichannel\WhatsAppService;
-use App\Services\Omnichannel\MessengerService;
-use App\Services\Omnichannel\InstagramService;
-use App\Services\Omnichannel\TicketAssignmentService;
 use App\Events\Omnichannel\ConversationUpdated;
 use App\Events\Omnichannel\NewMessageReceived;
+use App\Http\Controllers\Controller;
+use App\Models\CrmCase;
+use App\Models\Omnichannel\CannedResponse;
+use App\Models\Omnichannel\OmnichannelAgentConfig;
+use App\Models\Omnichannel\OmnichannelConversation;
+use App\Models\Omnichannel\OmnichannelMessage;
+use App\Models\Omnichannel\OmnichannelQueue;
+use App\Models\Pedido;
+use App\Models\Usuario;
+use App\Services\Omnichannel\ConversationAccess;
+use App\Services\Omnichannel\InstagramService;
+use App\Services\Omnichannel\MessengerService;
+use App\Services\Omnichannel\TicketAssignmentService;
+use App\Services\Omnichannel\WhatsAppService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
 
 class ConversationApiController extends Controller
 {
@@ -33,7 +39,7 @@ class ConversationApiController extends Controller
             ->orderBy('last_message_at', 'desc')
             ->orderBy('updated_at', 'desc');
 
-        if (!$isAdmin) {
+        if (! $isAdmin) {
             // Si es un asesor, SOLO ve los chats que están explícitamente asignados a él.
             $query->where('assigned_user_id', $user->id);
         }
@@ -58,8 +64,8 @@ class ConversationApiController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->whereHas('contact', function ($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%')
-                  ->orWhere('phone_number', 'like', '%' . $search . '%');
+                $q->where('name', 'like', '%'.$search.'%')
+                    ->orWhere('phone_number', 'like', '%'.$search.'%');
             });
         }
 
@@ -69,7 +75,7 @@ class ConversationApiController extends Controller
             // Si el contacto tiene un usuario vinculado, usar su nombre real
             $contactName = $conv->contact->name ?? 'Desconocido';
             if ($conv->contact->usuario) {
-                $realName = trim(($conv->contact->usuario->nombres ?? '') . ' ' . ($conv->contact->usuario->apellidos ?? ''));
+                $realName = trim(($conv->contact->usuario->nombres ?? '').' '.($conv->contact->usuario->apellidos ?? ''));
                 if ($realName) {
                     $contactName = $realName;
                 }
@@ -80,7 +86,7 @@ class ConversationApiController extends Controller
                 'contactName' => $contactName,
                 'initials' => strtoupper(mb_substr($contactName, 0, 2)),
                 'phone' => $conv->contact->phone_number ?? null,
-                'email' => $conv->contact->email ?? $conv->contact->usuario?->email ?? null,
+                'email' => $conv->contact->email ?? $conv->contact->usuario->email ?? null,
                 'channel' => $conv->channel,
                 'lastMessagePreview' => $conv->last_message_preview,
                 'lastMessageTime' => $conv->last_message_at?->format('H:i'),
@@ -91,7 +97,7 @@ class ConversationApiController extends Controller
                 'isBotActive' => $conv->status === 'bot_active',
                 'isLinkedUser' => (bool) $conv->contact->usuario_id,
                 'assignedUserId' => $conv->assigned_user_id,
-                'agentName' => $conv->assignedUser?->nombres ?? null,
+                'agentName' => $conv->assignedUser->nombres ?? null,
             ];
         });
 
@@ -103,11 +109,12 @@ class ConversationApiController extends Controller
      */
     public function messages(Request $request, OmnichannelConversation $conversation)
     {
+        ConversationAccess::authorize($conversation);
         $user = auth()->user();
         $isAdmin = $user->roles()->where('nombre', 'admin')->exists();
 
         // Validar que el asesor solo acceda a SUS conversaciones
-        if (!$isAdmin && $conversation->assigned_user_id !== $user->id) {
+        if (! $isAdmin && $conversation->assigned_user_id !== $user->id) {
             abort(403, 'No tienes permiso para ver esta conversación.');
         }
 
@@ -116,8 +123,8 @@ class ConversationApiController extends Controller
         broadcast(new ConversationUpdated($conversation))->toOthers();
 
         $messages = $conversation->messages()
-            ->orderBy('created_at', 'asc')
-            ->paginate(100);
+            ->orderByDesc('id')->paginate(100);
+        $messages->setCollection($messages->getCollection()->reverse()->values());
 
         $messages->getCollection()->transform(function ($msg) {
             return $this->formatMessage($msg);
@@ -131,11 +138,12 @@ class ConversationApiController extends Controller
      */
     public function sendMessage(Request $request, OmnichannelConversation $conversation)
     {
+        ConversationAccess::authorize($conversation);
         $user = auth()->user();
         $isAdmin = $user->roles()->where('nombre', 'admin')->exists();
 
         // Validar que el asesor solo acceda a SUS conversaciones
-        if (!$isAdmin && $conversation->assigned_user_id !== $user->id) {
+        if (! $isAdmin && $conversation->assigned_user_id !== $user->id) {
             abort(403, 'No tienes permiso para enviar mensajes en esta conversación.');
         }
 
@@ -180,10 +188,12 @@ class ConversationApiController extends Controller
      */
     public function assignAgent(Request $request, OmnichannelConversation $conversation)
     {
+        ConversationAccess::authorize($conversation, true);
         $request->validate([
             'user_id' => 'required|integer|exists:usuario,id',
         ]);
 
+        ConversationAccess::agent((int) $request->input('user_id'));
         $conversation->update([
             'assigned_user_id' => $request->input('user_id'),
             'status' => 'human_active',
@@ -193,10 +203,10 @@ class ConversationApiController extends Controller
         ]);
 
         // Registrar nota interna de asignación
-        $agentName = \App\Models\Usuario::find($request->input('user_id'))?->nombres ?? 'Agente';
-        
+        $agentName = Usuario::find($request->input('user_id'))->nombres ?? 'Agente';
+
         // Crear ticket
-        app(\App\Services\Omnichannel\TicketAssignmentService::class)->createCaseForConversation($conversation, $request->input('user_id'));
+        app(TicketAssignmentService::class)->createCaseForConversation($conversation, $request->input('user_id'));
         OmnichannelMessage::create([
             'conversation_id' => $conversation->id,
             'contact_id' => $conversation->contact_id,
@@ -210,6 +220,7 @@ class ConversationApiController extends Controller
         ]);
 
         broadcast(new ConversationUpdated($conversation->load('assignedUser')))->toOthers();
+
         return response()->json(['success' => true]);
     }
 
@@ -218,6 +229,7 @@ class ConversationApiController extends Controller
      */
     public function unassignAgent(Request $request, OmnichannelConversation $conversation)
     {
+        ConversationAccess::authorize($conversation);
         $conversation->update([
             'assigned_user_id' => null,
             'status' => 'bot_active',
@@ -227,6 +239,7 @@ class ConversationApiController extends Controller
         ]);
 
         broadcast(new ConversationUpdated($conversation))->toOthers();
+
         return response()->json(['success' => true]);
     }
 
@@ -235,6 +248,7 @@ class ConversationApiController extends Controller
      */
     public function resolveConversation(Request $request, OmnichannelConversation $conversation)
     {
+        ConversationAccess::authorize($conversation);
         $conversation->update([
             'status' => 'resolved',
             'resolved_at' => now(),
@@ -242,6 +256,7 @@ class ConversationApiController extends Controller
         ]);
 
         broadcast(new ConversationUpdated($conversation))->toOthers();
+
         return response()->json(['success' => true]);
     }
 
@@ -250,6 +265,7 @@ class ConversationApiController extends Controller
      */
     public function reopenConversation(Request $request, OmnichannelConversation $conversation)
     {
+        ConversationAccess::authorize($conversation);
         $previousStatus = $conversation->assigned_user_id ? 'human_active' : 'bot_active';
 
         $conversation->update([
@@ -259,6 +275,7 @@ class ConversationApiController extends Controller
         ]);
 
         broadcast(new ConversationUpdated($conversation))->toOthers();
+
         return response()->json(['success' => true]);
     }
 
@@ -267,6 +284,7 @@ class ConversationApiController extends Controller
      */
     public function addInternalNote(Request $request, OmnichannelConversation $conversation)
     {
+        ConversationAccess::authorize($conversation);
         $request->validate(['content' => 'required|string|max:4096']);
 
         $message = OmnichannelMessage::create([
@@ -299,9 +317,9 @@ class ConversationApiController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', '%' . $search . '%')
-                  ->orWhere('shortcut', 'like', '%' . $search . '%')
-                  ->orWhere('content', 'like', '%' . $search . '%');
+                $q->where('title', 'like', '%'.$search.'%')
+                    ->orWhere('shortcut', 'like', '%'.$search.'%')
+                    ->orWhere('content', 'like', '%'.$search.'%');
             });
         }
 
@@ -317,6 +335,7 @@ class ConversationApiController extends Controller
      */
     public function contactProfile(OmnichannelConversation $conversation)
     {
+        ConversationAccess::authorize($conversation);
         $contact = $conversation->contact;
         $contact->load('usuario');
 
@@ -326,7 +345,7 @@ class ConversationApiController extends Controller
         $displayPhone = $contact->phone_number;
 
         if ($contact->usuario) {
-            $realName = trim(($contact->usuario->nombres ?? '') . ' ' . ($contact->usuario->apellidos ?? ''));
+            $realName = trim(($contact->usuario->nombres ?? '').' '.($contact->usuario->apellidos ?? ''));
             if ($realName) {
                 $displayName = $realName;
             }
@@ -337,7 +356,7 @@ class ConversationApiController extends Controller
         // Buscar el último pedido del cliente si tiene un usuario vinculado
         $lastOrder = null;
         if ($contact->usuario_id) {
-            $lastOrder = \App\Models\Pedido::where('usuario_id', $contact->usuario_id)
+            $lastOrder = Pedido::where('usuario_id', $contact->usuario_id)
                 ->orderBy('created_at', 'desc')
                 ->first(['id', 'codigo', 'total', 'estado', 'created_at']);
         }
@@ -349,7 +368,7 @@ class ConversationApiController extends Controller
         ];
 
         // Buscar caso de CRM vinculado a la conversación
-        $activeCase = \App\Models\CrmCase::where('omnichannel_conversation_id', $conversation->id)
+        $activeCase = CrmCase::where('omnichannel_conversation_id', $conversation->id)
             ->whereIn('estado', ['abierto', 'en_progreso'])
             ->first(['id', 'titulo', 'estado']);
 
@@ -389,6 +408,7 @@ class ConversationApiController extends Controller
      */
     public function transferToBot(Request $request, OmnichannelConversation $conversation)
     {
+        ConversationAccess::authorize($conversation);
         $conversation->update([
             'status' => 'bot_active',
             'assigned_user_id' => null,
@@ -410,6 +430,7 @@ class ConversationApiController extends Controller
         ]);
 
         broadcast(new ConversationUpdated($conversation))->toOthers();
+
         return response()->json(['success' => true]);
     }
 
@@ -422,7 +443,7 @@ class ConversationApiController extends Controller
     {
         $today = Carbon::today();
         $yesterday = Carbon::yesterday();
-        $createdDate = $msg->created_at->startOfDay();
+        $createdDate = $msg->created_at->copy()->startOfDay();
 
         if ($createdDate->equalTo($today)) {
             $dateFormatted = 'Hoy';
@@ -456,7 +477,7 @@ class ConversationApiController extends Controller
         string $content
     ): void {
         try {
-            $result = match ($conversation->channel) {
+            $result = match ($conversation->getAttribute('channel')) {
                 'whatsapp' => $this->sendViaWhatsApp($conversation, $content),
                 'messenger' => $this->sendViaMessenger($conversation, $content),
                 'instagram' => $this->sendViaInstagram($conversation, $content),
@@ -492,9 +513,10 @@ class ConversationApiController extends Controller
     {
         $whatsapp = app(WhatsAppService::class);
         $phone = $conversation->contact->phone_number ?? null;
-        if (!$phone) {
+        if (! $phone) {
             return ['success' => false, 'data' => ['error' => 'Sin número de teléfono']];
         }
+
         return $whatsapp->sendTextMessage($phone, $content);
     }
 
@@ -502,9 +524,10 @@ class ConversationApiController extends Controller
     {
         $messenger = app(MessengerService::class);
         $recipientId = $conversation->contact->messenger_id ?? null;
-        if (!$recipientId) {
+        if (! $recipientId) {
             return ['success' => false, 'data' => ['error' => 'Sin ID de Messenger']];
         }
+
         return $messenger->sendTextMessage($recipientId, $content);
     }
 
@@ -512,9 +535,10 @@ class ConversationApiController extends Controller
     {
         $instagram = app(InstagramService::class);
         $recipientId = $conversation->contact->instagram_id ?? null;
-        if (!$recipientId) {
+        if (! $recipientId) {
             return ['success' => false, 'data' => ['error' => 'Sin ID de Instagram']];
         }
+
         return $instagram->sendTextMessage($recipientId, $content);
     }
 
@@ -527,13 +551,14 @@ class ConversationApiController extends Controller
      */
     public function transferConversation(Request $request, OmnichannelConversation $conversation)
     {
+        ConversationAccess::authorize($conversation);
         $request->validate([
             'to_user_id' => 'required|integer|exists:usuario,id',
             'reason' => 'nullable|string|max:500',
         ]);
 
         $fromUser = auth()->user();
-        $toUser = \App\Models\Usuario::findOrFail($request->input('to_user_id'));
+        $toUser = ConversationAccess::agent((int) $request->input('to_user_id'));
 
         app(TicketAssignmentService::class)->transferConversation(
             $conversation, $toUser, $fromUser, $request->input('reason', '')
@@ -546,12 +571,13 @@ class ConversationApiController extends Controller
             'channel' => $conversation->channel,
             'direction' => 'outbound',
             'message_type' => 'text',
-            'content' => "📋 Transferido de {$fromUser->nombre_completo} a {$toUser->nombre_completo}. Motivo: " . ($request->input('reason') ?: 'N/A'),
+            'content' => "📋 Transferido de {$fromUser->nombre_completo} a {$toUser->nombre_completo}. Motivo: ".($request->input('reason') ?: 'N/A'),
             'is_internal_note' => true,
             'status' => 'sent',
         ]);
 
         broadcast(new ConversationUpdated($conversation->refresh()))->toOthers();
+
         return response()->json(['success' => true]);
     }
 
@@ -560,6 +586,7 @@ class ConversationApiController extends Controller
      */
     public function closeConversation(Request $request, OmnichannelConversation $conversation)
     {
+        ConversationAccess::authorize($conversation);
         $request->validate([
             'reason' => 'required|string|max:500',
         ]);
@@ -569,6 +596,7 @@ class ConversationApiController extends Controller
         );
 
         broadcast(new ConversationUpdated($conversation->refresh()))->toOthers();
+
         return response()->json(['success' => true]);
     }
 
@@ -581,7 +609,7 @@ class ConversationApiController extends Controller
             'status' => 'required|in:online,busy,away,offline',
         ]);
 
-        $config = \App\Models\Omnichannel\OmnichannelAgentConfig::firstOrCreate(
+        $config = OmnichannelAgentConfig::firstOrCreate(
             ['usuario_id' => auth()->id()],
             ['max_chats' => 5]
         );
@@ -601,7 +629,7 @@ class ConversationApiController extends Controller
      */
     public function getAgentStatus()
     {
-        $config = \App\Models\Omnichannel\OmnichannelAgentConfig::firstOrCreate(
+        $config = OmnichannelAgentConfig::firstOrCreate(
             ['usuario_id' => auth()->id()],
             ['max_chats' => 5, 'status' => 'offline']
         );
@@ -623,34 +651,35 @@ class ConversationApiController extends Controller
      */
     public function supervisorDashboard()
     {
+        abort_unless(ConversationAccess::supervisor(auth('admin')->user()), 403);
         // 1. Agentes y su carga
-        $agents = \App\Models\Usuario::whereHas('roles', function ($q) {
-                $q->whereIn('rol.id', [1, 2]);
-            })
+        $agents = Usuario::where('estado', 'activo')->whereHas('roles', function ($q) {
+            $q->where('nombre', 'admin')->orWhereHas('permisos', fn ($p) => $p->where('nombre', 'gestionar_omnichannel'));
+        })
             ->with('omnichannelConfig')
             ->withCount(['omnichannelConversations as active_chats' => function ($q) {
                 $q->whereIn('status', ['open', 'human_active', 'waiting']);
             }])
             ->withCount(['omnichannelConversations as resolved_today' => function ($q) {
                 $q->whereIn('status', ['resolved', 'closed'])
-                  ->whereDate('closed_at', today());
+                    ->whereDate('closed_at', today());
             }])
             ->get()
             ->map(function ($agent) {
                 return [
                     'id' => $agent->id,
                     'name' => $agent->nombre_completo,
-                    'status' => $agent->omnichannelConfig?->status ?? 'offline',
-                    'maxChats' => $agent->omnichannelConfig?->max_chats ?? 5,
-                    'activeChats' => $agent->active_chats,
-                    'resolvedToday' => $agent->resolved_today,
-                    'skills' => $agent->omnichannelConfig?->skills ?? [],
+                    'status' => $agent->omnichannelConfig->status ?? 'offline',
+                    'maxChats' => $agent->omnichannelConfig->max_chats ?? 5,
+                    'activeChats' => $agent->getAttribute('active_chats'),
+                    'resolvedToday' => $agent->getAttribute('resolved_today'),
+                    'skills' => $agent->omnichannelConfig->skills ?? [],
                 ];
             });
 
         // 2. Cola de espera
-        $queueCount = \App\Models\Omnichannel\OmnichannelQueue::count();
-        $queueItems = \App\Models\Omnichannel\OmnichannelQueue::with('conversation.contact')
+        $queueCount = OmnichannelQueue::count();
+        $queueItems = OmnichannelQueue::with('conversation.contact')
             ->orderBy('queued_at', 'asc')
             ->limit(20)
             ->get()
@@ -658,11 +687,11 @@ class ConversationApiController extends Controller
                 return [
                     'id' => $item->id,
                     'conversationId' => $item->conversation_id,
-                    'contactName' => $item->conversation?->contact?->name ?? 'Desconocido',
+                    'contactName' => $item->conversation->contact->name ?? 'Desconocido',
                     'channel' => $item->conversation?->channel,
                     'priority' => $item->priority,
-                    'waitingTime' => $item->queued_at ? $item->queued_at->diffForHumans() : 'N/A',
-                    'waitingMinutes' => $item->queued_at ? now()->diffInMinutes($item->queued_at) : 0,
+                    'waitingTime' => $item->queued_at->diffForHumans(),
+                    'waitingMinutes' => max(0, $item->queued_at->diffInMinutes(now())),
                 ];
             });
 
@@ -693,9 +722,9 @@ class ConversationApiController extends Controller
      */
     public function availableAgents()
     {
-        $agents = \App\Models\Usuario::whereHas('roles', function ($q) {
-                $q->whereIn('rol.id', [1, 2]);
-            })
+        $agents = Usuario::where('estado', 'activo')->whereHas('roles', function ($q) {
+            $q->where('nombre', 'admin')->orWhereHas('permisos', fn ($p) => $p->where('nombre', 'gestionar_omnichannel'));
+        })
             ->with('omnichannelConfig')
             ->withCount(['omnichannelConversations as active_chats' => function ($q) {
                 $q->whereIn('status', ['open', 'human_active', 'waiting']);
@@ -705,9 +734,9 @@ class ConversationApiController extends Controller
                 return [
                     'id' => $agent->id,
                     'name' => $agent->nombre_completo,
-                    'status' => $agent->omnichannelConfig?->status ?? 'offline',
-                    'activeChats' => $agent->active_chats,
-                    'maxChats' => $agent->omnichannelConfig?->max_chats ?? 5,
+                    'status' => $agent->omnichannelConfig->status ?? 'offline',
+                    'activeChats' => $agent->getAttribute('active_chats'),
+                    'maxChats' => $agent->omnichannelConfig->max_chats ?? 5,
                 ];
             });
 

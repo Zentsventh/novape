@@ -2,8 +2,9 @@ import { createInertiaApp, usePage } from '@inertiajs/react';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
-import ChatBot from './Components/Home/ChatBot';
-import MobileBottomNav from './Components/Home/MobileBottomNav';
+const ChatBot = React.lazy(() => import('./Components/Home/ChatBot'));
+const PanelAssistant = React.lazy(() => import('./Components/Admin/PanelAssistant'));
+const MobileBottomNav = React.lazy(() => import('./Components/Home/MobileBottomNav'));
 import { ConfirmProvider } from '@/Contexts/ConfirmContext';
 import { DeviceProvider, useDeviceContext } from '@/Contexts/DeviceContext';
 import { LocationProvider } from '@/Contexts/LocationContext';
@@ -48,7 +49,7 @@ function GlobalLayout({ children }) {
     const { component: pageName, props } = usePage();
     const isAdmin = pageName.startsWith('Admin/');
     const hasWidgets = !isAdmin && !pageName.startsWith('Auth/') && !pageName.startsWith('Checkout');
-    const content = isAdmin ? children : (
+    const content = isAdmin ? <>{children}{props.auth?.user && !pageName.startsWith('Admin/Auth') && pageName !== 'Admin/Assistant/Index' && <React.Suspense fallback={null}><PanelAssistant/></React.Suspense>}</> : (
         <div className={`storefront${hasWidgets ? ' storefront--with-nav' : ''}`}>
             {children}
             {hasWidgets && <MobileBottomNav user={props.auth?.user} cart={props.cart} />}

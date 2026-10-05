@@ -23,7 +23,7 @@ class AnalyticsService
                 $query->whereDate('created_at', '<=', $endDate);
             }
             if ($status) {
-                $query->where('estado', $status);
+                $query->whereRaw('LOWER(estado) = ?', [strtolower($status)]);
             }
             if ($q) {
                 $query->where(function ($sq) use ($q) {
@@ -47,8 +47,8 @@ class AnalyticsService
         $pedidosCompletados = $dateFilterQuery(Pedido::whereRaw('LOWER(estado) = ?', ['completado']))->count();
         $pedidosCancelados = $dateFilterQuery(Pedido::whereRaw('LOWER(estado) = ?', ['cancelado']))->count();
 
-        $ventasTotalQuery = Pedido::whereRaw('LOWER(estado) IN (?, ?, ?)', ['pagado', 'enviado', 'completado']);
-        $ventasTotal = (float) $dateFilterQuery($ventasTotalQuery)->sum('total');
+        $ventasTotalQuery = Pedido::whereRaw('LOWER(estado) IN (?, ?, ?, ?)', ['pagado', 'procesando', 'enviado', 'completado']);
+        $ventasTotal = (float) $ventasTotalQuery->when($startDate, fn ($q) => $q->where('created_at', '>=', Carbon::parse($startDate)->startOfDay()))->when($endDate, fn ($q) => $q->where('created_at', '<', Carbon::parse($endDate)->addDay()->startOfDay()))->sum('total');
 
         $dateOnlyQuery = function ($query) use ($startDate, $endDate) {
             if ($startDate) {
@@ -71,7 +71,7 @@ class AnalyticsService
         $costosTotal = $costosGastos + $costosCompras;
         $gananciaNeta = $ventasTotal - $costosTotal;
 
-        $ventasMesQuery = Pedido::whereRaw('LOWER(estado) IN (?, ?, ?)', ['pagado', 'enviado', 'completado'])
+        $ventasMesQuery = Pedido::whereRaw('LOWER(estado) IN (?, ?, ?, ?)', ['pagado', 'procesando', 'enviado', 'completado'])
             ->where('created_at', '>=', now()->startOfMonth());
         $ventasMes = (float) $ventasMesQuery->sum('total');
 
@@ -99,7 +99,7 @@ class AnalyticsService
 
         for ($i = 6; $i >= 0; $i--) {
             $day = $endDateCarbon->copy()->subDays($i);
-            $webSales = (float) Pedido::whereRaw('LOWER(estado) IN (?, ?, ?)', ['pagado', 'enviado', 'completado'])
+            $webSales = (float) Pedido::whereRaw('LOWER(estado) IN (?, ?, ?, ?)', ['pagado', 'procesando', 'enviado', 'completado'])
                 ->whereDate('created_at', $day)
                 ->sum('total');
             $posSales = (float) DB::table('ventas_pos')->whereDate('created_at', $day)->sum('total');

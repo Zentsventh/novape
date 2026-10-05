@@ -25,6 +25,7 @@ use App\Models\Usuario;
 use App\Models\Variante;
 use App\Services\Admin\Crm\AutomationEngineService;
 use App\Services\Admin\Crm\CrmPipelineService;
+use App\Services\Admin\Crm\WebhookDnsResolver;
 use App\Services\AIEnrichmentService;
 use App\Services\Orders\InvoiceService;
 use App\Services\Orders\RefundOrderService;
@@ -179,8 +180,9 @@ class AdminExtendedIntegrityTest extends TestCase
     public function test_automation_webhook_failure_is_not_reported_as_success(): void
     {
         $deal = $this->deal();
-        CrmAutomation::create(['nombre' => 'Webhook', 'trigger_type' => 'deal_created', 'activo' => true, 'acciones' => [['type' => 'webhook', 'url' => 'https://example.test/hook']]]);
+        CrmAutomation::create(['nombre' => 'Webhook', 'trigger_type' => 'deal_created', 'activo' => true, 'acciones' => [['type' => 'webhook', 'url' => 'https://example.com/hook']]]);
         Http::fake(['*' => Http::response([], 500)]);
+        $this->mock(WebhookDnsResolver::class)->shouldReceive('addresses')->with('example.com')->andReturn(['93.184.216.34']);
         $this->expectException(RequestException::class);
         AutomationEngineService::run('deal_created', $deal);
     }
@@ -241,6 +243,9 @@ class AdminExtendedIntegrityTest extends TestCase
     public function test_invoice_service_refreshes_stale_orders_and_does_not_emit_twice(): void
     {
         $order = $this->order();
+        $product = Producto::factory()->create();
+        $variant = Variante::factory()->create(['producto_id' => $product->id]);
+        $order->items()->create(['variante_id' => $variant->id, 'cantidad' => 1, 'precio_unitario' => 100, 'producto_nombre' => $product->nombre]);
         $stale = Pedido::findOrFail($order->id);
         config(['services.apiperu.url' => 'https://example.test/invoice', 'services.apiperu.token' => 'test-token']);
         Http::fake(['*' => Http::response(['success' => true, 'data' => ['enlaces' => ['pdf' => 'https://example.test/document.pdf', 'xml' => 'https://example.test/document.xml']]])]);

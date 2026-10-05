@@ -12,6 +12,7 @@ use App\Services\Orders\OrderQueryService;
 use App\Services\Orders\RefundOrderService;
 use App\Services\Orders\UpdateOrderStatusService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -46,6 +47,7 @@ class OrderController extends Controller
 
         return Inertia::render('Admin/Pedidos/Show', [
             'pedido' => $pedido,
+            'paymentReviews' => DB::table('payment_reconciliations')->where('pedido_id', $pedido->id)->whereIn('status', ['authorizing', 'approved', 'needs_review'])->select('purchase_number', 'amount', 'status', 'created_at')->get(),
         ]);
     }
 
@@ -58,7 +60,7 @@ class OrderController extends Controller
 
             return redirect()->back()->with('success', 'Estado del pedido y envío actualizado.');
         } catch (\Throwable $e) {
-            return redirect()->back()->with('error', 'Ocurrió un error al actualizar el estado del pedido.');
+            return redirect()->back()->with('error', $e instanceof \InvalidArgumentException ? $e->getMessage() : 'Ocurrió un error al actualizar el estado del pedido.');
         }
     }
 

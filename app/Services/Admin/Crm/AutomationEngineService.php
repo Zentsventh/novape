@@ -12,6 +12,8 @@ use App\Models\CrmDeal;
 use App\Models\Cupon;
 use App\Models\Usuario;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -29,13 +31,14 @@ class AutomationEngineService
 
     public static function run(string $triggerType, Model $model, array $context = []): void
     {
+        $context['event_id'] ??= (string) Str::uuid();
         $automations = CrmAutomation::where('activo', true)
             ->where('trigger_type', $triggerType)
             ->get();
 
         foreach ($automations as $automation) {
             if (self::evaluateConditions($automation->condiciones, $model, $context)) {
-                self::executeActions($automation->acciones, $model, $context);
+                self::executeActions($automation->acciones, $model, array_merge($context, ['automation_id' => $automation->id]));
             }
         }
     }
@@ -79,8 +82,14 @@ class AutomationEngineService
 
     private static function executeActions(array $actions, Model $model, array $context): void
     {
-        foreach ($actions as $action) {
+        foreach ($actions as $index => $action) {
             $type = $action['type'] ?? '';
+            $key = ['event_id' => $context['event_id'], 'automation_id' => $context['automation_id'], 'action_index' => $index];
+            DB::table('automation_executions')->insertOrIgnore($key + ['status' => 'pending', 'created_at' => now(), 'updated_at' => now()]);
+            $claimed = DB::table('automation_executions')->where($key)->where('status', 'pending')->update(['status' => 'processing', 'updated_at' => now()]);
+            if (! $claimed) {
+                continue;
+            }
 
             try {
                 if ($type === 'webhook') {
@@ -94,8 +103,10 @@ class AutomationEngineService
                 } else {
                     throw new \InvalidArgumentException('Tipo de acción no soportado.');
                 }
+                DB::table('automation_executions')->where($key)->update(['status' => 'completed', 'updated_at' => now()]);
                 Log::info("Automation Action executed: {$type} for model ".$model->getKey());
             } catch (\Exception $e) {
+                DB::table('automation_executions')->where($key)->update(['status' => 'failed', 'error' => mb_substr($e->getMessage(), 0, 1000), 'updated_at' => now()]);
                 Log::error("Automation Action failed: {$type} for model ".$model->getKey().'. Error: '.$e->getMessage());
                 throw $e;
             }
@@ -104,12 +115,17 @@ class AutomationEngineService
 
     private static function fireWebhook(string $url, Model $model, array $context): void
     {
-        Http::connectTimeout(5)->timeout(15)->post($url, [
-            'event' => 'crm_automation',
-            'model' => $model->getMorphClass(),
-            'data' => $model->toArray(),
-            'context' => $context,
-        ])->throw();
+        [$host, $address] = PublicWebhookUrl::resolve($url);
+        $response = Http::connectTimeout(5)->timeout(15)->withoutRedirecting()
+            ->withOptions(['curl' => [CURLOPT_RESOLVE => [$host.':443:'.$address]]])->post($url, [
+                'event' => 'crm_automation',
+                'model' => $model->getMorphClass(),
+                'data' => Arr::only($model->toArray(), ['id', 'titulo', 'nombre', 'estado', 'stage_id', 'valor']),
+                'context' => Arr::only($context, ['event_id', 'from_stage_id', 'to_stage_id', 'actor_id']),
+            ])->throw();
+        if ($response->redirect()) {
+            throw new \RuntimeException('El webhook no admite redirecciones.');
+        }
     }
 
     private static function sendEmail(string $message, Model $model): void

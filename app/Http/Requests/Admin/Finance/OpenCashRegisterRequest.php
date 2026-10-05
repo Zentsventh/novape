@@ -16,7 +16,8 @@ class OpenCashRegisterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'monto_inicial' => 'required|numeric|min:0'
+            'caja_id' => 'required|integer|exists:cajas,id',
+            'monto_inicial' => 'required|numeric|min:0',
         ];
     }
 }

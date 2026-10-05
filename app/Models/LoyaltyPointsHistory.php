@@ -16,6 +16,7 @@ class LoyaltyPointsHistory extends Model
         'description',
     ];
 
+    /** @return BelongsTo<Usuario, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(Usuario::class, 'usuario_id');

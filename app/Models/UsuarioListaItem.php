@@ -18,6 +18,7 @@ class UsuarioListaItem extends Model
         'producto_id',
     ];
 
+    /** @return \Illuminate\Database\Eloquent\Relations\BelongsTo<UsuarioLista, $this> */
     public function lista(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(UsuarioLista::class, 'lista_id');

@@ -4,23 +4,22 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Events\Omnichannel\ConversationUpdated;
+use App\Events\Omnichannel\NewMessageReceived;
 use App\Http\Requests\Chatbot\ChatbotMessageRequest;
-use App\Services\Chatbot\ChatbotService;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use App\Jobs\Omnichannel\ProcessWebChatbotMessageJob;
 use App\Models\Omnichannel\OmnichannelContact;
 use App\Models\Omnichannel\OmnichannelConversation;
 use App\Models\Omnichannel\OmnichannelMessage;
-use App\Events\Omnichannel\NewMessageReceived;
-use App\Events\Omnichannel\ConversationUpdated;
-use App\Jobs\Omnichannel\ProcessWebChatbotMessageJob;
 use App\Services\Omnichannel\TicketAssignmentService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ChatbotController extends Controller
 {
     public function __construct(
-        private readonly ChatbotService $chatbotService,
         private readonly TicketAssignmentService $ticketAssignmentService
     ) {}
 
@@ -33,7 +32,7 @@ class ChatbotController extends Controller
         $sessionId = $request->input('session_id') ?: session()->getId();
         $messages = $request->input('messages');
         $authUser = auth()->user();
-        
+
         // El último mensaje es el del usuario
         $lastUserMessage = end($messages)['text'] ?? '';
 
@@ -57,7 +56,7 @@ class ChatbotController extends Controller
                     'content' => $lastUserMessage,
                     'status' => 'delivered',
                 ]);
-                
+
                 $conversation->update([
                     'last_message_preview' => mb_substr($lastUserMessage, 0, 50),
                     'last_message_at' => now(),
@@ -76,7 +75,7 @@ class ChatbotController extends Controller
             }
 
             // Si el bot no está pausado, procesar en segundo plano usando Jobs
-            if (!$conversation->is_bot_paused) {
+            if (! $conversation->is_bot_paused) {
                 // Despachar SINCRONAMENTE para que la web muestre "escribiendo..." hasta que Gemini responda
                 ProcessWebChatbotMessageJob::dispatchSync(
                     $conversation->id,
@@ -91,11 +90,12 @@ class ChatbotController extends Controller
                 'success' => true,
                 'is_bot_paused' => $conversation->is_bot_paused,
                 'conversation_id' => $conversation->id,
-                'processing_in_background' => !$conversation->is_bot_paused
+                'processing_in_background' => ! $conversation->is_bot_paused,
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            \Illuminate\Support\Facades\Log::error('Error en ChatbotController: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+            Log::error('Error en ChatbotController: '.$e->getMessage()."\n".$e->getTraceAsString());
+
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
@@ -109,12 +109,12 @@ class ChatbotController extends Controller
         $authUser = auth()->user();
 
         $contact = $this->findContact($authUser, $sessionId);
-        if (!$contact) {
+        if (! $contact) {
             return response()->json(['error' => 'Contacto no encontrado'], 404);
         }
 
         $conversation = $this->findActiveConversation($contact);
-        if (!$conversation) {
+        if (! $conversation) {
             return response()->json(['error' => 'Conversación no encontrada'], 404);
         }
 
@@ -126,7 +126,7 @@ class ChatbotController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Transferido a un asesor humano exitosamente.'
+            'message' => 'Transferido a un asesor humano exitosamente.',
         ]);
     }
 
@@ -141,15 +141,15 @@ class ChatbotController extends Controller
 
         // Buscar contacto por usuario autenticado o por session_id
         $contact = $this->findContact($authUser, $sessionId);
-        if (!$contact) {
+        if (! $contact) {
             return response()->json(['messages' => []]);
         }
 
         $conversation = $this->findActiveConversation($contact);
-        if (!$conversation) {
+        if (! $conversation) {
             return response()->json([
                 'messages' => [],
-                'conversation_ended' => true
+                'conversation_ended' => true,
             ]);
         }
 
@@ -163,16 +163,17 @@ class ChatbotController extends Controller
 
         $formattedMessages = $newMessages->map(function ($msg) {
             $agentName = null;
-            if (!$msg->is_ai_generated && $msg->direction === 'outbound' && $msg->user) {
+            if (! $msg->is_ai_generated && $msg->direction === 'outbound' && $msg->user) {
                 $firstName = explode(' ', $msg->user->nombres ?? '')[0];
                 $lastName = explode(' ', $msg->user->apellidos ?? '')[0];
-                $agentName = trim($firstName . ' ' . $lastName);
+                $agentName = trim($firstName.' '.$lastName);
             }
+
             return [
                 'id' => $msg->id,
                 'role' => $msg->direction === 'inbound' ? 'user' : 'bot',
                 'text' => $msg->content,
-                'is_human' => !$msg->is_ai_generated && $msg->direction === 'outbound',
+                'is_human' => ! $msg->is_ai_generated && $msg->direction === 'outbound',
                 'agent_name' => $agentName ?: 'Agente',
                 'time' => $msg->created_at->format('H:i'),
             ];
@@ -183,7 +184,7 @@ class ChatbotController extends Controller
         return response()->json([
             'messages' => $formattedMessages,
             'is_bot_paused' => $conversation->is_bot_paused,
-            'agent_name' => $conversation->assignedUser ? trim($conversation->assignedUser->nombres . ' ' . $conversation->assignedUser->apellidos) : null,
+            'agent_name' => $conversation->assignedUser ? trim($conversation->assignedUser->nombres.' '.$conversation->assignedUser->apellidos) : null,
         ]);
     }
 
@@ -197,12 +198,12 @@ class ChatbotController extends Controller
         $authUser = auth()->user();
 
         $contact = $this->findContact($authUser, $sessionId);
-        if (!$contact) {
+        if (! $contact) {
             return response()->json(['messages' => [], 'has_active_conversation' => false]);
         }
 
         $conversation = $this->findActiveConversation($contact);
-        if (!$conversation) {
+        if (! $conversation) {
             return response()->json(['messages' => [], 'has_active_conversation' => false]);
         }
 
@@ -214,16 +215,17 @@ class ChatbotController extends Controller
 
         $formattedMessages = $messages->map(function ($msg) {
             $agentName = null;
-            if (!$msg->is_ai_generated && $msg->direction === 'outbound' && $msg->user) {
+            if (! $msg->is_ai_generated && $msg->direction === 'outbound' && $msg->user) {
                 $firstName = explode(' ', $msg->user->nombres ?? '')[0];
                 $lastName = explode(' ', $msg->user->apellidos ?? '')[0];
-                $agentName = trim($firstName . ' ' . $lastName);
+                $agentName = trim($firstName.' '.$lastName);
             }
+
             return [
                 'id' => $msg->id,
                 'role' => $msg->direction === 'inbound' ? 'user' : 'bot',
                 'text' => $msg->content,
-                'is_human' => !$msg->is_ai_generated && $msg->direction === 'outbound',
+                'is_human' => ! $msg->is_ai_generated && $msg->direction === 'outbound',
                 'agent_name' => $agentName ?: 'Agente',
                 'time' => $msg->created_at->format('H:i'),
             ];
@@ -236,7 +238,7 @@ class ChatbotController extends Controller
             'has_active_conversation' => true,
             'conversation_id' => $conversation->id,
             'is_bot_paused' => $conversation->is_bot_paused,
-            'agent_name' => $conversation->assignedUser ? trim($conversation->assignedUser->nombres . ' ' . $conversation->assignedUser->apellidos) : null,
+            'agent_name' => $conversation->assignedUser ? trim($conversation->assignedUser->nombres.' '.$conversation->assignedUser->apellidos) : null,
         ]);
     }
 
@@ -249,12 +251,12 @@ class ChatbotController extends Controller
         $authUser = auth()->user();
 
         $contact = $this->findContact($authUser, $sessionId);
-        if (!$contact) {
+        if (! $contact) {
             return response()->json(['success' => true]); // nada que cerrar
         }
 
         $conversation = $this->findActiveConversation($contact);
-        if (!$conversation) {
+        if (! $conversation) {
             return response()->json(['success' => true]);
         }
 
@@ -292,11 +294,11 @@ class ChatbotController extends Controller
         // Si el usuario está autenticado, buscar por usuario_id primero
         if ($authUser) {
             $contact = OmnichannelContact::where('usuario_id', $authUser->id)->first();
-            
+
             if ($contact) {
                 // Actualizar nombre si cambió y vincular session_id
                 $updates = [];
-                $fullName = trim(($authUser->nombres ?? '') . ' ' . ($authUser->apellidos ?? ''));
+                $fullName = trim(($authUser->nombres ?? '').' '.($authUser->apellidos ?? ''));
                 if ($fullName && $contact->name !== $fullName) {
                     $updates['name'] = $fullName;
                 }
@@ -311,15 +313,14 @@ class ChatbotController extends Controller
                 $metadata['web_session_id'] = $sessionId;
                 $updates['metadata'] = $metadata;
 
-                if (!empty($updates)) {
-                    $contact->update($updates);
-                }
+                $contact->update($updates);
 
                 return $contact;
             }
 
             // No tiene contacto aún, pero está autenticado → crear con datos reales
-            $fullName = trim(($authUser->nombres ?? '') . ' ' . ($authUser->apellidos ?? ''));
+            $fullName = trim(($authUser->nombres ?? '').' '.($authUser->apellidos ?? ''));
+
             return OmnichannelContact::create([
                 'name' => $fullName ?: 'Cliente Registrado',
                 'email' => $authUser->email ?? null,
@@ -333,7 +334,7 @@ class ChatbotController extends Controller
 
         // Usuario NO autenticado: buscar por session_id en metadata
         $contact = OmnichannelContact::where('metadata->web_session_id', $sessionId)->first();
-        if (!$contact) {
+        if (! $contact) {
             $contact = OmnichannelContact::create([
                 'name' => 'Visitante Web',
                 'phone_number' => null,
@@ -343,7 +344,7 @@ class ChatbotController extends Controller
             ]);
 
             // Asignar nombre único con el ID del contacto
-            $contact->update(['name' => 'Visitante Web #' . $contact->id]);
+            $contact->update(['name' => 'Visitante Web #'.$contact->id]);
         }
 
         return $contact;
@@ -357,6 +358,7 @@ class ChatbotController extends Controller
         if ($authUser) {
             return OmnichannelContact::where('usuario_id', $authUser->id)->first();
         }
+
         return OmnichannelContact::where('metadata->web_session_id', $sessionId)->first();
     }
 
@@ -372,7 +374,7 @@ class ChatbotController extends Controller
             ->latest('updated_at')
             ->first();
 
-        if (!$conversation) {
+        if (! $conversation) {
             $conversation = OmnichannelConversation::create([
                 'contact_id' => $contact->id,
                 'channel' => 'web',
@@ -406,7 +408,7 @@ class ChatbotController extends Controller
         OmnichannelConversation $conversation
     ): void {
         // Solo actualizar si el contacto tiene nombre genérico de visitante
-        if (!str_starts_with($contact->name, 'Visitante Web')) {
+        if (! str_starts_with($contact->name, 'Visitante Web')) {
             return;
         }
 
@@ -436,7 +438,8 @@ class ChatbotController extends Controller
                 // Broadcast la actualización para que el CRM refleje el nuevo nombre
                 broadcast(new ConversationUpdated($conversation->refresh()))->toOthers();
 
-                \Illuminate\Support\Facades\Log::info("Contacto #{$contact->id} identificado como: {$detectedName}");
+                Log::info("Contacto #{$contact->id} identificado como: {$detectedName}");
+
                 return;
             }
         }

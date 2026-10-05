@@ -31,16 +31,13 @@ class CrmTaskController extends Controller
                     }
                 }
 
-                $activity->time_status = $status;
+                $activity->setAttribute('time_status', $status);
 
                 return $activity;
             });
 
-        $deals = CrmDeal::with('cliente')->orderBy('titulo')->get();
-
         return Inertia::render('Admin/CRM/Tasks', [
             'tasks' => $activities,
-            'deals' => $deals,
         ]);
     }
 
@@ -56,7 +53,7 @@ class CrmTaskController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'deal_id' => 'required_without:empresa_id|nullable|exists:crm_deals,id',
+            'deal_id' => ['required_without:empresa_id', 'nullable', \Illuminate\Validation\Rule::exists('crm_deals', 'id')->whereNull('deleted_at')],
             'empresa_id' => 'nullable|exists:crm_companies,id',
             'tipo' => 'required|string',
             'contenido' => 'required|string',
@@ -79,7 +76,7 @@ class CrmTaskController extends Controller
     public function update(Request $request, CrmActivity $activity)
     {
         $request->validate([
-            'deal_id' => 'required_without:empresa_id|nullable|exists:crm_deals,id',
+            'deal_id' => ['required_without:empresa_id', 'nullable', \Illuminate\Validation\Rule::exists('crm_deals', 'id')->whereNull('deleted_at')],
             'empresa_id' => 'nullable|exists:crm_companies,id',
             'tipo' => 'required|string',
             'contenido' => 'required|string',

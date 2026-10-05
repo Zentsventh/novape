@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin\Crm;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreDealProductRequest extends FormRequest
@@ -19,13 +20,14 @@ class StoreDealProductRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
             'producto_id' => 'required|exists:producto,id',
-            'cantidad' => 'required|integer|min:1'
+            'variante_id' => 'required|exists:variante,id',
+            'cantidad' => 'required|integer|min:1',
         ];
     }
 }

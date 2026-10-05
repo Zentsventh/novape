@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import viteCompression from 'vite-plugin-compression';
 
 export default defineConfig({
     server: {
@@ -16,5 +17,10 @@ export default defineConfig({
         }),
         react(),
         tailwindcss(),
+        viteCompression({
+            algorithm: 'brotliCompress',
+            ext: '.br',
+            threshold: 1024,
+        }),
     ],
 });

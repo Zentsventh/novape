@@ -44,11 +44,13 @@ try {
             break;
         }
     }
+    await page.setViewport({ width: 390, height: 844 });
     await page.goto(origin + '/admin', { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => document.body.innerText.length > 150, { timeout: 20000 }).catch(() => {});
-    await page.setViewport({ width: 390, height: 844 });
-    await page.screenshot({ path: 'storage/logs/admin-mobile-audit.png', fullPage: true });
-    results.push({ route: '/admin (mobile)', overflow: await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 2) });
+    await new Promise(resolve => setTimeout(resolve, 700));
+    const mobileMetrics = await page.evaluate(() => ({viewport: innerWidth, width: document.documentElement.scrollWidth, overflow: document.documentElement.scrollWidth > innerWidth + 2}));
+    await page.screenshot({ path: 'storage/logs/admin-mobile-audit.png' });
+    results.push({ route: '/admin (mobile)', ...mobileMetrics });
     await writeFile('storage/logs/admin-browser-audit.json', JSON.stringify(results, null, 2));
     if (results.some(r => r.errors?.length || r.status && r.status !== 200 || r.url?.includes('/admin/login') || r.rendered === false)) process.exitCode = 1;
 } finally {

@@ -22,7 +22,7 @@ class DashboardExport implements FromView, ShouldAutoSize, WithStyles
         return view('exports.dashboard', $this->data);
     }
 
-    public function styles(Worksheet $sheet)
+    public function styles(Worksheet $sheet): array
     {
         return [
             1 => ['font' => ['bold' => true, 'size' => 14]],

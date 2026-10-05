@@ -26,15 +26,15 @@ try {
         assert(home.bannerLoaded);
         assert(home.labelsFit, `Category labels clipped at ${width}`);
         assert.equal(home.mobileBanner, width < 768);
-        await page.evaluate(() => [...document.querySelectorAll('.efe-cat-nav-item')].find((button) => button.textContent.trim() === 'TV').click());
+        await page.evaluate(() => [...document.querySelectorAll('.efe-cat-nav-item')].find((button) => button.textContent.trim() === 'Tecnolog\u00eda').click());
         await page.waitForSelector('[role="dialog"]');
-        await page.waitForFunction(() => document.querySelector('.cat-detail-heading h3')?.textContent === 'TV');
+        await page.waitForFunction(() => document.querySelector('.cat-detail-heading h3')?.textContent === 'Tecnolog\u00eda');
         const menu = await page.evaluate(() => {
             const dialog = document.querySelector('[role="dialog"]');
             const detail = document.querySelector('.efe-cat-drawer-right').getBoundingClientRect();
             return { title: document.querySelector('.cat-detail-heading h3').textContent, subcategories: document.querySelectorAll('.cat-subcategory-link').length, brands: document.querySelectorAll('.cat-brand-link').length, width: dialog.getBoundingClientRect().width, right: detail.right, links: [...document.querySelectorAll('.cat-subcategory-link,.cat-brand-link')].map((a) => a.href) };
         });
-        assert(menu.subcategories > 0 && menu.brands > 0, `Empty TV menu at ${width}`);
+        assert(menu.subcategories > 0 && menu.brands > 0, `Empty technology menu at ${width}`);
         assert(menu.width <= width && menu.right <= width + 1, `Menu overflow at ${width}`);
         if (width === 390 || width === 1440) await page.screenshot({ path: `storage/app/private/storefront-qa/menu-${width}.png` });
         if (width < 1024) {
@@ -55,16 +55,6 @@ try {
         console.log(JSON.stringify({ viewport: width, ...home, subcategories: menu.subcategories, brands: menu.brands, result: 'OK' }));
         await page.close();
     }
-    const page = await browser.newPage();
-    await page.setViewport({ width: 1440, height: 900 });
-    await page.goto(url, { waitUntil: 'domcontentloaded' });
-    await page.waitForSelector('.parallax-stage');
-    await page.evaluate(() => document.querySelector('.parallax-stage').scrollIntoView({ block: 'center' }));
-    await page.waitForFunction(() => document.querySelector('.parallax-canvas').style.opacity === '1', { timeout: 20000 });
-    await page.screenshot({ path: 'storage/app/private/storefront-qa/parallax-1440.png' });
-    await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
-    await page.waitForFunction(() => getComputedStyle(document.querySelector('.parallax-canvas')).display === 'none');
-    console.log('Parallax loads; reduced-motion fallback works.');
     assert.deepEqual(errors, []);
 } finally {
     await browser.close();

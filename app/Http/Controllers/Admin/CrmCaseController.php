@@ -52,7 +52,7 @@ class CrmCaseController extends Controller
             'cliente_id' => 'nullable|exists:usuario,id',
             'pedido_id' => 'nullable|exists:pedido,id',
             'asignado_a' => 'nullable|exists:usuario,id',
-            'deal_id' => 'nullable|exists:crm_deals,id',
+            'deal_id' => ['nullable', \Illuminate\Validation\Rule::exists('crm_deals', 'id')->whereNull('deleted_at')],
         ]);
 
         $crmCase = CrmCase::create($validated);
@@ -108,7 +108,7 @@ class CrmCaseController extends Controller
             'cliente_id' => 'nullable|exists:usuario,id',
             'pedido_id' => 'nullable|exists:pedido,id',
             'asignado_a' => 'nullable|exists:usuario,id',
-            'deal_id' => 'nullable|exists:crm_deals,id',
+            'deal_id' => ['nullable', \Illuminate\Validation\Rule::exists('crm_deals', 'id')->whereNull('deleted_at')],
         ]);
 
         $crmCase->update($validated);

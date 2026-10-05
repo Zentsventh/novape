@@ -4,7 +4,7 @@ import AdminLayout from '../../../Layouts/AdminLayout';
 import { useConfirm } from '@/Contexts/ConfirmContext';
 import { ArrowLeft, FileText, Package, RefreshCw, User, CreditCard, Box, Calendar, Save, CheckCircle, Truck } from 'lucide-react';
 
-export default function Show({ pedido }) {
+export default function Show({ pedido, paymentReviews = [] }) {
     const confirmDialog = useConfirm();
 
     const { flash } = usePage().props;
@@ -21,6 +21,7 @@ export default function Show({ pedido }) {
 
     return (
         <AdminLayout logoUrl={null}>
+            {paymentReviews.length > 0 && <p role="alert" style={{padding: 16, background: "#FFF4CC"}}>Este pedido tiene {paymentReviews.length} intento(s) de pago que requieren conciliación con Niubiz. Verifica la transacción antes de solicitar otro cobro.</p>}
             <Head title={`Pedido ${pedido.codigo}`} />
             
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>

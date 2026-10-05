@@ -69,12 +69,16 @@ foreach ($chunk as $record) {
     $check($product->nombre === $record['name'] && $product->descripcion === $record['description'] && $product->garantias === $record['warranty'], 'Ficha distinta de la fuente: '.$product->id);
     // MySQL's unique brand index treats case and accents as equivalent.
     $check($brandKey((string) $brandNames->get($product->marca_id)) === $brandKey($record['brand']), 'Marca incorrecta: '.$product->id);
-    $images = $imagesByProduct->get($product->id, collect())->pluck('url');
+    $images = $imagesByProduct->get($product->id, collect())->map(fn ($row) => (new \App\Models\ProductoImagen(['url' => $row->url]))->url);
     $check($images->unique()->count() >= 3, 'Galería incompleta: '.$product->id);
+    // The original download identity stays stable after compression or folder moves.
+    $imageKey = static fn (string $path): string => preg_replace('/(?:_resultado)?\.[^.]+$/i', '', basename($path));
+    $currentImages = $images->keyBy($imageKey);
     $hashes = [];
     foreach ($record['image_paths'] as $path) {
-        $file = storage_path('app/public/'.$path);
-        $check(is_file($file) && in_array('/storage/'.$path, $images->all(), true), 'Imagen no asociada: '.$path);
+        $current = $currentImages->get($imageKey($path));
+        $file = $current && str_starts_with($current, '/storage/') ? storage_path('app/public/'.substr($current, 9)) : '';
+        $check(is_file($file), 'Imagen no asociada o ausente: '.$path);
         if (is_file($file)) {
             $check(@getimagesize($file) !== false, 'Archivo de imagen no válido: '.$path);
             $hashes[] = hash_file('sha256', $file);

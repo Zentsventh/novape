@@ -6,7 +6,9 @@
     <meta name="description" content="Novape - Tu tienda de electrodomésticos con los mejores precios y envío gratis a todo el Perú">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title inertia>{{ config('app.name', 'Novape') }}</title>
-    <link rel="icon" type="image/png" href="{{ asset('images/favicon_novape .png') }}">
+    <link rel="icon" type="image/png" sizes="48x48" href="{{ asset('images/favicon_novape.png') }}?v={{ file_exists(public_path('images/favicon_novape.png')) ? filemtime(public_path('images/favicon_novape.png')) : '1' }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v={{ file_exists(public_path('favicon.ico')) ? filemtime(public_path('favicon.ico')) : '1' }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/favicon_novape.png') }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

@@ -1,13 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Head, router, Link, useForm } from '@inertiajs/react';
 import TwentyCrmLayout from '../../../Layouts/TwentyCrmLayout';
 import TwentyKanban from '../../../Components/Admin/CRM/TwentyKanban';
 import TwentyRecordDrawer from '../../../Components/Admin/CRM/TwentyRecordDrawer';
 import { Plus, ListFilter, Download, Search, X } from 'lucide-react';
 import Swal from 'sweetalert2';
+import RemoteSelect from '../../../Components/Admin/RemoteSelect';
 
-export default function Pipeline({ pipeline, companies, personas }) {
-    const [search, setSearch] = useState('');
+export default function Pipeline({ pipeline, dealPages, query = '' }) {
+    const [search, setSearch] = useState(query);
+    useEffect(() => {
+        if (search === query) return;
+        const timer = setTimeout(() => router.get('/admin/crm/pipeline', {q: search}, {preserveState: true, preserveScroll: true, replace: true}), 400);
+        return () => clearTimeout(timer);
+    }, [search, query]);
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [showFilters, setShowFilters] = useState(false);
 
@@ -60,12 +66,12 @@ export default function Pipeline({ pipeline, companies, personas }) {
 
     const deleteDeal = (id) => {
         Swal.fire({
-            title: '¿Eliminar oportunidad?',
-            text: 'Esta acción borrará este negocio permanentemente.',
+            title: '¿Archivar oportunidad?',
+            text: 'Se retirará del pipeline y se conservará su historial.',
             icon: 'warning',
             iconColor: '#EF4444',
             showCancelButton: true,
-            confirmButtonText: 'Sí, eliminar',
+            confirmButtonText: 'Sí, archivar',
             cancelButtonText: 'Cancelar',
             customClass: {
                 popup: 'premium-swal-popup',
@@ -101,14 +107,6 @@ export default function Pipeline({ pipeline, companies, personas }) {
     const handleDealClick = (deal) => {
         router.visit(`/admin/crm/deals/${deal.id}`);
     };
-
-    const filteredPipeline = pipeline.map(stage => ({
-        ...stage,
-        deals: stage.deals ? stage.deals.filter(deal => 
-            deal.titulo.toLowerCase().includes(search.toLowerCase()) ||
-            (deal.cliente && (deal.cliente.nombres + ' ' + deal.cliente.apellidos).toLowerCase().includes(search.toLowerCase()))
-        ) : []
-    }));
 
     return (
         <TwentyCrmLayout title="Pipeline">
@@ -371,9 +369,10 @@ export default function Pipeline({ pipeline, companies, personas }) {
                 </div>
 
                 {/* Kanban Board */}
+                {dealPages && <nav aria-label="Páginas de oportunidades" style={{padding: '8px 32px', display: 'flex', gap: 12, flexWrap: 'wrap'}}>Mostrando {dealPages.from || 0}–{dealPages.to || 0} de {dealPages.total}. {dealPages.links.map((link, i) => link.url ? <Link key={i} href={link.url} preserveState aria-current={link.active ? 'page' : undefined} dangerouslySetInnerHTML={{__html: link.label}}/> : <span key={i} dangerouslySetInnerHTML={{__html: link.label}}/>)}</nav>}
                 <div style={{ flex: 1, overflow: 'hidden' }}>
                     <TwentyKanban 
-                        stages={filteredPipeline} 
+                        stages={pipeline}
                         onDragEnd={handleDragEnd} 
                         onDealClick={handleDealClick}
                         onDealEdit={openDrawer}
@@ -431,31 +430,14 @@ export default function Pipeline({ pipeline, companies, personas }) {
                     </div>
 
                     <div className="premium-form-group">
-                        <label className="premium-label">Empresa asociada</label>
-                        <select 
-                            className="premium-input"
-                            value={data.empresa_id}
-                            onChange={e => setData('empresa_id', e.target.value)}
-                        >
-                            <option value="">Seleccionar empresa (opcional)</option>
-                            {companies?.map(company => (
-                                <option key={company.id} value={company.id}>{company.nombre}</option>
-                            ))}
-                        </select>
+                        <RemoteSelect label="Empresa asociada" endpoint="/admin/crm/selectores/empresas"
+                            value={data.empresa_id} onChange={value => setData('empresa_id', value)} />
+                        {errors.empresa_id && <span role="alert">{errors.empresa_id}</span>}
                     </div>
-
                     <div className="premium-form-group">
-                        <label className="premium-label">Contacto asociado (Persona)</label>
-                        <select 
-                            className="premium-input"
-                            value={data.usuario_id}
-                            onChange={e => setData('usuario_id', e.target.value)}
-                        >
-                            <option value="">Seleccionar contacto (opcional)</option>
-                            {personas?.map(persona => (
-                                <option key={persona.id} value={persona.id}>{persona.nombres} {persona.apellidos}</option>
-                            ))}
-                        </select>
+                        <RemoteSelect label="Contacto asociado" endpoint="/admin/crm/selectores/contactos"
+                            value={data.usuario_id} onChange={value => setData('usuario_id', value)} />
+                        {errors.usuario_id && <span role="alert">{errors.usuario_id}</span>}
                     </div>
 
                     <div className="premium-form-group">

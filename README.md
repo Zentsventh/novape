@@ -1,62 +1,85 @@
-# Novape E‑Commerce Platform
+# Novape
 
-## Vision
-A **enterprise‑grade** e‑commerce platform built with **Laravel** using **Domain‑Driven Design (DDD)**. The architecture separates concerns into clear domains, supports rich business logic, robust automation, AI assistance, and a premium UI.
+El [conocimiento del chatbot](docs/CONOCIMIENTO_CHATBOT.md) permite cargar texto, PDF, Word y archivos de texto desde Comunicación → Conocimiento del chatbot, revisar borradores y activar fuentes para las respuestas de tienda y WhatsApp.
 
-## High‑Level Structure
-```
-app/
-├─ Domain/
-│  ├─ Catalog/       # Productos, categorías, marcas, variantes, atributos
-│  ├─ Inventory/     # Stock, almacenes, movimientos, kardex
-│  ├─ Sales/         # Pedidos, checkout, historial, comparador
-│  ├─ Payments/      # Métodos, transacciones, webhooks, conciliación
-│  ├─ Customers/     # Registro, perfil, direcciones, CRM, fidelización
-│  ├─ CRM/           # Conversaciones, tickets, notas, asignaciones
-│  ├─ Marketing/     # Campañas, cupones, automatizaciones, IA
-│  ├─ Procurement/   # Solicitudes, cotizaciones, órdenes de compra
-│  ├─ Billing/       # Facturación electrónica (SUNAT), comprobantes
-│  ├─ Automation/    # Motor de reglas, programaciones, notificaciones
-│  └─ AI/            # Asistente administrativo, generación de contenido
-├─ Actions/          # Use‑case / application services
-├─ Services/         # Infra‑estructuras (email, payment gateways, AI)
-├─ Events/           # Domain events
-├─ Listeners/        # Event listeners
-├─ Jobs/             # Queued jobs (emails, imports, IA)
-├─ Policies/         # Authorization policies (modulo.recurso.accion)
-└─ Notifications/    # Laravel notifications (email, SMS, push)
+Tienda y panel administrativo con Laravel 12, PHP 8.3 o superior, React 19, Inertia y Vite. Incluye catálogo, pedidos, inventario por almacén, compras, caja/POS, devoluciones, CRM, campañas y atención omnicanal.
+
+## Instalación
+
+Requiere Composer, Node.js 22 y MySQL o SQLite. Instalar dependencias desde `composer.lock`, sin copiar `vendor` de otro equipo.
+
+```powershell
+composer install
+npm ci
+Copy-Item .env.example .env
+php artisan key:generate
 ```
 
-## Core Decisions (Senior‑Level)
-- **Laravel 11** with PHP 8.3 – latest LTS features, type‑safe models, route attributes.
-- **DDD** – each domain has its own `Entities`, `ValueObjects`, `Repositories` and `Services`.
-- **CQRS** – Commands for write‑side, Queries for read‑side (via dedicated query classes).
-- **Event‑Sourcing** – critical actions (order status changes, payments) emit events stored in `events` table.
-- **Hexagonal Architecture** – `Domain` core is independent of Laravel, enabling easy testing and future migration.
-- **API‑first** – All features exposed through a versioned REST/GraphQL API (`/api/v1`).
-- **Security** – JWT + Laravel Sanctum for API, 2FA for admin, granular permissions (`module.resource.action`).
-- **CI/CD** – GitHub Actions pipeline (lint, phpstan, tests, Docker build, deployment).
-- **Docker** – Multi‑stage build with PHP‑FPM, Nginx, MySQL, Redis, Horizon.
-- **Testing** – PestPHP + PHPUnit, 100 % coverage on core domain logic.
-- **AI Integration** – OpenAI SDK wrapper under `App\Domain\AI\Services\OpenAIService`.
+Configurar en `.env` la base de datos, `APP_URL` y los servicios. En una instalación existente conservar `.env` y `APP_KEY`: esta clave protege también las credenciales cifradas del panel.
 
-## Immediate Next Steps (implemented now)
-1. Create the **DDD folder skeleton**.
-2. Add a base **Entity** class with UUID primary key.
-3. Scaffold a **Product** entity (Catalog domain) with migrations placeholder.
-4. Provide a **README** with onboarding instructions.
-5. Add a minimal **composer.json** and **.gitignore**.
-6. Commit these files – the project is ready for further development.
+Antes de actualizar una base existente:
 
-## How to Continue
-- Run `composer install` to fetch Laravel dependencies.
-- Execute `php artisan migrate` after generating migrations for each domain.
-- Implement API resources, request validation, and service classes per domain.
-- Extend the UI layer (Vue 3 + Vite) with a premium dashboard (glass‑morphism, dark mode).
+```powershell
+php scripts/panel_database_backup.php
+php artisan migrate --force
+npm run build
+```
 
----
-*All decisions were taken to ensure scalability, maintainability, and a premium user experience.*
+El respaldo se guarda en `storage/app/private`, contiene datos privados y debe protegerse. La migración de endurecimiento conserva historial y no permite un rollback destructivo automático. Las sesiones antiguas de caja deben cerrarse y abrirse nuevamente seleccionando caja física con almacén.
 
-# Datos de catálogo y demostración
+Para desarrollo ejecutar en terminales separadas:
 
-La carga de 200 clientes, catálogo de EFE e imágenes locales y un mes de operaciones simuladas está documentada en [docs/SEMILLAS_REALES.md](docs/SEMILLAS_REALES.md).
+```powershell
+php artisan serve
+npm run dev
+```
+
+## Procesos operativos
+
+Configurar `QUEUE_CONNECTION=database` o Redis en producción y mantener un worker supervisado. El scheduler debe ejecutarse cada minuto; Reverb proporciona actualizaciones del inbox.
+
+```powershell
+php artisan queue:work --timeout=60 --tries=1
+php artisan schedule:work
+php artisan reverb:start
+```
+
+Comprobar actividad y pendientes sin ejecutar trabajos ni enviar mensajes:
+
+```powershell
+php artisan panel:health --json
+```
+
+El comando devuelve código 1 si no hay señal reciente del scheduler o del worker de la cola configurada, o si no puede consultar base/caché. Registra esperas, trabajos activos/fallidos y estados de conciliación y entregas. Las señales caducan a los tres minutos. Con `QUEUE_CONNECTION=sync` informa ese modo y no exige worker: los trabajos se ejecutan en la solicitud. En producción usar cola durable y caché compartida; mantener el scheduler activo. Un código 0 acredita actividad reciente, no entrega de proveedores ni salud de todos los nodos.
+
+En producción ejecutar `schedule:run` desde el programador del sistema. El `retry_after` debe superar el timeout del worker; el valor predeterminado es 90 segundos. Reiniciar workers después de actualizar código. Configurar `REVERB_*`, `VITE_REVERB_*` y el proxy WebSocket; recompilar cuando cambien las variables del frontend.
+
+SMTP, WhatsApp/Meta, Niubiz y facturación electrónica requieren credenciales propias. El webhook exige secreto de firma válido y TLS debe verificarse. Una respuesta simulada o un correo en `log` no equivalen a entrega real. Revisar resultados inciertos antes de reenviar campañas, notificaciones o cobros.
+
+## Verificación
+
+```powershell
+composer validate --strict
+composer check-platform-reqs
+php artisan test --compact
+php vendor/bin/phpstan analyse --memory-limit=1G --no-progress
+npm run build
+```
+
+Las pruebas fuerzan SQLite en memoria y correo de prueba para proteger datos y destinatarios reales. CI ejecuta estas comprobaciones con PHP 8.3 y 8.5.
+
+La auditoría de rutas es de solo lectura:
+
+```powershell
+php scripts/audit_admin_pages.php
+```
+
+El recorrido de navegador requiere servidor local en `http://127.0.0.1:8000`, Chrome y Reverb. `scripts/admin_audit_session.php` crea una sesión temporal administrativa solo en entorno local; ejecutar su opción `cleanup` al terminar. Nunca publicar los archivos de sesiones.
+
+La [auditoría inicial](docs/AUDITORIA_360_PANEL_2026-10-05.md) describe el estado anterior. Consultar [correcciones y límites de verificación](docs/CORRECCIONES_PANEL_2026-10-05.md). La carga de catálogo y datos de demostración se documenta en [SEMILLAS_REALES](docs/SEMILLAS_REALES.md).
+
+La [continuación de pendientes](docs/CONTINUACION_PANEL_CATALOGO_2026-10-05.md) documenta las búsquedas remotas, edición y archivado del CRM, monitorización y comprobaciones adicionales de tienda. `node scripts/check-panel-completion.mjs` verifica selectores y 18 lecturas con concurrencia de tres contra el servidor local; crea y elimina una sesión temporal y no guarda compras ni envía comunicaciones.
+
+`php scripts/verify_product_images.php` comprueba las galerías locales actuales tras conversiones o cambios de carpeta. `php scripts/verify_efe_catalog.php` contrasta además fichas, fotografías de origen e inventario con el snapshot EFE, admitiendo las rutas reorganizadas.
+
+El [chat de trabajadores y asistente del panel](docs/COMUNICACION_PANEL_CRM_2026-10-05.md) documenta los espacios privados, la integración de borradores en Omnicanal CRM, los permisos y la recuperación de IA. `node scripts/check-panel-communication.mjs` valida chat directo y grupal con usuarios temporales, canales Reverb, borradores sin envío al cliente y diseño móvil.

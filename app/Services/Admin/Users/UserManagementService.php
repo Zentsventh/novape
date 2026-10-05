@@ -180,8 +180,7 @@ class UserManagementService
 
     private function assertAdminRoleAssignment(array $roles): void
     {
-        if (Rol::whereIn('id', $roles)->where('nombre', 'admin')->exists() &&
-            ! auth('admin')->user()?->esAdmin()) {
+        if ($roles && ! auth('admin')->user()?->esAdmin()) {
             abort(403);
         }
     }

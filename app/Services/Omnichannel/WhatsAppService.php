@@ -4,22 +4,24 @@ declare(strict_types=1);
 
 namespace App\Services\Omnichannel;
 
+use App\Models\ConfiguracionSitio;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-
-use App\Models\ConfiguracionSitio;
 
 class WhatsAppService
 {
     protected string $token;
+
     protected string $phoneNumberId;
+
     protected string $apiVersion;
+
     protected string $baseUrl;
 
     public function __construct()
     {
-        $this->token = ConfiguracionSitio::obtener('whatsapp_token', config('omnichannel.whatsapp.token'));
-        $this->phoneNumberId = ConfiguracionSitio::obtener('whatsapp_phone_number_id', config('omnichannel.whatsapp.phone_number_id'));
+        $this->token = (string) ConfiguracionSitio::obtener('whatsapp_token', config('omnichannel.whatsapp.token'));
+        $this->phoneNumberId = (string) ConfiguracionSitio::obtener('whatsapp_phone_number_id', config('omnichannel.whatsapp.phone_number_id'));
         $this->apiVersion = config('omnichannel.whatsapp.api_version', 'v21.0');
         $this->baseUrl = "https://graph.facebook.com/{$this->apiVersion}";
     }
@@ -38,7 +40,9 @@ class WhatsAppService
     public function sendImageMessage(string $to, string $imageUrl, ?string $caption = null): array
     {
         $image = ['link' => $imageUrl];
-        if ($caption) $image['caption'] = $caption;
+        if ($caption) {
+            $image['caption'] = $caption;
+        }
 
         return $this->sendRequest([
             'messaging_product' => 'whatsapp',
@@ -52,8 +56,12 @@ class WhatsAppService
     public function sendDocumentMessage(string $to, string $documentUrl, ?string $caption = null, ?string $filename = null): array
     {
         $document = ['link' => $documentUrl];
-        if ($caption) $document['caption'] = $caption;
-        if ($filename) $document['filename'] = $filename;
+        if ($caption) {
+            $document['caption'] = $caption;
+        }
+        if ($filename) {
+            $document['filename'] = $filename;
+        }
 
         return $this->sendRequest([
             'messaging_product' => 'whatsapp',
@@ -67,7 +75,9 @@ class WhatsAppService
     public function sendTemplateMessage(string $to, string $templateName, string $languageCode = 'es', array $components = []): array
     {
         $template = ['name' => $templateName, 'language' => ['code' => $languageCode]];
-        if (!empty($components)) $template['components'] = $components;
+        if (! empty($components)) {
+            $template['components'] = $components;
+        }
 
         return $this->sendRequest([
             'messaging_product' => 'whatsapp',
@@ -95,9 +105,11 @@ class WhatsAppService
                 return $response->json('url');
             }
             Log::error('WHATSAPP_MEDIA_ERROR', ['media_id' => $mediaId, 'response' => $response->json()]);
+
             return null;
         } catch (\Exception $e) {
             Log::error('WHATSAPP_MEDIA_EXCEPTION', ['media_id' => $mediaId, 'error' => $e->getMessage()]);
+
             return null;
         }
     }
@@ -106,7 +118,7 @@ class WhatsAppService
     {
         $url = "{$this->baseUrl}/{$this->phoneNumberId}/messages";
         try {
-            $response = Http::withoutVerifying()->withToken($this->token)->timeout(30)->post($url, $payload);
+            $response = Http::withOptions([])->withToken($this->token)->timeout(30)->post($url, $payload);
             $data = $response->json();
 
             if ($response->successful()) {
@@ -122,6 +134,7 @@ class WhatsAppService
             return ['success' => $response->successful(), 'data' => $data, 'status_code' => $response->status()];
         } catch (\Exception $e) {
             Log::error('WHATSAPP_EXCEPTION', ['error' => $e->getMessage()]);
+
             return ['success' => false, 'data' => ['error' => $e->getMessage()], 'status_code' => 500];
         }
     }

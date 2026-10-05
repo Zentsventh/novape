@@ -109,7 +109,7 @@ export default function MarketingIndex({ campaigns, stats }) {
                                     <td style={{ padding: '16px 20px', color: 'var(--admin-text-main)', fontSize: '14px' }}>{camp.open_rate}%</td>
                                     <td style={{ padding: '16px 20px', fontWeight: 'bold', color: '#10b981', fontSize: '14px' }}>{camp.roi == null ? 'Sin medición' : `S/ ${camp.roi}`}</td>
                                     <td style={{ padding: '16px 20px', textAlign: 'right' }}>
-                                        <button style={{ color: '#3b82f6', background: 'none', border: 'none', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>Ver Informe</button>
+                                        <Link href={route('admin.marketing.campaigns.report', camp.id)} style={{ color: '#3b82f6', fontWeight: 'bold', fontSize: '13px' }}>Ver informe y envío</Link>
                                     </td>
                                 </tr>
                             ))}

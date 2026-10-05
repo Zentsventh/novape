@@ -1,16 +1,20 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Head, Link, useForm, router } from '@inertiajs/react';
 import AdminLayout from '../../../Layouts/AdminLayout';
+import RemoteSelect from '../../../Components/Admin/RemoteSelect';
 import '../../../../css/admin/admin.css';
 import { useConfirm } from '@/Contexts/ConfirmContext';
 import { Plus, Search, Filter, Trash2, Eye, ShoppingCart, TrendingUp, Clock, Package, X, ChevronRight } from 'lucide-react';
 
-export default function ComprasIndex({ compras, totalGastado, comprasPendientes, proveedores, productos, categorias, marcas, historialProducto, filters, logoUrl }) {
+export default function ComprasIndex({ compras: comprasPage, totalGastado, comprasPendientes, proveedores, categorias, marcas, historialProducto, productoFiltro, filters, logoUrl }) {
+    const compras = comprasPage.data || comprasPage;
     const confirmDialog = useConfirm();
+    const historial = historialProducto?.data || [];
+    const [filterVariant, setFilterVariant] = useState(productoFiltro?.variante_id || '');
 
     const [showModal, setShowModal] = useState(false);
     const [items, setItems] = useState([{ producto_id: '', variante_id: '', cantidad: 1, costo_unitario: '' }]);
-    const { data, setData, post, processing, reset } = useForm({
+    const { data, setData, post, processing, reset, errors, transform } = useForm({
         proveedor_id: '',
         notas: '',
         items: [],
@@ -25,22 +29,12 @@ export default function ComprasIndex({ compras, totalGastado, comprasPendientes,
         search: filters?.search || ''
     });
 
-    const productosFiltrados = useMemo(() => {
-        let filtrados = productos;
-        if (searchFilters.categoria_id) {
-            filtrados = filtrados?.filter(p => p.parent_category_id == searchFilters.categoria_id);
-        }
-        if (searchFilters.marca_id) {
-            filtrados = filtrados?.filter(p => p.marca_id == searchFilters.marca_id);
-        }
-        return filtrados;
-    }, [productos, searchFilters.categoria_id, searchFilters.marca_id]);
-
     const applyFilters = () => {
         router.get('/admin/compras', searchFilters, { preserveState: true });
     };
 
     const resetFilters = () => {
+        setFilterVariant('');
         setSearchFilters({ proveedor_id: '', estado: '', categoria_id: '', marca_id: '', producto_id: '', search: '' });
         router.get('/admin/compras');
     };
@@ -52,13 +46,6 @@ export default function ComprasIndex({ compras, totalGastado, comprasPendientes,
     const updateItem = (idx, field, value) => {
         const updated = [...items];
         updated[idx][field] = value;
-        if (field === 'producto_id') {
-            const prod = productos.find(p => p.producto_id == value);
-            if (prod) {
-                updated[idx].variante_id = prod.variante_id;
-                updated[idx].costo_unitario = (parseFloat(prod.precio) * 0.6).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            }
-        }
         setItems(updated);
     };
 
@@ -70,7 +57,7 @@ export default function ComprasIndex({ compras, totalGastado, comprasPendientes,
 
     const submit = async (e) => {
         e.preventDefault();
-        router.post('/admin/compras', {
+        transform(() => ({
             proveedor_id: data.proveedor_id,
             notas: data.notas,
             items: items.map(i => ({
@@ -79,7 +66,8 @@ export default function ComprasIndex({ compras, totalGastado, comprasPendientes,
                 cantidad: parseInt(i.cantidad),
                 costo_unitario: parseFloat(i.costo_unitario),
             })),
-        }, {
+        }));
+        post('/admin/compras', {
             onSuccess: () => {
                 setShowModal(false);
                 setItems([{ producto_id: '', variante_id: '', cantidad: 1, costo_unitario: '' }]);
@@ -153,7 +141,7 @@ export default function ComprasIndex({ compras, totalGastado, comprasPendientes,
                         </div>
                         <div>
                             <div style={{ fontSize: '13px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Total Órdenes</div>
-                            <div style={{ fontSize: '28px', fontWeight: 800, color: '#1E293B' }}>{compras.length}</div>
+                            <div style={{ fontSize: '28px', fontWeight: 800, color: '#1E293B' }}>{comprasPage.total ?? compras.length}</div>
                         </div>
                     </div>
                 </div>
@@ -199,17 +187,10 @@ export default function ComprasIndex({ compras, totalGastado, comprasPendientes,
                         <div style={{ gridColumn: 'span 2' }}>
                             <label style={labelStyle}>Producto Comprado</label>
                             <div style={{ position: 'relative' }}>
-                                <select 
-                                    value={searchFilters.producto_id} 
-                                    onChange={e => setSearchFilters({...searchFilters, producto_id: e.target.value})} 
-                                    style={inputStyle}
-                                    onFocus={e => Object.assign(e.target.style, inputFocusStyle)}
-                                    onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }}
-                                >
-                                    <option value="">Todos los productos</option>
-                                    {productosFiltrados?.map(p => <option key={p.producto_id} value={p.producto_id}>{p.nombre}</option>)}
-                                </select>
-                                <ChevronRight size={16} color="#94A3B8" style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%) rotate(90deg)', pointerEvents: 'none' }} />
+                                <RemoteSelect label="Producto comprado" endpoint="/admin/selectores/variantes"
+                                    value={filterVariant} params={{categoria_id: searchFilters.categoria_id || '', marca_id: searchFilters.marca_id || ''}}
+                                    placeholder="Todos los productos" getLabel={row => `${row.nombre} (${row.sku})`}
+                                    onChange={(value, row) => {setFilterVariant(value); setSearchFilters({...searchFilters, producto_id: row?.producto_id || ''});}} />
                             </div>
                         </div>
                         <div>
@@ -283,6 +264,9 @@ export default function ComprasIndex({ compras, totalGastado, comprasPendientes,
                     </div>
                 </div>
 
+                {historialProducto?.links && <nav aria-label="Páginas del historial de compras" style={{display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12}}>
+                    {historialProducto.links.map((link, index) => link.url ? <Link key={index} href={link.url} preserveScroll style={{padding: 8, fontWeight: link.active ? 700 : 400}} dangerouslySetInnerHTML={{__html: link.label}} /> : <span key={index} style={{padding: 8, color: '#94A3B8'}} dangerouslySetInnerHTML={{__html: link.label}} />)}
+                </nav>}
                 {historialProducto && (
                     /* TABLA DE ANÁLISIS DE PRECIOS POR PRODUCTO (KARDEX DE COMPRAS) */
                     <div style={{ background: '#ffffff', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 4px 20px -2px rgba(0,0,0,0.03)', border: '1px solid #BAE6FD', marginBottom: '32px' }}>
@@ -304,11 +288,11 @@ export default function ComprasIndex({ compras, totalGastado, comprasPendientes,
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {historialProducto.length > 0 ? historialProducto.map((hp, index) => (
+                                    {historial.length > 0 ? historial.map((hp, index) => (
                                         <tr key={index} style={{ borderBottom: '1px solid #F1F5F9', background: index === 0 ? '#F8FAFC' : 'white', transition: 'background-color 0.2s' }} onMouseOver={e => e.currentTarget.style.backgroundColor = '#F8FAFC'} onMouseOut={e => e.currentTarget.style.backgroundColor = index === 0 ? '#F8FAFC' : 'white'}>
                                             <td style={{ padding: '20px 24px', color: '#475569', fontSize: '14px', fontWeight: index === 0 ? 600 : 400 }}>
                                                 {hp.fecha_compra} 
-                                                {index === 0 && <span style={{fontSize:'10px', background:'#10B981', color:'white', padding:'4px 8px', borderRadius:'12px', marginLeft:'8px', fontWeight: 700}}>ÚLTIMA</span>}
+                                                {index === 0 && historialProducto.current_page === 1 && <span style={{fontSize:'10px', background:'#10B981', color:'white', padding:'4px 8px', borderRadius:'12px', marginLeft:'8px', fontWeight: 700}}>ÚLTIMA</span>}
                                             </td>
                                             <td style={{ padding: '20px 24px', fontWeight: 700, color: '#1E293B', fontSize: '14px' }}>{hp.numero_orden}</td>
                                             <td style={{ padding: '20px 24px', color: '#004797', fontWeight: 600, fontSize: '14px' }}>{hp.proveedor_nombre || 'Sin proveedor'}</td>
@@ -425,6 +409,7 @@ export default function ComprasIndex({ compras, totalGastado, comprasPendientes,
                     </div>
                 </div>
 
+                {comprasPage.links && <nav aria-label="Páginas de compras" style={{display: 'flex', gap: 12, flexWrap: 'wrap'}}>{comprasPage.links.map((link, i) => link.url ? <Link key={i} href={link.url} aria-current={link.active ? 'page' : undefined} dangerouslySetInnerHTML={{__html: link.label}}/> : <span key={i} dangerouslySetInnerHTML={{__html: link.label}}/>)}</nav>}
                 {/* Modal Nueva Orden de Compra */}
                 {showModal && (
                     <div style={{ position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
@@ -448,6 +433,7 @@ export default function ComprasIndex({ compras, totalGastado, comprasPendientes,
                             
                             <div style={{ padding: '32px', overflowY: 'auto' }}>
                                 <form id="compra-form" onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                            {Object.keys(errors).length > 0 && <div role="alert" style={{color: '#B91C1C', marginBottom: 16}}>{Object.entries(errors).map(([key, message]) => <p key={key}>{message}</p>)}</div>}
                                     <div>
                                         <label style={labelStyle}>Proveedor</label>
                                         <div style={{ position: 'relative' }}>
@@ -477,20 +463,13 @@ export default function ComprasIndex({ compras, totalGastado, comprasPendientes,
                                                 <div key={idx} style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) 110px 130px 44px', gap: '16px', alignItems: 'center', background: '#ffffff', padding: '16px', borderRadius: '16px', border: '1px solid #E2E8F0', boxShadow: '0 4px 12px -2px rgba(0,0,0,0.03)', transition: 'transform 0.2s, box-shadow 0.2s' }} onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 16px -4px rgba(0,0,0,0.06)'; }} onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 12px -2px rgba(0,0,0,0.03)'; }}>
                                                     <div style={{ position: 'relative' }}>
                                                         <div style={{ fontSize: '11px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.5px' }}>Producto</div>
-                                                        <select 
-                                                            value={item.producto_id} 
-                                                            onChange={e => updateItem(idx, 'producto_id', e.target.value)} 
-                                                            style={{ ...inputStyle, padding: '12px 16px', background: '#F8FAFC', boxShadow: 'none' }} 
-                                                            onFocus={e => Object.assign(e.target.style, inputFocusStyle)}
-                                                            onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; e.target.style.background = '#F8FAFC'; }}
-                                                            required
-                                                        >
-                                                            <option value="">Seleccionar...</option>
-                                                            {productos?.map((p, i) => (
-                                                                <option key={i} value={p.producto_id}>{p.nombre} ({p.sku})</option>
-                                                            ))}
-                                                        </select>
-                                                        <ChevronRight size={16} color="#94A3B8" style={{ position: 'absolute', right: '14px', top: '38px', transform: 'rotate(90deg)', pointerEvents: 'none' }} />
+                                                        <RemoteSelect label={`Producto de la línea ${idx + 1}`} endpoint="/admin/selectores/variantes"
+                                                            value={item.variante_id} required placeholder="Seleccionar variante"
+                                                            getLabel={row => `${row.nombre} (${row.sku})`}
+                                                            onChange={(value, row) => setItems(previous => previous.map((entry, index) => index === idx ? {
+                                                                ...entry, producto_id: row?.producto_id || '', variante_id: value,
+                                                                costo_unitario: ''
+                                                            } : entry))} />
                                                     </div>
                                                     <div>
                                                         <div style={{ fontSize: '11px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.5px' }}>Cantidad</div>

@@ -3,9 +3,8 @@
 namespace App\Events\Omnichannel;
 
 use App\Models\Omnichannel\OmnichannelConversation;
-use Illuminate\Broadcasting\Channel;
+use App\Services\Omnichannel\ConversationAccess;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -33,7 +32,7 @@ class ConversationUpdated implements ShouldBroadcast
             'isBotActive' => $conversation->status === 'bot_active',
             'status' => $conversation->status,
             'assignedUserId' => $conversation->assigned_user_id,
-            'agentName' => $conversation->assignedUser?->nombres ?? null,
+            'agentName' => $conversation->assignedUser->nombres ?? null,
         ];
     }
 
@@ -41,14 +40,15 @@ class ConversationUpdated implements ShouldBroadcast
     {
         $words = explode(' ', trim($name));
         if (count($words) >= 2) {
-            return strtoupper(mb_substr($words[0], 0, 1) . mb_substr($words[1], 0, 1));
+            return strtoupper(mb_substr($words[0], 0, 1).mb_substr($words[1], 0, 1));
         }
+
         return strtoupper(mb_substr($name, 0, 2));
     }
 
     public function broadcastOn(): array
     {
-        return [new PrivateChannel('novape-inbox')];
+        return ConversationAccess::channels((int) $this->conversationData['id']);
     }
 
     public function broadcastAs(): string

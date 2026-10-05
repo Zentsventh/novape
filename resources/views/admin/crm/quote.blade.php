@@ -49,7 +49,7 @@
         <tbody>
             @foreach($deal->products as $item)
             <tr>
-                <td>{{ $item->producto->nombre }}</td>
+                <td>{{ $item->producto_nombre ?? $item->producto?->nombre ?? 'Producto' }} @if($item->sku)<br><small>SKU: {{ $item->sku }}</small>@endif</td>
                 <td>{{ $item->cantidad }}</td>
                 <td>S/ {{ number_format($item->precio_unitario, 2) }}</td>
                 <td>S/ {{ number_format($item->subtotal, 2) }}</td>

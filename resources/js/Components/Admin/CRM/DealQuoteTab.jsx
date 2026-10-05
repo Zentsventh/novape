@@ -17,7 +17,7 @@ export default function DealQuoteTab({ deal, setDeal }) {
         if (query.length > 2) {
             setSearching(true);
             try {
-                const response = await fetch('/api/search/live?q=' + encodeURIComponent(query));
+                const response = await fetch('/admin/crm/quote-variants?q=' + encodeURIComponent(query));
                 const data = await response.json();
                 setResults(data.productos || []);
             } catch (error) {
@@ -39,11 +39,11 @@ export default function DealQuoteTab({ deal, setDeal }) {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': csrfMeta ? csrfMeta.getAttribute('content') : ''
                 },
-                body: JSON.stringify({ producto_id: producto.id, cantidad: 1 })
+                body: JSON.stringify({ producto_id: producto.producto_id, variante_id: producto.variante_id, cantidad: 1 })
             });
 
             if (response.ok) {
-                const resDeal = await fetch('/admin/crm/deals/' + deal.id);
+                const resDeal = await fetch('/admin/crm/deals/' + deal.id + '/json');
                 const updatedDeal = await resDeal.json();
                 setDeal(updatedDeal);
                 
@@ -68,12 +68,12 @@ export default function DealQuoteTab({ deal, setDeal }) {
             });
 
             if (response.ok) {
-                const resDeal = await fetch('/admin/crm/deals/' + deal.id);
+                const resDeal = await fetch('/admin/crm/deals/' + deal.id + '/json');
                 const updatedDeal = await resDeal.json();
                 setDeal(updatedDeal);
                 
                 Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Producto removido', showConfirmButton: false, timer: 1500 });
-            }
+            } else { throw new Error('El producto no pudo agregarse. Verifica la variante y los permisos.'); }
         } catch (error) {
             console.error(error);
         }
@@ -107,7 +107,7 @@ export default function DealQuoteTab({ deal, setDeal }) {
                                 style={{ padding: '10px 16px', borderBottom: '1px solid #f3f4f6', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
                             >
                                 <div style={{ fontSize: '13px' }}>
-                                    <div style={{ fontWeight: 600 }}>{prod.nombre}</div>
+                                    <div style={{ fontWeight: 600 }}>{prod.nombre} · {prod.sku}</div>
                                     <div style={{ color: '#6b7280' }}>{formatMoney(prod.precio_final || prod.precio)}</div>
                                 </div>
                                 <button 

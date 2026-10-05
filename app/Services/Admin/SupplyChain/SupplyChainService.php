@@ -60,33 +60,13 @@ class SupplyChainService
             });
         }
         if (! empty($filters['producto_id'])) {
-            $query->join('compra_items', 'compras.id', '=', 'compra_items.compra_id')
-                ->where('compra_items.producto_id', $filters['producto_id'])
-                ->distinct();
+            $query->whereExists(fn ($items) => $items->selectRaw('1')->from('compra_items')
+                ->whereColumn('compra_items.compra_id', 'compras.id')->where('compra_items.producto_id', $filters['producto_id']));
         }
 
-        $compras = $query->orderBy('compras.fecha_compra', 'desc')->get();
-
-        $productos = DB::table('producto')
-            ->join('variante', 'variante.producto_id', '=', 'producto.id')
-            ->leftJoin('producto_categoria', 'producto_categoria.producto_id', '=', 'producto.id')
-            ->leftJoin('categoria', 'categoria.id', '=', 'producto_categoria.categoria_id')
-            ->leftJoin('categoria as padre', 'categoria.categoria_padre_id', '=', 'padre.id')
-            ->whereNull('producto.deleted_at')
-            ->whereNull('variante.deleted_at')
-            ->select(
-                'producto.id as producto_id',
-                'producto.nombre',
-                'producto.marca_id',
-                'variante.id as variante_id',
-                'variante.sku',
-                'variante.precio',
-                DB::raw('COALESCE(padre.id, categoria.id) as parent_category_id'),
-                DB::raw('COALESCE(padre.nombre, categoria.nombre) as parent_category_nombre')
-            )
-            ->orderBy('parent_category_nombre')
-            ->orderBy('producto.nombre')
-            ->get();
+        $totalGastado = (float) (clone $query)->where('compras.estado', 'completado')->sum('compras.total');
+        $comprasPendientes = (clone $query)->where('compras.estado', 'pendiente')->count();
+        $compras = $query->orderBy('compras.fecha_compra', 'desc')->orderByDesc('compras.id')->paginate(30)->withQueryString();
 
         $historialProducto = null;
         if (! empty($filters['producto_id'])) {
@@ -104,18 +84,18 @@ class SupplyChainService
                     'compra_items.subtotal'
                 )
                 ->orderBy('compras.fecha_compra', 'desc')
-                ->get();
+                ->orderByDesc('compra_items.id')->paginate(30, ['*'], 'historial_page')->withQueryString();
         }
 
         return [
             'compras' => $compras,
-            'totalGastado' => $compras->where('estado', 'completado')->sum('total'),
-            'comprasPendientes' => $compras->where('estado', 'pendiente')->count(),
+            'totalGastado' => $totalGastado,
+            'comprasPendientes' => $comprasPendientes,
             'proveedores' => DB::table('proveedor')->orderBy('nombre')->get(['id', 'nombre']),
-            'productos' => $productos,
             'categorias' => DB::table('categoria')->where('activa', true)->whereNull('categoria_padre_id')->orderBy('nombre')->get(['id', 'nombre']),
             'marcas' => DB::table('marca')->orderBy('nombre')->get(['id', 'nombre']),
             'historialProducto' => $historialProducto,
+            'productoFiltro' => empty($filters['producto_id']) ? null : DB::table('variante')->where('producto_id', $filters['producto_id'])->whereNull('deleted_at')->orderBy('id')->first(['id as variante_id']),
         ];
     }
 
@@ -187,22 +167,20 @@ class SupplyChainService
                     throw new \InvalidArgumentException('La compra contiene una variante inválida.');
                 }
 
-                if ($variante) {
-                    $stockActual = $variante->stock;
-                    $costoActual = $variante->precio_compra ?? 0;
+                $stockActual = $variante->stock;
+                $costoActual = $variante->precio_compra ?? 0;
 
-                    $nuevoStock = $stockActual + $item->cantidad;
-                    $nuevoPPP = $costoActual;
+                $nuevoStock = $stockActual + $item->cantidad;
+                $nuevoPPP = $costoActual;
 
-                    if ($nuevoStock > 0) {
-                        $nuevoPPP = (($stockActual * $costoActual) + ($item->cantidad * $item->costo_unitario)) / $nuevoStock;
-                    }
-
-                    DB::table('variante')->where('id', $item->variante_id)->update([
-                        'precio_compra' => $nuevoPPP,
-                        'updated_at' => now(),
-                    ]);
+                if ($nuevoStock > 0) {
+                    $nuevoPPP = (($stockActual * $costoActual) + ($item->cantidad * $item->costo_unitario)) / $nuevoStock;
                 }
+
+                DB::table('variante')->where('id', $item->variante_id)->update([
+                    'precio_compra' => $nuevoPPP,
+                    'updated_at' => now(),
+                ]);
 
                 $stockAlmacen = DB::table('stock_almacen')
                     ->where('almacen_id', $almacenId)
