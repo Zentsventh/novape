@@ -24,7 +24,7 @@
     --shadow-soft: 0 4px 20px rgba(0, 71, 151, 0.06);
     --shadow-hover: 0 12px 30px rgba(0, 71, 151, 0.12), 0 4px 6px rgba(0, 0, 0, 0.04);
     --shadow-glow: 0 0 20px rgba(0, 71, 151, 0.15);
-    --shadow-glass: 0 8px 32px rgba(31, 38, 135, 0.05);
+    --shadow-glass: 0 8px 32px rgba(0, 71, 151, 0.08);
     
     --radius-sm: 8px;
     --radius-md: 12px;
@@ -84,7 +84,7 @@ body {
 
 .is-success, .btn-success-anim {
     animation: successBounce 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    background-color: #10b981 !important;
+    background-color: var(--color-primary) !important;
     color: white !important;
 }
 

@@ -29,6 +29,8 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
     const sellingRef = useRef(false);
     const operationRef = useRef(null);
     const [isSelling, setIsSelling] = useState(false);
+    const [notice, setNotice] = useState(null);
+    const notify = (text, type = 'error') => setNotice({ text, type });
     const canDiscount = auth?.user?.roles?.some(r => r.nombre === 'admin') || auth?.user?.permisos?.includes('pos.descontar');
     const [montoInicial, setMontoInicial] = useState('');
     const [montoDeclarado, setMontoDeclarado] = useState('');
@@ -178,13 +180,13 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                 setClienteNombre(json.data.nombre_razon_social);
                 setClienteDireccion(json.data.direccion || '');
             } else {
-                alert(json.error || 'No encontrado');
+                notify(json.error || 'No encontrado');
                 setClienteNombre('');
                 setClienteDireccion('');
             }
         } catch (e) {
             console.error(e);
-            alert('Error al buscar cliente');
+            notify('Error al buscar cliente');
         } finally {
             setIsSearchingCliente(false);
         }
@@ -239,7 +241,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
         setCarrito([]);
         setClienteDoc('');
         setClienteNombre('');
-        alert('Venta pausada y guardada temporalmente.');
+        notify('Venta pausada y guardada temporalmente.', 'success');
     };
 
     const recuperarVenta = (ventaPausada) => {
@@ -258,16 +260,16 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
         if (carrito.length === 0) return;
         if (tipoComprobante === 'factura') {
             if (!clienteDoc || clienteDoc.length !== 11) {
-                alert("Para emitir Factura es obligatorio ingresar un RUC válido de 11 dígitos.");
+                notify("Para emitir Factura es obligatorio ingresar un RUC válido de 11 dígitos.");
                 return;
             }
             if (!clienteNombre) {
-                alert("Para emitir Factura es obligatorio ingresar la Razón Social.");
+                notify("Para emitir Factura es obligatorio ingresar la Razón Social.");
                 return;
             }
         } else if (tipoComprobante === 'boleta' && total >= 700) {
             if (!clienteDoc || clienteDoc.length < 8) {
-                alert("Por norma de SUNAT, toda boleta de S/ 700 a más exige identificar al cliente con DNI o Carné de Extranjería.");
+                notify("Por norma de SUNAT, toda boleta de S/ 700 a más exige identificar al cliente con DNI o Carné de Extranjería.");
                 return;
             }
         }
@@ -281,7 +283,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
         if (sellingRef.current || !cajaAbierta || cajaRequiereCierre) return;
         const sumaPagos = pagos.reduce((sum, p) => sum + Number(p.monto), 0);
         if (Math.abs(sumaPagos - total) > 0.05) {
-            alert(`La suma de los pagos (S/ ${sumaPagos.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}) debe ser igual al total de la venta (S/ ${total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}).`);
+            notify(`La suma de los pagos (S/ ${sumaPagos.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}) debe ser igual al total de la venta (S/ ${total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}).`);
             return;
         }
 
@@ -322,7 +324,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
             onFinish: () => { sellingRef.current = false; setIsSelling(false); },
             onError: (errs) => {
                 console.error("Validation errors:", errs);
-                alert('No se pudo guardar la venta:\n' + Object.values(errs).join('\n'));
+                notify('No se pudo guardar la venta:\n' + Object.values(errs).join('\n'));
             }
         });
     };
@@ -375,9 +377,9 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                                 if (json.success && json.data.length > 0) {
                                     const prod = json.data[0];
                                     if (prod.stock > 0) agregarAlCarrito(prod);
-                                    else alert('Sin stock: ' + prod.nombre);
+                                    else notify('Sin stock: ' + prod.nombre);
                                 } else {
-                                    alert('Código no encontrado: ' + barcodeBuffer);
+                                    notify('Código no encontrado: ' + barcodeBuffer);
                                 }
                                 setSearchTerm('');
                             });
@@ -401,7 +403,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                     if (localMatch && localMatch.stock > 0) {
                         agregarAlCarrito(localMatch);
                     } else if (localMatch && localMatch.stock <= 0) {
-                        alert('El producto escaneado no tiene stock: ' + localMatch.nombre);
+                        notify('El producto escaneado no tiene stock: ' + localMatch.nombre);
                     } else {
                         fetch(`/admin/pos/buscar-productos?search=${barcodeBuffer}`)
                             .then(r => r.json())
@@ -409,9 +411,9 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                                 if (json.success && json.data.length > 0) {
                                     const prod = json.data[0];
                                     if (prod.stock > 0) agregarAlCarrito(prod);
-                                    else alert('Sin stock: ' + prod.nombre);
+                                    else notify('Sin stock: ' + prod.nombre);
                                 } else {
-                                    alert('Código no encontrado: ' + barcodeBuffer);
+                                    notify('Código no encontrado: ' + barcodeBuffer);
                                 }
                             });
                     }
@@ -430,6 +432,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
         <AdminLayout logoUrl={logoUrl}>
             {cajaRequiereCierre && <p role="alert" style={{padding: 16, background: '#FFF4CC'}}>Esta sesión antigua no tiene almacén. Cierra el turno y abre una caja física para continuar.</p>}
             <Head title="Terminal POS" />
+            {notice && <div className={`panel-flash ${notice.type === 'error' ? 'is-error' : 'is-success'}`} role={notice.type === 'error' ? 'alert' : 'status'}><span style={{ whiteSpace: 'pre-line' }}>{notice.text}</span><button type="button" className="panel-icon-button" aria-label="Cerrar aviso" onClick={() => setNotice(null)}>×</button></div>}
 
             {/* Header KPIs */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>

@@ -1,450 +1,588 @@
-import React, { useState } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
-import AdminLayout from '../../Layouts/AdminLayout';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import { Calendar, DollarSign, CreditCard, TrendingUp, ShoppingCart, AlertCircle, Filter, Download, X, Search, ArrowRight, Activity, ChevronDown, Package, CheckCircle } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { Head, Link, router, usePage } from "@inertiajs/react";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import {
+  ArrowDownToLine,
+  ArrowRight,
+  ChartNoAxesCombined,
+  Check,
+  Clock3,
+  Filter,
+  Package,
+  Plus,
+  Search,
+  ShoppingBag,
+  TrendingUp,
+  Wallet,
+  X,
+} from "lucide-react";
+import AdminLayout from "../../Layouts/AdminLayout";
+import { canAccess } from "../../Components/Admin/navigation";
+import "../../../css/admin/dashboard.css";
+
+const money = (value) =>
+  new Intl.NumberFormat("es-PE", {
+    style: "currency",
+    currency: "PEN",
+    maximumFractionDigits: 2,
+  }).format(Number(value) || 0);
+const integer = (value) =>
+  new Intl.NumberFormat("es-PE").format(Number(value) || 0);
+const array = (value) =>
+  Array.isArray(value) ? value : Object.values(value || {});
+const statuses = {
+  pendiente: "Pendiente",
+  pagado: "Pagado",
+  procesando: "En proceso",
+  enviado: "Enviado",
+  completado: "Completado",
+  cancelado: "Cancelado",
+};
 
 export default function Dashboard({
-    totalProductos = 0, totalCategorias = 0, totalMarcas = 0, totalBanners = 0,
-    totalPromociones = 0, totalPedidos = 0, pedidosPendientes = 0,
-    pedidosEnviados = 0, pedidosCompletados = 0, pedidosCancelados = 0,
-    ventasTotal = 0, costosTotal = 0, gananciaNeta = 0, ventasMes = 0, totalUsuarios = 0, totalStock = 0,
-    productosRecientes = [], stockBajo = [], pedidosRecientes = [],
-    ventasSemana = [0,0,0,0,0,0,0], topProductosVendidos = [], logoUrl,
-    filters = {}
+  ventasTotal = 0,
+  costosTotal = 0,
+  gananciaNeta = 0,
+  totalPedidos = 0,
+  pedidosPendientes = 0,
+  pedidosEnviados = 0,
+  pedidosCompletados = 0,
+  stockBajo = [],
+  pedidosRecientes = [],
+  ventasSemana = [],
+  topProductosVendidos = [],
+  filters = {},
 }) {
-    const diasSemana = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-
-    const [startDate, setStartDate] = useState(filters.start_date || '');
-    const [endDate, setEndDate] = useState(filters.end_date || '');
-    const [statusFilter, setStatusFilter] = useState(filters.status || '');
-    const [searchQuery, setSearchQuery] = useState(filters.q || '');
-
-    const applyFilters = () => {
-        router.get('/admin', {
-            start_date: startDate,
-            end_date: endDate,
-            status: statusFilter,
-            q: searchQuery,
-            sort_by: filters.sort_by,
-            sort_order: filters.sort_order
-        }, { preserveState: true });
-    };
-
-    const clearFilters = () => {
-        setStartDate('');
-        setEndDate('');
-        setStatusFilter('');
-        setSearchQuery('');
-        router.get('/admin', {}, { preserveState: true });
-    };
-
-    const toggleSort = (column) => {
-        const currentOrder = filters.sort_order === 'desc' ? 'asc' : 'desc';
-        router.get('/admin', {
-            start_date: startDate,
-            end_date: endDate,
-            status: statusFilter,
-            q: searchQuery,
-            sort_by: column,
-            sort_order: filters.sort_by === column ? currentOrder : 'desc'
-        }, { preserveState: true });
-    };
-    
-    const chartVentasSemana = Array.isArray(ventasSemana) 
-        ? ventasSemana.map((v, i) => (typeof v === 'object' ? v : { dia: diasSemana[i], total: v }))
-        : Object.values(ventasSemana).map((v, i) => (typeof v === 'object' ? v : { dia: diasSemana[i], total: v }));
-
-    const safeStockBajo = Array.isArray(stockBajo) ? stockBajo : Object.values(stockBajo);
-    const rawPedidosRecientes = Array.isArray(pedidosRecientes) ? pedidosRecientes : Object.values(pedidosRecientes);
-    
-    // Live Search Filter
-    const safePedidosRecientes = rawPedidosRecientes.filter(pedido => {
-        if (!searchQuery) return true;
-        const q = searchQuery.toLowerCase();
-        return (
-            String(pedido.codigo).toLowerCase().includes(q) ||
-            String(pedido.usuario_nombre).toLowerCase().includes(q)
-        );
+  const { props } = usePage();
+  const user = props.auth?.user;
+  const [form, setForm] = useState({
+    start_date: filters.start_date || "",
+    end_date: filters.end_date || "",
+    status: filters.status || "",
+  });
+  const [search, setSearch] = useState(filters.q || ""),
+    [busy, setBusy] = useState(false),
+    [error, setError] = useState("");
+  useEffect(() => {
+    setForm({
+      start_date: filters.start_date || "",
+      end_date: filters.end_date || "",
+      status: filters.status || "",
     });
-    const safeTopProductosVendidos = Array.isArray(topProductosVendidos) ? topProductosVendidos : Object.values(topProductosVendidos);
-
-    const getStatusColor = (estado) => {
-        const lowerEstado = estado?.toLowerCase();
-        switch (lowerEstado) {
-            case 'pendiente': return { bg: '#FEF3C7', color: '#D97706' };
-            case 'procesando': return { bg: '#E0F2FE', color: '#0284C7' };
-            case 'enviado': return { bg: '#F3E8FF', color: '#7E22CE' };
-            case 'pagado':
-            case 'completado': return { bg: '#DCFCE7', color: '#16A34A' };
-            case 'cancelado': return { bg: '#FEE2E2', color: '#DC2626' };
-            default: return { bg: '#F1F5F9', color: '#64748B' };
-        }
-    };
-
-    return (
-        <AdminLayout logoUrl={logoUrl}>
-            <Head title="Dashboard" />
-            
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
-                <h1 style={{ fontSize: '24px', margin: 0, fontWeight: '700', color: '#1E293B', display: 'flex', alignItems: 'center', gap: '12px', letterSpacing: '-0.02em' }}>
-                    <div style={{ padding: '8px', backgroundColor: '#F0F9FF', borderRadius: '10px', color: '#004797' }}>
-                        <Activity size={24} />
-                    </div>
-                    Visión General
-                </h1>
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-                    
-                    <div className="admin-dashboard-filters" style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#ffffff', padding: '6px', borderRadius: '8px', border: '1px solid #E2E8F0', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', padding: '0 8px', gap: '6px' }}>
-                            <Calendar size={14} style={{ color: '#94A3B8' }} />
-                            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ border: 'none', background: 'transparent', color: '#1E293B', outline: 'none', fontSize: '13px', fontFamily: 'inherit' }} />
-                        </div>
-                        <span style={{ color: '#CBD5E1' }}>|</span>
-                        <div style={{ display: 'flex', alignItems: 'center', padding: '0 8px' }}>
-                            <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} style={{ border: 'none', background: 'transparent', color: '#1E293B', outline: 'none', fontSize: '13px', fontFamily: 'inherit' }} />
-                        </div>
-                        <span style={{ color: '#CBD5E1' }}>|</span>
-                        <div style={{ display: 'flex', alignItems: 'center', padding: '0 8px' }}>
-                            <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={{ border: 'none', background: 'transparent', color: '#1E293B', outline: 'none', fontSize: '13px', fontFamily: 'inherit', cursor: 'pointer' }}>
-                                <option value="">Todos los Estados</option>
-                                <option value="pendiente">Pendiente</option>
-                                <option value="pagado">Pagado</option>
-                                <option value="enviado">Enviado</option>
-                                <option value="completado">Completado</option>
-                                <option value="cancelado">Cancelado</option>
-                            </select>
-                        </div>
-                        
-                        <button 
-                            onClick={applyFilters} 
-                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F1F5F9'; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
-                            style={{ background: 'transparent', color: '#004797', border: 'none', borderRadius: '6px', padding: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s ease' }}
-                            title="Aplicar filtros"
-                        >
-                            <Filter size={16} />
-                        </button>
-                        {(startDate || endDate || statusFilter) && (
-                            <button 
-                                onClick={clearFilters} 
-                                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#FEE2E2'; e.currentTarget.style.color = '#EF4444'; }}
-                                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#94A3B8'; }}
-                                style={{ background: 'transparent', color: '#94A3B8', border: 'none', borderRadius: '6px', padding: '6px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s ease' }}
-                                title="Limpiar filtros"
-                            >
-                                <X size={16} />
-                            </button>
-                        )}
-                    </div>
-
-                    <Link 
-                        href="/admin/pedidos" 
-                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#009BE0'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 71, 151, 0.3)'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#004797'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 71, 151, 0.2)'; }}
-                        style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#004797', color: 'white', textDecoration: 'none', padding: '10px 16px', borderRadius: '8px', fontWeight: '600', fontSize: '13px', transition: 'all 0.2s ease', boxShadow: '0 2px 4px rgba(0, 71, 151, 0.2)' }}
-                    >
-                        <ShoppingCart size={16} />
-                        Gestionar Pedidos
-                    </Link>
-                    
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                        <a 
-                            href={`/admin/pedidos/exportar-excel?start_date=${startDate || ''}&end_date=${endDate || ''}`}
-                            target="_blank"
-                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F1F5F9'; e.currentTarget.style.color = '#1E293B'; e.currentTarget.style.borderColor = '#94A3B8'; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.color = '#475569'; e.currentTarget.style.borderColor = '#E2E8F0'; }}
-                            style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#ffffff', color: '#475569', textDecoration: 'none', padding: '10px 14px', borderRadius: '8px', fontWeight: '600', fontSize: '13px', border: '1px solid #E2E8F0', transition: 'all 0.2s ease', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}
-                            title="Exportar Excel"
-                        >
-                            <Download size={16} />
-                            Excel
-                        </a>
-                        <a 
-                            href={`/admin/pedidos/exportar-pdf?start_date=${startDate || ''}&end_date=${endDate || ''}`}
-                            target="_blank"
-                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F1F5F9'; e.currentTarget.style.color = '#1E293B'; e.currentTarget.style.borderColor = '#94A3B8'; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.color = '#475569'; e.currentTarget.style.borderColor = '#E2E8F0'; }}
-                            style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#ffffff', color: '#475569', textDecoration: 'none', padding: '10px 14px', borderRadius: '8px', fontWeight: '600', fontSize: '13px', border: '1px solid #E2E8F0', transition: 'all 0.2s ease', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}
-                            title="Exportar PDF"
-                        >
-                            <Download size={16} />
-                            PDF
-                        </a>
-                    </div>
+    setSearch(filters.q || "");
+  }, [filters.start_date, filters.end_date, filters.status, filters.q]);
+  const params = Object.fromEntries(
+    Object.entries({
+      ...form,
+      q: search,
+      sort_by: filters.sort_by,
+      sort_order: filters.sort_order,
+    }).filter(([, value]) => value),
+  );
+  const reportParams = new URLSearchParams(
+    Object.fromEntries(
+      Object.entries(filters).filter(
+        ([key, value]) =>
+          ["start_date", "end_date", "status", "q"].includes(key) && value,
+      ),
+    ),
+  ).toString();
+  const apply = (event) => {
+    event?.preventDefault();
+    setError("");
+    if (form.start_date && form.end_date && form.start_date > form.end_date) {
+      setError(
+        "La fecha de inicio debe ser anterior o igual a la fecha final.",
+      );
+      return;
+    }
+    setBusy(true);
+    router.get("/admin", params, {
+      preserveState: true,
+      preserveScroll: true,
+      onFinish: () => setBusy(false),
+    });
+  };
+  const reset = () => {
+    setError("");
+    setForm({ start_date: "", end_date: "", status: "" });
+    setSearch("");
+    router.get("/admin", {}, { preserveState: true, preserveScroll: true });
+  };
+  const chart = array(ventasSemana).map((value, i) =>
+    typeof value === "object"
+      ? { ...value, total: Number(value.total) || 0 }
+      : {
+          dia: ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"][i],
+          total: Number(value) || 0,
+        },
+  );
+  const orders = array(pedidosRecientes),
+    lowStock = array(stockBajo),
+    top = array(topProductosVendidos);
+  const metrics = [
+    {
+      label: "Ingresos",
+      value: money(ventasTotal),
+      note: "Ventas de la tienda y punto de venta",
+      icon: TrendingUp,
+      tone: "indigo",
+    },
+    {
+      label: "Costos registrados",
+      value: money(costosTotal),
+      note: "Compras recibidas y gastos del período",
+      icon: Wallet,
+      tone: "slate",
+    },
+    {
+      label: "Saldo operativo",
+      value: money(gananciaNeta),
+      note: "Ingresos menos compras y gastos",
+      icon: ChartNoAxesCombined,
+      tone: "green",
+    },
+    {
+      label: "Pedidos",
+      value: integer(totalPedidos),
+      note: "Pedidos del período seleccionado",
+      icon: ShoppingBag,
+      tone: "amber",
+    },
+  ];
+  const quickActions = [
+    {
+      href: "/admin/pos",
+      label: "Registrar venta",
+      icon: Plus,
+      permission: "pos.vender",
+    },
+    {
+      href: "/admin/products/create",
+      label: "Añadir producto",
+      icon: Package,
+      permission: "crear_producto",
+    },
+    {
+      href: "/admin/clientes/create",
+      label: "Crear cliente",
+      icon: Plus,
+      permission: "usuarios.gestionar",
+    },
+  ].filter((action) => canAccess(user, action.permission));
+  return (
+    <AdminLayout>
+      <Head title="Vista general" />
+      <div className="overview">
+        <header className="overview-heading">
+          <div>
+            <span className="overview-eyebrow">TU NEGOCIO, EN UN VISTAZO</span>
+            <h1>Vista general</h1>
+            <p>Las cifras y prioridades para continuar tu operación.</p>
+          </div>
+          <div className="overview-heading-actions">
+            <a
+              className="workspace-button"
+              href={`/admin/pedidos/exportar-excel?${reportParams}`}
+            >
+              <ArrowDownToLine size={15} />
+              Excel
+            </a>
+            <a
+              className="workspace-button"
+              href={`/admin/pedidos/exportar-pdf?${reportParams}`}
+            >
+              <ArrowDownToLine size={15} />
+              PDF
+            </a>
+            {canAccess(user, "ver_pedidos") && (
+              <Link
+                className="workspace-button is-primary"
+                href="/admin/pedidos"
+              >
+                Gestionar pedidos <ArrowRight size={15} />
+              </Link>
+            )}
+          </div>
+        </header>
+        <form className="overview-filters" onSubmit={apply}>
+          <div className="overview-period">
+            <label>
+              Desde
+              <input
+                type="date"
+                aria-label="Fecha inicial"
+                value={form.start_date}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, start_date: e.target.value }))
+                }
+              />
+            </label>
+            <span>—</span>
+            <label>
+              Hasta
+              <input
+                type="date"
+                aria-label="Fecha final"
+                min={form.start_date || undefined}
+                value={form.end_date}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, end_date: e.target.value }))
+                }
+              />
+            </label>
+          </div>
+          <label className="overview-status-filter">
+            Estado del pedido
+            <select
+              value={form.status}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, status: e.target.value }))
+              }
+            >
+              <option value="">Todos los estados</option>
+              {Object.entries(statuses).map(([key, label]) => (
+                <option key={key} value={key}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="overview-filter-actions">
+            <button type="submit" className="workspace-button" disabled={busy}>
+              <Filter size={14} />
+              {busy ? "Aplicando…" : "Aplicar filtros"}
+            </button>
+            {Object.keys(params).length > 0 && (
+              <button
+                type="button"
+                className="workspace-button is-quiet"
+                onClick={reset}
+              >
+                <X size={14} />
+                Limpiar
+              </button>
+            )}
+          </div>
+        </form>
+        {error && (
+          <div className="panel-flash is-error" role="alert">
+            {error}
+          </div>
+        )}
+        <section
+          className="overview-metrics"
+          aria-label="Indicadores del negocio"
+        >
+          {metrics.map((metric) => (
+            <article className="overview-metric" key={metric.label}>
+              <div>
+                <span className="overview-metric-label">{metric.label}</span>
+                <span className={`overview-metric-icon ${metric.tone}`}>
+                  <metric.icon size={18} />
+                </span>
+              </div>
+              <strong>{metric.value}</strong>
+              <p>{metric.note}</p>
+            </article>
+          ))}
+        </section>
+        <div className="overview-primary-grid">
+          <section className="overview-card overview-sales">
+            <header>
+              <div>
+                <h2>Evolución de las ventas</h2>
+                <p>Ventas de los últimos siete días</p>
+              </div>
+              <span className="overview-legend">
+                <i />
+                Ingresos
+              </span>
+            </header>
+            <div className="overview-chart">
+              {chart.some((day) => day.total > 0) ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart
+                    data={chart}
+                    margin={{ top: 8, right: 10, left: 0, bottom: 0 }}
+                  >
+                    <defs>
+                      <linearGradient
+                        id="overviewRevenue"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="0%"
+                          stopColor="#004797"
+                          stopOpacity={0.14}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor="#004797"
+                          stopOpacity={0}
+                        />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid
+                      stroke="#e1e7f0"
+                      vertical={false}
+                      strokeDasharray="3 4"
+                    />
+                    <XAxis
+                      dataKey="dia"
+                      tickLine={false}
+                      axisLine={false}
+                      tick={{ fill: "#8b94a7", fontSize: 11 }}
+                      dy={9}
+                    />
+                    <YAxis
+                      width={65}
+                      tickLine={false}
+                      axisLine={false}
+                      tick={{ fill: "#8b94a7", fontSize: 10 }}
+                      tickFormatter={(value) => `S/ ${integer(value)}`}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        borderRadius: 9,
+                        border: "1px solid #e4e7ef",
+                        fontSize: 12,
+                      }}
+                      formatter={(value) => [money(value), "Ingresos"]}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="total"
+                      stroke="#004797"
+                      strokeWidth={2.5}
+                      fill="url(#overviewRevenue)"
+                      activeDot={{ r: 4, stroke: "#fff", strokeWidth: 2 }}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="panel-empty">
+                  <ChartNoAxesCombined size={30} />
+                  <strong>Sin ventas en estos siete días</strong>
+                  <span>
+                    Las ventas registradas se mostrarán en este gráfico.
+                  </span>
                 </div>
+              )}
             </div>
-
-            {/* KPI Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px', marginBottom: '32px' }}>
-                
-                {/* KPI: Ingresos */}
-                <div 
-                    onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.1)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px -2px rgba(0, 0, 0, 0.05)'; }}
-                    style={{ background: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.3s ease' }}
-                >
-                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#F0F9FF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#004797', flexShrink: 0 }}>
-                        <DollarSign size={24} />
-                    </div>
-                    <div>
-                        <div style={{ color: '#64748B', fontSize: '12px', fontWeight: '600', letterSpacing: '0.05em' }}>INGRESOS</div>
-                        <div style={{ fontSize: '24px', fontWeight: '800', color: '#1E293B', letterSpacing: '-0.02em', marginTop: '2px' }}>S/ {ventasTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
-                        <div style={{ fontSize: '12px', color: '#10B981', marginTop: '4px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            Ventas web y POS del período
-                        </div>
-                    </div>
+          </section>
+          <section className="overview-card overview-priorities">
+            <header>
+              <div>
+                <h2>Estado de la operación</h2>
+                <p>Seguimiento de tus pedidos</p>
+              </div>
+            </header>
+            <div className="overview-priority-list">
+              {[
+                [Clock3, "Pendientes de atención", pedidosPendientes, "amber"],
+                [Package, "Pedidos enviados", pedidosEnviados, "indigo"],
+                [Check, "Pedidos completados", pedidosCompletados, "green"],
+              ].map(([Icon, label, value, tone]) => (
+                <div className="overview-priority" key={label}>
+                  <span className={`overview-metric-icon ${tone}`}>
+                    <Icon size={16} />
+                  </span>
+                  <span>{label}</span>
+                  <strong>{integer(value)}</strong>
                 </div>
-
-                {/* KPI: Costos */}
-                <div 
-                    onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.1)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px -2px rgba(0, 0, 0, 0.05)'; }}
-                    style={{ background: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.3s ease' }}
-                >
-                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B', flexShrink: 0 }}>
-                        <CreditCard size={24} />
-                    </div>
-                    <div>
-                        <div style={{ color: '#64748B', fontSize: '12px', fontWeight: '600', letterSpacing: '0.05em' }}>COSTOS</div>
-                        <div style={{ fontSize: '24px', fontWeight: '800', color: '#1E293B', letterSpacing: '-0.02em', marginTop: '2px' }}>S/ {costosTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
-                        <div style={{ fontSize: '12px', color: '#64748B', marginTop: '4px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            Compras recibidas y gastos registrados
-                        </div>
-                    </div>
-                </div>
-
-                {/* KPI: Ganancia Neta */}
-                <div 
-                    onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.1)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px -2px rgba(0, 0, 0, 0.05)'; }}
-                    style={{ background: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.3s ease' }}
-                >
-                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#ECFDF5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10B981', flexShrink: 0 }}>
-                        <Activity size={24} />
-                    </div>
-                    <div>
-                        <div style={{ color: '#64748B', fontSize: '12px', fontWeight: '600', letterSpacing: '0.05em' }}>SALDO OPERATIVO</div>
-                        <div style={{ fontSize: '24px', fontWeight: '800', color: '#1E293B', letterSpacing: '-0.02em', marginTop: '2px' }}>S/ {gananciaNeta.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
-                        <div style={{ fontSize: '12px', color: '#10B981', marginTop: '4px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            Ventas menos compras y gastos
-                        </div>
-                    </div>
-                </div>
-
-                {/* KPI: Total Pedidos */}
-                <div 
-                    onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.1)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 20px -2px rgba(0, 0, 0, 0.05)'; }}
-                    style={{ background: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', gap: '16px', transition: 'all 0.3s ease' }}
-                >
-                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: '#F5F3FF', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8B5CF6', flexShrink: 0 }}>
-                        <ShoppingCart size={24} />
-                    </div>
-                    <div>
-                        <div style={{ color: '#64748B', fontSize: '12px', fontWeight: '600', letterSpacing: '0.05em' }}>TOTAL PEDIDOS</div>
-                        <div style={{ fontSize: '24px', fontWeight: '800', color: '#1E293B', letterSpacing: '-0.02em', marginTop: '2px' }}>{totalPedidos}</div>
-                        <div style={{ fontSize: '12px', color: '#10B981', marginTop: '4px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            Pedidos del período seleccionado
-                        </div>
-                    </div>
-                </div>
+              ))}
             </div>
-
-            {/* CHAT/GRAFICOS */}
-            <div className="admin-dashboard-split" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 350px', gap: '24px', marginBottom: '24px', alignItems: 'start' }}>
-                {/* Gráfico de Ventas de la Semana */}
-                <div style={{ background: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                        <h2 style={{ fontSize: '16px', fontWeight: '700', color: '#1E293B', margin: 0 }}>Ventas de la Semana</h2>
-                    </div>
-                    <div style={{ height: '320px', width: '100%', position: 'relative' }}>
-                        {chartVentasSemana.every(d => d.total === 0) ? (
-                            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#94A3B8' }}>
-                                <Activity size={48} strokeWidth={1} style={{ opacity: 0.3, marginBottom: '16px' }} />
-                                <div style={{ fontSize: '14px', fontWeight: '500' }}>Aún no hay datos de ventas para esta semana</div>
-                            </div>
+            {canAccess(user, "ver_pedidos") && (
+              <Link href="/admin/pedidos" className="overview-card-link">
+                Revisar pedidos <ArrowRight size={14} />
+              </Link>
+            )}
+            {quickActions.length > 0 && (
+              <div className="overview-quick-actions">
+                <h3>Accesos rápidos</h3>
+                {quickActions.map((action) => (
+                  <Link key={action.href} href={action.href}>
+                    <action.icon size={14} />
+                    {action.label}
+                    <ArrowRight size={13} />
+                  </Link>
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
+        <div className="overview-secondary-grid">
+          <section className="overview-card overview-orders">
+            <header>
+              <div>
+                <h2>Últimos pedidos</h2>
+                <p>Consulta el detalle y continúa la atención</p>
+              </div>
+              {canAccess(user, "ver_pedidos") && (
+                <Link href="/admin/pedidos" className="overview-text-link">
+                  Ver todos <ArrowRight size={13} />
+                </Link>
+              )}
+            </header>
+            <form className="overview-order-search" onSubmit={apply}>
+              <Search size={15} />
+              <input
+                aria-label="Buscar pedidos"
+                placeholder="Buscar por código o cliente"
+                maxLength={200}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              <button type="submit" disabled={busy}>
+                Buscar
+              </button>
+            </form>
+            <div className="overview-table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Pedido</th>
+                    <th>Cliente</th>
+                    <th>Total</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>
+                      <span className="overview-sr">Detalle</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orders.map((order) => (
+                    <tr key={order.id}>
+                      <td>
+                        {canAccess(user, "ver_pedidos") ? (
+                          <Link
+                            href={`/admin/pedidos/${order.id}`}
+                            className="overview-order-code"
+                          >
+                            {order.codigo}
+                          </Link>
                         ) : (
-                            <ResponsiveContainer>
-                                <AreaChart data={chartVentasSemana} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                                    <defs>
-                                        <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#004797" stopOpacity={0.4}/>
-                                            <stop offset="95%" stopColor="#004797" stopOpacity={0}/>
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="4 4" stroke="#E2E8F0" vertical={false} />
-                                    <XAxis dataKey="dia" stroke="#94A3B8" fontSize={12} tickLine={false} axisLine={false} dy={10} />
-                                    <YAxis stroke="#94A3B8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `S/${val}`} dx={-10} />
-                                    <Tooltip 
-                                        contentStyle={{ background: '#1E293B', border: 'none', borderRadius: '8px', color: '#ffffff', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
-                                        itemStyle={{ color: '#004797', fontWeight: 'bold' }}
-                                        cursor={{fill: '#F8FAFC'}}
-                                        formatter={(value) => [`S/ ${value}`, 'Total']}
-                                    />
-                                    <Area type="monotone" dataKey="total" stroke="#004797" strokeWidth={3} fillOpacity={1} fill="url(#colorTotal)" activeDot={{ r: 6, fill: '#004797', stroke: '#ffffff', strokeWidth: 2 }} />
-                                </AreaChart>
-                            </ResponsiveContainer>
+                          order.codigo
                         )}
-                    </div>
-                </div>
-
-                {/* Alertas de Stock Bajo */}
-                <div style={{ background: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0', display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                        <h2 style={{ fontSize: '16px', fontWeight: '700', color: '#1E293B', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <AlertCircle size={18} style={{ color: '#EF4444' }} /> Alertas de Stock
-                        </h2>
-                        <span style={{ background: '#F1F5F9', color: '#64748B', padding: '4px 10px', borderRadius: '9999px', fontSize: '12px', fontWeight: '700' }}>
-                            {stockBajo.length} items
+                      </td>
+                      <td>{order.usuario_nombre || "Cliente"}</td>
+                      <td className="overview-number">{money(order.total)}</td>
+                      <td className="overview-muted">{order.fecha}</td>
+                      <td>
+                        <span className={`overview-status ${order.estado}`}>
+                          {statuses[order.estado] || order.estado}
                         </span>
-                    </div>
-                    
-                    <div style={{ flex: 1, overflowY: 'auto', maxHeight: '316px', paddingRight: '5px' }}>
-                        {safeStockBajo.length > 0 ? safeStockBajo.map(prod => (
-                            <div key={prod.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 0', borderBottom: '1px solid #E2E8F0' }}>
-                                <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: '#F8FAFC', border: '1px solid #E2E8F0', overflow: 'hidden', flexShrink: 0 }}>
-                                    {prod.imagen ? <img src={prod.imagen} alt={prod.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <Package size={20} style={{ color: '#94A3B8', margin: '9px' }} />}
-                                </div>
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                    <div style={{ fontSize: '13px', fontWeight: '600', color: '#1E293B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                        {prod.nombre}
-                                    </div>
-                                    <div style={{ fontSize: '12px', color: '#64748B' }}>{prod.marca || 'Sin marca'}</div>
-                                </div>
-                                <div style={{ textAlign: 'right' }}>
-                                    <span style={{ color: prod.stock <= 5 ? '#EF4444' : '#1E293B', fontWeight: '700', fontSize: '13px', background: prod.stock <= 5 ? '#FEE2E2' : '#F1F5F9', padding: '2px 8px', borderRadius: '4px' }}>
-                                        {prod.stock} u.
-                                    </span>
-                                </div>
-                            </div>
-                        )) : (
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#94A3B8', textAlign: 'center' }}>
-                                <div>
-                                    <CheckCircle size={32} style={{ color: '#10B981', margin: '0 auto 12px auto', opacity: 0.5 }} />
-                                    <div style={{ fontSize: '14px', fontWeight: '500' }}>Todo el inventario óptimo</div>
-                                </div>
-                            </div>
+                      </td>
+                      <td>
+                        {canAccess(user, "ver_pedidos") && (
+                          <Link
+                            href={`/admin/pedidos/${order.id}`}
+                            aria-label={`Ver pedido ${order.codigo}`}
+                            className="panel-icon-button"
+                          >
+                            <ArrowRight size={14} />
+                          </Link>
                         )}
-                    </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {!orders.length && (
+                <div className="panel-empty">
+                  <ShoppingBag size={25} />
+                  <strong>No hay pedidos para estos filtros</strong>
+                  <span>Cambia el período o limpia la búsqueda.</span>
                 </div>
+              )}
             </div>
-
-            {/* LISTAS/TABLAS RECIENTES */}
-            <div className="admin-dashboard-split" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 350px', gap: '24px', alignItems: 'start' }}>
-                {/* Pedidos Recientes */}
-                <div style={{ background: '#ffffff', borderRadius: '12px', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0', overflow: 'hidden' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px 24px 20px 24px' }}>
-                        <h2 style={{ fontSize: '16px', fontWeight: '700', color: '#1E293B', margin: 0 }}>Últimos Pedidos</h2>
-                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', background: '#F8FAFC', borderRadius: '8px', padding: '6px 12px', border: '1px solid #E2E8F0' }}>
-                                <Search size={14} style={{ color: '#94A3B8' }} />
-                                <input 
-                                    type="text" 
-                                    placeholder="Buscar pedido..." 
-                                    value={searchQuery}
-                                    onChange={e => setSearchQuery(e.target.value)}
-                                    style={{ border: 'none', background: 'transparent', outline: 'none', fontSize: '13px', padding: '0 0 0 8px', color: '#1E293B', width: '130px', fontFamily: 'inherit' }}
-                                />
-                            </div>
-                            <Link href="/admin/pedidos" style={{ color: '#004797', fontSize: '13px', textDecoration: 'none', fontWeight: '600', transition: 'color 0.2s ease' }} onMouseEnter={e => e.target.style.color = '#009BE0'} onMouseLeave={e => e.target.style.color = '#004797'}>
-                                Ver todos
-                            </Link>
-                        </div>
-                    </div>
-
-                    <div style={{ width: '100%', overflowX: 'auto' }}>
-                        <table style={{ width: '100%', minWidth: '600px', borderCollapse: 'collapse', textAlign: 'left' }}>
-                        <thead>
-                            <tr style={{ background: '#F8FAFC', borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0' }}>
-                                <th style={{ padding: '12px 24px', fontSize: '12px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Código</th>
-                                <th style={{ padding: '12px 24px', fontSize: '12px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Cliente</th>
-                                <th style={{ padding: '12px 24px', fontSize: '12px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', cursor: 'pointer' }} onClick={() => toggleSort('total')}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                        Monto {filters.sort_by === 'total' ? (filters.sort_order === 'desc' ? '↓' : '↑') : <ChevronDown size={14} style={{ opacity: 0.3 }} />}
-                                    </div>
-                                </th>
-                                <th style={{ padding: '12px 24px', fontSize: '12px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', cursor: 'pointer' }} onClick={() => toggleSort('created_at')}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                        Fecha {filters.sort_by === 'created_at' ? (filters.sort_order === 'desc' ? '↓' : '↑') : <ChevronDown size={14} style={{ opacity: 0.3 }} />}
-                                    </div>
-                                </th>
-                                <th style={{ padding: '12px 24px', fontSize: '12px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'right' }}>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {safePedidosRecientes.length > 0 ? safePedidosRecientes.map(pedido => {
-                                const { bg, color } = getStatusColor(pedido.estado);
-                                return (
-                                    <tr 
-                                        key={pedido.id} 
-                                        style={{ borderBottom: '1px solid #E2E8F0', transition: 'background 0.2s' }}
-                                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F8FAFC'; }}
-                                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
-                                    >
-                                        <td style={{ padding: '16px 24px', color: '#1E293B', fontWeight: '600', fontSize: '14px' }}>
-                                            <Link href={`/admin/pedidos/${pedido.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
-                                                {pedido.codigo}
-                                            </Link>
-                                        </td>
-                                        <td style={{ padding: '16px 24px', color: '#64748B', fontSize: '14px' }}>
-                                            {pedido.usuario_nombre === 'Cliente' ? (
-                                                <span style={{ color: '#EF4444', fontStyle: 'italic', background: '#FEE2E2', padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: '500' }}>Cliente Eliminado</span>
-                                            ) : (
-                                                <span style={{ fontWeight: '500', color: '#1E293B' }}>{pedido.usuario_nombre}</span>
-                                            )}
-                                        </td>
-                                        <td style={{ padding: '16px 24px', color: '#1E293B', fontWeight: '700', fontSize: '14px' }}>S/ {Number(pedido.total).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                                        <td style={{ padding: '16px 24px', color: '#64748B', fontSize: '13px' }}>
-                                            {new Date(pedido.created_at).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })}
-                                        </td>
-                                        <td style={{ padding: '16px 24px', textAlign: 'right' }}>
-                                            <span style={{ background: bg, color: color, padding: '4px 10px', borderRadius: '9999px', fontSize: '11px', fontWeight: '700', textTransform: 'capitalize' }}>
-                                                {pedido.estado}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                );
-                            }) : (
-                                <tr>
-                                    <td colSpan="5" style={{ padding: '40px 0', textAlign: 'center', color: '#94A3B8', fontSize: '14px' }}>No se encontraron pedidos recientes.</td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                    </div>
+          </section>
+          <section className="overview-card overview-stock">
+            <header>
+              <div>
+                <h2>Stock por reponer</h2>
+                <p>{integer(lowStock.length)} referencias requieren revisión</p>
+              </div>
+              <span className="overview-stock-count">
+                {integer(lowStock.length)}
+              </span>
+            </header>
+            <div className="overview-stock-list">
+              {lowStock.slice(0, 5).map((product) => (
+                <div className="overview-stock-row" key={product.id}>
+                  <span className="overview-product-symbol">
+                    <Package size={16} />
+                  </span>
+                  <div>
+                    {canAccess(user, "ver_productos") ? (
+                      <Link href={`/admin/products/${product.id}`}>
+                        {product.nombre}
+                      </Link>
+                    ) : (
+                      <strong>{product.nombre}</strong>
+                    )}
+                    <small>{product.marca || "Producto de catálogo"}</small>
+                  </div>
+                  <span className="overview-stock-badge">
+                    {integer(product.stock)} u.
+                  </span>
                 </div>
-
-                {/* Top Productos Más Vendidos */}
-                <div style={{ background: '#ffffff', padding: '24px', borderRadius: '12px', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                        <h2 style={{ fontSize: '16px', fontWeight: '700', color: '#1E293B', margin: 0 }}>Top Productos (Web y POS)</h2>
-                    </div>
-                    
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                        {safeTopProductosVendidos.length > 0 ? (
-                            safeTopProductosVendidos.map((prod, index) => (
-                                <div key={index} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '12px', borderBottom: '1px solid #E2E8F0' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                        <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: index === 0 ? '#004797' : '#F1F5F9', color: index === 0 ? 'white' : '#64748B', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', fontSize: '12px', boxShadow: index === 0 ? '0 2px 8px rgba(0, 71, 151, 0.3)' : 'none' }}>
-                                            {index + 1}
-                                        </div>
-                                        <div style={{ fontSize: '13px', fontWeight: '600', color: '#1E293B', maxWidth: '170px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                            {prod.nombre}
-                                        </div>
-                                    </div>
-                                    <div style={{ fontWeight: '700', color: '#1E293B', fontSize: '14px' }}>
-                                        {prod.cantidad} <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: '600' }}>u.</span>
-                                    </div>
-                                </div>
-                            ))
-                        ) : (
-                            <div style={{ textAlign: 'center', color: '#94A3B8', padding: '40px 0', fontSize: '14px' }}>No hay ventas en POS aún.</div>
-                        )}
-                    </div>
+              ))}
+              {!lowStock.length && (
+                <div className="panel-empty">
+                  <Check size={24} />
+                  <strong>Inventario al día</strong>
+                  <span>No hay alertas de stock bajo.</span>
                 </div>
-
+              )}
             </div>
-        </AdminLayout>
-    );
+            {canAccess(user, "inventario.gestionar") && (
+              <Link className="overview-card-link" href="/admin/inventario">
+                Abrir inventario <ArrowRight size={14} />
+              </Link>
+            )}
+          </section>
+        </div>
+        {top.length > 0 && (
+          <section className="overview-card overview-top-products">
+            <header>
+              <div>
+                <h2>Productos con más ventas</h2>
+                <p>
+                  Resultados del período seleccionado · Tienda y punto de venta
+                </p>
+              </div>
+            </header>
+            <div>
+              {top.slice(0, 5).map((product, i) => (
+                <article key={product.id}>
+                  <span className="overview-product-rank">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <div>
+                    <strong>{product.nombre}</strong>
+                    <span>{integer(product.cantidad)} unidades vendidas</span>
+                  </div>
+                  <span>{money(product.ingresos)}</span>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+    </AdminLayout>
+  );
 }

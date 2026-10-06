@@ -20,7 +20,7 @@ class ChatbotService
      *
      * @throws \Exception
      */
-    public function getReply(array $userMessages, ?int $conversationId = null, ?int $contactId = null): string
+    public function getReply(array $userMessages, ?int $conversationId = null, ?int $contactId = null, bool $sandbox = false): string
     {
         $apiKeys = array_values(array_filter([
             config('services.gemini.key'),
@@ -34,14 +34,16 @@ class ChatbotService
         $actionNode = new ActionNode;
 
         $productSearchTool = new ProductSearchTool;
-        $orderStatusTool = new OrderStatusTool;
+        $orderStatusTool = new OrderStatusTool(auth('web')->id());
         $updateContactTool = new UpdateContactInfoTool($conversationId, $contactId);
         $transferTool = new TransferToAgentTool($conversationId);
 
         $actionNode->registerTool($productSearchTool);
-        $actionNode->registerTool($orderStatusTool);
-        $actionNode->registerTool($updateContactTool);
-        $actionNode->registerTool($transferTool);
+        if (! $sandbox) {
+            $actionNode->registerTool($orderStatusTool);
+            $actionNode->registerTool($updateContactTool);
+            $actionNode->registerTool($transferTool);
+        }
 
         // 2. Construir el esquema de herramientas para pasárselo al AgentNode
         $toolsSchema = [
@@ -69,16 +71,26 @@ class ChatbotService
 
         $question = '';
         foreach (array_reverse($userMessages) as $message) {
-            if (($message['role'] ?? '') === 'user') { $question = $message['text']; break; }
+            if (($message['role'] ?? '') === 'user') {
+                $question = $message['text'];
+                break;
+            }
         }
-        $systemPrompt = $this->buildSystemPrompt().app(KnowledgeService::class)->prompt($question);
+        $recentQuestions = array_slice(array_values(array_filter($userMessages, fn ($message) => ($message['role'] ?? '') === 'user')), -3);
+        $retrievalQuestion = mb_substr($question."\n".implode("\n", array_column($recentQuestions, 'text')), 0, 4000);
+        $settings = app(ChatbotSettings::class)->get();
+        $systemPrompt = $this->buildSystemPrompt()."\nPreferencias del negocio:\n".$settings['instructions'].app(KnowledgeService::class)->prompt($retrievalQuestion);
+        if ($sandbox) {
+            $toolsSchema = array_slice($toolsSchema, 0, 1);
+            $systemPrompt .= "\nMODO DE PRUEBA: solo consulta productos y conocimiento; no guardes contactos ni transfieras conversaciones.";
+        }
 
         // 3. Crear el AgentNode
         $agentNode = new AgentNode($apiKeys, $systemPrompt, $toolsSchema);
 
         // 4. Crear el Estado Inicial (formateando los mensajes de entrada)
         $initialMessages = $this->formatMessages($userMessages);
-        $state = new EngineState($initialMessages, maxIterations: 4);
+        $state = new EngineState($initialMessages, maxIterations: 6);
 
         // 5. Orquestar todo en el Motor de Flujos (Workflow)
         $workflow = new ChatbotWorkflow($agentNode, $actionNode);
@@ -111,10 +123,13 @@ REGLAS ESTRICTAS:
     private function formatMessages(array $userMessages): array
     {
         $contents = [];
-        foreach ($userMessages as $msg) {
+        foreach (array_slice($userMessages, -20) as $msg) {
+            if (! in_array($msg['role'] ?? '', ['user', 'bot', 'model'], true)) {
+                continue;
+            }
             $contents[] = [
                 'role' => $msg['role'] === 'bot' ? 'model' : $msg['role'],
-                'parts' => [['text' => $msg['text']]],
+                'parts' => [['text' => mb_substr($msg['text'], 0, 4000)]],
             ];
         }
 

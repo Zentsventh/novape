@@ -1,14 +1,19 @@
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Head } from '@inertiajs/react';
 import TwentyCrmLayout from '../../../../Layouts/TwentyCrmLayout';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import useDialog from '../../../../Components/Admin/useDialog';
 
 export default function CalendarIndex() {
     const calendarRef = useRef(null);
     const [selectedEvent, setSelectedEvent] = useState(null);
+    const [calendarError, setCalendarError] = useState('');
+    const modal = useRef(null);
+    const closeEventModal = useCallback(() => setSelectedEvent(null), []);
+    useDialog(Boolean(selectedEvent), modal, closeEventModal);
 
     const handleEventClick = (info) => {
         // Prevent browser from following the event's url
@@ -21,13 +26,11 @@ export default function CalendarIndex() {
         });
     };
 
-    const closeEventModal = () => {
-        setSelectedEvent(null);
-    };
 
     return (
         <TwentyCrmLayout title="Calendario">
             <Head title="Calendario CRM" />
+            {calendarError && <div className="panel-flash is-error" role="alert">{calendarError}<button type="button" className="workspace-button" onClick={() => { setCalendarError(''); calendarRef.current?.getApi().refetchEvents(); }}>Reintentar</button></div>}
 
             <div 
                 style={{ 
@@ -130,6 +133,7 @@ export default function CalendarIndex() {
                         right: 'dayGridMonth,timeGridWeek,timeGridDay'
                     }}
                     events="/admin/crm/calendar/events"
+                    eventSourceFailure={() => setCalendarError('No se pudieron cargar las actividades del calendario.')}
                     eventClick={handleEventClick}
                     height="auto"
                     locale="es"
@@ -158,6 +162,7 @@ export default function CalendarIndex() {
                     }}
                 >
                     <div 
+                        ref={modal} role="dialog" aria-modal="true" aria-label="Detalle de actividad" tabIndex={-1}
                         onClick={e => e.stopPropagation()}
                         style={{
                             background: '#ffffff', borderRadius: '16px', width: '100%', maxWidth: '450px',
@@ -170,6 +175,7 @@ export default function CalendarIndex() {
                                 {selectedEvent.title}
                             </h3>
                             <button 
+                                aria-label="Cerrar detalle de actividad"
                                 onClick={closeEventModal}
                                 style={{
                                     background: 'transparent', border: 'none', fontSize: '20px', color: '#94A3B8',

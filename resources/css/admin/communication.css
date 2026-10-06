@@ -186,7 +186,7 @@
   display: flex;
   gap: 8px;
   align-items: center;
-  background: #152e50;
+  background: #4f46e5;
   color: white;
   border: 0;
   border-radius: 12px;
@@ -210,7 +210,7 @@
 }
 .panel-assistant-drawer > header {
   padding: 16px;
-  background: #152e50;
+  background: #004797;
   color: white;
   display: flex;
   align-items: center;

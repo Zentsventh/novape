@@ -39,7 +39,7 @@ class InvoiceService
         if (class_exists(QrCode::class)) {
             $qrContent = URL::signedRoute('comprobante.ecommerce.publico', ['codigo' => $pedido->codigo]);
             $qrSvg = QrCode::size(150)->generate($qrContent);
-            $qrBase64 = 'data:image/svg+xml;base64,'.base64_encode($qrSvg);
+            $qrBase64 = 'data:image/svg+xml;base64,'.base64_encode((string) $qrSvg);
         }
 
         $letras = null;

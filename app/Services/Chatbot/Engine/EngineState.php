@@ -7,10 +7,17 @@ namespace App\Services\Chatbot\Engine;
 class EngineState
 {
     public array $messages;
+
     public ?array $pendingToolCall;
+
+    public array $pendingToolCalls = [];
+
     public ?string $finalResponse;
+
     public ?string $errorMessage;
+
     public int $iteration;
+
     public int $maxIterations;
 
     public function __construct(array $initialMessages, int $maxIterations = 5)

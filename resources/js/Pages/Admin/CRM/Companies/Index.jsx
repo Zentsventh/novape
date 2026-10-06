@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Head, router, Link } from '@inertiajs/react';
 import TwentyCrmLayout from '../../../../Layouts/TwentyCrmLayout';
 import TwentyTable from '../../../../Components/Admin/CRM/TwentyTable';
@@ -12,6 +12,7 @@ export default function Index({ companies = { data: [], links: [] }, filters = {
     const [selectedRows, setSelectedRows] = useState([]);
 
     const [drawerOpen, setDrawerOpen] = useState(false);
+    useEffect(() => { if (new URLSearchParams(window.location.search).get('create') === 'true') setDrawerOpen(true); }, []);
 
     const handleSearch = (e) => {
         if (e.key === 'Enter') {

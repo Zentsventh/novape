@@ -474,13 +474,13 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
     };
 
     const fetchNiubizSession = async (couponCodeStr) => {
-        console.log("fetchNiubizSession called!", { step, niubizSession });
+
         setIsFetchingNiubiz(true);
         setNiubizError(null);
         const emailValue =
             facturacionData.email || document.getElementById('checkout-email')?.value || '';
         try {
-            console.log("Sending Niubiz session request...", { emailValue, deliveryType, addressData });
+
             const res = await axios.post('/api/checkout/niubiz/session', {
                 email: emailValue,
                 coupon: couponCodeStr || '',
@@ -493,7 +493,7 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
                 items: cartItems.map(item => ({ id: item.id, precio_final: item.precio_final, cantidad: item.cantidad }))
             });
             const data = res.data;
-            console.log("Niubiz session response:", data);
+
             if (data.sessionKey) {
                 setNiubizSession(data);
                 
@@ -1248,7 +1248,7 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
                                                         <div style={{ fontSize: '12px', color: '#94A3B8' }}>Encriptado y certificado</div>
                                                     </div>
                                                 </div>
-                                                <img src="https://logospng.org/download/mercado-pago/logo-mercado-pago-icono-1024.png" alt="Mercado Pago" style={{ height: '28px', opacity: .85 }} />
+                                                <img src="https://www.niubiz.com.pe/wp-content/uploads/2021/04/Logo-Niubiz-PNG.png" alt="Niubiz" style={{ height: '28px', opacity: .85 }} />
                                             </div>
                                             <p style={{ fontSize: '13px', color: '#64748B', marginBottom: '20px', lineHeight: '1.6', margin: '0 0 20px' }}>
                                                 Todas las transacciones están encriptadas y aseguradas. Paga con tarjeta, Yape, Plin o efectivo en agentes.
@@ -1257,7 +1257,7 @@ export default function Checkout({ cart = [], total = 0, loyaltyPoints = 0 }) {
                                             {isFetchingNiubiz && (
                                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 'clamp(0.75rem, 3vw, 2rem)', gap: '14px', background: '#fff', borderRadius: '10px', border: '1px solid #E8ECF0' }}>
                                                     <div style={{ width: '32px', height: '32px', border: '3px solid #E8ECF0', borderTopColor: '#004797', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }}></div>
-                                                    <span style={{ color: '#64748B', fontSize: '13.5px', fontWeight: '500' }}>Conectando con Mercado Pago...</span>
+                                                    <span style={{ color: '#64748B', fontSize: '13.5px', fontWeight: '500' }}>Conectando con Niubiz...</span>
                                                 </div>
                                             )}
 

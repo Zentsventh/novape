@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import AdminLayout from '../../../Layouts/AdminLayout';
+import axios from 'axios';
 import { Upload, FileText, CheckCircle, AlertTriangle, ArrowRight, ArrowLeft } from 'lucide-react';
 import '../../../../css/admin/admin.css';
 
@@ -8,6 +9,8 @@ export default function Import() {
     const [file, setFile] = useState(null);
     const [step, setStep] = useState(1); // 1: Upload, 2: Mapping, 3: Success/Error
     const [loading, setLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const showError = error => setErrorMessage(Object.values(error.response?.data?.errors || {}).flat().join(' ') || error.response?.data?.message || error.response?.data?.error || 'No se pudo completar la importación. Revisa el archivo e intenta de nuevo.');
     
     // Preview Data
     const [headers, setHeaders] = useState([]);
@@ -26,46 +29,37 @@ export default function Import() {
     };
 
     const handleUpload = async () => {
-        if (!file) return;
+        if (!file || loading) return;
         setLoading(true);
+        setErrorMessage('');
 
         const formData = new FormData();
         formData.append('file', file);
 
         try {
-            const res = await fetch('/admin/clientes/importar/preview', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: formData
-            });
-
-            const data = await res.json();
+            const { data } = await axios.post('/admin/clientes/importar/preview', formData);
             
-            if (res.ok) {
                 setHeaders(data.headers);
                 setPreview(data.preview);
                 setTotalRows(data.totalRows);
                 setMapping(data.suggestedMapping || {});
                 setStep(2);
-            } else {
-                alert(data.error || 'Error al procesar el archivo');
-            }
         } catch (error) {
-            alert('Error de conexión');
+            showError(error);
         } finally {
             setLoading(false);
         }
     };
 
     const handleProcess = async () => {
+        if (loading) return;
         if (!mapping.nombres) {
-            alert("El campo 'Nombres' es obligatorio.");
+            setErrorMessage("Selecciona la columna que contiene los nombres de los clientes.");
             return;
         }
 
         setLoading(true);
+        setErrorMessage('');
 
         const formData = new FormData();
         formData.append('file', file);
@@ -74,24 +68,12 @@ export default function Import() {
         });
 
         try {
-            const res = await fetch('/admin/clientes/importar/process', {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: formData
-            });
-
-            const data = await res.json();
+            const { data } = await axios.post('/admin/clientes/importar/process', formData);
             
-            if (res.ok) {
                 setResult(data);
                 setStep(3);
-            } else {
-                alert(data.error || 'Error al procesar la importación');
-            }
         } catch (error) {
-            alert('Error de conexión');
+            showError(error);
         } finally {
             setLoading(false);
         }
@@ -108,6 +90,7 @@ export default function Import() {
     return (
         <AdminLayout logoUrl={null}>
             <Head title="Importar Clientes CSV" />
+            {errorMessage && <div className="panel-flash is-error" role="alert">{errorMessage}</div>}
             
             <div className="admin-page-header" style={{ marginBottom: '24px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>

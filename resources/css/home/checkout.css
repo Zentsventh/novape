@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    CHECKOUT PREMIUM — NovaPe
    Diseño del checkout NovaPe con Niubiz
    ============================================================ */
@@ -7,23 +7,23 @@
 /* TOKENS */
 :root {
     --co-primary:        #004797;
-    --co-primary-hover:  #009EE0;
-    --co-primary-glow:   rgba(0, 71, 151, 0.18);
-    --co-primary-light:  #E0F7FF;
-    --co-success:        #10B981;
-    --co-success-bg:     #F0FDF4;
-    --co-warning:        #F59E0B;
-    --co-warning-bg:     #FFFBEB;
-    --co-danger:         #EF4444;
-    --co-danger-bg:      #FEF2F2;
-    --co-bg:             #F7F8FA;
+    --co-primary-hover:  #003670;
+    --co-primary-glow:   rgba(0, 71, 151, 0.15);
+    --co-primary-light:  #E5F0FA;
+    --co-success:        #004797;
+    --co-success-bg:     #E5F0FA;
+    --co-warning:        #3379C2;
+    --co-warning-bg:     #F0F3F8;
+    --co-danger:         #003670;
+    --co-danger-bg:      #E5F0FA;
+    --co-bg:             #F0F3F8;
     --co-surface:        #FFFFFF;
     --co-surface-2:      #F8FAFC;
-    --co-border:         #E8ECF0;
+    --co-border:         #E1E7F0;
     --co-border-focus:   var(--co-primary);
-    --co-text-1:         #0F172A;
+    --co-text-1:         #1E293B;
     --co-text-2:         #475569;
-    --co-text-3:         #94A3B8;
+    --co-text-3:         #64748B;
     --co-text-inv:       #FFFFFF;
     --co-shadow-xs:      0 1px 2px rgba(0,0,0,.04);
     --co-shadow-sm:      0 2px 8px rgba(0,0,0,.06);

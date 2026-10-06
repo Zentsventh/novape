@@ -10,7 +10,7 @@ import {
    DESIGN TOKENS — Premium SaaS palette
    ═══════════════════════════════════════════════ */
 const T = {
-    primary:    '#004797',
+    primary:    '#4f46e5',
     primaryDim: 'rgba(0, 71, 151, 0.12)',
     primaryGlow:'rgba(0, 71, 151, 0.25)',
     accent:     '#6366F1',
@@ -22,16 +22,16 @@ const T = {
     danger:     '#EF4444',
     dangerDim:  'rgba(239, 68, 68, 0.12)',
     // Surfaces
-    cardBg:     'rgba(255, 255, 255, 0.04)',
-    cardBorder: 'rgba(255, 255, 255, 0.06)',
-    cardHover:  'rgba(255, 255, 255, 0.07)',
+    cardBg:     '#ffffff',
+    cardBorder: '#e4e7ef',
+    cardHover:  '#fafbfe',
     // Text
-    textMain:   '#F1F5F9',
-    textSub:    '#94A3B8',
+    textMain:   '#202839',
+    textSub:    '#596579',
     textMuted:  '#64748B',
     // Chart
-    gridStroke: 'rgba(255, 255, 255, 0.04)',
-    tooltipBg:  'rgba(15, 23, 42, 0.95)',
+    gridStroke: '#edf0f6',
+    tooltipBg:  '#ffffff',
 };
 
 const CHART_COLORS = ['#004797', '#6366F1', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];

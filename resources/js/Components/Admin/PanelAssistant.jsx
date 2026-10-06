@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link, usePage } from "@inertiajs/react";
 import { Bot, X, Send, Plus } from "lucide-react";
 import { panelApi, panelError } from "./panelApi";
+import useDialog from "./useDialog";
 import "/resources/css/admin/communication.css";
 
 export function AssistantWorkspace({ context, onDraft }) {
@@ -205,6 +206,9 @@ export default function PanelAssistant() {
   const { url } = usePage();
   const [open, setOpen] = useState(false),
     [context, setContext] = useState(null);
+  const dialog = useRef(null);
+  const close = useCallback(() => setOpen(false), []);
+  useDialog(open, dialog, close);
   useEffect(() => {
     setContext(null);
     setOpen(false);
@@ -222,6 +226,9 @@ export default function PanelAssistant() {
       {open && (
         <section
           className="panel-assistant-drawer"
+          ref={dialog}
+          role="dialog"
+          aria-modal="true"
           aria-label="Asistente privado del panel"
         >
           <header>
@@ -229,7 +236,7 @@ export default function PanelAssistant() {
               <Bot size={20} /> Asistente del panel
             </span>
             <button
-              onClick={() => setOpen(false)}
+              onClick={close}
               aria-label="Cerrar asistente"
             >
               <X size={20} />
@@ -251,6 +258,7 @@ export default function PanelAssistant() {
       )}
       <button
         className="panel-assistant-launcher"
+        aria-label="Abrir asistente del panel"
         aria-expanded={open}
         onClick={() => {
           if (!open) setContext(null);

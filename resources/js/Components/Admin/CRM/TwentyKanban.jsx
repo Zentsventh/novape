@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Plus, MoreHorizontal, DollarSign, Edit2, Trash2 } from 'lucide-react';
 import { AnimatedList } from '../../Animations/AnimatedList';
 
-export default function TwentyKanban({ stages = [], deals, onDragEnd, onDealClick, onDealEdit, onDealDelete }) {
+export default function TwentyKanban({ stages = [], deals, onDragEnd, onDealClick, onDealEdit, onDealDelete, onDealCreate }) {
     const [activeDropdown, setActiveDropdown] = useState(null);
     const [draggingId, setDraggingId] = useState(null);
     const [overStage, setOverStage] = useState(null);
@@ -249,9 +249,9 @@ export default function TwentyKanban({ stages = [], deals, onDragEnd, onDealClic
                                         {stage.deals_count ?? groupedDeals[stage.id]?.length ?? 0}
                                     </span>
                                 </div>
-                                <button className="premium-btn-icon">
+                                {onDealCreate && <button type="button" className="premium-btn-icon" onClick={() => onDealCreate(stage.id)} title={`Crear oportunidad en ${stage.nombre}`} aria-label={`Crear oportunidad en ${stage.nombre}`}>
                                     <Plus size={16} />
-                                </button>
+                                </button>}
                             </div>
 
                             {/* Droppable Area */}
