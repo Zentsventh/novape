@@ -74,6 +74,9 @@ class ChatbotController extends Controller
                 $this->detectAndUpdateContactName($contact, $lastUserMessage, $conversation);
             }
 
+            // Persist the inbound message before waiting for the external AI provider.
+            DB::commit();
+
             // Si el bot no está pausado, procesar en segundo plano usando Jobs
             if (! $conversation->is_bot_paused) {
                 // Despachar SINCRONAMENTE para que la web muestre "escribiendo..." hasta que Gemini responda
@@ -84,8 +87,6 @@ class ChatbotController extends Controller
                 );
             }
 
-            DB::commit();
-
             return response()->json([
                 'success' => true,
                 'is_bot_paused' => $conversation->is_bot_paused,
@@ -93,10 +94,12 @@ class ChatbotController extends Controller
                 'processing_in_background' => ! $conversation->is_bot_paused,
             ]);
         } catch (\Exception $e) {
-            DB::rollBack();
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
             Log::error('Error en ChatbotController: '.$e->getMessage()."\n".$e->getTraceAsString());
 
-            return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json(['error' => 'No se pudo procesar el mensaje. Intenta de nuevo o solicita un asesor.'], 500);
         }
     }
 

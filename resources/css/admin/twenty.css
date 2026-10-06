@@ -4,32 +4,32 @@
 
 :root {
     /* Brand Colors - Vibrant, modern, deep */
-    --twenty-primary: #2563eb; /* Royal blue */
-    --twenty-primary-hover: #1d4ed8;
+    --twenty-primary: #004797; /* Royal blue */
+    --twenty-primary-hover: #003670;
     --twenty-primary-bg: #eff6ff; /* Soft blue for active states */
     
     /* Secondary / Accents */
     --twenty-secondary: #64748b;
-    --twenty-secondary-light: #f1f5f9;
+    --twenty-secondary-light: #f0f3f8;
     --twenty-success: #10b981;
     --twenty-success-light: #d1fae5;
     --twenty-warning: #f59e0b;
     --twenty-warning-light: #fef3c7;
     --twenty-danger: #ef4444;
     --twenty-danger-light: #fee2e2;
-    --twenty-purple: #8b5cf6;
-    --twenty-purple-light: #ede9fe;
+    --twenty-purple: #004797;
+    --twenty-purple-light: #e5f0fa;
     --twenty-cyan: #06b6d4;
     
     /* Backgrounds - Glassmorphism ready */
     --twenty-background: #f8fafc;
     --twenty-bg-app: #f8fafc; 
-    --twenty-bg-hover: #f1f5f9;
+    --twenty-bg-hover: #f0f3f8;
     --twenty-bg-active: #eff6ff;
     --twenty-bg-surface: #ffffff;
     
     /* Text - Better legibility */
-    --twenty-text-main: #0f172a; /* Slate 900 for high contrast */
+    --twenty-text-main: #1e293b; /* Slate 900 for high contrast */
     --twenty-text-secondary: #334155; /* Slate 700 */
     --twenty-text-muted: #64748b; /* Slate 500 */
     
@@ -428,7 +428,7 @@
         z-index: 1200;
     }
     .twenty-sidebar.mobile-open { transform: translateX(0); }
-    .twenty-mobile-backdrop { display: block; position: fixed; inset: 0; border: 0; background: #0f172a80; z-index: 1190; }
+    .twenty-mobile-backdrop { display: block; position: fixed; inset: 0; border: 0; background: #1e293b80; z-index: 1190; }
     .twenty-main { width: 100%; min-width: 0; }
     .twenty-topbar { padding: 0 12px; }
     .twenty-topbar-title { font-size: 16px; }

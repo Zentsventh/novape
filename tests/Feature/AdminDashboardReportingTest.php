@@ -10,6 +10,31 @@ use Tests\TestCase;
 
 class AdminDashboardReportingTest extends TestCase
 {
+    public function test_low_stock_uses_configured_thresholds_and_excludes_healthy_or_archived_products(): void
+    {
+        Schema::create('producto', function (Blueprint $t) {
+            $t->id(); $t->string('nombre'); $t->boolean('activo'); $t->integer('marca_id')->nullable(); $t->softDeletes();
+        });
+        Schema::create('variante', function (Blueprint $t) {
+            $t->id(); $t->integer('producto_id'); $t->integer('stock'); $t->integer('stock_minimo'); $t->softDeletes();
+        });
+        Schema::create('producto_imagen', function (Blueprint $t) {
+            $t->id(); $t->integer('producto_id'); $t->integer('orden');
+        });
+        foreach ([1 => ['Bajo', true], 2 => ['Saludable', true], 3 => ['Archivado', false]] as $id => [$name, $active]) {
+            DB::table('producto')->insert(['id' => $id, 'nombre' => $name, 'activo' => $active]);
+        }
+        DB::table('variante')->insert([
+            ['producto_id' => 1, 'stock' => 8, 'stock_minimo' => 10, 'deleted_at' => null],
+            ['producto_id' => 1, 'stock' => 999, 'stock_minimo' => 5, 'deleted_at' => now()],
+            ['producto_id' => 2, 'stock' => 50, 'stock_minimo' => 5, 'deleted_at' => null],
+            ['producto_id' => 3, 'stock' => 0, 'stock_minimo' => 5, 'deleted_at' => null],
+        ]);
+        $rows = app(AnalyticsService::class)->getLowStock();
+        $this->assertSame([1], array_column($rows, 'id'));
+        $this->assertSame(8, $rows[0]['stock']);
+    }
+
     public function test_product_ranking_includes_all_variants_and_separates_equal_names(): void
     {
         Schema::create('producto', function (Blueprint $t) {

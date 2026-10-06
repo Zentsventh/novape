@@ -144,7 +144,7 @@
 .efe-producto-price {
     font-size: 28px;
     font-weight: 800;
-    color: #d84315;
+    color: var(--color-primary);
     margin-bottom: 25px;
 }
 
@@ -229,7 +229,7 @@
 }
 
 .efe-delivery-check {
-    color: #22c55e;
+    color: var(--color-primary);
 }
 
 /* Acordeones Inferiores */

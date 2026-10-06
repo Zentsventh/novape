@@ -1391,9 +1391,6 @@ function InboxIndex() {
                                 >
                                     <Zap size={20} />
                                 </button>
-                                <button type="button" className="inbox-chat__input-btn" title="Adjuntar archivo">
-                                    <Paperclip size={20} />
-                                </button>
                                 <textarea
                                     value={messageInput}
                                     onChange={(e) => setMessageInput(e.target.value)}

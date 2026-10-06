@@ -19,9 +19,9 @@ class ChatbotMessageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'messages' => 'required|array',
+            'messages' => 'required|array|min:1|max:40',
             'messages.*.role' => 'required|string|in:user,model,bot',
-            'messages.*.text' => 'required|string'
+            'messages.*.text' => 'required|string|max:4000',
         ];
     }
 }

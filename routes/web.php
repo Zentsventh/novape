@@ -73,7 +73,7 @@ Route::controller(HomeController::class)->group(function () {
 });
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
-Route::post('/chatbot/message', [ChatbotController::class, 'message'])->name('chatbot.message');
+Route::post('/chatbot/message', [ChatbotController::class, 'message'])->middleware('throttle:20,1')->name('chatbot.message');
 Route::get('/chatbot/poll', [ChatbotController::class, 'pollMessages'])->name('chatbot.poll');
 Route::get('/chatbot/history', [ChatbotController::class, 'history'])->name('chatbot.history');
 Route::post('/chatbot/close', [ChatbotController::class, 'closeConversation'])->name('chatbot.close');
@@ -499,6 +499,10 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
         Route::get('/api/chatbot-knowledge', 'sources');
         Route::post('/api/chatbot-knowledge', 'store');
         Route::post('/api/chatbot-knowledge/preview', 'preview');
+        Route::get('/api/chatbot-knowledge/settings', 'settings');
+        Route::put('/api/chatbot-knowledge/settings', 'updateSettings');
+        Route::post('/api/chatbot-knowledge/test', 'testReply')->middleware('throttle:10,1');
+        Route::post('/api/chatbot-knowledge/{id}/reindex', 'reindex')->whereNumber('id')->middleware('throttle:10,1');
         Route::get('/api/chatbot-knowledge/{id}', 'show')->whereNumber('id');
         Route::put('/api/chatbot-knowledge/{id}', 'update')->whereNumber('id');
         Route::delete('/api/chatbot-knowledge/{id}', 'destroy')->whereNumber('id');

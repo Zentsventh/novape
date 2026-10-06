@@ -133,7 +133,7 @@
     position: absolute;
     top: 16px;
     left: 16px;
-    background: #FF3B30;
+    background: var(--color-primary-dark);
     color: #ffffff;
     font-size: 11px;
     font-weight: 800;
@@ -154,7 +154,7 @@
     position: absolute;
     top: 16px;
     right: 16px;
-    background: #34C759;
+    background: var(--color-primary);
     color: white;
     font-size: 10px;
     font-weight: 800;

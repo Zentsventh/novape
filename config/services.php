@@ -73,5 +73,6 @@ return [
     'gemini' => [
         'key' => env('GEMINI_API_KEY'),
         'secondary_key' => env('GEMINI_API_KEY_SECONDARY'),
+        'ca_bundle' => env('GEMINI_CA_BUNDLE'),
     ],
 ];

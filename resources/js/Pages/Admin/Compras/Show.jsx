@@ -40,9 +40,9 @@ export default function CompraShow({ compra, items, logoUrl }) {
                     </Link>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '32px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 340px', gap: '24px' }}>
                     {/* Columna Principal: Detalle de Items */}
-                    <div>
+                    <div style={{ minWidth: 0 }}>
                         <div style={{ background: '#ffffff', borderRadius: '20px', padding: '32px', boxShadow: '0 4px 20px -2px rgba(0,0,0,0.03)', border: '1px solid #E2E8F0', marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div>
                                 <div style={{ fontSize: '13px', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Detalle de la Transacción</div>

@@ -139,6 +139,7 @@ class AnalyticsService
                 AND v.deleted_at IS NULL
             WHERE p.deleted_at IS NULL AND p.activo = 1
             GROUP BY p.id, p.nombre
+            HAVING COALESCE(SUM(v.stock), 0) <= COALESCE(SUM(v.stock_minimo), 5)
             ORDER BY stock_total ASC
             LIMIT ?
         ', [$limit]);

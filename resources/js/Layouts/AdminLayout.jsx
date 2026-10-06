@@ -1,456 +1,475 @@
-import { useState, useEffect } from 'react';
-import { Link, usePage, router } from '@inertiajs/react';
-import { AnimatePresence } from 'framer-motion';
-import PageTransition from '@/Components/Animations/PageTransition';
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Link, router, usePage } from "@inertiajs/react";
+import axios from "axios";
 import {
-    LayoutDashboard, MonitorSmartphone, ShoppingCart, Package, MessageSquare,
-    CreditCard, Wallet, Archive, Image, Users, Truck,
-    UserCog, Shield, Star, Settings, LogOut, Menu, X, Bell, Eye, Grid, Briefcase, Mail, ShieldAlert, DollarSign, Building, Zap, Tags, Map, Ticket, TrendingUp
-} from 'lucide-react';
-import { useDeviceContext } from '@/Contexts/DeviceContext';
-import '../../css/admin/admin.css';
+  ArrowUpRight,
+  Bell,
+  CheckCheck,
+  ChevronDown,
+  ChevronRight,
+  ExternalLink,
+  LogOut,
+  Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Search,
+  X,
+} from "lucide-react";
+import {
+  activeItem,
+  canAccess,
+  visibleNavigation,
+} from "../Components/Admin/navigation";
+import PanelCommandPalette from "../Components/Admin/PanelCommandPalette";
+import useDialog from "../Components/Admin/useDialog";
+import "../../css/admin/admin.css";
+import "../../css/admin/workspace.css";
 
-const LOGO_FALLBACK = '/images/logo.png';
+const readPreference = (key, fallback) => {
+  try {
+    return JSON.parse(localStorage.getItem(key)) ?? fallback;
+  } catch {
+    return fallback;
+  }
+};
+const writePreference = (key, value) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {}
+};
 
-export default function AdminLayout({ children, logoUrl }) {
-    const { url, props } = usePage();
-    const { isMobile, isTablet } = useDeviceContext();
-    const logo = logoUrl || props.logoUrl || LOGO_FALLBACK;
-
-    const userPerms = props.auth?.user?.permisos || [];
-    const isAdmin = props.auth?.user?.roles?.some(r => r.nombre === 'admin') || false;
-
-    const hasPerm = (perm) => {
-        if (!perm) return true;
-        if (isAdmin) return true;
-        return userPerms.includes(perm);
+export default function AdminLayout({
+  children,
+  title,
+  headerActions,
+  section,
+}) {
+  const { url, props } = usePage();
+  const user = props.auth?.user;
+  const groups = visibleNavigation(user);
+  const current = groups
+    .flatMap((group) =>
+      group.items.map((item) => ({ ...item, group: group.label })),
+    )
+    .filter((item) => activeItem(item, url))
+    .sort((a, b) => b.href.length - a.href.length)[0];
+  const [collapsed, setCollapsed] = useState(() =>
+    readPreference("novape.panel.collapsed", false),
+  );
+  const [closedGroups, setClosedGroups] = useState(() =>
+    readPreference("novape.panel.groups", []),
+  );
+  const [mobile, setMobile] = useState(false),
+    [palette, setPalette] = useState(false),
+    [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([]),
+    [notificationError, setNotificationError] = useState(""),
+    [reading, setReading] = useState(false);
+  const [navigating, setNavigating] = useState(false),
+    [dismissed, setDismissed] = useState(null);
+  const mobileDialog = useRef(null),
+    notificationPanel = useRef(null);
+  const closeMobile = useCallback(() => setMobile(false), []);
+  const closePalette = useCallback(() => setPalette(false), []);
+  useDialog(mobile, mobileDialog, closeMobile);
+  const unread = notifications.filter((n) => !n.read).length;
+  const refreshNotifications = useCallback(async () => {
+    try {
+      const { data } = await axios.get("/admin/notificaciones");
+      setNotifications(Array.isArray(data) ? data : []);
+      setNotificationError("");
+    } catch {
+      setNotificationError("No se pudieron cargar las notificaciones.");
+    }
+  }, []);
+  useEffect(() => {
+    refreshNotifications();
+    const timer = setInterval(() => {
+      if (!document.hidden) refreshNotifications();
+    }, 60000);
+    return () => clearInterval(timer);
+  }, [refreshNotifications]);
+  useEffect(() => {
+    setMobile(false);
+    setShowNotifications(false);
+    setDismissed(null);
+  }, [url, props.flash?.success, props.flash?.error]);
+  useEffect(() => {
+    writePreference("novape.panel.collapsed", collapsed);
+  }, [collapsed]);
+  useEffect(() => {
+    writePreference("novape.panel.groups", closedGroups);
+  }, [closedGroups]);
+  useEffect(() => {
+    const start = router.on("start", () => setNavigating(true));
+    const finish = router.on("finish", () => setNavigating(false));
+    return () => {
+      start();
+      finish();
     };
-
-    const navCategories = [
-        { title: 'Comunicación', items: [
-            { href: '/admin/equipo', label: 'Equipo', icon: <Users size={18} /> },
-            { href: '/admin/asistente', label: 'Asistente del panel', icon: <MessageSquare size={18} /> },
-            { href: '/admin/chatbot/conocimiento', label: 'Conocimiento del chatbot', permission: 'gestionar_ajustes', icon: <Zap size={18} /> },
-        ] },
-        {
-            title: 'Métricas',
-            items: [
-                { href: '/admin', label: 'Panel Principal', exact: true, permission: 'ver_dashboard', icon: <LayoutDashboard size={20} /> },
-                { href: '/admin/analiticas', label: 'Reportes y Analíticas', exact: true, permission: 'ver_analiticas', icon: <Grid size={20} /> },
-            ]
-        },
-        {
-            title: 'Ventas y CRM',
-            items: [
-                { href: '/admin/pos', label: 'Punto de Venta', permission: 'pos.vender', icon: <MonitorSmartphone size={20} /> },
-                { href: '/admin/pedidos', label: 'Pedidos', permission: 'ver_pedidos', icon: <ShoppingCart size={20} /> },
-                { href: '/admin/rma', label: 'Garantías y Cambios', permission: 'editar_pedido', icon: <ShieldAlert size={20} /> },
-                { href: '/admin/clientes', label: 'Clientes', permission: 'ver_usuarios', icon: <Users size={20} /> },
-                { href: '/admin/crm/dashboard', label: 'Resumen CRM', permission: 'crm.gestionar', icon: <Briefcase size={20} /> },
-                { href: '/admin/crm/pipeline', label: 'Oportunidades CRM', permission: 'crm.gestionar', icon: <TrendingUp size={20} /> },
-                { href: '/admin/inbox', label: 'Bandeja CRM', permission: 'gestionar_omnichannel', icon: <Briefcase size={20} /> },
-            ]
-        },
-        {
-            title: 'Catálogo y Logística',
-            items: [
-                { href: '/admin/products', label: 'Productos', permission: 'ver_productos', icon: <Package size={20} /> },
-                { href: '/admin/categorias', label: 'Categorías', permission: 'gestionar_categorias', icon: <Tags size={20} /> },
-                { href: '/admin/marcas', label: 'Marcas', permission: 'gestionar_marcas', icon: <Tags size={20} /> },
-                { href: '/admin/inventario', label: 'Inventario', permission: 'inventario.gestionar', icon: <LayoutDashboard size={20} /> },
-                { href: '/admin/almacenes', label: 'Almacenes', permission: 'inventario.gestionar', icon: <Archive size={20} /> },
-                { href: '/admin/zonas', label: 'Zonas de Envío', permission: 'gestionar_ajustes', icon: <Map size={20} /> },
-            ]
-        },
-        {
-            title: 'Compras y Finanzas',
-            items: [
-                { href: '/admin/compras', label: 'Compras', permission: 'inventario.gestionar', icon: <CreditCard size={20} /> },
-                { href: '/admin/proveedores', label: 'Proveedores', permission: 'inventario.gestionar', icon: <Truck size={20} /> },
-                { href: '/admin/gastos', label: 'Gastos', permission: 'finanzas.gestionar', icon: <Wallet size={20} /> },
-            ]
-        },
-        {
-            title: 'Marketing y Tienda',
-            items: [
-                { href: '/admin/cupones', label: 'Cupones', permission: 'gestionar_cupones', icon: <Ticket size={20} /> },
-                { href: '/admin/banners', label: 'Banners Web', permission: 'gestionar_ajustes', icon: <Image size={20} /> },
-                { href: '/admin/marketing/campaigns', label: 'Campañas', permission: 'marketing.gestionar', icon: <Mail size={20} /> },
-            ]
-        },
-        {
-            title: 'Sistema',
-            items: [
-                { href: '/admin/trabajadores', label: 'Trabajadores', permission: 'ver_usuarios', icon: <Users size={20} /> },
-                { href: '/admin/roles', label: 'Roles y Permisos', permission: 'usuarios.gestionar', icon: <Shield size={20} /> },
-                { href: '/admin/ajustes', label: 'Configuración', permission: 'gestionar_ajustes', icon: <Settings size={20} /> },
-                { href: '/admin/metodos-pago', label: 'Métodos de pago', permission: 'gestionar_ajustes', icon: <CreditCard size={20} /> },
-                { href: '/admin/audit-logs', label: 'Registro Auditoría', permission: 'gestionar_ajustes', icon: <ShieldAlert size={20} /> },
-            ]
-        }
-    ];
-
-    // Filtrar los items de navegación según los permisos del usuario por categoría
-    const visibleCategories = navCategories.map(cat => ({
-        ...cat,
-        items: cat.items.filter(item => hasPerm(item.permission))
-    })).filter(cat => cat.items.length > 0);
-
-    const isActive = (item) => {
-        if (item.exact) return url === item.href;
-        return url.startsWith(item.href);
+  }, []);
+  useEffect(() => {
+    const keyboard = (event) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setPalette((p) => !p);
+      }
+      if (event.key === "Escape") setShowNotifications(false);
     };
-
-    const [notificaciones, setNotificaciones] = useState([]);
-    const [showNotifs, setShowNotifs] = useState(false);
-    const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [appLauncherOpen, setAppLauncherOpen] = useState(false);
-    const [globalSearchQuery, setGlobalSearchQuery] = useState('');
-    const [globalSearchResults, setGlobalSearchResults] = useState(null);
-    const [isSearching, setIsSearching] = useState(false);
-    const [showSearchDropdown, setShowSearchDropdown] = useState(false);
-
-    useEffect(() => {
-        if (globalSearchQuery.length > 2 && hasPerm('ver_dashboard')) {
-            const controller = new AbortController();
-            setIsSearching(true);
-            const timer = setTimeout(() => {
-                fetch(`/admin/buscar?q=${encodeURIComponent(globalSearchQuery)}`, { signal: controller.signal })
-                    .then(res => { if (!res.ok) throw new Error('No se pudo buscar'); return res.json(); })
-                    .then(data => {
-                        setGlobalSearchResults(data);
-                        setShowSearchDropdown(true);
-                        setIsSearching(false);
-                    })
-                    .catch(() => { if (controller.signal.aborted) return; setGlobalSearchResults(null); setShowSearchDropdown(false); setIsSearching(false); });
-            }, 300);
-            return () => { clearTimeout(timer); controller.abort(); };
-        } else {
-            setGlobalSearchResults(null);
-            setShowSearchDropdown(false);
-            setIsSearching(false);
-        }
-    }, [globalSearchQuery]);
-
-    useEffect(() => {
-        if (isMobile || isTablet) {
-            setSidebarOpen(false);
-        }
-    }, [url]);
-
-    useEffect(() => {
-        fetchNotificaciones();
-        const interval = setInterval(() => { if (!document.hidden) fetchNotificaciones(); }, 30000);
-        return () => clearInterval(interval);
-    }, []);
-
-    const fetchNotificaciones = () => {
-        fetch('/admin/notificaciones')
-            .then(res => res.json())
-            .then(data => setNotificaciones(data))
-            .catch(err => console.error("Error fetching notifications", err));
+    const outside = (event) => {
+      if (
+        notificationPanel.current &&
+        !notificationPanel.current.contains(event.target)
+      )
+        setShowNotifications(false);
     };
-
-    const markAsRead = (id, link) => {
-        fetch(`/admin/notificaciones/${id}/read`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                'Content-Type': 'application/json'
-            }
-        }).then(() => {
-            fetchNotificaciones();
-            if (link) window.location.href = link;
-        });
+    document.addEventListener("keydown", keyboard);
+    document.addEventListener("pointerdown", outside);
+    return () => {
+      document.removeEventListener("keydown", keyboard);
+      document.removeEventListener("pointerdown", outside);
     };
-
-    return (
-        <div className="admin-layout">
-            {/* Sidebar */}
-            <aside
-                className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}
-                style={(isMobile || isTablet) ? {
-                    position: 'fixed',
-                    top: 0,
-                    bottom: 0,
-                    left: sidebarOpen ? 0 : '-280px',
-                    height: '100dvh',
-                    zIndex: 9999,
-                    width: '280px',
-                    transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    transform: 'none'
-                } : {}}
-            >
-                <div className="admin-brand">
-                    <div className="admin-sidebar-header" style={{ padding: '20px 25px' }}>
-                        <img src={logo} alt="Logo" className="admin-sidebar-logo" style={{ maxHeight: '40px' }} />
-                    </div>
-                </div>
-                <nav className="admin-nav">
-                    {visibleCategories.map((category, idx) => (
-                        <div key={idx} className="admin-nav-category" style={{ marginBottom: '15px' }}>
-                            <div style={{ padding: '0 20px', fontSize: '0.75rem', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', fontWeight: '700', marginBottom: '5px', marginTop: idx > 0 ? '10px' : '0' }}>
-                                {category.title}
-                            </div>
-                            {category.items.map(item => (
-                                <Link
-                                    key={item.href}
-                                    href={item.href}
-                                    className={`admin-nav-link ${isActive(item) ? 'active' : ''}`}
-                                    title={item.label}
-                                >
-                                    {item.icon}
-                                    <span className="admin-nav-label">{item.label}</span>
-                                </Link>
-                            ))}
-                        </div>
-                    ))}
-                </nav>
-
-                {/* Sidebar Footer */}
-                <div className="admin-sidebar-footer" style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                    <a href="/" target="_blank" className="admin-nav-link admin-sidebar-store-link" title="Ver Tienda">
-                        <Eye size={20} />
-                        <span className="admin-nav-label">Ver Tienda</span>
-                    </a>
-                    <Link href="/admin/logout" method="post" as="button" className="admin-nav-link" style={{ border: 'none', background: 'transparent', width: '100%', textAlign: 'left', cursor: 'pointer', outline: 'none' }}>
-                        <LogOut size={20} />
-                        <span className="admin-nav-label">Cerrar Sesión</span>
-                    </Link>
-                </div>
-            </aside>
-
-            {/* Sidebar Overlay (Mobile) */}
-            {sidebarOpen && (
-                <div
-                    className="admin-sidebar-overlay"
-                    onClick={() => setSidebarOpen(false)}
-                    style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        width: '100vw',
-                        height: '100vh',
-                        background: 'rgba(0,0,0,0.5)',
-                        zIndex: 9998
-                    }}
-                />
-            )}
-
-            {/* Main Content */}
-            <main className="admin-main">
-                {/* Topbar */}
-                <header
-                    className="admin-topbar"
-                    style={{
-                        background: 'var(--admin-bg-panel)',
-                        borderBottom: '1px solid var(--admin-border)',
-                        ...((isMobile || isTablet) ? {
-                            position: 'fixed',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            width: '100vw',
-                            zIndex: 9990
-                        } : {})
-                    }}
-                >
-                    <div className="admin-topbar-left" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                        <button onClick={() => setSidebarOpen(true)} className="admin-topbar-menu">
-                            <Menu size={24} />
-                        </button>
-
-                        {/* App Launcher (Hidden to prevent Tailwind purge breaking the store) */}
-                        <div style={{ position: 'relative', display: 'none' }}>
-                            <button 
-                                onClick={() => setAppLauncherOpen(!appLauncherOpen)}
-                                style={{ 
-                                    background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '8px', 
-                                    color: 'var(--admin-text-main)', cursor: 'pointer', padding: '8px', borderRadius: '8px'
-                                }}
-                                className="app-launcher-btn hover:bg-gray-100"
-                            >
-                                <Grid size={22} color="#3b82f6" />
-                                <span style={{ fontWeight: 600, fontSize: '15px' }}>Plataforma</span>
-                            </button>
-
-                            {appLauncherOpen && (
-                                <div style={{
-                                    position: 'absolute', top: '100%', left: 0, marginTop: '8px',
-                                    width: '340px', background: '#fff', borderRadius: '12px',
-                                    boxShadow: '0 10px 40px rgba(0,0,0,0.15)', border: '1px solid #e5e7eb',
-                                    zIndex: 1000, overflow: 'hidden'
-                                }}>
-                                    <div style={{ padding: '16px', borderBottom: '1px solid #f3f4f6', background: '#f8fafc' }}>
-                                        <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#111827' }}>App Launcher (Clouds)</h3>
-                                        <p style={{ margin: 0, fontSize: '12px', color: '#6b7280', marginTop: '2px' }}>Cambia entre las aplicaciones de Novape</p>
-                                    </div>
-                                    <div style={{ padding: '12px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                                        <Link href="/admin/crm/dashboard" onClick={() => setAppLauncherOpen(false)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px 8px', borderRadius: '8px', textDecoration: 'none', color: '#1f2937', transition: 'background 0.2s' }} className="hover:bg-blue-50">
-                                            <Briefcase size={28} color="#3b82f6" style={{ marginBottom: '8px' }} />
-                                            <span style={{ fontSize: '13px', fontWeight: 600 }}>Sales Cloud</span>
-                                        </Link>
-                                        <Link href="/admin/inbox" onClick={() => setAppLauncherOpen(false)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px 8px', borderRadius: '8px', textDecoration: 'none', color: '#1f2937', transition: 'background 0.2s' }} className="hover:bg-green-50">
-                                            <MonitorSmartphone size={28} color="#10b981" style={{ marginBottom: '8px' }} />
-                                            <span style={{ fontSize: '13px', fontWeight: 600 }}>Service Cloud</span>
-                                        </Link>
-                                        <Link href="/admin/pedidos" onClick={() => setAppLauncherOpen(false)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px 8px', borderRadius: '8px', textDecoration: 'none', color: '#1f2937', transition: 'background 0.2s' }} className="hover:bg-purple-50">
-                                            <ShoppingCart size={28} color="#8b5cf6" style={{ marginBottom: '8px' }} />
-                                            <span style={{ fontSize: '13px', fontWeight: 600 }}>Commerce</span>
-                                        </Link>
-                                        <Link href="/admin/marketing/campaigns" onClick={() => setAppLauncherOpen(false)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px 8px', borderRadius: '8px', textDecoration: 'none', color: '#1f2937', transition: 'background 0.2s' }} className="hover:bg-orange-50">
-                                            <Mail size={28} color="#f59e0b" style={{ marginBottom: '8px' }} />
-                                            <span style={{ fontSize: '13px', fontWeight: 600 }}>Marketing</span>
-                                        </Link>
-                                    </div>
-                                    <div style={{ padding: '12px', borderTop: '1px solid #f3f4f6', textAlign: 'center' }}>
-                                        <Link href="/admin" onClick={() => setAppLauncherOpen(false)} style={{ color: '#3b82f6', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>
-                                            Ver Dashboard Principal (Analytics) →
-                                        </Link>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Global Search Autocomplete (Hidden to prevent Tailwind purge breaking the store) */}
-                        <div style={{ position: 'relative', marginLeft: '20px', display: 'none' }} className="hidden md:block">
-                            <div style={{ display: 'flex', alignItems: 'center', background: 'var(--admin-bg)', borderRadius: '20px', padding: '6px 16px', border: '1px solid var(--admin-border)', width: '300px' }}>
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--admin-text-muted)" strokeWidth="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                                <input 
-                                    type="text" 
-                                    placeholder="Buscar globalmente..." 
-                                    value={globalSearchQuery}
-                                    onChange={e => setGlobalSearchQuery(e.target.value)}
-                                    style={{ border: 'none', background: 'transparent', outline: 'none', marginLeft: '8px', fontSize: '14px', width: '100%', color: 'var(--admin-text-main)' }}
-                                />
-                                {isSearching && <span style={{ fontSize: '12px', color: 'var(--admin-text-muted)' }}>...</span>}
-                            </div>
-                            
-                            {showSearchDropdown && globalSearchResults && (
-                                <div style={{
-                                    position: 'absolute', top: '100%', left: 0, marginTop: '8px',
-                                    width: '100%', background: '#fff', borderRadius: '12px',
-                                    boxShadow: '0 10px 40px rgba(0,0,0,0.15)', border: '1px solid #e5e7eb',
-                                    zIndex: 1000, overflow: 'hidden', padding: '10px'
-                                }}>
-                                    {globalSearchResults.productos?.length > 0 && (
-                                        <div style={{ marginBottom: '10px' }}>
-                                            <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#9ca3af', textTransform: 'uppercase', marginBottom: '5px' }}>Productos</div>
-                                            {globalSearchResults.productos.map(p => (
-                                                <Link key={p.id} href={`/admin/productos/${p.id}/edit`} style={{ display: 'block', padding: '6px 8px', fontSize: '13px', color: '#374151', textDecoration: 'none', borderRadius: '6px' }} className="hover:bg-gray-100">
-                                                    {p.nombre} - S/ {p.precio}
-                                                </Link>
-                                            ))}
-                                        </div>
-                                    )}
-                                    {globalSearchResults.pedidos?.length > 0 && (
-                                        <div style={{ marginBottom: '10px' }}>
-                                            <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#9ca3af', textTransform: 'uppercase', marginBottom: '5px' }}>Pedidos</div>
-                                            {globalSearchResults.pedidos.map(p => (
-                                                <Link key={p.id} href={`/admin/pedidos/${p.id}`} style={{ display: 'block', padding: '6px 8px', fontSize: '13px', color: '#374151', textDecoration: 'none', borderRadius: '6px' }} className="hover:bg-gray-100">
-                                                    Pedido #{p.codigo} - {p.usuario?.nombres}
-                                                </Link>
-                                            ))}
-                                        </div>
-                                    )}
-                                    {(!globalSearchResults.productos?.length && !globalSearchResults.pedidos?.length && !globalSearchResults.usuarios?.length) && (
-                                        <div style={{ padding: '10px', textAlign: 'center', color: '#6b7280', fontSize: '13px' }}>
-                                            No se encontraron resultados
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                    <div className="admin-topbar-actions">
-                        <div style={{ position: 'relative' }}>
-                            <button
-                                className="admin-topbar-icon-btn"
-                                onClick={() => setShowNotifs(!showNotifs)}
-                            >
-                                <Bell size={20} />
-                                {notificaciones.length > 0 && <span className="notif-dot" style={{ position: 'absolute', top: '8px', right: '8px', width: '8px', height: '8px', background: '#DC2626', borderRadius: '50%' }}></span>}
-                            </button>
-
-                            {showNotifs && (
-                                <div style={{
-                                    position: 'absolute',
-                                    top: '100%',
-                                    right: 0,
-                                    width: '320px',
-                                    maxWidth: '90vw',
-                                    background: '#fff',
-                                    borderRadius: '12px',
-                                    boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
-                                    zIndex: 1000,
-                                    marginTop: '8px',
-                                    border: '1px solid #eee',
-                                    overflow: 'hidden'
-                                }}>
-                                    <div style={{ padding: '16px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 600 }}>Notificaciones</h3>
-                                        <span style={{ fontSize: '12px', background: '#8a2be2', color: '#fff', padding: '2px 8px', borderRadius: '12px' }}>{notificaciones.length} nuevas</span>
-                                    </div>
-                                    <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
-                                        {notificaciones.length === 0 ? (
-                                            <div style={{ padding: '32px 16px', textAlign: 'center', color: '#888', fontSize: '13px' }}>
-                                                No tienes notificaciones nuevas.
-                                            </div>
-                                        ) : (
-                                            notificaciones.map(n => (
-                                                <div
-                                                    key={n.id}
-                                                    onClick={() => markAsRead(n.id, n.link)}
-                                                    style={{ padding: '16px', borderBottom: '1px solid #f5f5f5', cursor: 'pointer', transition: 'background 0.2s', display: 'flex', gap: '12px', alignItems: 'flex-start', background: n.read ? 'transparent' : '#f0f9ff' }}
-                                                    onMouseOver={e => e.currentTarget.style.background = n.read ? '#f9f9f9' : '#e0f2fe'}
-                                                    onMouseOut={e => e.currentTarget.style.background = n.read ? 'transparent' : '#f0f9ff'}
-                                                >
-                                                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: `var(--admin-${n.color || 'blue'}-100, #e0f2fe)`, color: `var(--admin-${n.color || 'blue'}-600, #0284c7)`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                                        {n.icon === 'alert-triangle' ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg> :
-                                                         n.icon === 'upload' ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg> :
-                                                         <Bell size={16} />}
-                                                    </div>
-                                                    <div>
-                                                        <p style={{ margin: '0 0 2px', fontSize: '13px', color: '#111827', fontWeight: 600 }}>{n.title}</p>
-                                                        {n.body && <p style={{ margin: '0 0 4px', fontSize: '12px', color: '#4b5563', lineHeight: '1.4' }}>{n.body}</p>}
-                                                        <p style={{ margin: 0, fontSize: '11px', color: '#888' }}>{n.time}</p>
-                                                    </div>
-                                                </div>
-                                            ))
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                        <div className="admin-avatar" title={props.auth?.user?.nombres}>
-                            {props.auth?.user?.nombres ? props.auth.user.nombres.substring(0, 2).toUpperCase() : 'AD'}
-                        </div>
-                    </div>
-                </header>
-
-                <div
-                    className="admin-content"
-                    style={(isMobile || isTablet) ? {
-                        marginTop: 'calc(var(--admin-topbar-height) + 16px)'
-                    } : {}}
-                >
-                    {props.flash?.success && (
-                        <div style={{ background: '#10B981', color: 'white', padding: '15px 20px', borderRadius: '8px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 4px 6px rgba(16,185,129,0.2)' }}>
-                            <span style={{ fontWeight: 'bold' }}>{props.flash.success}</span>
-                        </div>
-                    )}
-                    {props.flash?.error && (
-                        <div style={{ background: '#EF4444', color: 'white', padding: '15px 20px', borderRadius: '8px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 4px 6px rgba(239,68,68,0.2)' }}>
-                            <span style={{ fontWeight: 'bold' }}>{props.flash.error}</span>
-                        </div>
-                    )}
-                    <AnimatePresence mode="wait">
-                        <PageTransition key={url}>
-                            {children}
-                        </PageTransition>
-                    </AnimatePresence>
-                </div>
-            </main>
-        </div>
+  }, []);
+  const read = async (notification = null) => {
+    setReading(true);
+    setNotificationError("");
+    try {
+      await axios.post(
+        notification
+          ? `/admin/notificaciones/${notification.id}/read`
+          : "/admin/notificaciones/read-all",
+      );
+      setNotifications((items) =>
+        items.map((item) =>
+          !notification || item.id === notification.id
+            ? { ...item, read: true }
+            : item,
+        ),
+      );
+      if (notification?.link?.startsWith("/admin")) {
+        setShowNotifications(false);
+        router.visit(notification.link);
+      }
+    } catch {
+      setNotificationError("No se pudo marcar como leída. Intenta de nuevo.");
+    } finally {
+      setReading(false);
+    }
+  };
+  const toggleGroup = (label) =>
+    setClosedGroups((items) =>
+      items.includes(label)
+        ? items.filter((item) => item !== label)
+        : [...items, label],
     );
+  const initials =
+    `${user?.nombres?.charAt(0) || "N"}${user?.apellidos?.charAt(0) || ""}`.toUpperCase();
+  const flash = props.flash?.error || props.flash?.success;
+  return (
+    <div
+      className={`admin-layout panel-shell ${collapsed ? "is-collapsed" : ""} ${mobile ? "mobile-open" : ""} ${section === "crm" ? "panel-crm" : ""}`}
+    >
+      <a href="#panel-content" className="panel-skip">
+        Ir al contenido
+      </a>
+      {mobile && (
+        <button
+          className="panel-sidebar-backdrop"
+          aria-label="Cerrar navegación"
+          onClick={closeMobile}
+        />
+      )}
+      <aside
+        className="admin-sidebar panel-sidebar"
+        ref={mobileDialog}
+        role={mobile ? "dialog" : undefined}
+        aria-modal={mobile || undefined}
+        aria-label="Navegación principal"
+      >
+        <div className="panel-brand">
+          <Link
+            href={
+              canAccess(user, "ver_dashboard")
+                ? "/admin"
+                : groups[0]?.items[0]?.href || "/admin/equipo"
+            }
+            aria-label="Inicio de Novape"
+            className="panel-brand-link"
+          >
+            <img src="/images/logo.png" alt="Novape" className="panel-brand-logo" />
+          </Link>
+          <button
+            type="button"
+            onClick={closeMobile}
+            className="panel-mobile-close panel-icon-button"
+            aria-label="Cerrar navegación"
+          >
+            <X size={19} />
+          </button>
+        </div>
+        <button
+          type="button"
+          className="panel-sidebar-search"
+          onClick={() => {
+            setMobile(false);
+            setPalette(true);
+          }}
+          title="Buscar en el panel (Ctrl+K)"
+        >
+          <Search size={17} />
+          <span>Buscar en el panel</span>
+          <kbd>⌘ K</kbd>
+        </button>
+        <nav className="panel-navigation" aria-label="Módulos del panel">
+          {groups.map((group) => {
+            const active = group.items.some((item) => activeItem(item, url));
+            const closed =
+              !collapsed && closedGroups.includes(group.label) && !active;
+            return (
+              <section className="panel-nav-group" key={group.label}>
+                <button
+                  type="button"
+                  className="panel-nav-group-title"
+                  onClick={() => toggleGroup(group.label)}
+                  aria-expanded={!closed}
+                  aria-controls={`nav-${group.label.replace(/\W/g, "-")}`}
+                >
+                  <span>{group.label}</span>
+                  <ChevronDown
+                    size={12}
+                    className={closed ? "is-closed" : ""}
+                  />
+                </button>
+                <div
+                  id={`nav-${group.label.replace(/\W/g, "-")}`}
+                  hidden={closed}
+                >
+                  {group.items.map((item) => (
+                    <Link
+                      href={item.href}
+                      key={item.href}
+                      title={item.label}
+                      aria-current={activeItem(item, url) ? "page" : undefined}
+                      className={`panel-nav-link ${activeItem(item, url) ? "active" : ""}`}
+                    >
+                      <item.icon size={18} strokeWidth={1.7} />
+                      <span>{item.label}</span>
+                      {activeItem(item, url) && (
+                        <span className="panel-active-dot" />
+                      )}
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            );
+          })}
+        </nav>
+        <footer className="panel-sidebar-footer">
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="panel-nav-link"
+            title="Abrir tienda"
+          >
+            <ExternalLink size={17} />
+            <span>Abrir tienda</span>
+            <ArrowUpRight size={14} />
+          </a>
+          <div className="panel-profile">
+            <span className="panel-avatar">{initials}</span>
+            <span className="panel-profile-text">
+              <strong>{user?.nombres || "Mi cuenta"}</strong>
+              <small>
+                {user?.roles?.map((role) => role.nombre).join(" · ") ||
+                  "Equipo Novape"}
+              </small>
+            </span>
+            <Link
+              href="/admin/logout"
+              method="post"
+              as="button"
+              title="Cerrar sesión"
+              aria-label="Cerrar sesión"
+              className="panel-icon-button"
+            >
+              <LogOut size={16} />
+            </Link>
+          </div>
+        </footer>
+      </aside>
+      <main className="admin-main panel-main">
+        <header className="admin-topbar panel-topbar">
+          <div className="panel-topbar-left">
+            <button
+              type="button"
+              className="panel-icon-button panel-desktop-menu"
+              aria-label={
+                collapsed ? "Expandir navegación" : "Contraer navegación"
+              }
+              onClick={() => setCollapsed((c) => !c)}
+            >
+              {collapsed ? (
+                <PanelLeftOpen size={19} />
+              ) : (
+                <PanelLeftClose size={19} />
+              )}
+            </button>
+            <button
+              type="button"
+              className="panel-icon-button panel-mobile-menu"
+              aria-label="Abrir navegación"
+              aria-expanded={mobile}
+              onClick={() => setMobile(true)}
+            >
+              <Menu size={21} />
+            </button>
+            <nav className="panel-breadcrumb" aria-label="Ubicación">
+              <span>{current?.group || "Espacio de trabajo"}</span>
+              <ChevronRight size={13} />
+              <strong>{title || current?.label || "Panel de control"}</strong>
+            </nav>
+          </div>
+          <div className="panel-topbar-actions">
+            <button
+              type="button"
+              className="panel-search-trigger"
+              onClick={() => setPalette(true)}
+              aria-label="Buscar en el panel"
+            >
+              <Search size={16} />
+              <span>Buscar</span>
+              <kbd>Ctrl K</kbd>
+            </button>
+            <div className="panel-notification-anchor" ref={notificationPanel}>
+              <button
+                type="button"
+                className="panel-icon-button"
+                onClick={() => {
+                  setShowNotifications((show) => !show);
+                  refreshNotifications();
+                }}
+                aria-label={`Notificaciones${unread ? `: ${unread} sin leer` : ""}`}
+                aria-expanded={showNotifications}
+              >
+                <Bell size={19} />
+                {unread > 0 && <span className="panel-notification-dot" />}
+              </button>
+              {showNotifications && (
+                <section
+                  className="panel-notifications"
+                  aria-label="Notificaciones"
+                >
+                  <header>
+                    <div>
+                      <strong>Notificaciones</strong>
+                      <small>
+                        {unread ? `${unread} sin leer` : "Estás al día"}
+                      </small>
+                    </div>
+                    <button
+                      type="button"
+                      className="panel-icon-button"
+                      title="Marcar todas como leídas"
+                      aria-label="Marcar todas como leídas"
+                      disabled={!unread || reading}
+                      onClick={() => read()}
+                    >
+                      <CheckCheck size={18} />
+                    </button>
+                    <button
+                      type="button"
+                      className="panel-icon-button"
+                      aria-label="Cerrar notificaciones"
+                      onClick={() => setShowNotifications(false)}
+                    >
+                      <X size={17} />
+                    </button>
+                  </header>
+                  {notificationError && (
+                    <div className="panel-inline-error" role="alert">
+                      {notificationError}
+                      <button type="button" onClick={refreshNotifications}>
+                        Reintentar
+                      </button>
+                    </div>
+                  )}
+                  <div className="panel-notification-list">
+                    {!notifications.length && !notificationError ? (
+                      <div className="panel-empty">
+                        <Bell size={25} />
+                        <strong>Sin notificaciones</strong>
+                        <span>
+                          Las novedades de tu operación aparecerán aquí.
+                        </span>
+                      </div>
+                    ) : (
+                      notifications.map((n) => (
+                        <button
+                          type="button"
+                          key={n.id}
+                          disabled={reading}
+                          className={`panel-notification ${n.read ? "" : "is-unread"}`}
+                          onClick={() => read(n)}
+                        >
+                          <span className="panel-notification-symbol">
+                            <Bell size={16} />
+                          </span>
+                          <span>
+                            <strong>{n.title}</strong>
+                            {n.body && <span>{n.body}</span>}
+                            <small>{n.time}</small>
+                          </span>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </section>
+              )}
+            </div>
+            <span
+              className="panel-avatar panel-topbar-avatar"
+              title={user?.nombres}
+            >
+              {initials}
+            </span>
+          </div>
+        </header>
+        {navigating && (
+          <div
+            className="panel-route-progress"
+            role="progressbar"
+            aria-label="Cargando página"
+          />
+        )}
+        <div
+          className="admin-content panel-content"
+          id="panel-content"
+          tabIndex={-1}
+        >
+          {flash && dismissed !== flash && (
+            <div
+              className={`panel-flash ${props.flash?.error ? "is-error" : "is-success"}`}
+              role={props.flash?.error ? "alert" : "status"}
+            >
+              <span>{flash}</span>
+              <button
+                type="button"
+                className="panel-icon-button"
+                aria-label="Cerrar aviso"
+                onClick={() => setDismissed(flash)}
+              >
+                <X size={17} />
+              </button>
+            </div>
+          )}
+          {headerActions && (
+            <div className="panel-page-actions">{headerActions}</div>
+          )}
+          {children}
+        </div>
+      </main>
+      <PanelCommandPalette open={palette} close={closePalette} user={user} />
+    </div>
+  );
 }

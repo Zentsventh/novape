@@ -2,13 +2,18 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\IndexChatbotKnowledge;
 use App\Models\Usuario;
 use App\Services\Chatbot\ChatbotService;
+use App\Services\Chatbot\ChatbotSettings;
+use App\Services\Chatbot\EmbeddingService;
 use App\Services\Chatbot\KnowledgeService;
+use Dompdf\Dompdf;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 use ZipArchive;
 
@@ -21,6 +26,7 @@ class ChatbotKnowledgeTest extends TestCase
         $user = Usuario::factory()->create();
         $id = DB::table('rol')->where('nombre', $role)->value('id') ?? DB::table('rol')->insertGetId(['nombre' => $role]);
         DB::table('usuario_rol')->insert(['usuario_id' => $user->id, 'rol_id' => $id]);
+
         return $user;
     }
 
@@ -65,7 +71,9 @@ class ChatbotKnowledgeTest extends TestCase
         try {
             $this->actingAs($this->worker(), 'admin')->post('/admin/api/chatbot-knowledge', ['title' => 'Manual', 'enabled' => '0', 'file' => new UploadedFile($path, 'manual.docx', null, null, true)], ['Accept' => 'application/json'])->assertCreated();
             $this->assertDatabaseHas('chatbot_knowledge_sources', ['content' => 'Garantía de doce meses para refrigeradoras.']);
-        } finally { @unlink($path); }
+        } finally {
+            @unlink($path);
+        }
     }
 
     public function test_invalid_documents_and_empty_text_are_rejected(): void
@@ -80,7 +88,7 @@ class ChatbotKnowledgeTest extends TestCase
 
     public function test_pdf_text_is_extracted(): void
     {
-        $pdf = new \Dompdf\Dompdf;
+        $pdf = new Dompdf;
         $pdf->loadHtml('<p>La garantia cubre fallas de fabrica durante doce meses.</p>');
         $pdf->render();
         $this->actingAs($this->worker(), 'admin')->post('/admin/api/chatbot-knowledge', ['title' => 'Garantía', 'enabled' => '0', 'file' => UploadedFile::fake()->createWithContent('manual.pdf', $pdf->output())], ['Accept' => 'application/json'])->assertCreated();
@@ -98,6 +106,7 @@ class ChatbotKnowledgeTest extends TestCase
         $this->assertStringContainsString('doce meses', $reply);
         Http::assertSent(function ($request) {
             $prompt = $request['systemInstruction']['parts'][0]['text'];
+
             return str_contains($prompt, 'Garantía oficial') && ! str_contains($prompt, 'Borrador secreto') && ! str_contains($prompt, '24-48h');
         });
     }
@@ -107,7 +116,80 @@ class ChatbotKnowledgeTest extends TestCase
         app(KnowledgeService::class)->save('Garantía', str_repeat('Garantía para refrigeradoras y electrodomésticos. ', 1500), 'text', true);
         $sources = app(KnowledgeService::class)->search('garantia refrigeradoras');
         $this->assertCount(6, $sources);
-        foreach ($sources as $source) $this->assertLessThanOrEqual(1200, mb_strlen($source['content']));
+        foreach ($sources as $source) {
+            $this->assertLessThanOrEqual(1200, mb_strlen($source['content']));
+        }
         $this->assertSame([], app(KnowledgeService::class)->search('zzzzzz'));
+    }
+
+    public function test_settings_are_validated_persisted_and_do_not_expose_keys(): void
+    {
+        config(['services.gemini.key' => 'private-key']);
+        $this->actingAs($this->worker(), 'admin');
+        $this->getJson('/admin/api/chatbot-knowledge/settings')->assertOk()->assertJsonPath('configured', true)->assertDontSee('private-key');
+        $data = ['model' => 'gemini-2.5-flash', 'temperature' => 0.2, 'max_output_tokens' => 1200, 'instructions' => 'Habla en español.', 'fallback' => 'Solicita un asesor.', 'semantic_search' => false];
+        $this->putJson('/admin/api/chatbot-knowledge/settings', $data)->assertOk()->assertJsonPath('settings.instructions', 'Habla en español.');
+        $this->getJson('/admin/api/chatbot-knowledge/settings')->assertJsonPath('settings.temperature', 0.2);
+        $this->putJson('/admin/api/chatbot-knowledge/settings', array_replace($data, ['model' => '../secret']))->assertUnprocessable();
+    }
+
+    public function test_indexing_is_queued_and_stale_jobs_cannot_index_new_content(): void
+    {
+        Queue::fake();
+        app(ChatbotSettings::class)->save(['semantic_search' => true]);
+        $service = app(KnowledgeService::class);
+        $id = $service->save('Garantía', 'La garantía cubre defectos de fabricación en los equipos.', 'text', true);
+        Queue::assertPushed(IndexChatbotKnowledge::class, fn ($job) => $job->sourceId === $id && $job->version === 1);
+        $service->save('Garantía', 'La nueva política permite solicitar atención en nuestra tienda.', 'text', true, $id);
+        Http::fake();
+        (new IndexChatbotKnowledge($id, 1))->handle(app(EmbeddingService::class));
+        Http::assertNothingSent();
+        $this->assertDatabaseHas('chatbot_knowledge_sources', ['id' => $id, 'version' => 2, 'index_status' => 'pending']);
+    }
+
+    public function test_semantic_search_finds_related_content_without_matching_words_and_excludes_drafts(): void
+    {
+        $knowledge = app(KnowledgeService::class);
+        $id = $knowledge->save('Protección de equipos', 'Cubrimos desperfectos técnicos de origen durante doce meses.', 'text', true);
+        $draft = $knowledge->save('Secreto', 'Información interna para empleados exclusivamente.', 'text', false);
+        $vector = array_fill(0, 768, 0);
+        $vector[0] = 1;
+        DB::table('chatbot_knowledge_chunks')->update(['embedding' => json_encode($vector), 'embedding_model' => 'gemini-embedding-001']);
+        DB::table('chatbot_knowledge_sources')->whereIn('id', [$id, $draft])->update(['index_status' => 'ready']);
+        app(ChatbotSettings::class)->save(['semantic_search' => true]);
+        config(['services.gemini.key' => 'fake']);
+        Http::fake(['*' => Http::response(['embedding' => ['values' => $vector]])]);
+        $results = $knowledge->search('garantía refrigeradora');
+        $this->assertCount(1, $results);
+        $this->assertSame($id, $results[0]['source_id']);
+        $this->assertSame('semantic', $results[0]['method']);
+        Http::fake(['*' => Http::response([], 429)]);
+        $this->assertNotEmpty($knowledge->search('desperfectos'));
+    }
+
+    public function test_parallel_tool_calls_preserve_signatures_and_all_results(): void
+    {
+        config(['services.gemini.key' => 'fake', 'services.gemini.secondary_key' => null]);
+        $parts = [['functionCall' => ['name' => 'buscar_productos', 'args' => ['query' => 'zzzzzz']], 'thoughtSignature' => 'signature'],
+            ['functionCall' => ['name' => 'actualizar_datos_cliente', 'args' => ['nombre' => 'Prueba']]]];
+        Http::fake(['*' => Http::sequence()->push(['candidates' => [['content' => ['role' => 'model', 'parts' => $parts]]]])
+            ->push(['candidates' => [['content' => ['parts' => [['text' => 'Respuesta verificada.']]]]]])]);
+        $reply = app(ChatbotService::class)->getReply([['role' => 'user', 'text' => 'Busco un equipo.']], sandbox: true);
+        $this->assertSame('Respuesta verificada.', $reply);
+        Http::assertSent(fn ($request) => isset($request['contents'][1]['parts'][0]['thoughtSignature']) && count($request['contents'][2]['parts']) === 2
+            && str_contains(json_encode($request['contents'][2]), 'no encontrada'));
+        $this->assertDatabaseCount('omnichannel_contacts', 0);
+    }
+
+    public function test_simulator_requires_configuration_and_runs_without_creating_conversations(): void
+    {
+        $this->actingAs($this->worker(), 'admin');
+        config(['services.gemini.key' => null, 'services.gemini.secondary_key' => null]);
+        $body = ['messages' => [['role' => 'user', 'text' => 'Hola']]];
+        $this->postJson('/admin/api/chatbot-knowledge/test', $body)->assertStatus(503);
+        config(['services.gemini.key' => 'fake']);
+        Http::fake(['*' => Http::response(['candidates' => [['content' => ['parts' => [['text' => 'Bienvenido a Novape.']]]]]])]);
+        $this->postJson('/admin/api/chatbot-knowledge/test', $body)->assertOk()->assertJsonPath('reply', 'Bienvenido a Novape.');
+        $this->assertDatabaseCount('omnichannel_conversations', 0);
     }
 }

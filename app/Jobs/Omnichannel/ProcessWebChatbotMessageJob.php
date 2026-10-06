@@ -2,11 +2,11 @@
 
 namespace App\Jobs\Omnichannel;
 
+use App\Events\Omnichannel\ConversationUpdated;
+use App\Events\Omnichannel\NewMessageReceived;
 use App\Models\Omnichannel\OmnichannelConversation;
 use App\Models\Omnichannel\OmnichannelMessage;
 use App\Services\Chatbot\ChatbotService;
-use App\Events\Omnichannel\ConversationUpdated;
-use App\Events\Omnichannel\NewMessageReceived;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -30,32 +30,36 @@ class ProcessWebChatbotMessageJob implements ShouldQueue
     public function handle(ChatbotService $chatbotService): void
     {
         $conversation = OmnichannelConversation::find($this->conversationId);
-        
-        if (!$conversation || $conversation->is_bot_paused) {
+
+        if (! $conversation || $conversation->is_bot_paused) {
             return; // If bot was paused in the meantime, abort.
         }
 
         try {
-            DB::beginTransaction();
+            $history = OmnichannelMessage::where('conversation_id', $this->conversationId)->where('is_internal_note', false)
+                ->orderByDesc('id')->limit(20)->get()->reverse()->map(fn ($message) => [
+                    'role' => $message->direction === 'inbound' ? 'user' : 'bot', 'text' => $message->content,
+                ])->values()->all();
+            $reply = $chatbotService->getReply($history, $this->conversationId, $this->contactId);
 
-            $reply = $chatbotService->getReply($this->messagesHistory, $this->conversationId, $this->contactId);
+            DB::beginTransaction();
 
             if ($reply) {
                 $outboundMessage = OmnichannelMessage::create([
                     'conversation_id' => $this->conversationId,
-                    'contact_id'      => $this->contactId,
-                    'channel'         => 'web',
-                    'direction'       => 'outbound',
-                    'message_type'    => 'text',
-                    'content'         => $reply,
-                    'status'          => 'sent',
+                    'contact_id' => $this->contactId,
+                    'channel' => 'web',
+                    'direction' => 'outbound',
+                    'message_type' => 'text',
+                    'content' => $reply,
+                    'status' => 'sent',
                     'is_ai_generated' => true,
                 ]);
 
                 $conversation->update([
                     'last_message_preview' => mb_substr($reply, 0, 50),
-                    'last_message_at'      => now(),
-                    'message_count'        => DB::raw('message_count + 1'),
+                    'last_message_at' => now(),
+                    'message_count' => DB::raw('message_count + 1'),
                 ]);
 
                 DB::commit();
@@ -68,8 +72,10 @@ class ProcessWebChatbotMessageJob implements ShouldQueue
             }
 
         } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error en ProcessWebChatbotMessageJob: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
+            Log::error('Error en ProcessWebChatbotMessageJob: '.$e->getMessage()."\n".$e->getTraceAsString());
         }
     }
 }

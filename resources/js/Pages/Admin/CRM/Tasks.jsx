@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Head, router, Link, useForm } from '@inertiajs/react';
 import TwentyCrmLayout from '../../../Layouts/TwentyCrmLayout';
 import { CheckCircle, Circle, Clock, PhoneCall, Mail, FileText, Calendar, AlertCircle, Trash2, Search, Filter, Plus, Edit2 } from 'lucide-react';
@@ -11,7 +11,7 @@ export default function Tasks({ tasks = [] }) {
     const [searchQuery, setSearchQuery] = useState('');
     const [filterType, setFilterType] = useState('todas');
 
-    const { data, setData, post, put, reset, errors, clearErrors } = useForm({
+    const { data, setData, post, put, reset, errors, clearErrors, processing } = useForm({
         id: null,
         deal_id: '',
         empresa_id: '',
@@ -32,7 +32,7 @@ export default function Tasks({ tasks = [] }) {
                 tipo: task.tipo || 'tarea',
                 contenido: task.contenido || '',
                 // Slicing to correctly format datetime-local input YYYY-MM-DDTHH:mm
-                fecha_vencimiento: task.fecha_vencimiento ? new Date(task.fecha_vencimiento).toISOString().slice(0, 16) : ''
+                fecha_vencimiento: task.fecha_vencimiento ? (() => { const date = new Date(task.fecha_vencimiento); return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}T${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`; })() : ''
             });
         } else {
             reset();
@@ -44,9 +44,11 @@ export default function Tasks({ tasks = [] }) {
         setDrawerOpen(false);
         reset();
     };
+    useEffect(() => { if (new URLSearchParams(window.location.search).get('create') === 'true') openDrawer(); }, []);
 
     const submitTask = (e) => {
         e.preventDefault();
+        if (processing) return;
         const isUpdate = !!data.id;
         const routeStr = isUpdate ? `/admin/crm/tasks/${data.id}` : '/admin/crm/tasks';
         
@@ -777,10 +779,17 @@ export default function Tasks({ tasks = [] }) {
                             value={data.contenido}
                             onChange={e => setData('contenido', e.target.value)}
                             rows={3}
+                            required
+                            maxLength={5000}
                         />
                         {errors.contenido && <span className="twenty-error" style={{color: '#ef4444', fontSize: '12px', marginTop: '2px'}}>{errors.contenido}</span>}
                     </div>
 
+                    <div className="premium-form-group">
+                        <RemoteSelect label="Empresa asociada" endpoint="/admin/crm/selectores/empresas"
+                            value={data.empresa_id} onChange={value => setData('empresa_id', value)} />
+                        {errors.empresa_id && <span className="twenty-error">{errors.empresa_id}</span>}
+                    </div>
                     <div className="premium-form-group">
                         <RemoteSelect label="Oportunidad asociada" endpoint="/admin/crm/selectores/oportunidades"
                             value={data.deal_id} onChange={value => setData('deal_id', value)}
@@ -820,8 +829,8 @@ export default function Tasks({ tasks = [] }) {
                         <button type="button" className="premium-btn-secondary" onClick={closeDrawer}>
                             Cancelar
                         </button>
-                        <button type="submit" className="premium-btn-primary">
-                            {data.id ? 'Guardar Cambios' : 'Crear Tarea'}
+                        <button type="submit" className="premium-btn-primary" disabled={processing}>
+                            {processing ? 'Guardando…' : data.id ? 'Guardar Cambios' : 'Crear Tarea'}
                         </button>
                     </div>
                 </form>

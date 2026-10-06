@@ -1,62 +1,62 @@
 /* ========================================
-   NOVAPE ADMIN – White + Purple Premium
-   Fondo: #ffffff | Acento: #8a2be2
+   NOVAPE ADMIN – Elegant Monochromatic Blue
+   Fondo: #ffffff | Acento: #004797
    ======================================== */
 
 
 :root {
-    /* Primary palette - Elegant Blue & Cyan (Inspired by reference) */
-    --admin-primary: #007BFF; /* Deep vibrant blue */
-    --admin-primary-light: #4D9CFF;
-    --admin-primary-lighter: #E6F2FF;
-    --admin-primary-glow: rgba(0, 123, 255, 0.3);
-    --admin-primary-dark: #0056B3;
+    /* Primary palette - Elegant Blue (#004797) */
+    --admin-primary: #004797;
+    --admin-primary-light: #3379C2;
+    --admin-primary-lighter: #E5F0FA;
+    --admin-primary-glow: rgba(0, 71, 151, 0.2);
+    --admin-primary-dark: #003670;
     
-    --admin-accent: #00D4FF; /* Cyan accent */
-    --admin-accent-glow: rgba(0, 212, 255, 0.4);
+    --admin-accent: #00A3E0;
+    --admin-accent-glow: rgba(0, 163, 224, 0.3);
 
     /* Light backgrounds */
-    --admin-bg: #F4F7F6;
+    --admin-bg: #F0F3F8;
     --admin-surface: #FFFFFF;
     --admin-card-bg: #FFFFFF;
     --admin-card-hover: #F8FAFC;
 
     /* Sidebar - Elegant Blue Gradient Theme */
-    --admin-sidebar-bg: linear-gradient(135deg, #0A48B3 0%, #007BFF 100%);
-    --admin-sidebar-hover: rgba(255, 255, 255, 0.15);
-    --admin-sidebar-active-bg: rgba(255, 255, 255, 0.2);
-    --admin-sidebar-text: rgba(255, 255, 255, 0.85);
+    --admin-sidebar-bg: linear-gradient(135deg, #001f3f 0%, #004797 100%);
+    --admin-sidebar-hover: rgba(255, 255, 255, 0.1);
+    --admin-sidebar-active-bg: rgba(255, 255, 255, 0.15);
+    --admin-sidebar-text: rgba(255, 255, 255, 0.75);
     --admin-sidebar-active-text: #FFFFFF;
 
     /* Text */
-    --admin-text-main: #111827;
-    --admin-text-secondary: #4B5563;
-    --admin-text-muted: #9CA3AF;
+    --admin-text-main: #1E293B;
+    --admin-text-secondary: #475569;
+    --admin-text-muted: #64748B;
 
     /* Borders */
-    --admin-border: #E5E7EB;
-    --admin-border-light: #F3F4F6;
+    --admin-border: #E1E7F0;
+    --admin-border-light: #F0F3F8;
 
-    /* Status */
-    --admin-success: #10B981;
-    --admin-success-bg: rgba(16, 185, 129, 0.1);
-    --admin-warning: #F59E0B;
-    --admin-warning-bg: rgba(245, 158, 11, 0.1);
-    --admin-error: #EF4444;
-    --admin-error-bg: rgba(239, 68, 68, 0.1);
-    --admin-info: #3B82F6;
-    --admin-info-bg: rgba(59, 130, 246, 0.1);
+    /* Status - Monochromatic/Elegant hints */
+    --admin-success: #004797;
+    --admin-success-bg: #E5F0FA;
+    --admin-warning: #3379C2;
+    --admin-warning-bg: #F0F3F8;
+    --admin-error: #003670;
+    --admin-error-bg: #E5F0FA;
+    --admin-info: #1A6BB8;
+    --admin-info-bg: #E6F0FA;
 
     /* Gradients */
-    --admin-gradient-purple: linear-gradient(135deg, #a855f7 0%, #8b5cf6 50%, #6d28d9 100%);
-    --admin-gradient-soft: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+    --admin-gradient-primary: linear-gradient(135deg, #1A6BB8 0%, #004797 50%, #002851 100%);
+    --admin-gradient-soft: linear-gradient(135deg, #F0F3F8 0%, #E5F0FA 100%);
 
-    /* Shadows */
-    --admin-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --admin-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --admin-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    --admin-shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-    --admin-shadow-glow: 0 10px 25px -5px rgba(139, 92, 246, 0.4);
+    /* Shadows - Extra Soft for Elegance */
+    --admin-shadow-sm: 0 2px 4px rgba(0, 31, 63, 0.03);
+    --admin-shadow-md: 0 4px 8px rgba(0, 31, 63, 0.04), 0 2px 4px rgba(0, 31, 63, 0.02);
+    --admin-shadow-lg: 0 12px 24px rgba(0, 31, 63, 0.05), 0 4px 8px rgba(0, 31, 63, 0.03);
+    --admin-shadow-card: 0 4px 12px rgba(0, 31, 63, 0.04), 0 1px 3px rgba(0, 31, 63, 0.02);
+    --admin-shadow-glow: 0 10px 30px rgba(0, 71, 151, 0.15);
 
     /* Sizing */
     --admin-sidebar-width: 260px;
@@ -329,7 +329,7 @@ body { background: var(--admin-bg); margin: 0; padding: 0; }
     position: absolute;
     top: 5px; right: 5px;
     width: 7px; height: 7px;
-    background: var(--admin-accent-pink);
+    background: var(--admin-primary-light);
     border-radius: 50%;
     border: 2px solid #FFF;
 }
@@ -337,7 +337,7 @@ body { background: var(--admin-bg); margin: 0; padding: 0; }
 .admin-avatar {
     width: 36px; height: 36px;
     border-radius: 50%;
-    background: var(--admin-gradient-purple);
+    background: var(--admin-gradient-primary);
     color: white;
     display: flex;
     align-items: center;
@@ -397,7 +397,7 @@ body { background: var(--admin-bg); margin: 0; padding: 0; }
 }
 
 .admin-stat-card:hover {
-    border-color: rgba(138,43,226,0.15);
+    border-color: var(--admin-primary-glow);
     box-shadow: var(--admin-shadow-glow);
     transform: translateY(-2px);
 }
@@ -642,7 +642,7 @@ body { background: var(--admin-bg); margin: 0; padding: 0; }
     text-decoration: none;
 }
 
-.admin-btn-coral:hover { background: #9333EA; }
+.admin-btn-coral:hover { background: var(--admin-primary-dark); }
 
 .admin-btn-outline {
     border: 1px solid var(--admin-border);
@@ -801,7 +801,7 @@ select.admin-form-input { appearance: auto; cursor: pointer; }
     top: 4px; right: 4px;
     width: 22px; height: 22px;
     border-radius: 50%;
-    background: rgba(220,38,38,0.85);
+    background: var(--admin-primary-dark);
     color: white;
     border: none;
     cursor: pointer;
@@ -818,7 +818,7 @@ select.admin-form-input { appearance: auto; cursor: pointer; }
 .admin-image-grid-item .order-badge {
     position: absolute;
     bottom: 4px; left: 4px;
-    background: rgba(138,43,226,0.85);
+    background: var(--admin-primary);
     color: white;
     font-size: 10px;
     padding: 2px 6px;

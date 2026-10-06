@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
-import { Head, Link, useForm } from '@inertiajs/react';
+import React, { useCallback, useRef, useState } from 'react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import AdminLayout from '../../../Layouts/AdminLayout';
 import axios from 'axios';
 import { useConfirm } from '@/Contexts/ConfirmContext';
+import { canAccess } from '../../../Components/Admin/navigation';
+import useDialog from '../../../Components/Admin/useDialog';
 
 
 export default function Form({ producto, marcas, categorias, proveedores, listaEspecificaciones = [] }) {
     const confirmDialog = useConfirm();
+    const canCreateCategory = canAccess(usePage().props.auth?.user, 'gestionar_categorias');
 
     const isEditing = !!producto;
     
@@ -48,6 +51,10 @@ export default function Form({ producto, marcas, categorias, proveedores, listaE
     const [newCatNombre, setNewCatNombre] = useState('');
     const [newCatPadreId, setNewCatPadreId] = useState('');
     const [isSavingCat, setIsSavingCat] = useState(false);
+    const [categoryError, setCategoryError] = useState('');
+    const categoryDialog = useRef(null);
+    const closeCategory = useCallback(() => setShowCatModal(false), []);
+    useDialog(showCatModal, categoryDialog, closeCategory);
 
     const submit = async (e) => {
         e.preventDefault();
@@ -107,9 +114,11 @@ export default function Form({ producto, marcas, categorias, proveedores, listaE
 
     const handleSaveNewCategory = async (e) => {
         e.preventDefault();
+        if (isSavingCat) return;
         setIsSavingCat(true);
+        setCategoryError('');
         try {
-            const res = await axios.post('/api/categorias', {
+            const res = await axios.post('/admin/categorias/api', {
                 nombre: newCatNombre,
                 categoria_padre_id: newCatPadreId || null
             });
@@ -123,7 +132,7 @@ export default function Form({ producto, marcas, categorias, proveedores, listaE
                 }
             }
         } catch (error) {
-            alert('Error al crear categoría');
+            setCategoryError(Object.values(error.response?.data?.errors || {}).flat().join(' ') || error.response?.data?.message || 'No se pudo crear la categoría. Intenta de nuevo.');
         } finally {
             setIsSavingCat(false);
         }
@@ -356,7 +365,7 @@ export default function Form({ producto, marcas, categorias, proveedores, listaE
                         <div style={{ background: 'var(--admin-bg-panel)', padding: '20px', borderRadius: '12px', border: '1px solid var(--admin-border)' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                                 <label style={{ display: 'block', margin: 0, fontWeight: 'bold', color: 'var(--admin-text-main)' }}>Categorías del Producto</label>
-                                <button type="button" onClick={() => setShowCatModal(true)} style={{ background: 'var(--admin-bg-body)', color: '#004797', border: '1px solid #004797', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>+ Nueva Categoría</button>
+                                {canCreateCategory && <button type="button" onClick={() => setShowCatModal(true)} style={{ background: 'var(--admin-bg-body)', color: '#004797', border: '1px solid #004797', padding: '6px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer' }}>+ Nueva Categoría</button>}
                             </div>
                             
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
@@ -450,9 +459,10 @@ export default function Form({ producto, marcas, categorias, proveedores, listaE
             {/* Modal Nueva Categoria */}
             {showCatModal && (
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
-                    <div style={{ background: 'white', padding: '30px', borderRadius: '12px', width: '100%', maxWidth: '400px' }}>
+                    <div ref={categoryDialog} role="dialog" aria-modal="true" aria-label="Nueva categoría" style={{ background: 'white', padding: '30px', borderRadius: '12px', width: '100%', maxWidth: '400px' }}>
                         <h2 style={{ margin: '0 0 20px 0', fontSize: '20px', fontWeight: 'bold', color: 'var(--admin-text-main)' }}>Nueva Categoría</h2>
                         <form onSubmit={handleSaveNewCategory} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                            {categoryError && <div className="panel-inline-error" role="alert">{categoryError}</div>}
                             <div>
                                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '13px' }}>Nombre</label>
                                 <input type="text" value={newCatNombre} onChange={e => setNewCatNombre(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }} required placeholder="Ej: Smartphones" />

@@ -45,9 +45,11 @@ export default function Pipeline({ pipeline, dealPages, query = '' }) {
         }
         setDrawerOpen(true);
     };
+    useEffect(() => { if (new URLSearchParams(window.location.search).get('create') === 'true') openDrawer(); }, []);
 
     const submitDeal = (e) => {
         e.preventDefault();
+        if (processing) return;
         if (data.id) {
             put(`/admin/crm/deals/${data.id}`, {
                 preserveScroll: true,
@@ -376,6 +378,7 @@ export default function Pipeline({ pipeline, dealPages, query = '' }) {
                         onDragEnd={handleDragEnd} 
                         onDealClick={handleDealClick}
                         onDealEdit={openDrawer}
+                        onDealCreate={stageId => { openDrawer(); setData('stage_id', stageId); }}
                         onDealDelete={deleteDeal}
                     />
                 </div>
