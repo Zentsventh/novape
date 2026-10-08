@@ -265,7 +265,7 @@ export default function PanelAssistant() {
           setOpen(!open);
         }}
       >
-        <Bot size={20} /> Asistente del panel
+        {open ? <X size={28} color="#000" style={{background: '#fff', borderRadius: '50%', padding: '5px', boxShadow: '0 4px 10px rgba(0,0,0,0.1)'}} /> : <img src="/images/chatbot_novape_panel.png" alt="Asistente del panel" />}
       </button>
     </div>
   );

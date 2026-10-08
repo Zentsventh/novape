@@ -9,8 +9,18 @@
 .efe-carousel-track {
     display: flex;
     gap: 16px;
-    transition: transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     padding: 8px 0;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.efe-carousel-track::-webkit-scrollbar {
+    display: none;
+}
+.efe-carousel-track > div {
+    scroll-snap-align: start;
 }
 
 /* Flechas de navegación – semicírculos azules premium */

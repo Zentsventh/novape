@@ -14,7 +14,7 @@ class SitemapController extends Controller
 
     public function index()
     {
-        $xml = $this->storefrontService->generateSitemapXml();
+        $xml = \Illuminate\Support\Facades\Cache::remember('store_sitemap_v2_'.sha1(url('/')), 300, fn () => $this->storefrontService->generateSitemapXml());
         return response($xml)->header('Content-Type', 'text/xml');
     }
 }

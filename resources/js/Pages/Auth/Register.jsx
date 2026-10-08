@@ -123,23 +123,23 @@ export default function Register({ errors }) {
 
                     <form onSubmit={handleSubmit} className="auth-form">
                         <div className="form-group">
-                            <input type="text" name="nombres" value={form.nombres} onChange={handleChange} placeholder="Nombres" required className="auth-input" />
+                            <input type="text" name="nombres" aria-label="Nombres" value={form.nombres} onChange={handleChange} placeholder="Nombres" required className="auth-input" />
                             {errors?.nombres && <div className="error-msg">{errors.nombres}</div>}
                         </div>
                         <div className="form-group">
-                            <input type="text" name="apellidos" value={form.apellidos} onChange={handleChange} placeholder="Apellidos" required className="auth-input" />
+                            <input type="text" name="apellidos" aria-label="Apellidos" value={form.apellidos} onChange={handleChange} placeholder="Apellidos" required className="auth-input" />
                             {errors?.apellidos && <div className="error-msg">{errors.apellidos}</div>}
                         </div>
                         
                         <div className="form-group">
                             <div className="form-row">
-                                <select name="tipo_documento" value={form.tipo_documento} onChange={handleChange} className="auth-select fixed-width" style={{ width: '120px' }}>
+                                <select name="tipo_documento" aria-label="Tipo de documento" value={form.tipo_documento} onChange={handleChange} className="auth-select fixed-width" style={{ width: '120px' }}>
                                     <option value="DNI">DNI</option>
-                                    <option value="RUC">RUC</option>
+                                    
                                     <option value="CE">CE</option>
                                     <option value="PASAPORTE">PASAPORTE</option>
                                 </select>
-                                <input type="text" name="dni" value={form.dni} onChange={handleChange} placeholder="Número de documento" required className="auth-input" />
+                                <input type="text" name="dni" aria-label="Número de documento" value={form.dni} onChange={handleChange} placeholder="Número de documento" required className="auth-input" />
                                 <button 
                                     type="button" 
                                     onClick={buscarDocumento} 
@@ -163,7 +163,7 @@ export default function Register({ errors }) {
                         </div>
 
                         <div className="form-group">
-                            <input type="email" name="email" value={form.email} onChange={handleChange} placeholder="Correo electrónico" required className="auth-input" />
+                            <input type="email" name="email" aria-label="Correo electrónico" value={form.email} onChange={handleChange} placeholder="Correo electrónico" required className="auth-input" />
                             {errors?.email && <div className="error-msg">{errors.email}</div>}
                         </div>
 
@@ -172,7 +172,7 @@ export default function Register({ errors }) {
                                 <div className="country-code fixed-width">
                                     +51
                                 </div>
-                                <input type="text" name="telefono" value={form.telefono} onChange={handleChange} placeholder="Celular" required className="auth-input" />
+                                <input type="text" name="telefono" aria-label="Celular" value={form.telefono} onChange={handleChange} placeholder="Celular" required className="auth-input" />
                             </div>
                             {errors?.telefono && <div className="error-msg">{errors.telefono}</div>}
                         </div>
@@ -180,7 +180,7 @@ export default function Register({ errors }) {
                         <div className="form-group">
                             <input 
                                 type={showPassword ? "text" : "password"} 
-                                name="password" 
+                                name="password" aria-label="Contraseña" 
                                 value={form.password} 
                                 onChange={handleChange} 
                                 placeholder="Contraseña" 
@@ -209,7 +209,7 @@ export default function Register({ errors }) {
                         <div className="form-group">
                             <input 
                                 type={showConfirmPassword ? "text" : "password"} 
-                                name="password_confirmation" 
+                                name="password_confirmation" aria-label="Confirmar contraseña" 
                                 value={form.password_confirmation} 
                                 onChange={handleChange} 
                                 placeholder="Ingresar la contraseña nuevamente" 

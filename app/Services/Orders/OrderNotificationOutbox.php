@@ -12,13 +12,13 @@ final class OrderNotificationOutbox
 {
     public static function record(Pedido $order): void
     {
+        if ($order->getAttribute('seed_batch')) return;
         $user = $order->usuario;
-        if (! $user) {
-            return;
-        }
-        $payload = ['codigo' => $order->codigo, 'estado' => $order->estado, 'nombres' => $user->nombres,
-            'tracking_number' => $order->tracking_number, 'courier_name' => $order->courier_name];
-        foreach (['email' => $user->email, 'whatsapp' => $user->telefono] as $channel => $destination) {
+        $address = $order->direccion_envio_snapshot ?? [];
+        $payload = ['codigo' => $order->codigo, 'estado' => $order->estado, 'nombres' => $address['nombres'] ?? $user?->nombres ?? 'Cliente',
+            'tracking_number' => $order->tracking_number, 'courier_name' => $order->courier_name,
+            'delivery_status' => $order->envio?->estado, 'pickup' => $address['pickup'] ?? null];
+        foreach (['email' => $address['email'] ?? $user?->email, 'whatsapp' => $address['celular'] ?? $user?->telefono] as $channel => $destination) {
             if (! $destination || ($channel === 'email' && ! filter_var($destination, FILTER_VALIDATE_EMAIL))) {
                 continue;
             }
@@ -27,7 +27,7 @@ final class OrderNotificationOutbox
                 'status' => 'pending', 'created_at' => now(), 'updated_at' => now()]);
             DB::afterCommit(function () use ($id) {
                 try {
-                    DeliverOrderNotificationJob::dispatch($id);
+                    DeliverOrderNotificationJob::dispatch($id)->onConnection(config('storefront.queue_connection'))->onQueue('storefront');
                 } catch (\Throwable $e) {
                     report($e);
                 } // The scheduler recovers persisted pending rows.

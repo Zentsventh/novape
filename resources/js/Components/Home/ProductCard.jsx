@@ -1,7 +1,8 @@
+import { cartPost } from '../../utils/cartRequest';
 import '../../../css/home/product-card.css';
 import { useState } from 'react';
 import { useShipping } from '@/Contexts/ShippingContext';
-import { router, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { DEFAULT_IMAGE } from './constants';
 import { fireConfetti } from '../../utils/confetti';
 
@@ -13,36 +14,34 @@ const formatPrice = (price) =>
 
 /* Renderiza una tarjeta de producto con imagen, precios y acciones. */
 export default function ProductCard({ product }) {
-    if (!product) return null;
 
     const [isWished, setIsWished] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const { shipping } = useShipping();
     const [isHovering, setIsHovering] = useState(false);
 
-    const { auth } = usePage().props;
+    const { auth, commercePolicy = {} } = usePage().props;
+    if (!product) return null;
     const isBombaCyber = product.categorias && product.categorias.includes('cyber-bombas');
     const isRetiroInmediato = product.categorias && product.categorias.includes('retiro-inmediato');
 
-    const showFreeShipping = product.precio_actual >= 299 || isRetiroInmediato;
+    const showFreeShipping = commercePolicy.free_shipping_enabled !== false && product.envio_domicilio && product.precio_actual >= (commercePolicy.free_shipping_threshold ?? 299);
 
     const handleMouseMove = (e) => {
         const rect = e.currentTarget.getBoundingClientRect();
-        setMousePosition({
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top,
-        });
+        e.currentTarget.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+        e.currentTarget.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
     };
 
     const handleAddToCart = (e) => {
         if (e) e.preventDefault();
         if (isAdding) return;
 
-        router.post(
+        cartPost(
             '/cart/add',
             {
                 producto_id: product.id,
+                variante_id: product.variante_id,
                 cantidad: 1,
                 precio: product.precio_actual,
             },
@@ -65,145 +64,61 @@ export default function ProductCard({ product }) {
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
             style={{
-                '--mouse-x': `${mousePosition.x}px`,
-                '--mouse-y': `${mousePosition.y}px`,
+                '--mouse-x': '0px',
+                '--mouse-y': '0px',
             }}
         >
-            <button
-                onClick={(e) => {
-                    e.preventDefault();
-                    if (auth?.user) {
-                        window.dispatchEvent(
-                            new CustomEvent('open-list-modal', { detail: product })
-                        );
-                    } else {
-                        router.get('/login');
-                    }
-                }}
-                className="efe-product-wishlist-btn"
-                title="Añadir a Mis listas"
-            >
-                <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#6b7280"
-                    strokeWidth="2"
-                >
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                </svg>
-            </button>
-            <button
-                onClick={(e) => {
-                    e.preventDefault();
-                    router.post(
-                        '/comparador/add',
-                        { producto_id: product.id },
-                        { preserveScroll: true }
-                    );
-                }}
-                className="efe-product-compare-btn"
-                title="Comparar Producto"
-            >
-                <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#6b7280"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                >
-                    <line x1="21" y1="3" x2="14" y2="10"></line>
-                    <polyline points="21 8 21 3 16 3"></polyline>
-                    <line x1="14" y1="21" x2="21" y2="14"></line>
-                    <polyline points="16 21 21 21 21 16"></polyline>
-                    <line x1="10" y1="14" x2="3" y2="21"></line>
-                    <polyline points="3 16 3 21 8 21"></polyline>
-                    <line x1="3" y1="3" x2="10" y2="10"></line>
-                    <polyline points="3 8 3 3 8 3"></polyline>
-                </svg>
-            </button>
-            <div
-                className="efe-product-img-wrap efe-product-img-click"
-                onClick={() => router.get(`/producto/${product.slug || product.id}`)}
-            >
+            <div className="efe-product-badges">
                 {product.descuento > 0 && (
-                    <span
-                        className="efe-discount-badge is-lower-left"
-                        style={{ top: '10px', left: '10px', bottom: 'auto' }}
-                    >
-                        -{product.descuento}%
-                    </span>
+                    <div className="efe-badge-discount">-{product.descuento}%</div>
                 )}
                 {showFreeShipping && (
-                    <span
-                        className="efe-free-shipping"
-                        style={{
-                            backgroundColor: '#0056b3',
-                            color: 'white',
-                            padding: '4px 8px',
-                            borderRadius: '4px',
-                            fontSize: '10px',
-                            fontWeight: 'bold',
-                        }}
-                    >
-                        ENVÍO
-                        <br />
-                        GRATIS
-                    </span>
+                    <div className="efe-badge-shipping">ENVÍO<br/>GRATIS</div>
                 )}
-                {isBombaCyber && (
-                    <span
-                        className="efe-bomba-cyber"
-                        style={{
-                            position: 'absolute',
-                            bottom: '10px',
-                            left: '10px',
-                            backgroundColor: '#e0f2fe',
-                            color: '#0369a1',
-                            padding: '4px 8px',
-                            borderRadius: '4px',
-                            fontSize: '12px',
-                            fontWeight: '900',
-                            zIndex: 10,
-                        }}
-                    >
-                        BOMBA
-                        <br />
-                        CYBER
-                    </span>
-                )}
-                <img src={product.imagen || DEFAULT_IMAGE} alt={product.nombre} loading="lazy" />
+            </div>
 
+            <div className="efe-product-actions-top">
                 <button
-                    className="efe-product-quick-view-btn"
+                    className="efe-action-btn efe-quick-view-btn"
                     onClick={(e) => {
+                        e.preventDefault();
                         e.stopPropagation();
-                        window.dispatchEvent(
-                            new CustomEvent('open-quick-view', { detail: product })
-                        );
+                        window.dispatchEvent(new CustomEvent('open-quick-view', { detail: product }));
                     }}
                     title="Vista rápida"
                 >
-                    <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    >
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                        <circle cx="12" cy="12" r="3"></circle>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <polyline points="9 21 3 21 3 15"></polyline>
+                        <line x1="21" y1="3" x2="14" y2="10"></line>
+                        <line x1="3" y1="21" x2="10" y2="14"></line>
                     </svg>
-                    <span>Vista rápida</span>
+                </button>
+                <button
+                    className="efe-action-btn efe-wishlist-btn"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (auth?.user) {
+                            window.dispatchEvent(new CustomEvent('open-list-modal', { detail: product }));
+                        } else {
+                            router.get('/login');
+                        }
+                    }}
+                    title="Añadir a Mis listas"
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
                 </button>
             </div>
+
+            <Link
+                className="efe-product-img-wrap efe-product-img-click"
+                href={`/producto/${product.slug || product.id}`}
+            >
+                <img src={product.imagen || DEFAULT_IMAGE} alt={product.nombre} loading="lazy" />
+            </Link>
 
             <div className="efe-product-info">
                 <span className="efe-brand-name">
@@ -213,9 +128,8 @@ export default function ProductCard({ product }) {
                 </span>
                 <h3
                     className="efe-product-name efe-product-name-click"
-                    onClick={() => router.get(`/producto/${product.slug || product.id}`)}
                 >
-                    {product.nombre}
+                    <Link href={`/producto/${product.slug || product.id}`}>{product.nombre}</Link>
                 </h3>
                 <div className="efe-price-row">
                     <span className="efe-price-old">

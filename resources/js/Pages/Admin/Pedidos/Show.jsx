@@ -1,16 +1,20 @@
 import React from 'react';
 import { Head, Link, useForm, usePage, router } from '@inertiajs/react';
 import AdminLayout from '../../../Layouts/AdminLayout';
+import OrderRefundPanel from '../../../Components/Admin/OrderRefundPanel';
 import { useConfirm } from '@/Contexts/ConfirmContext';
 import { ArrowLeft, FileText, Package, RefreshCw, User, CreditCard, Box, Calendar, Save, CheckCircle, Truck } from 'lucide-react';
 
-export default function Show({ pedido, paymentReviews = [] }) {
+export default function Show({ pedido, paymentReviews = [], refunds = [], returnOptions = [] }) {
     const confirmDialog = useConfirm();
 
     const { flash } = usePage().props;
-    const { data, setData, put, processing } = useForm({
-        estado: pedido.estado,
-        tracking: pedido.envio?.tracking || '',
+    const pickup = pedido.direccion_envio_snapshot?.delivery_type === 'tienda' || pedido.direccion_envio_snapshot?.shipping_quote?.source === 'pickup';
+    const { data, setData, put, processing, errors } = useForm({
+        estado: pedido.estado.toLowerCase(),
+        fulfillment_reference: pedido.fulfillment_reference || '',
+        tracking_number: pedido.tracking_number || pedido.envio?.tracking || '',
+        courier_name: pedido.courier_name || pedido.envio?.proveedor || '',
         estado_envio: pedido.envio?.estado || ''
     });
 
@@ -138,6 +142,8 @@ export default function Show({ pedido, paymentReviews = [] }) {
                         </h2>
                         
                         <form onSubmit={updateStatus}>
+                            {Object.values(errors).map((error,i)=><p key={i} role="alert">{error}</p>)}
+                            <p style={{fontSize:13}}>Confirma la recepción con una constancia real. Cancelar un pedido despachado requiere una devolución física mediante RMA para restituir stock.</p>
                             <div style={{ marginBottom: '16px' }}>
                                 <label style={{ display: 'block', marginBottom: '8px', color: '#64748B', fontSize: '13px', fontWeight: '600' }}>Estado del Pedido</label>
                                 <select 
@@ -148,8 +154,9 @@ export default function Show({ pedido, paymentReviews = [] }) {
                                     style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #E2E8F0', background: '#F8FAFC', color: '#1E293B', fontSize: '14px', outline: 'none', transition: 'all 0.2s ease', cursor: 'pointer' }}
                                 >
                                     <option value="pendiente">Pendiente</option>
+                                    <option value="pagado">Pagado</option>
                                     <option value="procesando">Procesando</option>
-                                    <option value="enviado">Enviado</option>
+                                    {!pickup && <option value="enviado">Enviado</option>}
                                     <option value="completado">Completado</option>
                                     <option value="cancelado">Cancelado</option>
                                 </select>
@@ -159,15 +166,21 @@ export default function Show({ pedido, paymentReviews = [] }) {
                                 <label style={{ display: 'block', marginBottom: '8px', color: '#64748B', fontSize: '13px', fontWeight: '600' }}>Código de Tracking</label>
                                 <input 
                                     type="text"
-                                    value={data.tracking}
-                                    onChange={e => setData('tracking', e.target.value)}
-                                    placeholder="Ej: SHP-12345"
+                                    maxLength={100}
+                                    value={data.tracking_number}
+                                    onChange={e => setData('tracking_number', e.target.value)}
                                     onFocus={(e) => { e.target.style.borderColor = '#004797'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.1)'; e.target.style.backgroundColor = '#ffffff'; }}
                                     onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; e.target.style.backgroundColor = '#F8FAFC'; }}
                                     style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #E2E8F0', background: '#F8FAFC', color: '#1E293B', fontSize: '14px', outline: 'none', transition: 'all 0.2s ease', boxSizing: 'border-box' }}
                                 />
                             </div>
 
+                            <label style={{ display: 'block', marginBottom: 16 }}>Empresa de transporte
+                                <input type="text" maxLength={100} value={data.courier_name} onChange={e => setData('courier_name', e.target.value)} style={{ display: 'block', width: '100%', padding: 10 }} />
+                            </label>
+                            <label style={{display:'block',marginBottom:16}}>Referencia de recepción o retiro
+                                <input required={data.estado==='completado'} maxLength={255} value={data.fulfillment_reference} onChange={e=>setData('fulfillment_reference',e.target.value)} placeholder="Guía, acta o constancia real de recepción" style={{display:'block',width:'100%',padding:12}} />
+                            </label>
                             <div style={{ marginBottom: '24px' }}>
                                 <label style={{ display: 'block', marginBottom: '8px', color: '#64748B', fontSize: '13px', fontWeight: '600' }}>Estado de Envío</label>
                                 <select 
@@ -179,8 +192,10 @@ export default function Show({ pedido, paymentReviews = [] }) {
                                 >
                                     <option value="">Seleccionar...</option>
                                     <option value="Preparando">Preparando</option>
-                                    <option value="Enviado">Enviado / En Tránsito</option>
-                                    <option value="Entregado">Entregado</option>
+                                    {!pickup && <option value="Enviado">Enviado / En Tránsito</option>}
+                                    {!pickup && <option value="Entregado">Entregado</option>}
+                                    {pickup && <option value="Listo para recoger">Listo para recoger</option>}
+                                    {pickup && <option value="Recogido">Recogido</option>}
                                 </select>
                             </div>
                             
@@ -262,22 +277,14 @@ export default function Show({ pedido, paymentReviews = [] }) {
                                 Solicitar anulación Niubiz
                             </button>
                         ) : pedido.pago?.estado === 'reembolso_pendiente' ? (
-                            <button
-                                onClick={async () => {
-                                    if (await confirmDialog('Confirma que la anulación ya fue completada en el portal Niubiz. El pedido se cancelará y el stock se devolverá.')) {
-                                        router.post(`/admin/pedidos/${pedido.id}/reembolso-confirmar`);
-                                    }
-                                }}
-                                style={{ width: '100%', background: '#D97706', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', fontWeight: '600', fontSize: '14px', cursor: 'pointer' }}
-                            >
-                                Confirmar anulación hecha en Niubiz
-                            </button>
+                            <p>Registra la evidencia de la anulación en la sección Devoluciones de dinero.</p>
                         ) : (
                             <p style={{ color: '#94A3B8', fontSize: '13px', textAlign: 'center', margin: 0, fontWeight: '500' }}>No es posible reembolsar este pedido actualmente.</p>
                         )}
                     </div>
                 </div>
             </div>
+            <OrderRefundPanel orderId={pedido.id} refunds={refunds} returnOptions={returnOptions} />
         </AdminLayout>
     );
 }

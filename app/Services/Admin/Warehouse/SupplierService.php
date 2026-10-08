@@ -40,6 +40,10 @@ class SupplierService
 
     public function deleteSupplier(Proveedor $proveedor): void
     {
-        $proveedor->delete();
+        \Illuminate\Support\Facades\DB::transaction(function () use ($proveedor) {
+            $proveedor->update(['activo' => false]);
+            $proveedor->delete();
+            \App\Services\Operations\OperationEvents::record('supplier.archived', 'proveedor', $proveedor->id, []);
+        });
     }
 }

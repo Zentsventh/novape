@@ -21,7 +21,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->scoped(\App\Services\Storefront\VariantPricing::class);
     }
 
     /**
@@ -29,7 +29,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        foreach (['panel-assistant' => 15, 'team-create' => 20, 'team-send' => 60, 'inbox-send' => 30] as $name => $maximum) {
+        $caBundle = config('http.ca_bundle');
+        if ($caBundle && is_file($caBundle)) {
+            \Illuminate\Support\Facades\Http::globalOptions(['verify'=>$caBundle]);
+        }
+        foreach (['panel-assistant' => 15, 'team-workspace' => 1200, 'team-create' => 20, 'team-send' => 60, 'team-presence' => 120, 'team-signal' => 900, 'inbox-send' => 30] as $name => $maximum) {
             \Illuminate\Support\Facades\RateLimiter::for($name, fn (\Illuminate\Http\Request $request) => \Illuminate\Cache\RateLimiting\Limit::perMinute($maximum)
                 ->by($name.':'.(auth('admin')->id() ?? $request->ip())));
         }
@@ -39,6 +43,7 @@ class AppServiceProvider extends ServiceProvider
         Pedido::observe(PedidoObserver::class);
 
         \Illuminate\Support\Facades\Queue::looping(function (\Illuminate\Queue\Events\Looping $event) {
+            request()->attributes->remove('site_settings_snapshot');
             try {
                 foreach (explode(',', $event->queue) as $queue) {
                     \Illuminate\Support\Facades\Cache::put(

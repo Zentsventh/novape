@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Gasto extends Model
 {
-    use HasFactory;
+    use HasFactory, \Illuminate\Database\Eloquent\SoftDeletes;
 
     protected $table = 'gastos';
 

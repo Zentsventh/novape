@@ -17,3 +17,9 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 Broadcast::channel('novape-inbox.supervisors', fn ($user) => ConversationAccess::supervisor($user), ['guards' => ['admin']]);
 Broadcast::channel('novape-inbox.agent.{id}', fn ($user, $id) => $user->estado === 'activo'
     && (int) $user->id === (int) $id && $user->tienePermiso('gestionar_omnichannel'), ['guards' => ['admin']]);
+
+Broadcast::channel('staff-thread.{threadId}', function ($user, $threadId) {
+    return $user->estado === 'activo' && $user->roles()->where('nombre', '!=', 'cliente')->exists() && \App\Models\StaffThread::where('id', $threadId)
+        ->whereHas('members', fn($q) => $q->where('user_id', $user->id))
+        ->exists();
+}, ['guards' => ['admin']]);

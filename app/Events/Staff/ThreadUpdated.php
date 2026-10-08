@@ -9,12 +9,16 @@ use Illuminate\Support\Facades\DB;
 
 class ThreadUpdated implements ShouldBroadcast, ShouldDispatchAfterCommit
 {
-    public function __construct(public int $threadId) {}
+    public string $connection = 'database';
+    public string $queue = 'team-realtime';
+    public function __construct(public int $threadId, public array $recipients = []) {}
 
     public function broadcastOn(): array
     {
-        return DB::table('staff_thread_members')->where('thread_id', $this->threadId)->pluck('user_id')
+        $channels = DB::table('staff_thread_members')->where('thread_id', $this->threadId)->pluck('user_id')->merge($this->recipients)->unique()
             ->map(fn ($id) => new PrivateChannel('novape-team.user.'.$id))->all();
+        $channels[] = new PrivateChannel('staff-thread.'.$this->threadId);
+        return $channels;
     }
 
     public function broadcastAs(): string

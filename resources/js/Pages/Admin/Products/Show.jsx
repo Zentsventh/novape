@@ -173,11 +173,11 @@ export default function Show({ producto, costoPromedio, historialCompras = [], c
                                     {/* Rentabilidad con ese proveedor */}
                                     <div style={{ background: index === 0 ? '#ffffff' : '#F8FAFC', padding: '16px', borderRadius: '8px', border: index === 0 ? 'none' : '1px solid #E2E8F0', boxShadow: index === 0 ? '0 1px 3px rgba(0,0,0,0.05)' : 'none' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                            <span style={{ color: index === 0 ? '#009BE0' : '#64748B', fontSize: '13px', fontWeight: '700' }}>Ganancia Neta:</span>
+                                            <span style={{ color: index === 0 ? '#009BE0' : '#64748B', fontSize: '13px', fontWeight: '700' }}>Diferencia precio-coste:</span>
                                             <span style={{ fontWeight: '800', color: index === 0 ? '#004797' : '#1E293B', fontSize: '15px' }}>S/ {Number(gananciaProv).toLocaleString('en-US', {minimumFractionDigits:2})}</span>
                                         </div>
                                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                            <span style={{ color: index === 0 ? '#009BE0' : '#64748B', fontSize: '13px', fontWeight: '700' }}>Margen de utilidad:</span>
+                                            <span style={{ color: index === 0 ? '#009BE0' : '#64748B', fontSize: '13px', fontWeight: '700' }}>Margen comercial estimado:</span>
                                             <span style={{ fontWeight: '700', color: index === 0 ? '#004797' : '#1E293B', fontSize: '14px' }}>{margenProv.toFixed(2)}%</span>
                                         </div>
                                     </div>

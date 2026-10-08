@@ -51,6 +51,7 @@ export default function Dashboard({
   ventasTotal = 0,
   costosTotal = 0,
   gananciaNeta = 0,
+  financialQuality,
   totalPedidos = 0,
   pedidosPendientes = 0,
   pedidosEnviados = 0,
@@ -144,12 +145,13 @@ export default function Dashboard({
       tone: "slate",
     },
     {
-      label: "Saldo operativo",
+      label: "Balance comercial",
       value: money(gananciaNeta),
       note: "Ingresos menos compras y gastos",
       icon: ChartNoAxesCombined,
       tone: "green",
     },
+    ...(financialQuality ? [{ label: "Margen comercial estimado", value: financialQuality.margenComercial === null ? "Sin coste completo" : money(financialQuality.margenComercial), note: financialQuality.partidasSinCosto ? `${financialQuality.partidasSinCosto} partidas sin coste histórico` : "Ventas netas menos coste histórico; incluye importes registrados", icon: ChartNoAxesCombined, tone: "slate" }] : []),
     {
       label: "Pedidos",
       value: integer(totalPedidos),

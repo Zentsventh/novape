@@ -84,15 +84,29 @@ class ProductController extends Controller
 
     public function store(StoreProductRequest $request)
     {
-        $this->productService->createProduct($request->validated(), auth()->id() ?? 1);
+        $adminId = (int) (auth('admin')->id() ?? auth()->id() ?? 1);
+        $this->productService->createProduct($request->validated(), $adminId);
 
         return redirect()->route('admin.products')->with('success', 'Producto creado exitosamente.');
     }
 
     public function edit(int $id)
     {
+        $product = Producto::with(['categorias', 'imagenes', 'productoEspecificaciones', 'variantes'])->findOrFail($id);
+        $warehouseId = (int) \App\Models\ConfiguracionSitio::obtener('almacen_ecommerce_id', 1);
+        $variantIds = $product->variantes->pluck('id')->all();
+        $stocks = ! empty($variantIds)
+            ? DB::table('stock_almacen')
+                ->whereIn('variante_id', $variantIds)
+                ->where('almacen_id', $warehouseId)
+                ->pluck('cantidad', 'variante_id')
+            : collect();
+
+        foreach ($product->variantes as $variant) {
+            $variant->setAttribute('stock_local', (int) ($stocks[$variant->id] ?? 0));
+        }
         return Inertia::render('Admin/Products/Form', [
-            'producto' => Producto::with(['categorias', 'imagenes', 'productoEspecificaciones', 'variantes'])->findOrFail($id),
+            'producto' => $product,
             'marcas' => Marca::all(),
             'categorias' => Categoria::all(),
             'proveedores' => Proveedor::where('activo', true)->get(),
@@ -145,7 +159,8 @@ class ProductController extends Controller
 
     public function update(UpdateProductRequest $request, int $id)
     {
-        $this->productService->updateProduct(Producto::findOrFail($id), $request->validated(), auth()->id() ?? 1);
+        $adminId = (int) (auth('admin')->id() ?? auth()->id() ?? 1);
+        $this->productService->updateProduct(Producto::findOrFail($id), $request->validated(), $adminId);
 
         return redirect()->route('admin.products')->with('success', 'Producto actualizado exitosamente.');
     }

@@ -12,8 +12,8 @@ class StorefrontService
 {
     public function generateSitemapXml(): string
     {
-        $productos = Producto::where('activo', 1)->get();
-        $categorias = Categoria::all();
+        $productos = Producto::where('activo', 1)->get(['id', 'slug', 'updated_at']);
+        $categorias = Categoria::where('activa', true)->get(['id', 'nombre', 'updated_at']);
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>';
         $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';

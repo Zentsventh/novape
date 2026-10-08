@@ -1,0 +1,248 @@
+/* ========================================================
+   Brand Stories Carousel - Modern & Robust Styling
+   ======================================================== */
+
+.efe-brand-stories-section {
+    padding: 18px 24px;
+    margin: 12px auto 20px;
+    max-width: 1440px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.efe-brand-stories-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    padding: 0 4px;
+}
+
+.efe-brand-stories-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+    letter-spacing: -0.2px;
+    text-transform: uppercase;
+    font-family: 'Inter', sans-serif;
+}
+
+.efe-brand-stories-carousel-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    min-width: 0;
+}
+
+.efe-carousel-btn {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    color: #4b5563;
+    transition: all 0.2s ease;
+    z-index: 5;
+    flex-shrink: 0;
+}
+
+.efe-carousel-btn:hover {
+    background: #f8fafc;
+    color: #004797;
+    border-color: #004797;
+    box-shadow: 0 4px 10px rgba(0, 71, 151, 0.15);
+}
+
+.efe-carousel-left {
+    margin-right: 8px;
+}
+
+.efe-carousel-right {
+    margin-left: 8px;
+}
+
+.efe-brand-stories-wrapper {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 6px 4px 12px 4px;
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+    scroll-behavior: smooth;
+    flex: 1 1 0%;
+    min-width: 0;
+}
+
+.efe-brand-stories-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
+/* El elemento individual NUNCA debe encogerse */
+.efe-story-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 82px;
+    min-width: 82px;
+    max-width: 82px;
+    flex: 0 0 82px; /* Forzar que no se encoja */
+    flex-shrink: 0 !important;
+    text-decoration: none;
+    color: #374151;
+    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    cursor: pointer;
+    user-select: none;
+}
+
+.efe-story-item:hover {
+    transform: translateY(-2px);
+}
+
+.efe-story-ring {
+    width: 68px;
+    height: 68px;
+    min-width: 68px;
+    min-height: 68px;
+    border-radius: 50%;
+    padding: 3px;
+    background: #e5e7eb;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    transition: all 0.25s ease;
+    flex-shrink: 0 !important;
+}
+
+.efe-story-item:hover .efe-story-ring {
+    background: #004797;
+    box-shadow: 0 4px 12px rgba(0, 71, 151, 0.2);
+}
+
+.efe-story-item.is-selected .efe-story-ring {
+    background: linear-gradient(135deg, #004797 0%, #009ce0 100%);
+    box-shadow: 0 0 0 3px rgba(0, 71, 151, 0.25), 0 4px 12px rgba(0, 71, 151, 0.3);
+}
+
+.efe-story-logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: contain;
+    background: #ffffff;
+    border: 2px solid #ffffff;
+    flex-shrink: 0 !important;
+}
+
+.efe-story-fallback-img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    border: 2px solid #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 800;
+    color: #004797;
+    flex-shrink: 0 !important;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.5px;
+}
+
+.efe-story-item.is-selected .efe-story-fallback-img {
+    background: #e0f2fe;
+    color: #004797;
+}
+
+.efe-story-name {
+    font-size: 11.5px;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    color: #4b5563;
+    transition: color 0.2s;
+    font-family: 'Inter', sans-serif;
+}
+
+.efe-story-item:hover .efe-story-name {
+    color: #004797;
+}
+
+.efe-story-item.is-selected .efe-story-name {
+    font-weight: 700;
+    color: #004797;
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 767px) {
+    .efe-brand-stories-section {
+        padding: 14px 12px;
+        margin: 8px 12px 16px;
+        border-radius: 10px;
+    }
+
+    .efe-brand-stories-title {
+        font-size: 13.5px;
+    }
+
+    .efe-brand-stories-wrapper {
+        gap: 12px;
+    }
+
+    .efe-story-item {
+        width: 66px;
+        min-width: 66px;
+        max-width: 66px;
+        flex: 0 0 66px;
+    }
+
+    .efe-story-ring {
+        width: 58px;
+        height: 58px;
+        min-width: 58px;
+        min-height: 58px;
+    }
+
+    .efe-story-logo, .efe-story-fallback-img {
+        width: 50px;
+        height: 50px;
+        font-size: 18px;
+    }
+
+    .efe-story-name {
+        font-size: 10.5px;
+    }
+
+    .efe-carousel-btn {
+        width: 30px;
+        height: 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .efe-carousel-btn {
+        display: none;
+    }
+    
+    .efe-brand-stories-wrapper {
+        padding: 4px 0 8px 0;
+    }
+}

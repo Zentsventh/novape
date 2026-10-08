@@ -21,6 +21,7 @@ class BannerController extends Controller
     {
         return Inertia::render('Admin/Banners/Index', [
             'banners' => $this->marketingService->getBanners(),
+            'categorias' => \Illuminate\Support\Facades\DB::table('categoria')->select('id', 'nombre')->get(),
             'logoUrl' => ConfiguracionSitio::obtener('logo_url')
         ]);
     }

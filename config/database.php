@@ -67,6 +67,17 @@ return [
             ], fn ($value) => $value !== null) : [],
         ],
 
+        'mysql_backup' => [
+            'driver' => 'mysql',
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '3306'),
+            'database' => env('DB_DATABASE', 'laravel'),
+            'username' => env('DB_BACKUP_USERNAME'),
+            'password' => env('DB_BACKUP_PASSWORD'),
+            'charset' => 'utf8mb4', 'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '', 'strict' => true,
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),

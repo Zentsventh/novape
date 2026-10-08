@@ -28,12 +28,18 @@ class ConfiguracionSitio extends Model
      */
     private static function loadAll(): array
     {
+        $request = request();
+        $level = DB::transactionLevel();
+        $memo = $request->attributes->get('site_settings_snapshot');
+        if ($memo !== null && $memo['level'] === $level) return $memo['values'];
         $load = function () {
             return static::pluck('valor', 'clave')->toArray();
         };
 
-        return DB::transactionLevel() > 0
+        $values = DB::transactionLevel() > 0
             ? $load() : Cache::remember('config_all_values', 60, $load);
+        $request->attributes->set('site_settings_snapshot',['level'=>$level,'values'=>$values]);
+        return $values;
     }
 
     /**
@@ -61,6 +67,7 @@ class ConfiguracionSitio extends Model
             ['clave' => $clave],
             ['valor' => $valor]
         );
+        request()->attributes->remove('site_settings_snapshot');
         DB::afterCommit(fn () => self::clearMemo());
 
         return $record;
@@ -71,6 +78,7 @@ class ConfiguracionSitio extends Model
      */
     public static function clearMemo(): void
     {
+        request()->attributes->remove('site_settings_snapshot');
         Cache::forget('config_all_values');
         Cache::forget('globalConfig');
     }

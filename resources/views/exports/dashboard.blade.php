@@ -24,7 +24,7 @@
             <td colspan="3">{{ number_format($costosTotal, 2) }}</td>
         </tr>
         <tr>
-            <td>Saldo operativo (S/)</td>
+            <td>Balance comercial (S/)</td>
             <td colspan="3">{{ number_format($gananciaNeta, 2) }}</td>
         </tr>
         <tr>

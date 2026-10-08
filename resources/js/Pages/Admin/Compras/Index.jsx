@@ -96,63 +96,95 @@ export default function ComprasIndex({ compras: comprasPage, totalGastado, compr
             <Head title="Historial de Compras" />
 
             <div style={{ fontFamily: "'Inter', sans-serif", padding: '24px 32px', maxWidth: '1400px', margin: '0 auto' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-                    <div>
-                        <h1 style={{ fontSize: '28px', margin: '0 0 8px 0', fontWeight: 800, color: '#1E293B', letterSpacing: '-0.5px' }}>Historial de Compras</h1>
-                        <p style={{ margin: 0, color: '#64748B', fontSize: '15px' }}>Gestiona tus órdenes de compra, proveedores y abastecimiento.</p>
-                    </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
+                    <h1 style={{ fontSize: '24px', margin: 0, fontWeight: '700', color: '#1E293B', display: 'flex', alignItems: 'center', gap: '12px', letterSpacing: '-0.02em' }}>
+                        <div style={{ padding: '8px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', color: '#64748B', display: 'flex' }}>
+                            <ShoppingCart size={20} />
+                        </div>
+                        <div>
+                            Historial de Compras
+                            <p style={{ color: '#64748B', fontSize: '13px', margin: '4px 0 0 0', fontWeight: '500' }}>
+                                Gestiona tus órdenes de compra, proveedores y abastecimiento.
+                            </p>
+                        </div>
+                    </h1>
                     <button 
                         onClick={() => setShowModal(true)} 
-                        style={{ 
-                            display: 'flex', alignItems: 'center', gap: '8px', background: '#004797', color: 'white', 
-                            padding: '12px 24px', borderRadius: '12px', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '14px',
-                            boxShadow: '0 4px 14px rgba(0, 71, 151, 0.3)', transition: 'all 0.2s ease'
-                        }}
-                        onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 71, 151, 0.4)'; }}
-                        onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 71, 151, 0.3)'; }}
+                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#003670'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 71, 151, 0.2)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#004797'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 71, 151, 0.15)'; }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#004797', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '10px', fontWeight: '600', fontSize: '13px', transition: 'all 0.2s ease', boxShadow: '0 2px 4px rgba(0, 71, 151, 0.15)', cursor: 'pointer' }}
                     >
-                        <Plus size={18} /> Nueva Orden
+                        <Plus size={16} /> Nueva Orden
                     </button>
                 </div>
 
                 {/* KPIs */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginBottom: '32px' }}>
-                    <div style={{ background: '#ffffff', padding: '24px', borderRadius: '20px', boxShadow: '0 4px 20px -2px rgba(0,0,0,0.03)', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', gap: '20px', transition: 'transform 0.2s', cursor: 'default' }} onMouseOver={e => e.currentTarget.style.transform = 'translateY(-2px)'} onMouseOut={e => e.currentTarget.style.transform = 'none'}>
-                        <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'linear-gradient(135deg, #E0F2FE, #BAE6FD)', color: '#0369A1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <TrendingUp size={28} />
+                    <div style={{ background: '#ffffff', padding: '24px', borderRadius: '16px', boxShadow: '0 4px 20px -2px rgba(0,0,0,0.05)', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', gap: '20px', transition: 'transform 0.2s' }}>
+                        <div style={{ padding: '12px', borderRadius: '12px', background: '#F8FAFC', border: '1px solid #E2E8F0', color: '#004797', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <TrendingUp size={24} />
                         </div>
                         <div>
-                            <div style={{ fontSize: '13px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Inversión Total</div>
-                            <div style={{ fontSize: '28px', fontWeight: 800, color: '#1E293B' }}>S/ {Number(totalGastado).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                            <div style={{ fontSize: '12px', fontWeight: 600, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Inversión Total</div>
+                            <div style={{ fontSize: '24px', fontWeight: 700, color: '#1E293B', letterSpacing: '-0.02em' }}>S/ {Number(totalGastado).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
                         </div>
                     </div>
-                    <div style={{ background: '#ffffff', padding: '24px', borderRadius: '20px', boxShadow: '0 4px 20px -2px rgba(0,0,0,0.03)', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', gap: '20px', transition: 'transform 0.2s', cursor: 'default' }} onMouseOver={e => e.currentTarget.style.transform = 'translateY(-2px)'} onMouseOut={e => e.currentTarget.style.transform = 'none'}>
-                        <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'linear-gradient(135deg, #FEF3C7, #FDE68A)', color: '#B45309', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Clock size={28} />
+                    <div style={{ background: '#ffffff', padding: '24px', borderRadius: '16px', boxShadow: '0 4px 20px -2px rgba(0,0,0,0.05)', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', gap: '20px', transition: 'transform 0.2s' }}>
+                        <div style={{ padding: '12px', borderRadius: '12px', background: '#F8FAFC', border: '1px solid #E2E8F0', color: '#D97706', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Clock size={24} />
                         </div>
                         <div>
-                            <div style={{ fontSize: '13px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Órdenes Pendientes</div>
-                            <div style={{ fontSize: '28px', fontWeight: 800, color: '#1E293B' }}>{comprasPendientes}</div>
+                            <div style={{ fontSize: '12px', fontWeight: 600, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Órdenes Pendientes</div>
+                            <div style={{ fontSize: '24px', fontWeight: 700, color: '#1E293B', letterSpacing: '-0.02em' }}>{comprasPendientes}</div>
                         </div>
                     </div>
-                    <div style={{ background: '#ffffff', padding: '24px', borderRadius: '20px', boxShadow: '0 4px 20px -2px rgba(0,0,0,0.03)', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', gap: '20px', transition: 'transform 0.2s', cursor: 'default' }} onMouseOver={e => e.currentTarget.style.transform = 'translateY(-2px)'} onMouseOut={e => e.currentTarget.style.transform = 'none'}>
-                        <div style={{ width: '56px', height: '56px', borderRadius: '16px', background: 'linear-gradient(135deg, #F1F5F9, #E2E8F0)', color: '#475569', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <ShoppingCart size={28} />
+                    <div style={{ background: '#ffffff', padding: '24px', borderRadius: '16px', boxShadow: '0 4px 20px -2px rgba(0,0,0,0.05)', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', gap: '20px', transition: 'transform 0.2s' }}>
+                        <div style={{ padding: '12px', borderRadius: '12px', background: '#F8FAFC', border: '1px solid #E2E8F0', color: '#475569', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <ShoppingCart size={24} />
                         </div>
                         <div>
-                            <div style={{ fontSize: '13px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Total Órdenes</div>
-                            <div style={{ fontSize: '28px', fontWeight: 800, color: '#1E293B' }}>{comprasPage.total ?? compras.length}</div>
+                            <div style={{ fontSize: '12px', fontWeight: 600, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Total Órdenes</div>
+                            <div style={{ fontSize: '24px', fontWeight: 700, color: '#1E293B', letterSpacing: '-0.02em' }}>{comprasPage.total ?? compras.length}</div>
                         </div>
                     </div>
                 </div>
 
                 {/* Filtros */}
-                <div style={{ background: '#ffffff', padding: '24px', borderRadius: '20px', boxShadow: '0 4px 20px -2px rgba(0,0,0,0.03)', border: '1px solid #E2E8F0', marginBottom: '32px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', color: '#1E293B', fontWeight: 700 }}>
-                        <Filter size={18} color="#004797" /> Filtros Avanzados
+                <div style={{ background: '#ffffff', padding: '24px', borderRadius: '16px', boxShadow: '0 4px 20px -2px rgba(0,0,0,0.05)', border: '1px solid #E2E8F0', marginBottom: '32px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px', color: '#1E293B', fontWeight: 700, fontSize: '15px' }}>
+                        <Filter size={18} color="#64748B" /> Filtros Avanzados
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '20px', alignItems: 'flex-end' }}>
-                        <div>
+                    
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', alignItems: 'flex-start' }}>
+                        <div style={{ flex: '1 1 300px' }}>
+                            <label style={labelStyle}>Buscar Orden o Producto</label>
+                            <div style={{ position: 'relative' }}>
+                                <input 
+                                    type="text" placeholder="Buscar por SKU / Nombre / Orden..." 
+                                    value={searchFilters.search} 
+                                    onChange={e => setSearchFilters({...searchFilters, search: e.target.value})} 
+                                    onKeyDown={e => e.key === 'Enter' && applyFilters()} 
+                                    style={{...inputStyle, paddingLeft: '40px'}}
+                                    onFocus={e => Object.assign(e.target.style, inputFocusStyle)}
+                                    onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }}
+                                />
+                                <Search size={18} color="#94A3B8" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
+                            </div>
+                        </div>
+
+                        <div style={{ flex: '1 1 300px' }}>
+                            <RemoteSelect 
+                                label="Filtrar por Producto Específico" 
+                                endpoint="/admin/selectores/variantes"
+                                value={filterVariant} 
+                                params={{categoria_id: searchFilters.categoria_id || '', marca_id: searchFilters.marca_id || ''}}
+                                placeholder="Escribe para buscar..." 
+                                getLabel={row => `${row.nombre} (${row.sku})`}
+                                onChange={(value, row) => {setFilterVariant(value); setSearchFilters({...searchFilters, producto_id: row?.producto_id || ''});}} 
+                            />
+                        </div>
+
+                        <div style={{ flex: '1 1 200px' }}>
                             <label style={labelStyle}>Categoría</label>
                             <div style={{ position: 'relative' }}>
                                 <select 
@@ -162,13 +194,14 @@ export default function ComprasIndex({ compras: comprasPage, totalGastado, compr
                                     onFocus={e => Object.assign(e.target.style, inputFocusStyle)}
                                     onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }}
                                 >
-                                    <option value="">Todas</option>
+                                    <option value="">Todas las categorías</option>
                                     {categorias?.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
                                 </select>
                                 <ChevronRight size={16} color="#94A3B8" style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%) rotate(90deg)', pointerEvents: 'none' }} />
                             </div>
                         </div>
-                        <div>
+
+                        <div style={{ flex: '1 1 200px' }}>
                             <label style={labelStyle}>Marca</label>
                             <div style={{ position: 'relative' }}>
                                 <select 
@@ -178,22 +211,14 @@ export default function ComprasIndex({ compras: comprasPage, totalGastado, compr
                                     onFocus={e => Object.assign(e.target.style, inputFocusStyle)}
                                     onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }}
                                 >
-                                    <option value="">Todas</option>
+                                    <option value="">Todas las marcas</option>
                                     {marcas?.map(m => <option key={m.id} value={m.id}>{m.nombre}</option>)}
                                 </select>
                                 <ChevronRight size={16} color="#94A3B8" style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%) rotate(90deg)', pointerEvents: 'none' }} />
                             </div>
                         </div>
-                        <div style={{ gridColumn: 'span 2' }}>
-                            <label style={labelStyle}>Producto Comprado</label>
-                            <div style={{ position: 'relative' }}>
-                                <RemoteSelect label="Producto comprado" endpoint="/admin/selectores/variantes"
-                                    value={filterVariant} params={{categoria_id: searchFilters.categoria_id || '', marca_id: searchFilters.marca_id || ''}}
-                                    placeholder="Todos los productos" getLabel={row => `${row.nombre} (${row.sku})`}
-                                    onChange={(value, row) => {setFilterVariant(value); setSearchFilters({...searchFilters, producto_id: row?.producto_id || ''});}} />
-                            </div>
-                        </div>
-                        <div>
+
+                        <div style={{ flex: '1 1 200px' }}>
                             <label style={labelStyle}>Proveedor</label>
                             <div style={{ position: 'relative' }}>
                                 <select 
@@ -203,28 +228,14 @@ export default function ComprasIndex({ compras: comprasPage, totalGastado, compr
                                     onFocus={e => Object.assign(e.target.style, inputFocusStyle)}
                                     onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }}
                                 >
-                                    <option value="">Todos</option>
+                                    <option value="">Todos los proveedores</option>
                                     {proveedores?.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
                                 </select>
                                 <ChevronRight size={16} color="#94A3B8" style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%) rotate(90deg)', pointerEvents: 'none' }} />
                             </div>
                         </div>
-                        <div>
-                            <label style={labelStyle}>Buscar</label>
-                            <div style={{ position: 'relative' }}>
-                                <input 
-                                    type="text" placeholder="SKU / Nombre / Orden..." 
-                                    value={searchFilters.search} 
-                                    onChange={e => setSearchFilters({...searchFilters, search: e.target.value})} 
-                                    onKeyDown={e => e.key === 'Enter' && applyFilters()} 
-                                    style={{...inputStyle, paddingLeft: '40px'}}
-                                    onFocus={e => Object.assign(e.target.style, inputFocusStyle)}
-                                    onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }}
-                                />
-                                <Search size={16} color="#94A3B8" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
-                            </div>
-                        </div>
-                        <div>
+
+                        <div style={{ flex: '1 1 200px' }}>
                             <label style={labelStyle}>Estado</label>
                             <div style={{ position: 'relative' }}>
                                 <select 
@@ -234,7 +245,7 @@ export default function ComprasIndex({ compras: comprasPage, totalGastado, compr
                                     onFocus={e => Object.assign(e.target.style, inputFocusStyle)}
                                     onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }}
                                 >
-                                    <option value="">Todos</option>
+                                    <option value="">Cualquier estado</option>
                                     <option value="completado">Completados</option>
                                     <option value="pendiente">Pendientes</option>
                                     <option value="cancelado">Cancelados</option>
@@ -242,25 +253,25 @@ export default function ComprasIndex({ compras: comprasPage, totalGastado, compr
                                 <ChevronRight size={16} color="#94A3B8" style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%) rotate(90deg)', pointerEvents: 'none' }} />
                             </div>
                         </div>
-                        
-                        <div style={{ display: 'flex', gap: '12px', gridColumn: 'span 1' }}>
-                            <button 
-                                onClick={resetFilters} 
-                                style={{ flex: 1, padding: '12px', background: '#F1F5F9', color: '#475569', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s', fontSize: '14px' }}
-                                onMouseOver={e => e.currentTarget.style.background = '#E2E8F0'}
-                                onMouseOut={e => e.currentTarget.style.background = '#F1F5F9'}
-                            >
-                                Limpiar
-                            </button>
-                            <button 
-                                onClick={applyFilters} 
-                                style={{ flex: 1, padding: '12px', background: '#1E293B', color: 'white', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s', fontSize: '14px', boxShadow: '0 4px 12px rgba(30, 41, 59, 0.2)' }}
-                                onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(30, 41, 59, 0.3)'; }}
-                                onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(30, 41, 59, 0.2)'; }}
-                            >
-                                Filtrar
-                            </button>
-                        </div>
+                    </div>
+                    
+                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '24px', paddingTop: '24px', borderTop: '1px solid #E2E8F0' }}>
+                        <button 
+                            onClick={resetFilters} 
+                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#E2E8F0'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#F8FAFC'; }}
+                            style={{ padding: '10px 24px', borderRadius: '10px', border: '1px solid #E2E8F0', background: '#F8FAFC', color: '#475569', cursor: 'pointer', fontWeight: '600', fontSize: '13px', transition: 'all 0.2s' }}
+                        >
+                            Limpiar
+                        </button>
+                        <button 
+                            onClick={applyFilters} 
+                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#003670'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 71, 151, 0.2)'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#004797'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 71, 151, 0.15)'; }}
+                            style={{ padding: '10px 24px', borderRadius: '10px', border: 'none', background: '#004797', color: 'white', fontWeight: '600', fontSize: '13px', transition: 'all 0.2s ease', boxShadow: '0 2px 4px rgba(0, 71, 151, 0.15)', cursor: 'pointer' }}
+                        >
+                            Filtrar
+                        </button>
                     </div>
                 </div>
 
@@ -348,9 +359,10 @@ export default function ComprasIndex({ compras: comprasPage, totalGastado, compr
                                         <td style={{ padding: '20px 24px', fontWeight: 800, color: '#1E293B', fontSize: '15px' }}>S/ {Number(c.total).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                                         <td style={{ padding: '20px 24px' }}>
                                             <span style={{
-                                                background: c.estado === 'completado' ? '#D1FAE5' : c.estado === 'pendiente' ? '#FEF3C7' : '#FEE2E2',
-                                                color: c.estado === 'completado' ? '#059669' : c.estado === 'pendiente' ? '#D97706' : '#DC2626',
-                                                padding: '6px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: 700, textTransform: 'capitalize'
+                                                background: c.estado === 'completado' ? '#F0FDF4' : c.estado === 'pendiente' ? '#FFFBEB' : '#FEF2F2',
+                                                color: c.estado === 'completado' ? '#10B981' : c.estado === 'pendiente' ? '#D97706' : '#EF4444',
+                                                border: `1px solid ${c.estado === 'completado' ? '#DCFCE7' : c.estado === 'pendiente' ? '#FEF3C7' : '#FEE2E2'}`,
+                                                padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 600, textTransform: 'capitalize'
                                             }}>
                                                 {c.estado}
                                             </span>
@@ -359,27 +371,21 @@ export default function ComprasIndex({ compras: comprasPage, totalGastado, compr
                                             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                                                 <Link 
                                                     href={`/admin/compras/${c.id}`} 
-                                                    style={{ 
-                                                        color: '#004797', background: '#E0F2FE', padding: '8px', borderRadius: '8px', 
-                                                        display: 'inline-flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s', textDecoration: 'none'
-                                                    }}
-                                                    onMouseOver={e => { e.currentTarget.style.backgroundColor = '#004797'; e.currentTarget.style.color = '#ffffff'; e.currentTarget.style.transform = 'scale(1.05)'; }}
-                                                    onMouseOut={e => { e.currentTarget.style.backgroundColor = '#E0F2FE'; e.currentTarget.style.color = '#004797'; e.currentTarget.style.transform = 'scale(1)'; }}
+                                                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F8FAFC'; e.currentTarget.style.color = '#1E293B'; e.currentTarget.style.borderColor = '#CBD5E1'; }}
+                                                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#94A3B8'; e.currentTarget.style.borderColor = 'transparent'; }}
+                                                    style={{ color: '#94A3B8', background: 'transparent', border: '1px solid transparent', textDecoration: 'none', padding: '6px', borderRadius: '6px', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                                     title="Ver Detalles"
                                                 >
-                                                    <Eye size={18} />
+                                                    <Eye size={16} />
                                                 </Link>
                                                 <button 
                                                     onClick={() => handleDelete(c.id)} 
-                                                    style={{ 
-                                                        color: '#EF4444', background: 'transparent', border: 'none', cursor: 'pointer', padding: '8px', borderRadius: '8px',
-                                                        display: 'inline-flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s'
-                                                    }}
-                                                    onMouseOver={e => { e.currentTarget.style.backgroundColor = '#FEE2E2'; e.currentTarget.style.transform = 'scale(1.05)'; }}
-                                                    onMouseOut={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.transform = 'scale(1)'; }}
-                                                    title="Eliminar"
+                                                    title="Eliminar" 
+                                                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#FEF2F2'; e.currentTarget.style.color = '#EF4444'; }}
+                                                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#94A3B8'; }}
+                                                    style={{ color: '#94A3B8', background: 'transparent', border: 'none', cursor: 'pointer', padding: '6px', borderRadius: '6px', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                                 >
-                                                    <Trash2 size={18} />
+                                                    <Trash2 size={16} />
                                                 </button>
                                             </div>
                                         </td>

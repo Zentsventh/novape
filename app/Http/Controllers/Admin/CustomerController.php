@@ -148,7 +148,7 @@ class CustomerController extends Controller
     {
         $newPassword = $this->userService->resetPassword(Usuario::findOrFail($id));
 
-        return redirect()->back()->with('success', "Contraseña restablecida exitosamente. Nueva contraseña: {$newPassword}");
+        return redirect()->back()->with('success', "Contraseña restablecida exitosamente. Clave temporal: {$newPassword} (Copia esta clave ahora; no se volverá a mostrar).");
     }
 
     public function show(int $id)

@@ -199,7 +199,7 @@ export default function Pipeline({ pipeline, dealPages, query = '' }) {
                     text-decoration: none;
                 }
                 .premium-btn-primary:hover {
-                    background: #009be5;
+                    background: #003670;
                     transform: translateY(-1px);
                     box-shadow: 0 6px 10px -1px rgba(0, 71, 151, 0.3), 0 2px 4px -1px rgba(0, 71, 151, 0.1);
                 }
@@ -371,7 +371,60 @@ export default function Pipeline({ pipeline, dealPages, query = '' }) {
                 </div>
 
                 {/* Kanban Board */}
-                {dealPages && <nav aria-label="Páginas de oportunidades" style={{padding: '8px 32px', display: 'flex', gap: 12, flexWrap: 'wrap'}}>Mostrando {dealPages.from || 0}–{dealPages.to || 0} de {dealPages.total}. {dealPages.links.map((link, i) => link.url ? <Link key={i} href={link.url} preserveState aria-current={link.active ? 'page' : undefined} dangerouslySetInnerHTML={{__html: link.label}}/> : <span key={i} dangerouslySetInnerHTML={{__html: link.label}}/>)}</nav>}
+                {dealPages && (
+                    <div style={{ padding: '0 32px 12px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                        <span style={{ fontSize: '12.5px', color: '#64748B', fontWeight: 500 }}>
+                            Mostrando <strong style={{ color: '#1E293B' }}>{dealPages.from || 0}–{dealPages.to || 0}</strong> de <strong style={{ color: '#1E293B' }}>{dealPages.total}</strong> oportunidades
+                        </span>
+                        {dealPages.links && dealPages.links.length > 3 && (
+                            <nav aria-label="Paginación" style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                                {dealPages.links.map((link, i) => {
+                                    const labelClean = link.label
+                                        .replace('pagination.previous', '‹ Anterior')
+                                        .replace('&laquo; Previous', '‹ Anterior')
+                                        .replace('pagination.next', 'Siguiente ›')
+                                        .replace('Next &raquo;', 'Siguiente ›');
+                                    if (!link.url) {
+                                        return (
+                                            <span 
+                                                key={i} 
+                                                style={{
+                                                    padding: '5px 10px',
+                                                    fontSize: '12px',
+                                                    borderRadius: '8px',
+                                                    color: '#94A3B8',
+                                                    background: '#F1F5F9',
+                                                    pointerEvents: 'none'
+                                                }}
+                                                dangerouslySetInnerHTML={{ __html: labelClean }}
+                                            />
+                                        );
+                                    }
+                                    return (
+                                        <Link
+                                            key={i}
+                                            href={link.url}
+                                            preserveState
+                                            style={{
+                                                padding: '5px 10px',
+                                                fontSize: '12px',
+                                                fontWeight: link.active ? 600 : 500,
+                                                borderRadius: '8px',
+                                                color: link.active ? '#FFFFFF' : '#475569',
+                                                backgroundColor: link.active ? '#004797' : '#FFFFFF',
+                                                border: link.active ? '1px solid #004797' : '1px solid #E2E8F0',
+                                                textDecoration: 'none',
+                                                transition: 'all 0.2s ease',
+                                                boxShadow: link.active ? '0 2px 4px rgba(0, 71, 151, 0.2)' : 'none'
+                                            }}
+                                            dangerouslySetInnerHTML={{ __html: labelClean }}
+                                        />
+                                    );
+                                })}
+                            </nav>
+                        )}
+                    </div>
+                )}
                 <div style={{ flex: 1, overflow: 'hidden' }}>
                     <TwentyKanban 
                         stages={pipeline}
@@ -395,8 +448,7 @@ export default function Pipeline({ pipeline, dealPages, query = '' }) {
                         <label className="premium-label">Título de la oportunidad *</label>
                         <input 
                             type="text" 
-                            className="premium-input" 
-                            placeholder="Ej: Venta de software a Acme"
+                            className="premium-input"
                             value={data.titulo}
                             onChange={e => setData('titulo', e.target.value)}
                             required

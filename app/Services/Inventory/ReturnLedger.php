@@ -25,14 +25,15 @@ final class ReturnLedger
             throw ValidationException::withMessages(['items' => 'No se encontró la variante original.']);
         }
         if ($restock) {
-            $stock = DB::table('stock_almacen')->where('almacen_id', $warehouse)->where('variante_id', $item->variante_id)->lockForUpdate()->first();
-            if ($stock) {
-                DB::table('stock_almacen')->where('id', $stock->id)->increment('cantidad', $quantity);
-            } else {
-                DB::table('stock_almacen')->insert(['almacen_id' => $warehouse, 'variante_id' => $item->variante_id, 'cantidad' => $quantity, 'created_at' => now(), 'updated_at' => now()]);
-            }
-            DB::statement('UPDATE variante SET stock = (SELECT COALESCE(SUM(cantidad), 0) FROM stock_almacen WHERE variante_id = ?) WHERE id = ?', [$item->variante_id, $item->variante_id]);
-            DB::table('movimientos_almacen')->insert(['almacen_id' => $warehouse, 'variante_id' => $item->variante_id, 'tipo' => 'entrada', 'cantidad' => $quantity, 'referencia' => $reason, 'usuario_id' => $actor ?: null, 'created_at' => now(), 'updated_at' => now()]);
+            app(\App\Services\Inventario\InventoryService::class)->registrarMovimiento(
+                varianteId: $item->variante_id,
+                almacenId: $warehouse,
+                cantidad: $quantity,
+                tipo: 'entrada',
+                motivo: $reason,
+                usuarioId: $actor ?: null,
+                operationKey: 'return:'.$operation
+            );
         }
         DB::table('inventory_returns')->insert(['pedido_item_id' => $item->id, 'operation_key' => $operation, 'cantidad' => $quantity, 'restocked' => $restock, 'almacen_id' => $warehouse, 'usuario_id' => $actor ?: null, 'created_at' => now(), 'updated_at' => now()]);
     }

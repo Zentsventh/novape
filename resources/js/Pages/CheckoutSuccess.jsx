@@ -1,29 +1,27 @@
-import React, { useEffect } from 'react';
-import { Head, router } from '@inertiajs/react';
-import Header from '../Components/Home/Header';
+import { useEffect } from 'react';
+import { Head, Link, usePage } from '@inertiajs/react';
+import { ArrowRight, Check, Download, Package } from 'lucide-react';
+import PurchaseHeader from '../Components/Home/PurchaseHeader';
 
-export default function CheckoutSuccess({ pedido }) {
+export default function CheckoutSuccess({ pedido, comprobante, orderAccessUrl }) {
+    const { auth } = usePage().props;
     useEffect(() => {
-        // Si estamos dentro de un iframe (Modal de Pago), redireccionamos la ventana principal
-        if (window.top !== window.self) {
-            window.top.location.href = '/perfil?tab=compras';
-        } else {
-            // Redirigir de inmediato a la sección de órdenes en el perfil sin refrescar la página
-            router.visit('/perfil?tab=compras');
-        }
+        if (window.top !== window.self) window.top.location.href = window.location.href;
+        ['checkout_address', 'checkout_delivery', 'checkout_shipping_cost', 'checkout_customer'].forEach(key => sessionStorage.removeItem(key));
     }, []);
-
-    return (
-        <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
-            <Head title="Procesando Pedido..." />
-            <Header cartCount={0} onOpenCart={() => {}} onOpenCategories={() => {}} minimal={true} />
-
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
-                <div style={{ width: '50px', height: '50px', border: '5px solid #bfdbfe', borderTop: '5px solid #2563eb', borderRadius: '50%', animation: 'spin 1s linear infinite', marginBottom: '20px' }}></div>
-                <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
-                <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#1e3a8a' }}>Generando tu orden...</h2>
-                <p style={{ color: '#64748b' }}>Redirigiendo a tu panel de pedidos.</p>
-            </div>
-        </div>
-    );
+    return <div className="purchase-page">
+        <Head title="Compra confirmada"><meta name="robots" content="noindex,nofollow" /></Head>
+        <PurchaseHeader stage={3} complete />
+        <main className="purchase-container"><section className="purchase-card purchase-status" aria-labelledby="purchase-confirmed">
+            <span className="purchase-status-icon"><Check size={32} aria-hidden="true" /></span>
+            <h1 id="purchase-confirmed">Tu compra está confirmada</h1>
+            <p>Gracias por comprar en Novape. Conserva este código para consultar el estado de tu pedido.</p>
+            <dl><div><dt>Código de pedido</dt><dd>{pedido.codigo}</dd></div><div><dt>Estado</dt><dd>{pedido.estado}</dd></div><div><dt>Total de la compra</dt><dd>{new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(pedido.total)}</dd></div></dl>
+            {comprobante && <div className="purchase-notice"><div><strong>{comprobante.tipo} · {comprobante.numero}</strong><p>{comprobante.estado === 'aceptado' ? 'Comprobante electrónico emitido.' : 'Comprobante registrado. Emisión electrónica pendiente.'}</p></div></div>}
+            <div className="purchase-status-actions">{comprobante && <a className="purchase-primary" href={comprobante.downloadUrl}><Download size={17} />Descargar comprobante</a>}<Link className="purchase-outline" href={`/seguimiento?codigo=${encodeURIComponent(pedido.codigo)}`}><Package size={17} />Seguir mi pedido</Link>
+                {orderAccessUrl && <a className="purchase-outline" href={orderAccessUrl}>Estado y posventa de mi compra</a>}
+                {auth?.user && <Link className="purchase-outline" href="/perfil?tab=compras">Mis compras</Link>}
+                <Link className="purchase-outline" href="/catalogo">Seguir comprando<ArrowRight size={16} /></Link></div>
+        </section></main>
+    </div>;
 }

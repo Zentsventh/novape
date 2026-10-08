@@ -10,6 +10,26 @@ use Illuminate\Support\Facades\DB;
 
 class CrmAnalyticsService
 {
+    private function daysToClose(): string
+    {
+        return match (DB::getDriverName()) {
+            'sqlite' => "julianday(date(updated_at)) - julianday(date(created_at))",
+            'pgsql' => '(CAST(updated_at AS date) - CAST(created_at AS date))',
+            'sqlsrv' => 'DATEDIFF(day, created_at, updated_at)',
+            default => 'DATEDIFF(updated_at, created_at)',
+        };
+    }
+
+    private function month(string $column): string
+    {
+        return match (DB::getDriverName()) {
+            'sqlite' => "strftime('%Y-%m', $column)",
+            'pgsql' => "TO_CHAR($column, 'YYYY-MM')",
+            'sqlsrv' => "CONVERT(char(7), $column, 120)",
+            default => "DATE_FORMAT($column, '%Y-%m')",
+        };
+    }
+
     public function getDashboardMetrics(): array
     {
         return [
@@ -37,7 +57,7 @@ class CrmAnalyticsService
         $ltv = $activeCustomers > 0 ? round($totalRevenue / $activeCustomers, 2) : 0;
 
         $dealVelocity = CrmDeal::where('estado', 'won')
-            ->select(DB::raw('AVG(DATEDIFF(updated_at, created_at)) as avg_days'))
+            ->selectRaw('AVG('.$this->daysToClose().') as avg_days')
             ->value('avg_days');
 
         return [
@@ -51,26 +71,29 @@ class CrmAnalyticsService
 
     private function getFunnelData(): array
     {
-        return DB::table('crm_deals')
+        return CrmDeal::query()
             ->join('crm_stages', 'crm_deals.stage_id', '=', 'crm_stages.id')
             ->select('crm_stages.nombre as name', DB::raw('count(crm_deals.id) as value'), 'crm_stages.color')
-            ->groupBy('crm_stages.id', 'crm_stages.nombre', 'crm_stages.color')
+            ->groupBy('crm_stages.id', 'crm_stages.nombre', 'crm_stages.color', 'crm_stages.orden')
             ->orderBy('crm_stages.orden')
+            ->toBase()
             ->get()
+            ->map(fn ($row) => ['name'=>$row->name, 'value'=>(int)$row->value, 'color'=>$row->color])
             ->toArray();
     }
 
     private function getMonthlySalesData(): array
     {
-        return DB::table('crm_deals')
+        return CrmDeal::query()
             ->where('estado', 'won')
             ->where('updated_at', '>=', now()->subMonths(6))
             ->select(
-                DB::raw('DATE_FORMAT(updated_at, "%Y-%m") as month'),
+                DB::raw($this->month('updated_at').' as month'),
                 DB::raw('SUM(valor) as total')
             )
             ->groupBy('month')
             ->orderBy('month')
+            ->toBase()
             ->get()
             ->map(function ($item) {
                 return [
@@ -83,12 +106,13 @@ class CrmAnalyticsService
 
     private function getScatterData(): array
     {
-        return DB::table('crm_deals')
+        return CrmDeal::query()
             ->where('estado', 'won')
             ->select(
-                DB::raw('DATEDIFF(updated_at, created_at) as dias_cierre'),
+                DB::raw($this->daysToClose().' as dias_cierre'),
                 'valor'
             )
+            ->toBase()
             ->get()
             ->map(function ($item) {
                 return [
@@ -102,15 +126,16 @@ class CrmAnalyticsService
 
     private function getPipelineForecast(): array
     {
-        $data = DB::table('crm_deals')
+        $data = CrmDeal::query()
             ->where('updated_at', '>=', now()->subMonths(6))
             ->select(
-                DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month'),
+                DB::raw($this->month('created_at').' as month'),
                 'estado',
                 DB::raw('COUNT(id) as total')
             )
             ->groupBy('month', 'estado')
             ->orderBy('month')
+            ->toBase()
             ->get();
 
         $forecast = [];
@@ -126,7 +151,7 @@ class CrmAnalyticsService
 
     private function getWinLossRatio(): array
     {
-        $stats = DB::table('crm_deals')
+        $stats = CrmDeal::query()
             ->select('estado', DB::raw('count(id) as total'))
             ->groupBy('estado')
             ->pluck('total', 'estado')
@@ -147,16 +172,18 @@ class CrmAnalyticsService
             ->selectRaw('deal_id, MIN(id) as first_activity_id')
             ->groupBy('deal_id');
 
-        return DB::table('crm_deals')
+        return CrmDeal::query()
             ->joinSub($authors, 'authors', fn ($join) => $join->on('authors.deal_id', '=', 'crm_deals.id'))
             ->join('crm_activities', 'crm_activities.id', '=', 'authors.first_activity_id')
             ->join('usuario', 'usuario.id', '=', 'crm_activities.usuario_id')
+            ->whereNull('usuario.deleted_at')
             ->where('crm_deals.estado', 'won')
             ->select('usuario.nombres', 'usuario.apellidos')
             ->selectRaw('SUM(crm_deals.valor) AS total_ventas, COUNT(crm_deals.id) AS deals_cerrados')
             ->groupBy('usuario.id', 'usuario.nombres', 'usuario.apellidos')
             ->orderByDesc('total_ventas')
             ->limit(10)
+            ->toBase()
             ->get()
             ->map(fn ($row) => ['vendedor' => trim($row->nombres.' '.$row->apellidos), 'total_ventas' => (float) $row->total_ventas, 'deals_cerrados' => (int) $row->deals_cerrados])
             ->all();

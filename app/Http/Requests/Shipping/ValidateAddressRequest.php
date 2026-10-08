@@ -22,6 +22,7 @@ class ValidateAddressRequest extends FormRequest
             'departamento' => 'nullable|string',
             'provincia' => 'nullable|string',
             'distrito' => 'nullable|string',
+            'codigo_postal' => ['nullable', 'regex:/^[0-9]{5}$/'],
         ];
     }
 }

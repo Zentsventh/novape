@@ -1,9 +1,11 @@
 import React from 'react';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import AdminLayout from '../../../Layouts/AdminLayout';
 import { Edit2, ArrowLeft, Shield, Check, Save, User, Mail, Lock, CreditCard, Phone, KeyRound } from 'lucide-react';
 
 export default function Edit({ trabajador, roles }) {
+    const { auth } = usePage().props;
+    const canManageRoles = auth?.user?.roles?.some(role => role.nombre === 'admin');
     const { data, setData, put, processing, errors } = useForm({
         nombres: trabajador.nombres,
         apellidos: trabajador.apellidos,
@@ -15,6 +17,7 @@ export default function Edit({ trabajador, roles }) {
     });
 
     const toggleRole = (roleId) => {
+        if (!canManageRoles) return;
         const currentRoles = data.roles || [];
         if (currentRoles.includes(roleId)) {
             setData('roles', currentRoles.filter(id => id !== roleId));
@@ -213,6 +216,10 @@ export default function Edit({ trabajador, roles }) {
                                     return (
                                         <div 
                                             key={r.id}
+                                            role={canManageRoles ? 'checkbox' : undefined}
+                                            aria-checked={canManageRoles ? isSelected : undefined}
+                                            tabIndex={canManageRoles ? 0 : undefined}
+                                            onKeyDown={e => { if (canManageRoles && (e.key === ' ' || e.key === 'Enter')) { e.preventDefault(); toggleRole(r.id); } }}
                                             onClick={() => toggleRole(r.id)}
                                             style={{
                                                 padding: '20px',

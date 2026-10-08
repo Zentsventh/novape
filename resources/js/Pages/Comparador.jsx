@@ -1,21 +1,35 @@
 import React, { useState } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import Header from '../Components/Home/Header';
 import Footer from '../Components/Home/Footer';
 
-export default function Comparador() {
-    const [productos, setProductos] = useState([]);
+export default function Comparador({ productos = [], especificacionesUnicas = [], logoUrl }) {
+    const { cart } = usePage().props;
+    const [pending, setPending] = useState(false);
+    const remove = id => router.post('/comparador/remove', { producto_id: id }, { preserveScroll: true,
+        onStart: () => setPending(true), onFinish: () => setPending(false) });
 
     return (
         <div className="layout-container">
             <Head title="Comparador" />
-            <Header />
+            <Header logoUrl={logoUrl} cartCount={cart?.count || 0} onOpenCart={() => router.visit('/carrito')} onOpenCategories={() => router.visit('/catalogo')} />
             <div style={{ maxWidth: '1200px', margin: '40px auto', padding: '20px', minHeight: '60vh' }}>
                 <h1 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '20px' }}>Comparador de Productos</h1>
                 {productos.length > 0 ? (
-                    <div className="comparador-table" style={{ overflowX: 'auto' }}>
-                        {/* Aquí iría la tabla de comparación real */}
+                    <div className="store-table-scroll" tabIndex={0} role="region" aria-label="Comparación de productos">
                         <p>Comparando {productos.length} productos...</p>
+                        <table className="store-comparison-table">
+                            <caption>Precios y características</caption>
+                            <thead><tr><th scope="col">Producto</th>{productos.map(p => <th scope="col" key={p.id}>
+                                <Link href={`/producto/${p.id}`}><img src={p.imagen} alt="" loading="lazy" /><span>{p.nombre}</span></Link>
+                                <button onClick={() => remove(p.id)} disabled={pending} aria-label={`Quitar ${p.nombre}`}>Quitar</button>
+                            </th>)}</tr></thead>
+                            <tbody>
+                                <tr><th scope="row">Precio</th>{productos.map(p => <td key={p.id}>{new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(p.precio)}</td>)}</tr>
+                                <tr><th scope="row">Marca</th>{productos.map(p => <td key={p.id}>{p.marca}</td>)}</tr>
+                                {especificacionesUnicas.map(name => <tr key={name}><th scope="row">{name}</th>{productos.map(p => <td key={p.id}>{p.especificaciones?.find(s => s.nombre === name)?.valor || 'No especificado'}</td>)}</tr>)}
+                            </tbody>
+                        </table>
                     </div>
                 ) : (
                     <div style={{ textAlign: 'center', padding: '60px 40px', background: '#f9fafb', borderRadius: '16px', border: '1px dashed #cbd5e1' }}>

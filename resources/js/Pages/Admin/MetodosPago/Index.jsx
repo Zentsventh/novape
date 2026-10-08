@@ -87,7 +87,7 @@ export default function MetodosPagoIndex({ metodos, logoUrl }) {
                         <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Nombre</label>
-                                <input type="text" value={data.nombre} onChange={e => setData('nombre', e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }} required placeholder="Ej: Niubiz" />
+                                <input type="text" value={data.nombre} onChange={e => setData('nombre', e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }} required />
                             </div>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Tipo</label>

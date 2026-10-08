@@ -34,7 +34,7 @@ class AlmacenController extends Controller
     {
         try {
             $this->warehouseService->deleteWarehouse($id);
-            return redirect()->back()->with('success', 'Almacén eliminado.');
+            return redirect()->back()->with('success', 'Almacén desactivado; su historial se conserva.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
@@ -42,17 +42,14 @@ class AlmacenController extends Controller
 
     public function kardex(int $id)
     {
-        $data = $this->warehouseService->getKardex($id);
-        if (!$data) abort(404);
-
-        $data['logoUrl'] = ConfiguracionSitio::obtener('logo_url');
-        return Inertia::render('Admin/Almacenes/Kardex', $data);
+        return redirect()->route('admin.inventario.movimientos', ['almacen_id' => $id]);
     }
 
     public function transferir(WarehouseTransferRequest $request)
     {
         try {
-            $this->warehouseService->transferStock($request->validated(), auth()->id() ?? 1);
+            $adminId = (int) (auth('admin')->id() ?? auth()->id() ?? 1);
+            $this->warehouseService->transferStock($request->validated(), $adminId);
             return redirect()->back()->with('success', 'Transferencia realizada correctamente.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());

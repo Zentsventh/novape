@@ -178,7 +178,7 @@ export default function Index() {
                 <Download size={16} />
                 Exportar
             </Link>
-            <Link href="/admin/clientes/create" className="premium-btn premium-btn-primary">
+            <Link href="/admin/clientes/create" className="premium-btn premium-btn-primary" style={{ background: '#004797', color: '#ffffff' }}>
                 <Plus size={16} />
                 Nueva Persona
             </Link>
@@ -280,7 +280,7 @@ export default function Index() {
                     box-shadow: 0 2px 4px rgba(0, 71, 151, 0.2);
                 }
                 .premium-btn-primary:hover {
-                    background: #00A2E8;
+                    background: #003670 !important;
                     transform: translateY(-1px);
                     box-shadow: 0 4px 10px rgba(0, 71, 151, 0.3);
                 }
@@ -415,18 +415,24 @@ export default function Index() {
                     {clientes?.links && clientes.data.length > 0 && (
                         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
                             <div style={{ display: 'flex', gap: '6px' }} className="premium-pagination">
-                                {clientes.links.map((link, k) => (
-                                    <Link
-                                        key={k}
-                                        href={link.url || '#'}
-                                        dangerouslySetInnerHTML={{ __html: link.label }}
-                                        className={link.active ? 'active' : ''}
-                                        style={{
-                                            pointerEvents: link.url ? 'auto' : 'none',
-                                            opacity: link.url ? 1 : 0.5,
-                                        }}
-                                    />
-                                ))}
+                                {clientes.links.map((link, k) => {
+                                    let label = link.label;
+                                    if (label.includes('pagination.previous') || label.includes('Previous')) label = '&laquo; Anterior';
+                                    if (label.includes('pagination.next') || label.includes('Next')) label = 'Siguiente &raquo;';
+                                    
+                                    return (
+                                        <Link
+                                            key={k}
+                                            href={link.url || '#'}
+                                            dangerouslySetInnerHTML={{ __html: label }}
+                                            className={link.active ? 'active' : ''}
+                                            style={{
+                                                pointerEvents: link.url ? 'auto' : 'none',
+                                                opacity: link.url ? 1 : 0.5,
+                                            }}
+                                        />
+                                    );
+                                })}
                             </div>
                         </div>
                     )}

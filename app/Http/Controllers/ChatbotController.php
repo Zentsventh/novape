@@ -29,7 +29,8 @@ class ChatbotController extends Controller
      */
     public function message(ChatbotMessageRequest $request): JsonResponse
     {
-        $sessionId = $request->input('session_id') ?: session()->getId();
+        session()->put('chatbot_active', true);
+        $sessionId = hash_hmac('sha256', session()->getId(), config('app.key'));
         $messages = $request->input('messages');
         $authUser = auth()->user();
 
@@ -67,8 +68,12 @@ class ChatbotController extends Controller
                 // Actualizar última interacción del contacto
                 $contact->update(['last_interaction_at' => now()]);
 
-                broadcast(new NewMessageReceived($inboundMessage))->toOthers();
-                broadcast(new ConversationUpdated($conversation->refresh()))->toOthers();
+                try {
+                    broadcast(new NewMessageReceived($inboundMessage))->toOthers();
+                    broadcast(new ConversationUpdated($conversation->refresh()))->toOthers();
+                } catch (\Throwable $broadcastError) {
+                    Log::warning('Omnichannel realtime unavailable in Chatbot; polling will refresh', ['exception' => get_class($broadcastError)]);
+                }
 
                 // Detectar si el visitante se identifica por nombre
                 $this->detectAndUpdateContactName($contact, $lastUserMessage, $conversation);
@@ -79,12 +84,12 @@ class ChatbotController extends Controller
 
             // Si el bot no está pausado, procesar en segundo plano usando Jobs
             if (! $conversation->is_bot_paused) {
-                // Despachar SINCRONAMENTE para que la web muestre "escribiendo..." hasta que Gemini responda
-                ProcessWebChatbotMessageJob::dispatchSync(
+                // AI requests run on a dedicated worker rather than blocking storefront requests.
+                ProcessWebChatbotMessageJob::dispatch(
                     $conversation->id,
                     $contact->id,
                     $messages
-                );
+                )->onConnection(config('storefront.queue_connection', 'database'))->onQueue('storefront');
             }
 
             return response()->json([
@@ -108,7 +113,7 @@ class ChatbotController extends Controller
      */
     public function handoff(Request $request): JsonResponse
     {
-        $sessionId = $request->input('session_id') ?: session()->getId();
+        $sessionId = hash_hmac('sha256', session()->getId(), config('app.key'));
         $authUser = auth()->user();
 
         $contact = $this->findContact($authUser, $sessionId);
@@ -125,7 +130,9 @@ class ChatbotController extends Controller
         $this->ticketAssignmentService->handoffToHuman($conversation);
 
         // Notificar al frontend
-        broadcast(new ConversationUpdated($conversation->refresh()))->toOthers();
+                try {
+                    broadcast(new ConversationUpdated($conversation->refresh()))->toOthers();
+                } catch (\Throwable $e) {}
 
         return response()->json([
             'success' => true,
@@ -138,7 +145,7 @@ class ChatbotController extends Controller
      */
     public function pollMessages(Request $request): JsonResponse
     {
-        $sessionId = $request->query('session_id') ?: session()->getId();
+        $sessionId = hash_hmac('sha256', session()->getId(), config('app.key'));
         $lastMessageId = $request->query('last_message_id', 0);
         $authUser = auth()->user();
 
@@ -197,7 +204,8 @@ class ChatbotController extends Controller
      */
     public function history(Request $request): JsonResponse
     {
-        $sessionId = $request->query('session_id') ?: session()->getId();
+        session()->put('chatbot_active', true);
+        $sessionId = hash_hmac('sha256', session()->getId(), config('app.key'));
         $authUser = auth()->user();
 
         $contact = $this->findContact($authUser, $sessionId);
@@ -250,7 +258,7 @@ class ChatbotController extends Controller
      */
     public function closeConversation(Request $request): JsonResponse
     {
-        $sessionId = $request->input('session_id') ?: session()->getId();
+        $sessionId = hash_hmac('sha256', session()->getId(), config('app.key'));
         $authUser = auth()->user();
 
         $contact = $this->findContact($authUser, $sessionId);
@@ -281,7 +289,9 @@ class ChatbotController extends Controller
             'status' => 'sent',
         ]);
 
-        broadcast(new ConversationUpdated($conversation->refresh()))->toOthers();
+                try {
+                    broadcast(new ConversationUpdated($conversation->refresh()))->toOthers();
+                } catch (\Throwable $e) {}
 
         return response()->json(['success' => true]);
     }
@@ -336,7 +346,7 @@ class ChatbotController extends Controller
         }
 
         // Usuario NO autenticado: buscar por session_id en metadata
-        $contact = OmnichannelContact::where('metadata->web_session_id', $sessionId)->first();
+        $contact = OmnichannelContact::whereNull('usuario_id')->where('metadata->web_session_id', $sessionId)->first();
         if (! $contact) {
             $contact = OmnichannelContact::create([
                 'name' => 'Visitante Web',
@@ -362,7 +372,7 @@ class ChatbotController extends Controller
             return OmnichannelContact::where('usuario_id', $authUser->id)->first();
         }
 
-        return OmnichannelContact::where('metadata->web_session_id', $sessionId)->first();
+        return OmnichannelContact::whereNull('usuario_id')->where('metadata->web_session_id', $sessionId)->first();
     }
 
     /**
@@ -439,7 +449,9 @@ class ChatbotController extends Controller
                 $contact->update(['name' => $detectedName]);
 
                 // Broadcast la actualización para que el CRM refleje el nuevo nombre
-                broadcast(new ConversationUpdated($conversation->refresh()))->toOthers();
+                        try {
+                    broadcast(new ConversationUpdated($conversation->refresh()))->toOthers();
+                } catch (\Throwable $e) {}
 
                 Log::info("Contacto #{$contact->id} identificado como: {$detectedName}");
 

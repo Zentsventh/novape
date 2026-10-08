@@ -45,7 +45,7 @@ final class SalesAppointmentService
                 }
             }
         }
-        usort($slots, fn ($a, $b) => [strtotime($a['starts_at']), $a['seller_id']] <=> [strtotime($b['starts_at']), $b['seller_id']);
+        usort($slots, fn ($a, $b) => [strtotime($a['starts_at']), $a['seller_id']] <=> [strtotime($b['starts_at']), $b['seller_id']]);
 
         return array_slice($slots, 0, 1000);
     }

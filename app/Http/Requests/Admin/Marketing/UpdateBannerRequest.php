@@ -23,6 +23,7 @@ class UpdateBannerRequest extends FormRequest
             'titulo' => 'required|string|max:255',
             'subtitulo' => 'nullable|string|max:255',
             'enlace_url' => 'nullable|string|max:500',
+            'posicion' => 'sometimes|string|in:hero,lateral,promocional_1,promocional_2,promocional_3',
             'activo' => 'sometimes|boolean',
             'imagen' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'fecha_inicio' => 'nullable|date',

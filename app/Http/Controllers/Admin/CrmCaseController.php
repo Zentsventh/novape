@@ -91,7 +91,7 @@ class CrmCaseController extends Controller
 
         $crmCase->notas()->create([
             'contenido' => $validated['contenido'],
-            'usuario_id' => auth()->id()
+            'usuario_id' => (int) (auth('admin')->id() ?? auth()->id() ?? 1)
         ]);
 
         return redirect()->back()->with('success', 'Nota añadida al caso');

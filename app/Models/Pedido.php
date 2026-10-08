@@ -19,7 +19,8 @@ class Pedido extends Model implements Auditable
     protected $table = 'pedido';
 
     protected $fillable = [
-        'usuario_id', 'codigo', 'subtotal', 'descuento', 'costo_envio',
+        'usuario_id', 'codigo', 'subtotal', 'descuento', 'costo_envio', 'checkout_session_id', 'currency',
+        'fulfilled_at', 'dispatched_at', 'fulfillment_reference', 'commerce_policy_snapshot', 'checkout_fingerprint', 'redeemed_points_restored',
         'total', 'estado', 'tracking_number', 'courier_name', 'tipo_comprobante',
         'documento_cliente', 'nombre_facturacion', 'direccion_facturacion',
         'direccion_envio_snapshot', 'cupon_id', 'puntos_usados', 'crm_deal_id', 'stock_consumed_at', 'stock_returned_at', 'igv_porcentaje', 'invoice_snapshot',
@@ -34,6 +35,9 @@ class Pedido extends Model implements Auditable
         'updated_at' => 'datetime',
         'direccion_envio_snapshot' => 'array',
         'invoice_snapshot' => 'array',
+        'commerce_policy_snapshot' => 'array',
+        'fulfilled_at' => 'datetime',
+        'dispatched_at' => 'datetime',
         'stock_consumed_at' => 'datetime',
         'stock_returned_at' => 'datetime',
     ];

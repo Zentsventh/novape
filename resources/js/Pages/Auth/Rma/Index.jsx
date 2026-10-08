@@ -33,24 +33,24 @@ export default function RmaIndex({ rmas, categoriaProductos = [] }) {
     };
 
     return (
-        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#f8fafc' }}>
+        <div style={{ minHeight: '100vh', display: 'flex', flexWrap: 'wrap', flexDirection: 'column', backgroundColor: '#f8fafc' }}>
             <Head title="Mis Devoluciones y Garantías" />
             
-            <Header onCartClick={() => setIsCartOpen(true)} cartItemCount={cart?.items?.length || 0} user={auth.user} />
-            <CategoryNavBar categories={categoriaProductos} />
+            <Header onOpenCart={() => setIsCartOpen(true)} cartCount={cart?.count || 0} user={auth.user} />
+            <CategoryNavBar categorias={categoriaProductos} />
             <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} cart={cart} />
             <Toast message={flash?.success || flash?.error} type={flash?.error ? 'error' : 'success'} />
 
             <main style={{ flex: 1, padding: '40px 20px', maxWidth: '1200px', width: '100%', margin: '0 auto' }}>
                 
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px', gap: '12px' }}>
-                    <Link href="/perfil" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', textDecoration: 'none', fontWeight: '500' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', marginBottom: '24px', gap: '12px' }}>
+                    <Link href="/perfil" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px', color: '#64748b', textDecoration: 'none', fontWeight: '500' }}>
                         <ArrowLeft size={18} /> Volver a mi Perfil
                     </Link>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-                    <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '12px', margin: 0 }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+                    <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#1e293b', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '12px', margin: 0 }}>
                         <ShieldAlert size={32} color="#3b82f6" /> 
                         Mis Devoluciones y Garantías
                     </h1>
@@ -69,9 +69,9 @@ export default function RmaIndex({ rmas, categoriaProductos = [] }) {
                     ) : (
                         <div style={{ display: 'grid', gap: '16px' }}>
                             {rmas.map(rma => (
-                                <div key={rma.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px', border: '1px solid #e2e8f0', borderRadius: '12px', transition: 'all 0.2s' }} className="hover:border-blue-300">
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <div key={rma.id} style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', padding: '20px', border: '1px solid #e2e8f0', borderRadius: '12px', transition: 'all 0.2s' }} className="hover:border-blue-300">
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', flexDirection: 'column', gap: '8px' }}>
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '12px' }}>
                                             <span style={{ fontWeight: 'bold', fontSize: '16px', color: '#0f172a' }}>
                                                 RMA #{rma.id.toString().padStart(6, '0')}
                                             </span>
@@ -86,13 +86,13 @@ export default function RmaIndex({ rmas, categoriaProductos = [] }) {
                                                 {getTypeLabel(rma.type)}
                                             </span>
                                         </div>
-                                        <div style={{ color: '#64748b', fontSize: '14px', display: 'flex', gap: '16px' }}>
+                                        <div style={{ color: '#64748b', fontSize: '14px', display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
                                             <span>Pedido #{rma.pedido_id}</span>
                                             <span>•</span>
                                             <span>{new Date(rma.created_at).toLocaleDateString('es-PE', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
                                         </div>
                                     </div>
-                                    <Link href={`/perfil/devoluciones/${rma.id}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#3b82f6', textDecoration: 'none', fontWeight: '600', padding: '8px 16px', borderRadius: '8px', background: '#eff6ff' }}>
+                                    <Link href={`/perfil/devoluciones/${rma.id}`} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px', color: '#3b82f6', textDecoration: 'none', fontWeight: '600', padding: '8px 16px', borderRadius: '8px', background: '#eff6ff' }}>
                                         Ver Detalles <ChevronRight size={18} />
                                     </Link>
                                 </div>

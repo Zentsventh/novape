@@ -160,7 +160,7 @@
                 <p class="value">S/ {{ number_format($costosTotal, 2) }}</p>
             </div>
             <div class="summary-card">
-                <h3>Saldo operativo</h3>
+                <h3>Balance comercial</h3>
                 <p class="value">S/ {{ number_format($gananciaNeta, 2) }}</p>
             </div>
         </div>

@@ -15,6 +15,11 @@ class Marca extends Model
     public $timestamps = false;
 
     protected $fillable = ['nombre'];
+    protected static function booted(): void
+    {
+        static::saved(fn () => \Illuminate\Support\Facades\Cache::forget('home_categorias_menu_v3'));
+        static::deleted(fn () => \Illuminate\Support\Facades\Cache::forget('home_categorias_menu_v3'));
+    }
 
     public function productos(): \Illuminate\Database\Eloquent\Relations\HasMany
     {

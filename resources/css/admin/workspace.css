@@ -655,8 +655,8 @@
 .panel-shell .premium-btn-primary,
 .panel-shell .premium-create-btn,
 .panel-shell .twenty-btn-primary {
-  background: #4f46e5;
-  border-color: #4f46e5;
+  background: #004797;
+  border-color: #004797;
   color: #fff;
   box-shadow: none;
   border-radius: 8px;
@@ -664,7 +664,7 @@
 .panel-shell .admin-btn-primary:hover,
 .panel-shell .premium-btn-primary:hover,
 .panel-shell .premium-create-btn:hover {
-  background: #4338ca;
+  background: #003670;
   transform: none;
 }
 .panel-shell .admin-card,

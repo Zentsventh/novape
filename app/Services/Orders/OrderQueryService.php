@@ -35,9 +35,12 @@ class OrderQueryService
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('codigo', 'like', "%{$search}%")
+                    ->orWhere('documento_cliente', 'like', "%{$search}%")
                     ->orWhereHas('usuario', function ($u) use ($search) {
                         $u->where('nombres', 'like', "%{$search}%")
-                            ->orWhere('apellidos', 'like', "%{$search}%");
+                            ->orWhere('apellidos', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('dni', 'like', "%{$search}%");
                     });
             });
         }

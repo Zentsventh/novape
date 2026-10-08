@@ -89,7 +89,12 @@ class UserManagementService
             Rol::where('nombre', 'admin')->lockForUpdate()->first();
             $usuario = Usuario::whereKey($usuario->id)->lockForUpdate()->firstOrFail();
             $this->assertAdminAccountAccess($usuario);
-            $this->assertAdminRoleAssignment($data['roles'] ?? []);
+            if (isset($data['roles']) && !auth('admin')->user()?->esAdmin()) {
+                $existing = $usuario->roles()->pluck('rol.id')->map(fn ($id) => (int) $id)->sort()->values()->all();
+                $requested = collect($data['roles'])->map(fn ($id) => (int) $id)->unique()->sort()->values()->all();
+                abort_unless($existing === $requested, 403);
+                unset($data['roles']);
+            }
             if ($isStaff && $usuario->esAdmin() && isset($data['roles']) &&
                 ! Rol::whereIn('id', $data['roles'])->where('nombre', 'admin')->exists()) {
                 $this->assertAnotherAdministrator($usuario);

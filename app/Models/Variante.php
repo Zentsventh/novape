@@ -16,6 +16,19 @@ class Variante extends Model
 
     protected $table = 'variante';
 
+    protected static function booted(): void
+    {
+        $history = function (self $variant) {
+            if ($variant->wasRecentlyCreated || $variant->wasChanged('precio')) {
+                \Illuminate\Support\Facades\DB::table('historial_precio')->where('variante_id', $variant->id)->whereNull('fecha_fin')->update(['fecha_fin' => now(), 'updated_at' => now()]);
+                \Illuminate\Support\Facades\DB::table('historial_precio')->insert(['variante_id' => $variant->id, 'precio' => $variant->precio,
+                    'fecha_inicio' => now(), 'usuario_id' => auth('admin')->id(), 'motivo' => $variant->wasRecentlyCreated ? 'Precio inicial' : 'Actualización de precio', 'created_at' => now(), 'updated_at' => now()]);
+            }
+        };
+        static::created($history);
+        static::updated($history);
+    }
+
     protected $fillable = [
         'producto_id',
         'sku',
@@ -25,10 +38,12 @@ class Variante extends Model
         'stock',
         'stock_reservado',
         'peso', 'precio_compra', 'stock_minimo', 'stock_maximo', 'stock_seguridad',
+        'shipping_length_cm', 'shipping_width_cm', 'shipping_height_cm',
     ];
 
     protected $casts = [
         'precio' => 'decimal:2',
+        'precio_compra' => 'decimal:4',
         'precio_anterior' => 'decimal:2',
         'activo' => 'boolean',
         'stock' => 'integer',
@@ -50,5 +65,10 @@ class Variante extends Model
     public function scopeActivos(Builder $query): Builder
     {
         return $query->where('activo', true);
+    }
+
+    public function getPrecioFinalAttribute()
+    {
+        return \App\Services\Storefront\VariantPricing::quote($this)['price'];
     }
 }

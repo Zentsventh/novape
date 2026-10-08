@@ -110,7 +110,6 @@ export default function Permisos({ roles, permisos }) {
                         <form onSubmit={submitNewRole} style={{ background: 'rgba(0,0,0,0.02)', padding: '12px', borderRadius: '8px', marginBottom: '15px', border: '1px solid var(--admin-border)' }}>
                             <input
                                 type="text"
-                                placeholder="Nombre (ej. Vendedor)"
                                 value={roleData.nombre}
                                 onChange={e => setRoleData('nombre', e.target.value)}
                                 style={{ width: '100%', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--admin-border)', marginBottom: '8px', background: 'var(--admin-bg-panel)', color: 'var(--admin-text-main)', fontSize: '14px' }}

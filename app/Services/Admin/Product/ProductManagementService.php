@@ -24,6 +24,7 @@ class ProductManagementService
     public function createProduct(array $data, int $userId): Producto
     {
         return DB::transaction(function () use ($data, $userId) {
+            $data['sku_base'] = ($data['sku_base'] ?? null) ?: 'NP-'.strtoupper((string) \Illuminate\Support\Str::ulid());
             $producto = Producto::create([
                 'nombre' => $data['nombre'],
                 'marca_id' => $data['marca_id'],
@@ -32,6 +33,8 @@ class ProductManagementService
                 'descripcion' => $data['descripcion'] ?? null,
                 'garantias' => $data['garantias'] ?? null,
                 'activo' => $data['activo'] ?? true,
+                'retiro_tienda' => $data['retiro_tienda'] ?? true,
+                'envio_domicilio' => $data['envio_domicilio'] ?? true,
             ]);
 
             $variante = Variante::create([
@@ -39,6 +42,9 @@ class ProductManagementService
                 'sku' => $data['sku_base'] ?? ('SKU-'.$producto->id),
                 'precio' => $data['precio'],
                 'peso' => $data['peso_kg'] ?? 1.0,
+                'shipping_length_cm' => $data['shipping_length_cm'] ?? null,
+                'shipping_width_cm' => $data['shipping_width_cm'] ?? null,
+                'shipping_height_cm' => $data['shipping_height_cm'] ?? null,
                 'stock' => 0,
                 'activo' => true,
             ]);
@@ -55,6 +61,7 @@ class ProductManagementService
     public function updateProduct(Producto $producto, array $data, int $userId): Producto
     {
         return DB::transaction(function () use ($producto, $data, $userId) {
+            $data['sku_base'] = ($data['sku_base'] ?? null) ?: $producto->sku_base;
             $producto->update([
                 'nombre' => $data['nombre'],
                 'marca_id' => $data['marca_id'],
@@ -63,6 +70,8 @@ class ProductManagementService
                 'descripcion' => $data['descripcion'] ?? null,
                 'garantias' => $data['garantias'] ?? null,
                 'activo' => $data['activo'] ?? true,
+                'retiro_tienda' => $data['retiro_tienda'] ?? true,
+                'envio_domicilio' => $data['envio_domicilio'] ?? true,
             ]);
 
             $variante = Variante::where('producto_id', $producto->id)->lockForUpdate()->first();
@@ -70,11 +79,16 @@ class ProductManagementService
             $diferencia = 0;
 
             if ($variante) {
-                $diferencia = $nuevoStock - $variante->stock;
+                $localStock = (int) DB::table('stock_almacen')->where('variante_id', $variante->id)
+                    ->where('almacen_id', (int) ConfiguracionSitio::obtener('almacen_ecommerce_id', 1))->value('cantidad');
+                $diferencia = $nuevoStock - $localStock;
                 $variante->update([
                     'sku' => $data['sku_base'] ?? $variante->sku,
                     'precio' => $data['precio'],
                     'peso' => $data['peso_kg'] ?? 1.0,
+                'shipping_length_cm' => array_key_exists('shipping_length_cm', $data) ? $data['shipping_length_cm'] : $variante->shipping_length_cm,
+                'shipping_width_cm' => array_key_exists('shipping_width_cm', $data) ? $data['shipping_width_cm'] : $variante->shipping_width_cm,
+                'shipping_height_cm' => array_key_exists('shipping_height_cm', $data) ? $data['shipping_height_cm'] : $variante->shipping_height_cm,
                 ]);
             } else {
                 $variante = Variante::create([
@@ -82,6 +96,9 @@ class ProductManagementService
                     'sku' => $data['sku_base'] ?? ('SKU-'.$producto->id),
                     'precio' => $data['precio'],
                     'peso' => $data['peso_kg'] ?? 1.0,
+                'shipping_length_cm' => $data['shipping_length_cm'] ?? null,
+                'shipping_width_cm' => $data['shipping_width_cm'] ?? null,
+                'shipping_height_cm' => $data['shipping_height_cm'] ?? null,
                     'stock' => 0,
                     'activo' => true,
                 ]);
@@ -116,47 +133,21 @@ class ProductManagementService
             return;
         }
 
-        $almacenEcommerceId = ConfiguracionSitio::obtener('almacen_ecommerce_id', 1);
-        $stockAlmacen = DB::table('stock_almacen')
-            ->where('almacen_id', $almacenEcommerceId)
-            ->where('variante_id', $variante->id)
-            ->lockForUpdate()
-            ->first();
-        if (($stockAlmacen->cantidad ?? 0) + $cantidad < 0) {
-            throw ValidationException::withMessages([
-                'stock' => 'El ajuste dejaría stock negativo en el almacén de ecommerce. Transfiere o ajusta el almacén correspondiente.',
-            ]);
-        }
+        $almacenEcommerceId = (int) ConfiguracionSitio::obtener('almacen_ecommerce_id', 1);
 
-        StockAvailability::assertRemaining($variante->id, (int) $almacenEcommerceId, (int) ($stockAlmacen->cantidad ?? 0) + $cantidad);
-        if ($stockAlmacen) {
-            DB::table('stock_almacen')->where('id', $stockAlmacen->id)->increment('cantidad', $cantidad);
-        } else {
-            DB::table('stock_almacen')->insert([
-                'almacen_id' => $almacenEcommerceId,
-                'variante_id' => $variante->id,
-                'cantidad' => $cantidad,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
-
-        DB::table('movimientos_almacen')->insert([
-            'almacen_id' => $almacenEcommerceId,
-            'variante_id' => $variante->id,
-            'tipo' => 'ajuste',
-            'cantidad' => $cantidad,
-            'referencia' => $referencia,
-            'usuario_id' => $userId,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::statement('UPDATE variante SET stock = (SELECT COALESCE(SUM(cantidad), 0) FROM stock_almacen WHERE variante_id = ?) WHERE id = ?', [$variante->id, $variante->id]);
+        app(\App\Services\Inventario\InventoryService::class)->registrarMovimiento(
+            varianteId: $variante->id,
+            almacenId: $almacenEcommerceId,
+            cantidad: $cantidad,
+            tipo: 'ajuste',
+            motivo: $referencia,
+            usuarioId: $userId
+        );
     }
 
     private function syncCategories(Producto $producto, array $categoryIds): void
     {
+        \Illuminate\Support\Facades\Cache::forget('home_categorias_menu_v3');
         if (empty($categoryIds)) {
             $producto->categorias()->sync([]);
 

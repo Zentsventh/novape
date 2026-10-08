@@ -100,7 +100,6 @@ export default function Create({ roles }) {
                                             onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }}
                                             required
                                             autoComplete="off"
-                                            placeholder="Ej: Juan Carlos"
                                         />
                                     </div>
                                     {errors.nombres && <div style={{ color: '#EF4444', fontSize: '12px', marginTop: '6px', fontWeight: 600 }}>{errors.nombres}</div>}
@@ -118,7 +117,6 @@ export default function Create({ roles }) {
                                             onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }}
                                             required
                                             autoComplete="off"
-                                            placeholder="Ej: Pérez Gómez"
                                         />
                                     </div>
                                     {errors.apellidos && <div style={{ color: '#EF4444', fontSize: '12px', marginTop: '6px', fontWeight: 600 }}>{errors.apellidos}</div>}

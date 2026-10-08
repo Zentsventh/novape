@@ -25,9 +25,7 @@ class SendMarketingCampaignJob implements ShouldQueue
         if ($this->campaign->fresh()?->status !== 'sending') {
             return;
         }
-        $query = Usuario::whereHas('roles', fn ($q) => $q->where('nombre', 'cliente'))
-            ->where('estado', 'activo')
-            ->whereNotNull('email');
+        $query = \App\Services\Marketing\MarketingConsent::audience();
 
         if ($this->campaign->segment === 'vip') {
             $query->where('total_orders', '>=', 5);

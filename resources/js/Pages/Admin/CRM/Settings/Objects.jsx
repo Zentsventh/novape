@@ -356,7 +356,6 @@ export default function ObjectsSettings({ fields = [], flash, errors }) {
                                                 setData('label', e.target.value);
                                                 if (!data.name) setData('name', e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, ''));
                                             }}
-                                            placeholder="Ej: Sector Industrial"
                                             style={{ 
                                                 width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #E2E8F0', 
                                                 fontSize: '15px', outline: 'none', transition: 'all 0.2s',

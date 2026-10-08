@@ -22,7 +22,7 @@ export default function AlmacenesIndex({ almacenes, categorias, marcas, logoUrl 
     });
 
     const { data: dataT, setData: setDataT, post: postT, processing: procT, reset: resetT, errors: errorsT } = useForm({
-        almacen_origen_id: '', almacen_destino_id: '', variante_id: '', cantidad: '', referencia: ''
+        almacen_origen_id: '', almacen_destino_id: '', variante_id: '', cantidad: '', referencia: '', operation_key: crypto.randomUUID()
     });
 
     const submitAlmacen = (e) => {
@@ -32,7 +32,7 @@ export default function AlmacenesIndex({ almacenes, categorias, marcas, logoUrl 
 
     const submitTransfer = async (e) => {
         e.preventDefault();
-        postT('/admin/almacenes/transferir', { onSuccess: () => { setShowTransferModal(false); resetT(); } });
+        postT('/admin/almacenes/transferir', { onSuccess: () => { setShowTransferModal(false); resetT(); setDataT('operation_key', crypto.randomUUID()); } });
     };
 
     const handleDelete = async (id) => {
@@ -49,8 +49,8 @@ export default function AlmacenesIndex({ almacenes, categorias, marcas, logoUrl 
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
                 <h1 style={{ fontSize: '24px', margin: 0, fontWeight: '700', color: '#1E293B', display: 'flex', alignItems: 'center', gap: '12px', letterSpacing: '-0.02em' }}>
-                    <div style={{ padding: '8px', backgroundColor: '#F0F9FF', borderRadius: '10px', color: '#004797' }}>
-                        <Building2 size={24} />
+                    <div style={{ padding: '8px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', color: '#64748B', display: 'flex' }}>
+                        <Building2 size={20} />
                     </div>
                     <div>
                         Ubicaciones y Almacenes
@@ -63,18 +63,18 @@ export default function AlmacenesIndex({ almacenes, categorias, marcas, logoUrl 
                 <div style={{ display: 'flex', gap: '12px' }}>
                     <button 
                         onClick={() => setShowTransferModal(true)} 
-                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F1F5F9'; e.currentTarget.style.color = '#1E293B'; e.currentTarget.style.borderColor = '#94A3B8'; }}
+                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F8FAFC'; e.currentTarget.style.color = '#1E293B'; e.currentTarget.style.borderColor = '#CBD5E1'; }}
                         onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.color = '#475569'; e.currentTarget.style.borderColor = '#E2E8F0'; }}
-                        style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#ffffff', color: '#475569', textDecoration: 'none', padding: '10px 16px', borderRadius: '8px', fontWeight: '600', fontSize: '13px', border: '1px solid #E2E8F0', transition: 'all 0.2s ease', boxShadow: '0 1px 2px rgba(0,0,0,0.02)', cursor: 'pointer' }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#ffffff', color: '#475569', textDecoration: 'none', padding: '10px 16px', borderRadius: '10px', fontWeight: '600', fontSize: '13px', border: '1px solid #E2E8F0', transition: 'all 0.2s ease', boxShadow: '0 1px 2px rgba(0,0,0,0.02)', cursor: 'pointer' }}
                     >
                         <ArrowRightLeft size={16} />
                         Transferir Stock
                     </button>
                     <button 
                         onClick={() => setShowModal(true)} 
-                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#009BE0'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 71, 151, 0.3)'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#004797'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 71, 151, 0.2)'; }}
-                        style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#004797', color: 'white', border: 'none', padding: '10px 16px', borderRadius: '8px', fontWeight: '600', fontSize: '13px', transition: 'all 0.2s ease', boxShadow: '0 2px 4px rgba(0, 71, 151, 0.2)', cursor: 'pointer' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#003670'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 71, 151, 0.2)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#004797'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 71, 151, 0.15)'; }}
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#004797', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '10px', fontWeight: '600', fontSize: '13px', transition: 'all 0.2s ease', boxShadow: '0 2px 4px rgba(0, 71, 151, 0.15)', cursor: 'pointer' }}
                     >
                         <Plus size={16} />
                         Nuevo Almacén
@@ -120,8 +120,8 @@ export default function AlmacenesIndex({ almacenes, categorias, marcas, logoUrl 
                                 <td style={{ padding: '16px 24px', color: '#64748B', fontSize: '13px', fontWeight: '500' }}>{a.total_skus} prod.</td>
                                 <td style={{ padding: '16px 24px' }}>
                                     {a.activo 
-                                        ? <span style={{ background: '#ECFDF5', color: '#10B981', padding: '4px 10px', borderRadius: '9999px', fontSize: '11px', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><CheckCircle size={12} /> Activo</span> 
-                                        : <span style={{ background: '#F1F5F9', color: '#64748B', padding: '4px 10px', borderRadius: '9999px', fontSize: '11px', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><AlertCircle size={12} /> Inactivo</span>
+                                        ? <span style={{ background: '#F0FDF4', color: '#10B981', border: '1px solid #DCFCE7', padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>Activo</span> 
+                                        : <span style={{ background: '#F8FAFC', color: '#64748B', border: '1px solid #E2E8F0', padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>Inactivo</span>
                                     }
                                 </td>
                                 <td style={{ padding: '16px 24px', textAlign: 'right' }}>
@@ -129,20 +129,20 @@ export default function AlmacenesIndex({ almacenes, categorias, marcas, logoUrl 
                                         <Link 
                                             href={`/admin/almacenes/${a.id}/kardex`} 
                                             title="Kardex (Movimientos)" 
-                                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F0F9FF'; e.currentTarget.style.color = '#009BE0'; }}
-                                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#004797'; }}
-                                            style={{ color: '#004797', background: 'transparent', textDecoration: 'none', padding: '8px', borderRadius: '8px', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F8FAFC'; e.currentTarget.style.color = '#1E293B'; e.currentTarget.style.borderColor = '#CBD5E1'; }}
+                                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#94A3B8'; e.currentTarget.style.borderColor = 'transparent'; }}
+                                            style={{ color: '#94A3B8', background: 'transparent', border: '1px solid transparent', textDecoration: 'none', padding: '6px', borderRadius: '6px', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                         >
-                                            <ClipboardList size={18} />
+                                            <ClipboardList size={16} />
                                         </Link>
                                         <button 
                                             onClick={() => handleDelete(a.id)} 
                                             title="Eliminar Almacén" 
-                                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#FEF2F2'; e.currentTarget.style.color = '#DC2626'; }}
-                                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#EF4444'; }}
-                                            style={{ color: '#EF4444', background: 'transparent', border: 'none', cursor: 'pointer', padding: '8px', borderRadius: '8px', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#FEF2F2'; e.currentTarget.style.color = '#EF4444'; }}
+                                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#94A3B8'; }}
+                                            style={{ color: '#94A3B8', background: 'transparent', border: 'none', cursor: 'pointer', padding: '6px', borderRadius: '6px', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                         >
-                                            <Trash2 size={18} />
+                                            <Trash2 size={16} />
                                         </button>
                                     </div>
                                 </td>
@@ -167,8 +167,7 @@ export default function AlmacenesIndex({ almacenes, categorias, marcas, logoUrl 
                                 <input 
                                     type="text" 
                                     value={dataA.nombre} 
-                                    onChange={e => setDataA('nombre', e.target.value)} 
-                                    placeholder="Ej. Tienda Miraflores"
+                                    onChange={e => setDataA('nombre', e.target.value)}
                                     style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: '8px', border: '1px solid #E2E8F0', background: '#F8FAFC', color: '#1E293B', outline: 'none', transition: 'all 0.2s', fontSize: '14px', fontFamily: 'inherit' }}
                                     onFocus={(e) => { e.currentTarget.style.borderColor = '#004797'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.1)'; }}
                                     onBlur={(e) => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.boxShadow = 'none'; }}
@@ -192,17 +191,17 @@ export default function AlmacenesIndex({ almacenes, categorias, marcas, logoUrl 
                                     type="button" 
                                     onClick={() => setShowModal(false)} 
                                     onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#E2E8F0'; }}
-                                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#F1F5F9'; }}
-                                    style={{ flex: 1, padding: '12px', borderRadius: '8px', border: 'none', background: '#F1F5F9', color: '#475569', cursor: 'pointer', fontWeight: '600', fontSize: '14px', transition: 'all 0.2s' }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#F8FAFC'; }}
+                                    style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid #E2E8F0', background: '#F8FAFC', color: '#475569', cursor: 'pointer', fontWeight: '600', fontSize: '13px', transition: 'all 0.2s' }}
                                 >
                                     Cancelar
                                 </button>
                                 <button 
                                     type="submit" 
                                     disabled={procA} 
-                                    onMouseEnter={(e) => { if(!procA) e.currentTarget.style.backgroundColor = '#009BE0'; }}
+                                    onMouseEnter={(e) => { if(!procA) e.currentTarget.style.backgroundColor = '#003670'; }}
                                     onMouseLeave={(e) => { if(!procA) e.currentTarget.style.backgroundColor = '#004797'; }}
-                                    style={{ flex: 1, padding: '12px', borderRadius: '8px', border: 'none', background: '#004797', color: 'white', fontWeight: '600', cursor: procA ? 'not-allowed' : 'pointer', fontSize: '14px', opacity: procA ? 0.7 : 1, transition: 'all 0.2s' }}
+                                    style={{ flex: 1, padding: '12px', borderRadius: '10px', border: 'none', background: '#004797', color: 'white', fontWeight: '600', cursor: procA ? 'not-allowed' : 'pointer', fontSize: '13px', opacity: procA ? 0.7 : 1, transition: 'all 0.2s' }}
                                 >
                                     {procA ? 'Guardando...' : 'Crear Almacén'}
                                 </button>
@@ -216,8 +215,10 @@ export default function AlmacenesIndex({ almacenes, categorias, marcas, logoUrl 
             {showTransferModal && (
                 <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
                     <div style={{ background: '#ffffff', padding: '32px', borderRadius: '16px', width: '100%', maxWidth: '700px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 40px -10px rgba(0,0,0,0.1)', border: '1px solid #E2E8F0' }}>
-                        <h2 style={{ margin: '0 0 24px 0', fontSize: '20px', fontWeight: '800', color: '#1E293B', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid #E2E8F0', paddingBottom: '16px' }}>
-                            <ArrowRightLeft size={20} style={{ color: '#004797' }} />
+                        <h2 style={{ margin: '0 0 24px 0', fontSize: '20px', fontWeight: '700', color: '#1E293B', display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid #E2E8F0', paddingBottom: '16px', letterSpacing: '-0.02em' }}>
+                            <div style={{ padding: '6px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '8px', color: '#64748B', display: 'flex' }}>
+                                <ArrowRightLeft size={18} />
+                            </div>
                             Transferencia de Stock Inter-Almacén
                         </h2>
                         <form onSubmit={submitTransfer} style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -317,7 +318,6 @@ export default function AlmacenesIndex({ almacenes, categorias, marcas, logoUrl 
                                     value={dataT.referencia} 
                                     onChange={e => setDataT('referencia', e.target.value)} 
                                     style={{ width: '100%', boxSizing: 'border-box', padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '14px', outline: 'none', fontFamily: 'inherit' }} 
-                                    placeholder="Ej: Reposición de inventario para campaña, etc." 
                                     onFocus={(e) => { e.currentTarget.style.borderColor = '#004797'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.1)'; }}
                                     onBlur={(e) => { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.boxShadow = 'none'; }}
                                 />
@@ -328,17 +328,17 @@ export default function AlmacenesIndex({ almacenes, categorias, marcas, logoUrl 
                                     type="button" 
                                     onClick={() => setShowTransferModal(false)} 
                                     onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#E2E8F0'; }}
-                                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#F1F5F9'; }}
-                                    style={{ flex: 1, padding: '14px', borderRadius: '8px', border: 'none', background: '#F1F5F9', color: '#475569', cursor: 'pointer', fontWeight: '600', fontSize: '14px', transition: 'all 0.2s' }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#F8FAFC'; }}
+                                    style={{ flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid #E2E8F0', background: '#F8FAFC', color: '#475569', cursor: 'pointer', fontWeight: '600', fontSize: '13px', transition: 'all 0.2s' }}
                                 >
                                     Cancelar
                                 </button>
                                 <button 
                                     type="submit" 
                                     disabled={procT || maxAvailable === 0 || maxAvailable === null || dataT.cantidad > maxAvailable || dataT.cantidad < 1} 
-                                    onMouseEnter={(e) => { if(!(procT || maxAvailable === 0 || maxAvailable === null || dataT.cantidad > maxAvailable || dataT.cantidad < 1)) e.currentTarget.style.backgroundColor = '#009BE0'; }}
+                                    onMouseEnter={(e) => { if(!(procT || maxAvailable === 0 || maxAvailable === null || dataT.cantidad > maxAvailable || dataT.cantidad < 1)) e.currentTarget.style.backgroundColor = '#003670'; }}
                                     onMouseLeave={(e) => { if(!(procT || maxAvailable === 0 || maxAvailable === null || dataT.cantidad > maxAvailable || dataT.cantidad < 1)) e.currentTarget.style.backgroundColor = '#004797'; }}
-                                    style={{ flex: 1, padding: '14px', borderRadius: '8px', border: 'none', background: '#004797', color: 'white', fontWeight: '600', cursor: (procT || maxAvailable === 0 || maxAvailable === null || dataT.cantidad > maxAvailable || dataT.cantidad < 1) ? 'not-allowed' : 'pointer', opacity: (procT || maxAvailable === 0 || maxAvailable === null || dataT.cantidad > maxAvailable || dataT.cantidad < 1) ? 0.6 : 1, fontSize: '14px', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                                    style={{ flex: 1, padding: '12px', borderRadius: '10px', border: 'none', background: '#004797', color: 'white', fontWeight: '600', cursor: (procT || maxAvailable === 0 || maxAvailable === null || dataT.cantidad > maxAvailable || dataT.cantidad < 1) ? 'not-allowed' : 'pointer', opacity: (procT || maxAvailable === 0 || maxAvailable === null || dataT.cantidad > maxAvailable || dataT.cantidad < 1) ? 0.6 : 1, fontSize: '13px', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                                 >
                                     {procT ? 'Procesando...' : <><ArrowRightLeft size={16} /> Confirmar Transferencia</>}
                                 </button>

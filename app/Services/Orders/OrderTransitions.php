@@ -28,6 +28,11 @@ final class OrderTransitions
             'completado' => ['cancelado'],
             'cancelado' => [],
         ];
+        if (($order->direccion_envio_snapshot['delivery_type'] ?? '') === 'tienda' || ($order->direccion_envio_snapshot['shipping_quote']['source'] ?? '') === 'pickup') {
+            $allowed['procesando'] = ['completado', 'cancelado'];
+            $allowed['pagado'] = ['procesando', 'cancelado'];
+            if ($target === 'enviado') throw new \InvalidArgumentException('Los pedidos de retiro no se despachan: confirma Listo para recoger y después Recogido.');
+        }
         if (! in_array($target, $allowed[$source] ?? [], true)) {
             throw new \InvalidArgumentException('La transición de '.$source.' a '.$target.' no está permitida.');
         }

@@ -2,159 +2,88 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class ShippoService
 {
-    protected $baseUrl = 'https://api.goshippo.com';
+    private string $baseUrl = 'https://api.goshippo.com';
 
-    protected $apiToken;
-
-    public function __construct()
+    public function isConfigured(): bool
     {
-        $this->apiToken = config('services.shippo.key');
+        $key = (string) config('services.shippo.key');
+        return $key !== '' && $key !== 'shippo_test_...';
     }
 
-    /**
-     * Cotiza el precio de envío basado en el peso usando Shippo.
-     */
-    public function getShippingRate($originZip, $destZip, $weightInKg)
+    private function client()
     {
-        if (! $this->apiToken || $this->apiToken === 'shippo_test_...') {
-            // Si la key no es válida o falta, usar mock
-            return $this->mockRate($originZip, $destZip, $weightInKg);
+        return Http::connectTimeout(4)->timeout(12)->withoutVerifying()->withHeaders([
+            'Authorization' => 'ShippoToken '.config('services.shippo.key'),
+            'SHIPPO-API-VERSION' => '2018-02-08',
+        ])->acceptJson();
+    }
+
+    public function quote(array $origin, array $destination, array $parcels): ?array
+    {
+        if (! $this->isConfigured() || ! $parcels) return null;
+        if (config('services.niubiz.env') === 'production' && str_starts_with((string) config('services.shippo.key'), 'shippo_test_')) return null;
+        foreach ([$origin, $destination] as $address) {
+            if (empty($address['street1']) || empty($address['city']) || ($address['country'] ?? null) !== 'PE') return null;
         }
-
+        $payload = ['address_from' => array_filter($origin, fn ($v) => $v !== null && $v !== ''),
+            'address_to' => array_filter($destination, fn ($v) => $v !== null && $v !== ''), 'parcels' => $parcels, 'async' => false];
+        if ($accounts = config('services.shippo.carrier_accounts')) $payload['carrier_accounts'] = $accounts;
+        $key = 'shippo:quote:'.hash('sha256', json_encode([$payload, config('services.shippo.key')]));
+        if ($cached = Cache::get($key)) return isset($cached['unavailable']) ? null : $cached;
         try {
-            // Shippo requiere un Shipment para cotizar tarifas en vivo
-            $response = Http::withHeaders([
-                'Authorization' => "ShippoToken {$this->apiToken}",
-                'Content-Type' => 'application/json',
-            ])->post("{$this->baseUrl}/shipments/", [
-                'address_from' => [
-                    'name' => 'Almacén Novape',
-                    'street1' => 'Av. Principal 123',
-                    'city' => 'Lima',
-                    'state' => 'LMA',
-                    'zip' => $originZip,
-                    'country' => 'PE',
-                ],
-                'address_to' => [
-                    'name' => 'Cliente',
-                    'street1' => 'Dirección Destino',
-                    'city' => 'Lima', // Simplificado
-                    'state' => 'LMA',
-                    'zip' => $destZip,
-                    'country' => 'PE',
-                ],
-                'parcels' => [
-                    [
-                        'length' => '10',
-                        'width' => '10',
-                        'height' => '10',
-                        'distance_unit' => 'in',
-                        'weight' => (string) max(1, $weightInKg),
-                        'mass_unit' => 'kg', // Shippo soporta lb, kg, oz, g
-                    ],
-                ],
-                'async' => false,
-            ]);
-
-            if ($response->successful()) {
-                $rates = $response->json('rates');
-                if (! empty($rates)) {
-                    // Tomamos la tarifa más barata por defecto
-                    return (float) $rates[0]['amount'];
-                }
-            } else {
-                Log::error('Error cotizando con Shippo API: '.$response->body());
+            $response = $this->client()->post($this->baseUrl.'/shipments/', $payload);
+            if (! $response->successful()) {
+                Log::warning('Shippo quotation unavailable', ['http_status' => $response->status()]);
+                Cache::put($key, ['unavailable' => true], now()->addMinute());
+                return null;
             }
-
-            return $this->mockRate($originZip, $destZip, $weightInKg);
-
-        } catch (\Exception $e) {
-            Log::error('Excepción cotizando Shippo: '.$e->getMessage());
-
-            return $this->mockRate($originZip, $destZip, $weightInKg);
-        }
-    }
-
-    /**
-     * Fallback si Shippo no encuentra tarifas para esa ruta o falla
-     */
-    private function mockRate($originZip, $destZip, $weightInKg)
-    {
-        $baseRate = 12.00;
-        $weightCost = max(0, ceil($weightInKg - 1)) * 2.00;
-        $distanceCost = ($originZip === $destZip || str_starts_with($destZip, '15')) ? 0 : 15.00;
-
-        return $baseRate + $weightCost + $distanceCost;
-    }
-
-    /**
-     * Valida una dirección usando Shippo
-     */
-    public function validateAddress($addressData)
-    {
-        try {
-            $response = Http::withHeaders([
-                'Authorization' => "ShippoToken {$this->apiToken}",
-                'Content-Type' => 'application/json',
-            ])->post("{$this->baseUrl}/addresses/", [
-                'name' => $addressData['name'] ?? 'Cliente',
-                'street1' => $addressData['street1'],
-                'city' => $addressData['city'] ?? 'Lima',
-                'state' => $addressData['state'] ?? 'LMA',
-                'zip' => $addressData['zip'] ?? '15001',
-                'country' => $addressData['country'] ?? 'PE',
-                'validate' => true,
-            ]);
-
-            if ($response->successful()) {
-                $data = $response->json();
-                $validation = $data['validation_results'] ?? null;
-                if ($validation) {
-                    return [
-                        'is_valid' => $validation['is_valid'] ?? true,
-                        'messages' => $validation['messages'] ?? [],
-                    ];
+            $rates = $response->json('rates', []);
+            $test = str_starts_with((string) config('services.shippo.key'), 'shippo_test_');
+            $eligible = [];
+            foreach (is_array($rates) ? $rates : [] as $rate) {
+                // Never interpret USD/EUR as soles or use a test rate with a live key.
+                if (! $test && ($rate['test'] ?? false)) continue;
+                $amount = ($rate['currency'] ?? '') === 'PEN' ? ($rate['amount'] ?? null)
+                    : (($rate['currency_local'] ?? '') === 'PEN' ? ($rate['amount_local'] ?? null) : null);
+                if (! is_numeric($amount) || ! is_finite((float) $amount) || (float) $amount <= 0 || empty($rate['object_id'])) continue;
+                $eligible[] = ['costo' => round((float) $amount, 2), 'currency' => 'PEN', 'courier' => $rate['provider'] ?? 'Transportista',
+                    'rate_id' => $rate['object_id'], 'service' => $rate['servicelevel']['name'] ?? '', 'estimated_days' => $rate['estimated_days'] ?? null,
+                    'source' => 'shippo', 'test' => $test || (bool) ($rate['test'] ?? false)];
+            }
+            usort($eligible, fn ($a, $b) => $a['costo'] <=> $b['costo']);
+            if (! $eligible) {
+                if ($test) {
+                    $eligible[] = ['costo' => 15.00, 'currency' => 'PEN', 'courier' => 'DHL Express',
+                        'rate_id' => 'mock_rate_' . uniqid(), 'service' => 'Express Delivery', 'estimated_days' => 1,
+                        'source' => 'shippo', 'test' => true];
+                } else {
+                    Cache::put($key, ['unavailable' => true], now()->addMinute());
+                    return null;
                 }
             }
-
-            return ['is_valid' => true, 'messages' => []]; // Permitir si falla la API
-        } catch (\Exception $e) {
-            Log::error('Error validando dirección con Shippo: '.$e->getMessage());
-
-            // En caso de error de conexión o API, permitimos que el proceso siga adelante sin bloquear al usuario.
-            return [
-                'is_valid' => true,
-                'messages' => [],
-            ];
+            Cache::put($key, $eligible[0], now()->addMinutes(5));
+            return $eligible[0];
+        } catch (\Throwable $error) {
+            Log::warning('Shippo quotation connection failed', ['exception' => get_class($error)]);
+            Cache::put($key, ['unavailable' => true], now()->addMinute());
+            return null;
         }
     }
 
-    /**
-     * Rastrear un paquete usando Shippo API
-     */
     public function trackPackage($carrier, $trackingNumber)
     {
+        if (! $this->isConfigured()) return null;
         try {
-            $response = Http::withHeaders([
-                'Authorization' => "ShippoToken {$this->apiToken}",
-                'Shippo-API-Version' => '2018-02-08',
-            ])->get("{$this->baseUrl}/tracks/{$carrier}/{$trackingNumber}");
-
-            if ($response->successful()) {
-                return $response->json();
-            }
-
-            Log::error('Shippo Tracking API Error: '.$response->body());
-
-            return null;
-        } catch (\Exception $e) {
-            Log::error('Error rastreando paquete con Shippo: '.$e->getMessage());
-
+            $response = $this->client()->get($this->baseUrl.'/tracks/'.rawurlencode($carrier).'/'.rawurlencode($trackingNumber));
+            return $response->successful() ? $response->json() : null;
+        } catch (\Throwable $error) {
+            Log::warning('Shippo tracking unavailable', ['exception' => get_class($error)]);
             return null;
         }
     }

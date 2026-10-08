@@ -16,12 +16,13 @@ class PedidoItem extends Model
         'pedido_id',
         'variante_id',
         'cantidad',
-        'precio_unitario', 'costo_unitario', 'almacen_id', 'producto_nombre', 'sku',
+        'precio_unitario', 'costo_unitario', 'almacen_id', 'producto_nombre', 'sku', 'discount_amount', 'net_total',
     ];
 
     protected $casts = [
         'cantidad' => 'integer',
         'precio_unitario' => 'decimal:2',
+        'discount_amount'=>'decimal:2', 'net_total'=>'decimal:2',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

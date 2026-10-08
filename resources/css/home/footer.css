@@ -3,7 +3,7 @@
 .efe-footer {
     background: #004797;
     color: rgba(255, 255, 255, 0.9);
-    padding: 60px 30px 100px;
+    padding: 60px 30px 30px;
     margin-top: 40px;
 }
 
@@ -84,7 +84,7 @@
 /* ====== RESPONSIVE ====== */
 @media (max-width: 1023px) {
     .efe-footer {
-        padding: 48px 24px 100px;
+        padding: 48px 24px 30px;
     }
 
     .efe-footer-grid {
@@ -95,7 +95,7 @@
 
 @media (max-width: 767px) {
     .efe-footer {
-        padding: 40px 20px 110px;
+        padding: 40px 20px 30px;
     }
 
     .efe-footer-grid {

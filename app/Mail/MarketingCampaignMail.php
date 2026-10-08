@@ -33,8 +33,8 @@ class MarketingCampaignMail extends Mailable
         $contentHtml = $this->campaign->content;
         
         // Simple placeholder replacement
-        $contentHtml = str_replace('{{ nombre }}', $this->user->nombres, $contentHtml);
-        $contentHtml = str_replace('{{ apellido }}', $this->user->apellidos, $contentHtml);
+        $contentHtml = str_replace('{{ nombre }}', e($this->user->nombres), $contentHtml);
+        $contentHtml = str_replace('{{ apellido }}', e($this->user->apellidos), $contentHtml);
 
         return new Content(
             view: 'emails.marketing.campaign',

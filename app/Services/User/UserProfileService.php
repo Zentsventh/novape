@@ -15,11 +15,21 @@ class UserProfileService
 {
     public function updateProfile(Usuario $usuario, array $data): void
     {
-        $usuario->update([
+        $updateData = [
             'nombres' => $data['nombres'],
             'apellidos' => $data['apellidos'],
-            'dni' => $data['dni'],
-        ]);
+        ];
+
+        if (array_key_exists('tipo_documento', $data)) {
+            $updateData['tipo_documento'] = $data['tipo_documento'];
+        }
+
+        if (array_key_exists('dni', $data)) {
+            $updateData['dni'] = $data['dni'];
+        }
+        if (array_key_exists('fecha_nacimiento', $data)) $updateData['fecha_nacimiento'] = $data['fecha_nacimiento'];
+
+        $usuario->update($updateData);
     }
 
     public function requestPhoneOtp(Usuario $usuario, string $telefono): void
@@ -66,36 +76,44 @@ class UserProfileService
 
     public function addAddress(Usuario $usuario, array $data, bool $isPrincipal): void
     {
-        if ($isPrincipal) {
-            $usuario->direcciones()->update(['principal' => false]);
-        }
-        $usuario->direcciones()->create($data);
+        $data = array_map(fn ($value) => is_string($value) ? trim($value) : $value, $data);
+        if (empty($data['direccion'])) throw \Illuminate\Validation\ValidationException::withMessages(['direccion' => 'Ingresa la dirección de entrega.']);
+        \App\Services\Shipping\LimaCoverage::validate($data);
+        DB::transaction(function () use ($usuario, $data, $isPrincipal) {
+            Usuario::whereKey($usuario->id)->lockForUpdate()->firstOrFail();
+            $existing = $usuario->direcciones()->where('direccion', trim($data['direccion']))->where('distrito', $data['distrito'])->first();
+            $isPrincipal = $isPrincipal || ! $usuario->direcciones()->exists() || (bool) $existing?->principal;
+            if ($isPrincipal) $usuario->direcciones()->update(['principal' => false]);
+            $values = \Illuminate\Support\Arr::only($data, ['direccion', 'referencia', 'departamento', 'provincia', 'distrito', 'codigo_postal']);
+            $values['principal'] = $isPrincipal;
+            $usuario->direcciones()->updateOrCreate(['direccion' => trim($data['direccion']), 'distrito' => $data['distrito']], $values);
+        });
     }
 
     public function setPrincipalAddress(Usuario $usuario, int $addressId): void
     {
-        $usuario->direcciones()->update(['principal' => false]);
-        $direccion = $usuario->direcciones()->findOrFail($addressId);
-        $direccion->principal = true;
-        $direccion->save();
+        DB::transaction(function () use ($usuario, $addressId) {
+            Usuario::whereKey($usuario->id)->lockForUpdate()->firstOrFail();
+            $direccion = $usuario->direcciones()->lockForUpdate()->findOrFail($addressId);
+            $usuario->direcciones()->update(['principal' => false]);
+            $direccion->update(['principal' => true]);
+        });
     }
 
     public function deleteAddress(Usuario $usuario, int $addressId): void
     {
-        $usuario->direcciones()->findOrFail($addressId)->delete();
+        DB::transaction(function () use ($usuario, $addressId) {
+            Usuario::whereKey($usuario->id)->lockForUpdate()->firstOrFail();
+            $address = $usuario->direcciones()->findOrFail($addressId);
+            $principal = $address->principal;
+            $address->delete();
+            if ($principal && ($next = $usuario->direcciones()->orderBy('id')->first())) $next->update(['principal' => true]);
+        });
     }
 
     public function addCard(Usuario $usuario, array $data): void
     {
-        $ultimos = substr($data['numero_tarjeta'], -4);
-        $marca = str_starts_with($data['numero_tarjeta'], '4') ? 'Visa' : (str_starts_with($data['numero_tarjeta'], '5') ? 'Mastercard' : 'Amex');
-        
-        $usuario->tarjetas()->create([
-            'ultimos_digitos' => $ultimos,
-            'marca' => $marca,
-            'principal' => $usuario->tarjetas()->count() === 0,
-            'token_simulado' => 'tok_' . uniqid(),
-        ]);
+        throw \Illuminate\Validation\ValidationException::withMessages(['tarjeta' => 'El guardado de tarjetas requiere tokenización habilitada por Niubiz.']);
     }
 
     public function deleteCard(Usuario $usuario, int $cardId): void

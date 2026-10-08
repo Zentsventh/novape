@@ -12,12 +12,30 @@ export default function ChatBot({ user }) {
     const [isResolved, setIsResolved] = useState(false);
     
     const wrapperRef = useRef(null);
-    const posRef = useRef({ target: 0, current: 0, velocity: 0 });
-    const rafRef = useRef(null);
-    const delayRef = useRef(null);
+    const panelRef = useRef(null);
+    const pollInFlight = useRef(false);
     const messagesEndRef = useRef(null);
 
     const authUser = user ?? null;
+
+    useEffect(() => {
+        if (!isOpen) return;
+        const viewport = window.visualViewport;
+        const resize = () => {
+            const inset = Math.max(0, window.innerHeight - (viewport?.height ?? window.innerHeight) - (viewport?.offsetTop ?? 0));
+            panelRef.current?.style.setProperty('--chat-keyboard-inset', `${inset}px`);
+            panelRef.current?.style.setProperty('--chat-visible-height', `${viewport?.height ?? window.innerHeight}px`);
+        };
+        resize();
+        viewport?.addEventListener('resize', resize);
+        viewport?.addEventListener('scroll', resize);
+        window.addEventListener('resize', resize);
+        return () => {
+            viewport?.removeEventListener('resize', resize);
+            viewport?.removeEventListener('scroll', resize);
+            window.removeEventListener('resize', resize);
+        };
+    }, [isOpen]);
 
     // Auto-scroll al último mensaje
     const scrollToBottom = () => {
@@ -28,71 +46,8 @@ export default function ChatBot({ user }) {
         scrollToBottom();
     }, [messages, isLoading]);
 
-    // Lógica del botón flotante (física)
-    useEffect(() => {
-        const gravity = 0.02;
-        const damping = 0.86;
-        const bottomOffset = 36;
-        const delayMs = 350;
-
-        const getTargetPos = () => window.scrollY + window.innerHeight - bottomOffset;
-
-        const scheduleTarget = () => {
-            clearTimeout(delayRef.current);
-            delayRef.current = setTimeout(() => {
-                posRef.current.target = getTargetPos();
-            }, delayMs);
-        };
-
-        const animate = () => {
-            const pos = posRef.current;
-            const diff = pos.target - pos.current;
-            pos.velocity += diff * gravity;
-            pos.velocity *= damping;
-            pos.current += pos.velocity;
-
-            if (wrapperRef.current) {
-                const baseY = window.scrollY + window.innerHeight - bottomOffset;
-                wrapperRef.current.style.transform = `translateY(${pos.current - baseY}px)`;
-            }
-            rafRef.current = requestAnimationFrame(animate);
-        };
-
-        const init = getTargetPos();
-        posRef.current.target = init;
-        posRef.current.current = init;
-
-        window.addEventListener('scroll', scheduleTarget, { passive: true });
-        rafRef.current = requestAnimationFrame(animate);
-
-        return () => {
-            window.removeEventListener('scroll', scheduleTarget);
-            clearTimeout(delayRef.current);
-            if (rafRef.current) cancelAnimationFrame(rafRef.current);
-        };
-    }, []);
-
-    // Generar o recuperar sessionId (solo para visitantes no autenticados)
-    useEffect(() => {
-        if (!authUser && !localStorage.getItem('novabot_session')) {
-            localStorage.setItem('novabot_session', 'web_' + Math.random().toString(36).substr(2, 9));
-        }
-    }, [authUser]);
-
-    // Obtener el identificador de sesión apropiado
-    const getSessionId = () => {
-        if (authUser) {
-            // Para usuarios autenticados, usamos un session_id basado en su ID
-            // pero también mantenemos un session_id en localStorage para consistencia
-            let sessionId = localStorage.getItem('novabot_session');
-            if (!sessionId) {
-                sessionId = 'user_' + authUser.id + '_' + Math.random().toString(36).substr(2, 5);
-                localStorage.setItem('novabot_session', sessionId);
-            }
-            return sessionId;
-        }
-        return localStorage.getItem('novabot_session') || '';
-    };
+    // Conversation ownership is derived from the server session, never a browser-supplied ID.
+    const getSessionId = () => '';
 
     // Cargar historial al abrir el chat (persistencia ante F5)
     useEffect(() => {
@@ -135,6 +90,8 @@ export default function ChatBot({ user }) {
         let interval;
         if (isOpen) {
             interval = setInterval(async () => {
+                if (pollInFlight.current || document.hidden) return;
+                pollInFlight.current = true;
                 try {
                     const sessionId = getSessionId();
                     const lastMessageId = messages.reduce((max, m) => m.id && m.id > max ? m.id : max, 0);
@@ -179,7 +136,7 @@ export default function ChatBot({ user }) {
                     }
                 } catch (e) {
                     console.error('Error polling messages:', e);
-                }
+                } finally { pollInFlight.current = false; }
             }, 3000);
         }
         return () => clearInterval(interval);
@@ -286,13 +243,6 @@ export default function ChatBot({ user }) {
     return (
         <>
             <div ref={wrapperRef} className="efe-chatbot-wrapper">
-                {!isOpen && (
-                    <>
-                        <span className="efe-chatbot-radar-ring" />
-                        <span className="efe-chatbot-radar-ring" />
-                    </>
-                )}
-
                 {isOpen ? (
                     <button
                         className="efe-chatbot-btn--close"
@@ -319,7 +269,12 @@ export default function ChatBot({ user }) {
             </div>
 
             {isOpen && (
-                <div className="efe-chat-panel">
+                <div ref={panelRef} className="efe-chat-panel" role="dialog" aria-label="Chat de ayuda" onKeyDown={event => {
+                    if (event.key === 'Escape') {
+                        setIsOpen(false);
+                        wrapperRef.current?.querySelector('button')?.focus();
+                    }
+                }}>
                     <div className="efe-chat-header">
                         <div className="efe-chat-header-left">
                             <div className="efe-chat-header-text">
@@ -343,7 +298,7 @@ export default function ChatBot({ user }) {
                                     </svg>
                                 </button>
                             )}
-                            <button className="efe-chat-minimize" onClick={() => setIsOpen(false)}>
+                            <button className="efe-chat-minimize" aria-label="Cerrar chat" onClick={() => setIsOpen(false)}>
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                                     <polyline points="6 9 12 15 18 9" />
                                 </svg>
@@ -492,10 +447,11 @@ export default function ChatBot({ user }) {
                                     onChange={(e) => setMessage(e.target.value)}
                                     onKeyDown={handleKeyDown}
                                     placeholder="Escribe tu mensaje..."
+                                    aria-label="Mensaje al asistente"
                                     className="efe-chat-input"
                                     disabled={isLoading}
                                 />
-                                <button className="efe-chat-send" onClick={() => sendMessage(message)} disabled={!message.trim() || isLoading}>
+                                <button className="efe-chat-send" aria-label="Enviar mensaje" onClick={() => sendMessage(message)} disabled={!message.trim() || isLoading}>
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                         <line x1="22" y1="2" x2="11" y2="13" />
                                         <polygon points="22 2 15 22 11 13 2 9 22 2" />

@@ -54,19 +54,14 @@ export default function useDevice(serverHints = {}) {
     const getBreakpoint = useCallback(() => {
         if (typeof window === 'undefined') return 'lg';
         const w = window.innerWidth;
-        if (w < BREAKPOINTS.xs)  return 'xs';
-        if (w < BREAKPOINTS.sm)  return 'sm';
-        if (w < BREAKPOINTS.md)  return 'md';
-        if (w < BREAKPOINTS.lg)  return 'lg';
-        if (w < BREAKPOINTS.xl)  return 'xl';
-        return '2xl';
+        return Object.entries(BREAKPOINTS).reverse().find(([, width]) => w >= width)?.[0] || 'xs';
     }, []);
 
     // --- Estado inicial (hidrata desde server-side si está disponible) ---
     const [device, setDevice] = useState(() => ({
-        isMobile:   serverHints.isMobile  ?? matchers.isMobile?.matches  ?? false,
-        isTablet:   serverHints.isTablet  ?? matchers.isTablet?.matches  ?? false,
-        isDesktop:  serverHints.isDesktop ?? matchers.isDesktop?.matches ?? true,
+        isMobile:   matchers.isMobile?.matches ?? serverHints.isMobile ?? false,
+        isTablet:   matchers.isTablet?.matches ?? serverHints.isTablet ?? false,
+        isDesktop:  matchers.isDesktop?.matches ?? serverHints.isDesktop ?? true,
         isTouch:    matchers.isTouch?.matches ?? false,
         isPortrait: matchers.isPortrait?.matches ?? false,
         prefersReducedMotion: matchers.prefersReducedMotion?.matches ?? false,
@@ -95,6 +90,7 @@ export default function useDevice(serverHints = {}) {
             });
         };
 
+        update();
         // Registrar listeners en cada matcher
         const entries = Object.values(matchers);
         entries.forEach(mql => {

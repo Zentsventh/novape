@@ -1,6 +1,8 @@
+import { cartPost } from '../../utils/cartRequest';
 import '../../../css/home/cart-drawer.css';
 import { router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import useStoreDialog from '../../Hooks/useStoreDialog';
 import LoginModal from './LoginModal';
 import { DEFAULT_IMAGE } from './constants';
 
@@ -10,26 +12,30 @@ const formatPrice = (price) =>
     );
 
 export default function CartDrawer({ cart, isOpen, onClose }) {
-    const { auth, flash } = usePage().props;
+    const panel = useStoreDialog(isOpen, onClose);
+    const { auth, flash, commercePolicy = {} } = usePage().props;
     const [isLoginOpen, setIsLoginOpen] = useState(false);
 
-    const FREE_SHIPPING_THRESHOLD = 299;
+    const FREE_SHIPPING_THRESHOLD = commercePolicy.free_shipping_threshold ?? 299;
     const currentTotal = cart?.total || 0;
     const amountLeftForFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - currentTotal);
     const progressPercentage = Math.min(100, (currentTotal / FREE_SHIPPING_THRESHOLD) * 100);
 
-    const handleUpdate = (productoId, currentQty, amount) => {
+    const [isUpdating, setIsUpdating] = useState(false);
+    const handleUpdate = (productoId, currentQty, amount, varianteId) => {
+        if (isUpdating) return;
         const newQty = currentQty + amount;
-        if (newQty < 1 || newQty > 5) return;
-        router.post(
+        if (newQty < 1 || newQty > (commercePolicy.max_quantity ?? 5)) return;
+        cartPost(
             '/cart/update',
-            { producto_id: productoId, cantidad: newQty },
-            { preserveScroll: true }
+            { producto_id: productoId, variante_id: varianteId, cantidad: newQty },
+            { preserveScroll: true, onStart: () => setIsUpdating(true), onFinish: () => setIsUpdating(false) }
         );
     };
 
-    const handleRemove = (productoId) => {
-        router.post('/cart/remove', { producto_id: productoId }, { preserveScroll: true });
+    const handleRemove = (productoId, varianteId) => {
+        if (isUpdating) return;
+        cartPost('/cart/remove', { producto_id: productoId, variante_id: varianteId }, { preserveScroll: true, onStart: () => setIsUpdating(true), onFinish: () => setIsUpdating(false) });
     };
 
     return (
@@ -276,11 +282,11 @@ export default function CartDrawer({ cart, isOpen, onClose }) {
             `}</style>
 
             <div className={`efe-cart-overlay ${isOpen ? 'is-open' : ''}`} onClick={onClose} style={{ backdropFilter: 'blur(4px)', transition: 'all 0.3s ease' }} />
-            
-            <div className={`efe-cart-drawer premium-cart-drawer ${isOpen ? 'is-open' : ''}`}>
+
+            <div ref={panel} role={isOpen ? 'dialog' : undefined} aria-modal={isOpen ? 'true' : undefined} aria-label="Carrito de compras" aria-hidden={!isOpen} inert={!isOpen ? true : undefined} tabIndex={-1} className={`efe-cart-drawer premium-cart-drawer ${isOpen ? 'is-open' : ''}`}>
                 <div className="premium-cart-header">
                     <h2 className="premium-cart-title">
-                        <button className="premium-cart-close" onClick={onClose}>
+                        <button className="premium-cart-close" onClick={onClose} aria-label="Cerrar carrito">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                 <line x1="18" y1="6" x2="6" y2="18" />
                                 <line x1="6" y1="6" x2="18" y2="18" />
@@ -289,7 +295,7 @@ export default function CartDrawer({ cart, isOpen, onClose }) {
                         Tu Carrito
                     </h2>
                     {cart?.items?.length > 0 && (
-                        <button className="premium-cart-clear" onClick={() => router.post('/cart/clear')}>
+                        <button className="premium-cart-clear" disabled={isUpdating} onClick={() => cartPost('/cart/clear', {}, { onStart: () => setIsUpdating(true), onFinish: () => setIsUpdating(false) })}>
                             Vaciar carrito
                         </button>
                     )}
@@ -319,7 +325,7 @@ export default function CartDrawer({ cart, isOpen, onClose }) {
                         </div>
                     ) : (
                         cart.items.map((item) => (
-                            <div key={item.id} className="premium-cart-item">
+                            <div key={item.line_id || item.variante_id || item.id} className="premium-cart-item">
                                 <div className="premium-cart-img-container">
                                     <img src={item.imagen || DEFAULT_IMAGE} alt={item.nombre} />
                                 </div>
@@ -328,12 +334,12 @@ export default function CartDrawer({ cart, isOpen, onClose }) {
                                     <h4 className="premium-cart-name">{item.nombre}</h4>
                                     <span className="premium-cart-price">S/ {formatPrice(item.precio)}</span>
                                     <div className="premium-qty-ctrl">
-                                        <button className="premium-qty-btn" onClick={() => handleUpdate(item.id, item.cantidad, -1)}>-</button>
+                                        <button className="premium-qty-btn" disabled={isUpdating || item.cantidad <= 1} aria-label={`Reducir cantidad de ${item.nombre}`} onClick={() => handleUpdate(item.id, item.cantidad, -1, item.variante_id)}>-</button>
                                         <span className="premium-qty-val">{item.cantidad}</span>
-                                        <button className="premium-qty-btn" onClick={() => handleUpdate(item.id, item.cantidad, 1)}>+</button>
+                                        <button className="premium-qty-btn" disabled={isUpdating || item.cantidad >= (commercePolicy.max_quantity ?? 5)} aria-label={`Aumentar cantidad de ${item.nombre}`} onClick={() => handleUpdate(item.id, item.cantidad, 1, item.variante_id)}>+</button>
                                     </div>
                                 </div>
-                                <button className="premium-remove-btn" onClick={() => handleRemove(item.id)} title="Eliminar producto">
+                                <button className="premium-remove-btn" disabled={isUpdating} aria-label={`Retirar ${item.nombre}`} onClick={() => handleRemove(item.id, item.variante_id)} title="Eliminar producto">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                         <polyline points="3 6 5 6 21 6" />
                                         <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />

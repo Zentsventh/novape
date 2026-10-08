@@ -1,0 +1,418 @@
+/* resources/css/home/profile.css */
+/* Modern SaaS Profile UI */
+
+.efe-profile-page {
+    background-color: #F8FAFC;
+    min-height: calc(100vh - 80px);
+    padding: 40px 0 80px;
+}
+
+.efe-profile-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+}
+
+/* Sidebar */
+.efe-profile-sidebar {
+    flex-shrink: 0;
+    width: 280px;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 24px 20px;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    position: sticky;
+    top: 100px;
+}
+
+.efe-profile-sidebar-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    padding-left: 16px;
+}
+
+.efe-profile-sidebar-divider {
+    height: 1px;
+    background: #E2E8F0;
+    margin: 20px 0;
+    border-radius: 1px;
+}
+
+.efe-profile-sidebar-btn {
+    width: 100%;
+    text-align: left;
+    padding: 12px 16px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #475569;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s ease;
+    margin-bottom: 4px;
+}
+
+.efe-profile-sidebar-btn:hover {
+    background: #F8FAFC;
+    color: #1E293B;
+}
+
+.efe-profile-sidebar-btn.active {
+    background: #F0F9FF;
+    border-color: #E0F2FE;
+    color: #004797;
+    font-weight: 600;
+}
+
+.efe-profile-sidebar-btn-danger {
+    color: #EF4444;
+}
+.efe-profile-sidebar-btn-danger:hover {
+    background: #FEF2F2;
+    color: #DC2626;
+}
+
+/* Main Content Area */
+.efe-profile-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.efe-profile-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.efe-profile-heading {
+    font-size: 28px;
+    color: #1E293B;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin: 0;
+}
+
+/* Cards (Sections) */
+.efe-profile-card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+    margin-bottom: 24px;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.efe-profile-card:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+    border-color: #CBD5E1;
+}
+
+.efe-profile-row {
+    padding: 24px 32px;
+    border-bottom: 1px solid #F1F5F9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s ease;
+}
+.efe-profile-row:last-child {
+    border-bottom: none;
+}
+.efe-profile-row:hover {
+    background-color: #F8FAFC;
+}
+
+.efe-profile-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.efe-profile-value {
+    font-size: 16px;
+    color: #1E293B;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.efe-profile-value-empty {
+    color: #CBD5E1;
+}
+
+/* Buttons */
+.efe-btn-outline {
+    padding: 8px 20px;
+    background: transparent;
+    border: 1px solid #E2E8F0;
+    color: #004797;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.efe-btn-outline:hover {
+    background: #F0F9FF;
+    border-color: #004797;
+}
+
+.efe-btn-primary {
+    padding: 12px 28px;
+    background: #004797;
+    color: white;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 71, 151, 0.25);
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.efe-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 71, 151, 0.3);
+}
+
+.efe-btn-secondary {
+    padding: 10px 22px;
+    background: #F1F5F9;
+    color: #334155;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid #E2E8F0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.efe-btn-secondary:hover {
+    background: #E2E8F0;
+    color: #0F172A;
+}
+
+.efe-badge-success {
+    padding: 6px 14px;
+    background: #F0FFF4;
+    color: #16A34A;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.efe-badge-info {
+    padding: 6px 14px;
+    background: #F0F9FF;
+    color: #0284C7;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.efe-badge-warning {
+    padding: 6px 14px;
+    background: #FFFBEB;
+    color: #D97706;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Overview / Dashboard Cards */
+.efe-overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+.efe-overview-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    display: flex;
+    flex-direction: column;
+    transition: all 0.25s ease;
+    cursor: default;
+}
+.efe-overview-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(0, 71, 151, 0.08);
+    border-color: #004797;
+}
+
+/* Forms */
+.efe-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.efe-form-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748B;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.efe-input, .efe-select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #CBD5E1;
+    border-radius: 10px;
+    background: #FFFFFF;
+    color: #1E293B;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+.efe-input:focus, .efe-select:focus {
+    border-color: #004797;
+    box-shadow: 0 0 0 3px rgba(0, 71, 151, 0.12);
+}
+
+/* Empty State */
+.efe-empty-state {
+    padding: 60px 40px;
+    background: #FFFFFF;
+    border: 1px dashed #CBD5E1;
+    border-radius: 16px;
+    text-align: center;
+    color: #64748B;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+/* Drawers / Slide-over Modals */
+.efe-drawer-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(4px);
+    transition: all 0.3s ease;
+}
+
+.efe-drawer-content {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 440px;
+    background: #ffffff;
+    z-index: 10000;
+    box-shadow: -10px 0 35px rgba(0, 0, 0, 0.15);
+    padding: 32px 28px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+.efe-drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.efe-drawer-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1E293B;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+}
+
+.efe-drawer-close {
+    background: #F1F5F9;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    cursor: pointer;
+    color: #64748B;
+    transition: all 0.2s ease;
+}
+.efe-drawer-close:hover {
+    background: #E2E8F0;
+    color: #0F172A;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .efe-profile-container {
+        flex-direction: column;
+    }
+    .efe-profile-sidebar {
+        width: 100%;
+        position: static;
+        margin-bottom: 24px;
+    }
+}
+@media (max-width: 640px) {
+    .efe-profile-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 20px;
+    }
+    .efe-drawer-content {
+        max-width: 100%;
+        padding: 24px 20px;
+    }
+}
+

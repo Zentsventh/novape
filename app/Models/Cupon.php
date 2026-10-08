@@ -20,12 +20,13 @@ class Cupon extends Model
         'limite_usos',
         'usos_actuales',
         'activo',
-        'unico_por_cliente'
+        'unico_por_cliente', 'combinable_points'
     ];
 
     protected $casts = [
         'fecha_inicio' => 'datetime',
         'fecha_fin' => 'datetime',
         'activo' => 'boolean',
+        'combinable_points' => 'boolean',
     ];
 }

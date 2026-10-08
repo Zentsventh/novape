@@ -16,19 +16,30 @@ class InvoiceController extends Controller
 
     public function descargarComprobante($pedidoId)
     {
-        $pedido = Pedido::with(['items.variante.producto', 'usuario'])->findOrFail($pedidoId);
+        $pedido = Pedido::findOrFail($pedidoId);
 
         if (Auth::id() !== $pedido->usuario_id && ! Auth::user()->esAdmin()) {
             abort(403, 'No tienes permiso para ver este comprobante.');
         }
 
-        return $this->invoiceGenerationService->downloadInvoicePdf($pedido);
+        return $this->downloadPaid($pedido);
     }
 
     public function verComprobanteEcommerce(string $codigo)
     {
-        $pedido = Pedido::with(['items.variante.producto', 'usuario'])->where('codigo', $codigo)->firstOrFail();
+        $pedido = Pedido::where('codigo', $codigo)->firstOrFail();
+        return $this->downloadPaid($pedido);
+    }
 
-        return $this->invoiceGenerationService->downloadInvoicePdf($pedido);
+    private function downloadPaid(Pedido $pedido)
+    {
+        abort_unless(in_array(strtolower($pedido->estado), \App\Services\Orders\OrderTransitions::REVENUE_STATES, true), 403);
+        $receipt = app(\App\Services\Orders\PaidInvoiceRegistry::class)->register($pedido);
+        if (! $receipt->ruta_pdf || ! \Illuminate\Support\Facades\Storage::disk('local')->exists($receipt->ruta_pdf)) {
+            $path = 'comprobantes/ecommerce/'.$pedido->id.'/'.$receipt->codigo_ticket.'.pdf';
+            \Illuminate\Support\Facades\Storage::disk('local')->put($path, app(\App\Services\Orders\InvoiceService::class)->generatePdf($pedido)->output());
+            $receipt->update(['ruta_pdf' => $path]);
+        }
+        return \Illuminate\Support\Facades\Storage::disk('local')->download($receipt->ruta_pdf, 'comprobante_'.$pedido->codigo.'.pdf', ['Content-Type' => 'application/pdf', 'Cache-Control' => 'private, no-store']);
     }
 }

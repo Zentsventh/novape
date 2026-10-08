@@ -9,7 +9,8 @@
 .efe-producto-page {
     background-color: #f7f7f7;
     min-height: 100vh;
-    padding-bottom: 60px;
+    display: flex;
+    flex-direction: column;
     font-family: 'Inter', sans-serif;
 }
 

@@ -693,6 +693,16 @@
 }
 
 /* RESPONSIVE */
+@media (max-width: 1024px) {
+    .efe-checkout-container {
+        padding: 0 20px;
+        gap: 20px;
+    }
+    .efe-checkout-sidebar {
+        width: 320px;
+    }
+}
+
 @media (max-width: 768px) {
     .efe-checkout-container {
         flex-direction: column;

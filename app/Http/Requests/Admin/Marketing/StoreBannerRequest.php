@@ -20,6 +20,7 @@ class StoreBannerRequest extends FormRequest
             'subtitulo' => 'nullable|string|max:255',
             'imagen' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
             'enlace_url' => 'nullable|string|max:500',
+            'posicion' => 'required|string|in:hero,lateral,promocional_1,promocional_2,promocional_3',
             'fecha_inicio' => 'nullable|date|after_or_equal:today',
             'fecha_fin' => 'nullable|date|after_or_equal:fecha_inicio',
         ];

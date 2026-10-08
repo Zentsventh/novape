@@ -37,51 +37,121 @@ class RoleAndPermissionSeeder extends Seeder
 
         $now = Carbon::now();
 
-        // 2. Crear Permisos
-        $permisosData = [
-            ['nombre' => 'ver_dashboard', 'descripcion' => 'Acceso general al panel de administración', 'created_at' => $now, 'updated_at' => $now],
-            ['nombre' => 'pos.vender', 'descripcion' => 'Acceso al módulo POS y ventas', 'created_at' => $now, 'updated_at' => $now],
-            ['nombre' => 'inventario.gestionar', 'descripcion' => 'Ver y modificar el inventario y almacenes', 'created_at' => $now, 'updated_at' => $now],
-            ['nombre' => 'usuarios.gestionar', 'descripcion' => 'Crear, editar o eliminar usuarios y roles', 'created_at' => $now, 'updated_at' => $now],
-            ['nombre' => 'reportes.ver', 'descripcion' => 'Ver métricas y reportes del dashboard', 'created_at' => $now, 'updated_at' => $now],
+        // 2. Crear Permisos (Profesional)
+        $permisosList = [
+            // Dashboard y Reportes
+            ['nombre' => 'dashboard.ver', 'descripcion' => 'Ver panel de control principal'],
+            ['nombre' => 'reportes.ventas', 'descripcion' => 'Ver reportes de ventas e ingresos'],
+            ['nombre' => 'reportes.inventario', 'descripcion' => 'Ver reportes de stock y movimientos'],
+            ['nombre' => 'reportes.clientes', 'descripcion' => 'Ver métricas de clientes'],
+            
+            // POS y Ventas
+            ['nombre' => 'pos.vender', 'descripcion' => 'Realizar ventas en el POS'],
+            ['nombre' => 'pos.reembolsar', 'descripcion' => 'Realizar reembolsos en el POS'],
+            ['nombre' => 'pos.anular', 'descripcion' => 'Anular comprobantes o ventas'],
+            ['nombre' => 'ventas.ver', 'descripcion' => 'Ver registro de ventas'],
+            
+            // Pedidos y Entregas
+            ['nombre' => 'pedidos.ver', 'descripcion' => 'Ver listado de pedidos'],
+            ['nombre' => 'pedidos.gestionar', 'descripcion' => 'Cambiar estados de pedidos (procesando, enviado, etc)'],
+            
+            // Inventario y Productos
+            ['nombre' => 'productos.ver', 'descripcion' => 'Ver listado de productos'],
+            ['nombre' => 'productos.crear', 'descripcion' => 'Crear nuevos productos'],
+            ['nombre' => 'productos.editar', 'descripcion' => 'Editar productos existentes'],
+            ['nombre' => 'productos.eliminar', 'descripcion' => 'Eliminar o desactivar productos'],
+            ['nombre' => 'inventario.ajustar', 'descripcion' => 'Realizar ajustes manuales de stock'],
+            ['nombre' => 'almacen.ver', 'descripcion' => 'Ver configuración de almacenes'],
+            
+            // Clientes
+            ['nombre' => 'clientes.ver', 'descripcion' => 'Ver listado de clientes'],
+            ['nombre' => 'clientes.editar', 'descripcion' => 'Editar datos de clientes'],
+            ['nombre' => 'clientes.bloquear', 'descripcion' => 'Bloquear o desbloquear clientes'],
+            
+            // Usuarios / Trabajadores (Staff)
+            ['nombre' => 'trabajadores.ver', 'descripcion' => 'Ver listado de trabajadores'],
+            ['nombre' => 'trabajadores.crear', 'descripcion' => 'Crear nuevos trabajadores y asignar roles'],
+            ['nombre' => 'trabajadores.editar', 'descripcion' => 'Modificar trabajadores existentes'],
+            ['nombre' => 'trabajadores.eliminar', 'descripcion' => 'Eliminar trabajadores del sistema'],
+            
+            // Roles y Permisos
+            ['nombre' => 'roles.gestionar', 'descripcion' => 'Gestionar roles y permisos del sistema'],
+            
+            // Configuración
+            ['nombre' => 'configuracion.ver', 'descripcion' => 'Ver configuración general del sistema'],
+            ['nombre' => 'configuracion.editar', 'descripcion' => 'Modificar opciones del sistema'],
         ];
-        DB::table('permiso')->insert($permisosData);
 
-        // Obtener IDs de permisos
-        $permisoDash = DB::table('permiso')->where('nombre', 'ver_dashboard')->first()->id;
-        $permisoPos = DB::table('permiso')->where('nombre', 'pos.vender')->first()->id;
-        $permisoInv = DB::table('permiso')->where('nombre', 'inventario.gestionar')->first()->id;
-        $permisoUsu = DB::table('permiso')->where('nombre', 'usuarios.gestionar')->first()->id;
-        $permisoRep = DB::table('permiso')->where('nombre', 'reportes.ver')->first()->id;
+        $permisosData = array_map(function($p) use ($now) {
+            $p['created_at'] = $now;
+            $p['updated_at'] = $now;
+            return $p;
+        }, $permisosList);
+
+        DB::table('permiso')->insert($permisosData);
+        $permisos = DB::table('permiso')->get()->keyBy('nombre');
 
         // 3. Crear Roles
-        $rolesData = [
-            ['nombre' => 'admin', 'descripcion' => 'Administrador (Control total)', 'created_at' => $now, 'updated_at' => $now],
-            ['nombre' => 'cajero', 'descripcion' => 'Cajero/Vendedor (Acceso al POS)', 'created_at' => $now, 'updated_at' => $now],
-            ['nombre' => 'almacen', 'descripcion' => 'Almacenero (Acceso a compras e inventario)', 'created_at' => $now, 'updated_at' => $now],
+        $rolesList = [
+            ['nombre' => 'admin', 'descripcion' => 'Administrador General (Control total del sistema)'],
+            ['nombre' => 'gerente', 'descripcion' => 'Gerente de Tienda (Control operativo y reportes)'],
+            ['nombre' => 'cajero', 'descripcion' => 'Cajero/Vendedor (Acceso al POS y clientes)'],
+            ['nombre' => 'almacen', 'descripcion' => 'Almacenero (Gestión de stock, despachos e inventario)'],
+            ['nombre' => 'marketing', 'descripcion' => 'Marketing (Gestión de clientes y reportes)'],
         ];
-        DB::table('rol')->insert($rolesData);
 
-        // Obtener IDs de roles
-        $rolAdmin = DB::table('rol')->where('nombre', 'admin')->first()->id;
-        $rolCajero = DB::table('rol')->where('nombre', 'cajero')->first()->id;
-        $rolAlmacen = DB::table('rol')->where('nombre', 'almacen')->first()->id;
+        $rolesData = array_map(function($r) use ($now) {
+            $r['created_at'] = $now;
+            $r['updated_at'] = $now;
+            return $r;
+        }, $rolesList);
+
+        DB::table('rol')->insert($rolesData);
+        $roles = DB::table('rol')->get()->keyBy('nombre');
 
         // 4. Asignar Permisos a Roles (rol_permiso)
-        $rolPermisos = [
-            // Admin tiene todo
-            ['rol_id' => $rolAdmin, 'permiso_id' => $permisoDash],
-            ['rol_id' => $rolAdmin, 'permiso_id' => $permisoPos],
-            ['rol_id' => $rolAdmin, 'permiso_id' => $permisoInv],
-            ['rol_id' => $rolAdmin, 'permiso_id' => $permisoUsu],
-            ['rol_id' => $rolAdmin, 'permiso_id' => $permisoRep],
-            // Cajero
-            ['rol_id' => $rolCajero, 'permiso_id' => $permisoDash],
-            ['rol_id' => $rolCajero, 'permiso_id' => $permisoPos],
-            // Almacenero
-            ['rol_id' => $rolAlmacen, 'permiso_id' => $permisoDash],
-            ['rol_id' => $rolAlmacen, 'permiso_id' => $permisoInv],
+        $rolPermisos = [];
+
+        // Definir qué permisos tiene cada rol
+        $matrizPermisos = [
+            'admin' => ['*'], // Tendrá todos
+            'gerente' => [
+                'dashboard.ver', 'reportes.ventas', 'reportes.inventario', 'reportes.clientes',
+                'pos.vender', 'pos.reembolsar', 'ventas.ver', 'pedidos.ver', 'pedidos.gestionar',
+                'productos.ver', 'almacen.ver',
+                'clientes.ver', 'clientes.editar',
+                'trabajadores.ver'
+            ],
+            'cajero' => [
+                'dashboard.ver', 'pos.vender', 'ventas.ver', 'clientes.ver'
+            ],
+            'almacen' => [
+                'dashboard.ver', 'pedidos.ver', 'pedidos.gestionar', 
+                'productos.ver', 'productos.editar', 'inventario.ajustar', 'almacen.ver'
+            ],
+            'marketing' => [
+                'dashboard.ver', 'reportes.ventas', 'reportes.clientes',
+                'productos.ver', 'clientes.ver'
+            ]
         ];
+
+        foreach ($matrizPermisos as $rolNombre => $listaPermisos) {
+            $rolId = $roles[$rolNombre]->id;
+            
+            if ($listaPermisos === ['*']) {
+                $listaPermisos = $permisos->keys()->toArray();
+            }
+
+            foreach ($listaPermisos as $permisoNombre) {
+                if (isset($permisos[$permisoNombre])) {
+                    $rolPermisos[] = [
+                        'rol_id' => $rolId,
+                        'permiso_id' => $permisos[$permisoNombre]->id
+                    ];
+                }
+            }
+        }
+
         DB::table('rol_permiso')->insert($rolPermisos);
 
         // 5. Crear Usuarios Semilla
@@ -121,9 +191,9 @@ class RoleAndPermissionSeeder extends Seeder
             
             // Asignar rol correspondiente
             $rolId = null;
-            if (str_contains($userData['email'], 'admin')) $rolId = $rolAdmin;
-            else if (str_contains($userData['email'], 'cajero')) $rolId = $rolCajero;
-            else if (str_contains($userData['email'], 'almacen')) $rolId = $rolAlmacen;
+            if (str_contains($userData['email'], 'admin')) $rolId = $roles['admin']->id;
+            else if (str_contains($userData['email'], 'cajero')) $rolId = $roles['cajero']->id;
+            else if (str_contains($userData['email'], 'almacen')) $rolId = $roles['almacen']->id;
             
             if ($rolId) {
                 DB::table('usuario_rol')->insert([

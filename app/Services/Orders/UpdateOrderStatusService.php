@@ -41,36 +41,66 @@ class UpdateOrderStatusService
             $estadoAnterior = strtolower($pedido->estado);
             OrderTransitions::validate($pedido, $nuevoEstado);
             $consumed = $pedido->stock_consumed_at !== null;
+            $previousTracking = $pedido->tracking_number;
+            $previousCourier = $pedido->courier_name;
+            $previousDelivery = $pedido->envio?->estado ?: 'Preparando';
+            $pickup = ($pedido->direccion_envio_snapshot['delivery_type'] ?? '') === 'tienda' || ($pedido->direccion_envio_snapshot['shipping_quote']['source'] ?? '') === 'pickup';
+            $deliveryState = !empty($data['estado_envio']) ? $data['estado_envio'] : $previousDelivery;
+            
+            // Auto-align states for convenience
+            if ($nuevoEstado === 'enviado') $deliveryState = 'Enviado';
+            if ($nuevoEstado === 'completado') $deliveryState = $pickup ? 'Recogido' : 'Entregado';
+            if (in_array($deliveryState, ['Entregado', 'Recogido'], true) && $nuevoEstado !== 'cancelado') $nuevoEstado = 'completado';
+            if ($deliveryState === 'Enviado' && $nuevoEstado !== 'cancelado' && $nuevoEstado !== 'completado') $nuevoEstado = 'enviado';
+
+            $reference = trim($data['fulfillment_reference'] ?? $pedido->fulfillment_reference ?? '');
+            $delivered = in_array($deliveryState, ['Entregado', 'Recogido'], true);
+            
+            if ($nuevoEstado === 'completado' && !$reference) {
+                throw new \InvalidArgumentException('Confirma Entregado o Recogido e indica la referencia de recepción antes de completar el pedido.');
+            }
+            
+            $leftWarehouse = $pedido->dispatched_at || in_array($estadoAnterior,['enviado','completado'],true) || in_array($previousDelivery,['Enviado','Entregado','Recogido'],true);
             $pedido->update([
                 'estado' => $nuevoEstado,
                 'tracking_number' => $data['tracking_number'] ?? $pedido->tracking_number,
                 'courier_name' => $data['courier_name'] ?? $pedido->courier_name,
+                'fulfillment_reference' => $reference ?: null,
+                'fulfilled_at' => $nuevoEstado === 'completado' ? ($pedido->fulfilled_at ?? now()) : $pedido->fulfilled_at,
+                'dispatched_at' => $nuevoEstado === 'enviado' ? ($pedido->dispatched_at ?? now()) : $pedido->dispatched_at,
             ]);
+            if (array_key_exists('tracking_number', $data) || array_key_exists('courier_name', $data) || ! empty($data['estado_envio'])) {
+                if ($nuevoEstado === 'pendiente' || $nuevoEstado === 'cancelado') {
+                    if ((! empty($data['tracking_number']) && $data['tracking_number'] !== $previousTracking)
+                        || (! empty($data['estado_envio']) && $data['estado_envio'] !== $previousDelivery)) throw new \InvalidArgumentException('Solo puedes preparar entregas de pedidos pagados.');
+                } else {
+                    $pickup = ($pedido->direccion_envio_snapshot['delivery_type'] ?? '') === 'tienda' || ($pedido->direccion_envio_snapshot['shipping_quote']['source'] ?? '') === 'pickup';
+                    $deliveryState = $data['estado_envio'] ?? $previousDelivery;
+                    if (($pickup && in_array($deliveryState, ['Enviado', 'Entregado'], true)) || (! $pickup && in_array($deliveryState, ['Listo para recoger', 'Recogido'], true))) {
+                        throw new \InvalidArgumentException('El estado de entrega no corresponde a la modalidad del pedido.');
+                    }
+                    $pedido->envio()->updateOrCreate(['pedido_id' => $pedido->id], ['tracking' => $pedido->tracking_number,
+                        'proveedor' => $pedido->courier_name, 'estado' => $deliveryState]);
+                    $pedido->unsetRelation('envio');
+                }
+            }
             if ($nuevoEstado === 'cancelado') {
                 DB::table('checkout_benefit_reservations')->where('pedido_id', $pedido->id)->delete();
+                if ($estadoAnterior !== 'cancelado') OrderLoyaltyService::reversed($pedido);
             }
 
             if ($nuevoEstado === 'cancelado' && $estadoAnterior !== 'cancelado' && $consumed) {
-                $this->inventoryService->returnStockForOrder($pedido, (int) auth('admin')->id(), 'Cancelación Administrativa');
-                $pedido->update(['stock_returned_at' => now()]);
+                if (!$leftWarehouse) {
+                    $this->inventoryService->returnStockForOrder($pedido, (int) auth('admin')->id(), 'Cancelación antes de despacho');
+                    $pedido->update(['stock_returned_at' => now()]);
+                }
 
                 // Restaurar Beneficios del Cliente (Puntos y Cupones)
                 if ($pedido->cupon_id) {
                     Cupon::where('id', $pedido->cupon_id)->where('usos_actuales', '>', 0)->decrement('usos_actuales');
                 }
 
-                if ($pedido->puntos_usados > 0 && $pedido->usuario_id) {
-                    $user = Usuario::find($pedido->usuario_id);
-                    if ($user) {
-                        $user->increment('loyalty_points', $pedido->puntos_usados);
-                        LoyaltyPointsHistory::create([
-                            'usuario_id' => $user->id,
-                            'points' => $pedido->puntos_usados,
-                            'type' => 'refunded',
-                            'description' => "Puntos devueltos por cancelación del pedido {$pedido->codigo}",
-                        ]);
-                    }
-                }
+                OrderLoyaltyService::restoreRedeemed($pedido);
 
                 // Sincronizar CRM: Si se cancela el pedido, cerrar oportunidad como perdida
                 if ($pedido->crm_deal_id) {
@@ -82,13 +112,13 @@ class UpdateOrderStatusService
                             'deal_id' => $deal->id,
                             'usuario_id' => auth('admin')->id(),
                             'tipo' => 'system',
-                            'contenido' => "El pedido {$pedido->codigo} fue cancelado y devuelto a inventario.",
+                            'contenido' => "El pedido {$pedido->codigo} fue cancelado. ".($leftWarehouse ? 'La recepción física requiere RMA.' : 'Stock liberado antes del despacho.'),
                         ]);
                     }
                 }
             }
 
-            if ($estadoAnterior !== $nuevoEstado) {
+            if ($estadoAnterior !== $nuevoEstado || $previousTracking !== $pedido->tracking_number || $previousCourier !== $pedido->courier_name || $previousDelivery !== $pedido->envio?->estado) {
                 OrderNotificationOutbox::record($pedido);
             }
             DB::commit();

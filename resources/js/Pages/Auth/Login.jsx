@@ -38,7 +38,7 @@ export default function Login() {
                             </span>
                             <input 
                                 type="email" 
-                                name="email" 
+                                name="email" aria-label="Correo electrónico" autoComplete="email" 
                                 value={data.email} 
                                 onChange={e => setData('email', e.target.value)} 
                                 placeholder="Email" 
@@ -54,7 +54,7 @@ export default function Login() {
                             </span>
                             <input 
                                 type="password" 
-                                name="password" 
+                                name="password" aria-label="Contraseña" autoComplete="current-password" 
                                 value={data.password} 
                                 onChange={e => setData('password', e.target.value)} 
                                 placeholder="********" 
@@ -68,7 +68,7 @@ export default function Login() {
                         </div>
 
                         <div style={{ display: 'flex', justifyContent: 'flex-end', fontSize: '13px', marginTop: '5px' }}>
-                            <a href="#" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: '500' }}>¿Olvidaste tu contraseña?</a>
+                            <a href="/recuperar-contrasena" style={{ color: '#0284c7', textDecoration: 'none', fontWeight: '500' }}>¿Olvidaste tu contraseña?</a>
                         </div>
 
                         <button type="submit" disabled={processing} style={{ width: '100%', background: '#0284c7', color: 'white', border: 'none', padding: '14px', borderRadius: '8px', cursor: processing ? 'not-allowed' : 'pointer', fontWeight: 'bold', fontSize: '14px', marginTop: '10px' }}>

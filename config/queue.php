@@ -31,6 +31,15 @@ return [
 
     'connections' => [
 
+        'storefront' => [
+            'driver' => 'database',
+            'connection' => env('DB_QUEUE_CONNECTION'),
+            'table' => env('DB_QUEUE_TABLE', 'jobs'),
+            'queue' => 'storefront',
+            'retry_after' => 180,
+            'after_commit' => true,
+        ],
+
         'chatbot' => [
             'driver' => 'database',
             'connection' => env('DB_QUEUE_CONNECTION'),

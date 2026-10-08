@@ -41,12 +41,19 @@ export default function HeroCarousel({ banners = [] }) {
             }}>
             <div className="efe-hero-track" style={{ transform: `translateX(-${current * 100}%)` }}>
                 {banners.map((banner, index) => {
+                    const url = banner.enlace_url || banner.link_url;
+                    const isExternal = url && (url.startsWith('http://') || url.startsWith('https://'));
+                    const hasLink = url && url !== '#';
+
                     const image = <picture>
                         {banner.imagen_mobile_url && <source media="(max-width: 767px)" srcSet={banner.imagen_mobile_url} />}
                         <img src={banner.imagen_url || banner.image} alt={banner.titulo || 'Promoción de la tienda'} width="2367" height="728" loading={index === 0 ? 'eager' : 'lazy'} fetchPriority={index === 0 ? 'high' : 'auto'} draggable="false" />
                     </picture>;
-                    return <div key={banner.id || index} className="efe-hero-slide" inert={index !== current} aria-hidden={index !== current}>
-                        {(banner.enlace_url || banner.link_url) ? <Link href={banner.enlace_url || banner.link_url}>{image}</Link> : image}
+                    
+                    return <div key={banner.id || index} className="efe-hero-slide" inert={index !== current ? "" : undefined} aria-hidden={index !== current}>
+                        {!hasLink ? image : (
+                            isExternal ? <a href={url} target="_blank" rel="noopener noreferrer">{image}</a> : <Link href={url}>{image}</Link>
+                        )}
                     </div>;
                 })}
             </div>

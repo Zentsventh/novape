@@ -16,14 +16,15 @@ class AnalyticsService
     public function getDashboardStats(string $startDate, string $endDate, string $sortBy, string $sortOrder, ?string $status = null, ?string $q = null): array
     {
         $dateFilterQuery = function ($query) use ($startDate, $endDate, $status, $q) {
+            \App\Services\Operations\ReportDataset::apply($query, 'pedido');
             if ($startDate) {
-                $query->whereDate('created_at', '>=', $startDate);
+                $query->where('created_at', '>=', Carbon::parse($startDate)->startOfDay());
             }
             if ($endDate) {
-                $query->whereDate('created_at', '<=', $endDate);
+                $query->where('created_at', '<', Carbon::parse($endDate)->addDay()->startOfDay());
             }
             if ($status) {
-                $query->whereRaw('LOWER(estado) = ?', [strtolower($status)]);
+                $query->whereIn('estado', [strtolower($status), ucfirst(strtolower($status))]);
             }
             if ($q) {
                 $query->where(function ($sq) use ($q) {
@@ -47,35 +48,35 @@ class AnalyticsService
         $pedidosCompletados = $dateFilterQuery(Pedido::whereRaw('LOWER(estado) = ?', ['completado']))->count();
         $pedidosCancelados = $dateFilterQuery(Pedido::whereRaw('LOWER(estado) = ?', ['cancelado']))->count();
 
-        $ventasTotalQuery = Pedido::whereRaw('LOWER(estado) IN (?, ?, ?, ?)', ['pagado', 'procesando', 'enviado', 'completado']);
+        $ventasTotalQuery = \App\Services\Operations\ReportDataset::apply(Pedido::query(), 'pedido')->whereIn('estado', ['pagado', 'procesando', 'enviado', 'completado', 'Pagado', 'Procesando', 'Enviado', 'Completado']);
         $ventasTotal = (float) $ventasTotalQuery->when($startDate, fn ($q) => $q->where('created_at', '>=', Carbon::parse($startDate)->startOfDay()))->when($endDate, fn ($q) => $q->where('created_at', '<', Carbon::parse($endDate)->addDay()->startOfDay()))->sum('total');
 
         $dateOnlyQuery = function ($query) use ($startDate, $endDate) {
             if ($startDate) {
-                $query->whereDate('created_at', '>=', $startDate);
+                $query->where('created_at', '>=', Carbon::parse($startDate)->startOfDay());
             }
             if ($endDate) {
-                $query->whereDate('created_at', '<=', $endDate);
+                $query->where('created_at', '<', Carbon::parse($endDate)->addDay()->startOfDay());
             }
 
             return $query;
         };
         $ventasWebTotal = $ventasTotal;
-        $ventasPosQuery = DB::table('ventas_pos');
+        $ventasPosQuery = \App\Services\Operations\ReportDataset::apply(DB::table('ventas_pos'), 'ventas_pos');
         $ventasPosTotal = (float) $dateOnlyQuery($ventasPosQuery)->sum('total');
         $ventasTotal += $ventasPosTotal;
 
-        $costosGastos = (float) $dateOnlyQuery(DB::table('gastos'))->sum('monto');
-        $costosCompras = (float) $dateOnlyQuery(DB::table('compras')->where('estado', 'completado'))->sum('total');
+        $costosGastos = (float) $this->businessDates(DB::table('gastos'), 'gastos', 'fecha_gasto', $startDate, $endDate)->sum('monto');
+        $costosCompras = (float) $this->businessDates(DB::table('compras')->where('estado', 'completado'), 'compras', 'fecha_compra', $startDate, $endDate)->sum('total');
 
         $costosTotal = $costosGastos + $costosCompras;
         $gananciaNeta = $ventasTotal - $costosTotal;
 
-        $ventasMesQuery = Pedido::whereRaw('LOWER(estado) IN (?, ?, ?, ?)', ['pagado', 'procesando', 'enviado', 'completado'])
+        $ventasMesQuery = \App\Services\Operations\ReportDataset::apply(Pedido::query(), 'pedido')->whereIn('estado', ['pagado', 'procesando', 'enviado', 'completado', 'Pagado', 'Procesando', 'Enviado', 'Completado'])
             ->where('created_at', '>=', now()->startOfMonth());
         $ventasMes = (float) $ventasMesQuery->sum('total');
 
-        $ventasPosMesQuery = DB::table('ventas_pos')->where('created_at', '>=', now()->startOfMonth());
+        $ventasPosMesQuery = \App\Services\Operations\ReportDataset::apply(DB::table('ventas_pos'), 'ventas_pos')->where('created_at', '>=', now()->startOfMonth());
         $ventasMes += (float) $ventasPosMesQuery->sum('total');
 
         $pedidosRecientes = $dateFilterQuery(Pedido::with('usuario'))
@@ -99,10 +100,10 @@ class AnalyticsService
 
         for ($i = 6; $i >= 0; $i--) {
             $day = $endDateCarbon->copy()->subDays($i);
-            $webSales = (float) Pedido::whereRaw('LOWER(estado) IN (?, ?, ?, ?)', ['pagado', 'procesando', 'enviado', 'completado'])
-                ->whereDate('created_at', $day)
+            $webSales = (float) \App\Services\Operations\ReportDataset::apply(Pedido::query(), 'pedido')->whereIn('estado', ['pagado', 'procesando', 'enviado', 'completado', 'Pagado', 'Procesando', 'Enviado', 'Completado'])
+                ->where('created_at', '>=', $day->copy()->startOfDay())->where('created_at', '<', $day->copy()->addDay()->startOfDay())
                 ->sum('total');
-            $posSales = (float) DB::table('ventas_pos')->whereDate('created_at', $day)->sum('total');
+            $posSales = (float) \App\Services\Operations\ReportDataset::apply(DB::table('ventas_pos'), 'ventas_pos')->where('created_at', '>=', $day->copy()->startOfDay())->where('created_at', '<', $day->copy()->addDay()->startOfDay())->sum('total');
             $ventasSemana[] = [
                 'dia' => $nombresDias[$day->dayOfWeek],
                 'total' => $webSales + $posSales,
@@ -121,13 +122,23 @@ class AnalyticsService
             'ventasWeb' => $ventasWebTotal,
             'ventasPos' => $ventasPosTotal,
             'costosTotal' => $costosTotal,
-            'gananciaNeta' => $gananciaNeta,
+            'gananciaNeta' => $gananciaNeta, // Legacy key: commercial balance, not accounting profit.
+            'balanceComercial' => $gananciaNeta,
+            'financialQuality' => app(CommercialMarginService::class)->summary($startDate, $endDate),
             'ventasMes' => $ventasMes,
             'pedidosRecientes' => $pedidosRecientes,
             'ventasSemana' => $ventasSemana,
             'stockBajo' => $this->getLowStock(),
             'topProductosVendidos' => $this->getTopProducts($startDate, $endDate),
         ];
+    }
+
+    private function businessDates($query, string $table, string $date, string $start, string $end)
+    {
+        $query = \App\Services\Operations\ReportDataset::apply($query, $table);
+        $date = \Illuminate\Support\Facades\Schema::hasColumn($table, $date) ? $date : 'created_at';
+        if (\Illuminate\Support\Facades\Schema::hasColumn($table, 'deleted_at')) $query->whereNull('deleted_at');
+        return $query->where($date, '>=', $date === 'created_at' ? Carbon::parse($start)->startOfDay() : Carbon::parse($start)->toDateString())->where($date, '<', $date === 'created_at' ? Carbon::parse($end)->addDay()->startOfDay() : Carbon::parse($end)->addDay()->toDateString());
     }
 
     public function getLowStock(int $limit = 150): array
@@ -169,10 +180,10 @@ class AnalyticsService
                     ->join('ventas_pos', 'ventas_pos.id', '=', 'venta_pos_items.venta_pos_id') // Corrected join key
                     ->select('variante_id', 'cantidad', DB::raw('venta_pos_items.cantidad * venta_pos_items.precio_unitario as ingresos'));
                 if ($startDate) {
-                    $q1->whereDate('ventas_pos.created_at', '>=', $startDate);
+                    $q1->where('ventas_pos.created_at', '>=', Carbon::parse($startDate)->startOfDay());
                 }
                 if ($endDate) {
-                    $q1->whereDate('ventas_pos.created_at', '<=', $endDate);
+                    $q1->where('ventas_pos.created_at', '<', Carbon::parse($endDate)->addDay()->startOfDay());
                 }
 
                 $q2 = DB::table('pedido_item')
@@ -180,12 +191,14 @@ class AnalyticsService
                     ->where('pedido.estado', 'completado')
                     ->select('variante_id', 'cantidad', DB::raw('pedido_item.cantidad * pedido_item.precio_unitario as ingresos'));
                 if ($startDate) {
-                    $q2->whereDate('pedido.created_at', '>=', $startDate);
+                    $q2->where('pedido.created_at', '>=', Carbon::parse($startDate)->startOfDay());
                 }
                 if ($endDate) {
-                    $q2->whereDate('pedido.created_at', '<=', $endDate);
+                    $q2->where('pedido.created_at', '<', Carbon::parse($endDate)->addDay()->startOfDay());
                 }
 
+                \App\Services\Operations\ReportDataset::apply($q1, 'ventas_pos');
+                \App\Services\Operations\ReportDataset::apply($q2, 'pedido');
                 $query->from($q1->unionAll($q2), 'ventas_combinadas');
             }, 'ventas_combinadas')
             ->join('variante', 'variante.id', '=', 'ventas_combinadas.variante_id')

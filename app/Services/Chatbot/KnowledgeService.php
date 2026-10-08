@@ -47,7 +47,7 @@ class KnowledgeService
         $source = DB::table('chatbot_knowledge_sources')->find($id);
         abort_unless($source, 404);
         DB::table('chatbot_knowledge_sources')->where('id', $id)->update(['index_status' => 'pending', 'index_error' => null]);
-        IndexChatbotKnowledge::dispatch($id, $source->version)->onConnection('chatbot')->afterCommit();
+        IndexChatbotKnowledge::dispatch($id, data_get($source, 'version'))->onConnection('chatbot')->afterCommit();
     }
 
     private function normalize(string $text): string

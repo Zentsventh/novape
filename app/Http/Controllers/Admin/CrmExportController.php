@@ -55,7 +55,9 @@ class CrmExportController extends Controller
             } elseif ($type === 'personas') {
                 fwrite($file, Csv::row(['ID', 'Nombres', 'Apellidos', 'Email', 'Teléfono', 'Empresa ID', 'Creado']));
 
-                Usuario::where('estado', 'activo')->chunk(100, function ($personas) use ($file) {
+                Usuario::where('estado', 'activo')
+                    ->whereDoesntHave('roles', fn ($roles) => $roles->where('nombre', '!=', 'cliente'))
+                    ->chunk(100, function ($personas) use ($file) {
                     foreach ($personas as $p) {
                         fwrite($file, Csv::row([
                             $p->id, $p->nombres, $p->apellidos, $p->email, $p->telefono,

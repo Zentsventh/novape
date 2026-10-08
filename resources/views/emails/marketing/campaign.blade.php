@@ -39,8 +39,9 @@
     </div>
 
     <div class="footer">
-        <p>Has recibido este correo porque eres un cliente registrado en Novape.</p>
+        <p>Has recibido este correo porque autorizaste recibir promociones de Novape.</p>
         <p>&copy; {{ date('Y') }} Novape. Todos los derechos reservados.</p>
     </div>
+    <p><a href="{{ \Illuminate\Support\Facades\URL::signedRoute('marketing.unsubscribe', ['user' => $user->id, 'recipient' => hash('sha256', mb_strtolower($user->email))]) }}">Dejar de recibir promociones</a></p>
 </body>
 </html>

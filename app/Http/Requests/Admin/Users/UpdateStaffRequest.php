@@ -19,11 +19,11 @@ class UpdateStaffRequest extends FormRequest
         return [
             'nombres' => 'required|string|max:100',
             'apellidos' => 'required|string|max:100',
-            'email' => 'required|email|unique:usuario,email,' . $id,
-            'roles' => 'required|array|min:1',
-            'roles.*' => 'exists:rol,id',
+            'email' => 'required|email|max:100|unique:usuario,email,' . $id,
+            'roles' => 'sometimes|required|array|min:1',
+            'roles.*' => 'integer|distinct|exists:rol,id',
             'dni' => 'nullable|string|max:20|unique:usuario,dni,' . $id,
-            'telefono' => 'nullable|string|max:30',
+            'telefono' => 'nullable|string|max:20',
             'password' => 'nullable|string|min:6',
         ];
     }

@@ -27,7 +27,7 @@ use Illuminate\Support\Str;
 
 class CheckoutService
 {
-    public function validateAndCalculateTotal(array $cart, ?string $couponCode, float $shippingCost, bool $usePoints = false): array
+    public function validateAndCalculateTotal(array $cart, ?string $couponCode, float $shippingCost, bool $usePoints = false, bool $enforceMinimum = true): array
     {
         $total = 0;
         foreach ($cart as &$item) {
@@ -35,18 +35,21 @@ class CheckoutService
                 throw new \InvalidArgumentException('El carrito contiene un producto inválido.');
             }
             $variante = Variante::find($item['variante_id']);
-            if (! $variante || ! $variante->activo) {
+            if (! $variante || ! $variante->activo || !$variante->producto?->activo || (int) $item['cantidad'] > \App\Services\Storefront\CommercePolicy::summary()['max_quantity'] || (int) $variante->producto_id !== (int) ($item['id'] ?? 0)) {
                 throw new \InvalidArgumentException('Un producto del carrito ya no está disponible.');
             }
-            $item['precio'] = (float) $variante->precio;
+            $quote = \App\Services\Storefront\VariantPricing::quote($variante);
+            $item['precio'] = $quote['price'];
+            if ($couponCode && !$quote['combinable_coupon']) throw \Illuminate\Validation\ValidationException::withMessages(['coupon'=>'Una promoción de tu carrito no admite cupones adicionales.']);
             $total += $item['precio'] * (int) $item['cantidad'];
         }
         unset($item);
 
-        if ($total <= 0) {
+        if (empty($cart)) {
             throw new \Exception('Carrito vacío');
         }
 
+        $total = round($total, 2);
         $descuentoMonto = 0;
         $couponId = null;
 
@@ -68,6 +71,9 @@ class CheckoutService
                     $isValid = false;
                 }
 
+                if ($cupon->unico_por_cliente && !auth()->check()) {
+                    throw \Illuminate\Validation\ValidationException::withMessages(['coupon' => 'Inicia sesión para utilizar este cupón personal.']);
+                }
                 if ($cupon->unico_por_cliente && auth()->check()) {
                     $used = Pedido::where('usuario_id', auth()->id())
                         ->where('cupon_id', $cupon->id)
@@ -80,8 +86,12 @@ class CheckoutService
 
                 if ($isValid) {
                     $couponId = $cupon->id;
-                    $descuentoMonto = $cupon->tipo === 'porcentaje' ? ($total * ($cupon->valor / 100)) : $cupon->valor;
+                    $descuentoMonto = round(min($total, max(0, $cupon->tipo === 'porcentaje' ? ($total * ($cupon->valor / 100)) : $cupon->valor)), 2);
                 }
+            }
+            if (!$couponId) throw \Illuminate\Validation\ValidationException::withMessages(['coupon' => 'El cupón no está disponible o tu compra no cumple sus condiciones. Revisa el código, vigencia y compra mínima.']);
+            if ($usePoints && (!\App\Services\Storefront\CommercePolicy::summary()['coupon_points_combinable'] || ($cupon->combinable_points ?? true) === false)) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['usePoints' => 'Este cupón no se puede combinar con puntos. Elige un beneficio.']);
             }
         }
 
@@ -114,10 +124,12 @@ class CheckoutService
             throw new \InvalidArgumentException('Costo de envío inválido.');
         }
 
-        $totalConDescuento = max(0, $total - $descuentoMonto) + $shippingCost;
+        $descuentoMonto = round(min($total, $descuentoMonto), 2);
+        $totalConDescuento = round($total - $descuentoMonto + $shippingCost, 2);
 
-        if ($totalConDescuento < 2.00 && $totalConDescuento > 0) {
-            throw new \Exception('El monto mínimo es de S/ 2.00 (después de descuentos)');
+        $minimum = \App\Services\Storefront\CommercePolicy::summary()['minimum_payment'];
+        if ($enforceMinimum && $totalConDescuento < $minimum) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['coupon' => 'Esta tienda requiere un importe final mínimo de S/ '.number_format($minimum,2).'. Reduce los beneficios o revisa tu carrito antes de pagar.']);
         }
 
         return [
@@ -126,6 +138,7 @@ class CheckoutService
             'descuentoMonto' => $descuentoMonto,
             'couponId' => $couponId,
             'cart' => $cart,
+            'couponDiscount' => round($descuentoMonto - $descuentoPuntos, 2),
             'puntosUsados' => $puntosUsados,
         ];
     }
@@ -143,6 +156,7 @@ class CheckoutService
                 }
             }
 
+            ksort($requiredByVariant);
             foreach ($requiredByVariant as $varianteId => $requiredQuantity) {
                 if ($varianteId) {
                     Variante::lockForUpdate()->find($varianteId);
@@ -189,29 +203,25 @@ class CheckoutService
     public function createPendingOrder(array $checkoutData, array $shippingAddress, ?string $documentoCliente, ?string $nombreFacturacion, ?string $direccionFacturacion, string $tipoComprobante, float $shippingCost): Pedido
     {
         return DB::transaction(function () use ($checkoutData, $shippingAddress, $documentoCliente, $nombreFacturacion, $direccionFacturacion, $tipoComprobante, $shippingCost) {
-            if (auth()->check() && ! empty($shippingAddress['guardarDireccion'])) {
-                DireccionUsuario::firstOrCreate([
-                    'usuario_id' => auth()->id(),
-                    'direccion' => $shippingAddress['direccion'],
-                    'distrito' => $shippingAddress['distrito'],
-                ], [
-                    'referencia' => $shippingAddress['referencia'] ?? '',
-                    'departamento' => 'LIMA',
-                    'provincia' => 'LIMA',
-                ]);
+            if (auth()->check() && ! empty($shippingAddress['guardarDireccion']) && ! empty($shippingAddress['direccion']) && ! empty($shippingAddress['distrito'])) {
+                app(\App\Services\User\UserProfileService::class)->addAddress(auth()->user(), array_merge($shippingAddress, ['departamento' => 'LIMA', 'provincia' => 'LIMA']), false);
             }
 
             $codigoPedido = session('checkout_pedido') ?: 'PED-'.date('ymd').'-'.strtoupper(Str::random(6));
 
+            $pedido = Pedido::where('codigo', $codigoPedido)->lockForUpdate()->first();
             if (auth()->id()) {
                 Usuario::whereKey(auth()->id())->lockForUpdate()->firstOrFail();
             }
-            $pedido = Pedido::where('codigo', $codigoPedido)->lockForUpdate()->first();
             if ($pedido && ($pedido->usuario_id != auth()->id() || strtolower($pedido->estado) !== 'pendiente')) {
                 throw new \InvalidArgumentException('El pedido de esta sesión ya no puede modificarse.');
             }
+            if ($pedido && DB::table('payment_reconciliations')->where('pedido_id',$pedido->id)->whereIn('status',['authorizing','approved','needs_review'])->exists()) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['cart'=>'El pago está en verificación y la compra no puede modificarse.']);
+            }
             $pedidoData = [
                 'usuario_id' => auth()->id(),
+                'checkout_session_id' => session()->getId(),
                 'codigo' => $codigoPedido,
                 'subtotal' => $checkoutData['total'],
                 'descuento' => $checkoutData['descuentoMonto'],
@@ -225,19 +235,24 @@ class CheckoutService
                 'cupon_id' => $checkoutData['couponId'],
                 'puntos_usados' => (int) ($checkoutData['puntosUsados'] ?? 0),
                 'igv_porcentaje' => (float) ConfiguracionSitio::obtener('igv_porcentaje', 18),
+                'commerce_policy_snapshot' => \App\Services\Storefront\CommercePolicy::summary(),
             ];
 
             if (! $pedido) {
                 $pedidoData['estado'] = 'Pendiente';
                 $pedido = Pedido::create($pedidoData);
-            } elseif ($pedido->estado === 'Pendiente') {
+            } elseif (strtolower($pedido->estado) === 'pendiente') {
                 $pedido->update($pedidoData);
                 $pedido->items()->delete();
             }
 
-            if ($pedido->estado === 'Pendiente') {
-                foreach ($checkoutData['cart'] as $item) {
+            if (strtolower($pedido->estado) === 'pendiente') {
+                $lines = array_values($checkoutData['cart']);
+                $discounts = DiscountAllocation::cents(array_map(fn($item)=>round($item['precio']*$item['cantidad'],2),$lines),$checkoutData['descuentoMonto']);
+                foreach ($lines as $index => $item) {
                     $variant = Variante::with('producto')->findOrFail($item['variante_id']);
+                    $gross = round($item['precio'] * $item['cantidad'], 2);
+                    $discount = $discounts[$index]/100;
                     $pedido->items()->create([
                         'variante_id' => $item['variante_id'] ?? null,
                         'cantidad' => $item['cantidad'],
@@ -245,6 +260,8 @@ class CheckoutService
                         'producto_nombre' => $variant->producto?->nombre,
                         'sku' => $variant->sku,
                         'almacen_id' => (int) ConfiguracionSitio::obtener('almacen_ecommerce_id', 1),
+                        'discount_amount' => $discount,
+                        'net_total' => round($gross - $discount, 2),
                     ]);
                 }
             }
@@ -265,7 +282,7 @@ class CheckoutService
         return DB::transaction(function () use ($codigoPedido, $montoPagado, $transactionReference) {
             $pedido = Pedido::with('items')->where('codigo', $codigoPedido)->lockForUpdate()->first();
 
-            if ($pedido && $pedido->estado === 'Pendiente') {
+            if ($pedido && strtolower($pedido->estado) === 'pendiente') {
                 if (abs($montoPagado - $pedido->total) > 0.01) {
                     Log::warning("Webhook Niubiz: Monto pagado ($montoPagado) no coincide con total del pedido {$pedido->codigo} ({$pedido->total}).");
 
@@ -326,6 +343,9 @@ class CheckoutService
 
                 }
 
+                Variante::whereIn('id', $pedido->items->pluck('variante_id')->filter()->unique())->orderBy('id')->lockForUpdate()->get();
+                $warehouses = $pedido->items->map(fn ($item) => (int) ($item->almacen_id ?: ConfiguracionSitio::obtener('almacen_ecommerce_id', 1)))->unique()->sort()->values();
+                DB::table('almacenes')->whereIn('id', $warehouses)->orderBy('id')->lockForUpdate()->get(['id']);
                 foreach ($pedido->items->sortBy('variante_id') as $item) {
                     if ($item->variante_id) {
                         $variante = Variante::lockForUpdate()->find($item->variante_id);
@@ -333,32 +353,24 @@ class CheckoutService
                             $almacenEcommerceId = (int) ($item->almacen_id ?: ConfiguracionSitio::obtener('almacen_ecommerce_id', 1));
                             $item->update(['costo_unitario' => $variante->precio_compra]);
 
-                            $stockAlmacen = DB::table('stock_almacen')
-                                ->where('variante_id', $item->variante_id)
-                                ->where('almacen_id', $almacenEcommerceId)
-                                ->lockForUpdate()
-                                ->first();
-
-                            if (! $stockAlmacen || $stockAlmacen->cantidad < $item->cantidad) {
-                                throw new \RuntimeException('Stock insuficiente para completar el pedido.');
-                            }
-
-                            DB::table('stock_almacen')->where('id', $stockAlmacen->id)->decrement('cantidad', $item->cantidad);
-
-                            DB::statement('UPDATE variante SET stock = (SELECT COALESCE(SUM(cantidad), 0) FROM stock_almacen WHERE variante_id = ?) WHERE id = ?', [$item->variante_id, $item->variante_id]);
-
-                            DB::table('movimientos_almacen')->insert([
-                                'almacen_id' => $almacenEcommerceId,
-                                'variante_id' => $item->variante_id,
-                                'tipo' => 'salida',
-                                'cantidad' => -$item->cantidad,
-                                'referencia' => 'Venta Ecommerce Niubiz - '.$pedido->codigo,
-                                'usuario_id' => $pedido->usuario_id ?? 1,
-                                'created_at' => now(),
-                                'updated_at' => now(),
-                            ]);
+                            app(\App\Services\Inventario\InventoryService::class)->registrarMovimiento(
+                                varianteId: $item->variante_id,
+                                almacenId: $almacenEcommerceId,
+                                cantidad: -$item->cantidad,
+                                tipo: 'salida',
+                                motivo: 'Venta Ecommerce Niubiz - '.$pedido->codigo,
+                                usuarioId: $pedido->usuario_id,
+                                referencia: $pedido,
+                                costoUnitario: $variante->precio_compra === null ? null : (float) $variante->precio_compra,
+                                operationKey: 'web:'.$pedido->id.':'.$item->id,
+                                reservationSessionId: $pedido->checkout_session_id
+                            );
                         }
                     }
+                }
+
+                if ($pedido->checkout_session_id) {
+                    ReservaStock::where('session_id', $pedido->checkout_session_id)->delete();
                 }
 
                 if ($pedido->crm_deal_id) {
@@ -368,12 +380,19 @@ class CheckoutService
                     }
                 }
                 DB::table('checkout_benefit_reservations')->where('pedido_id', $pedido->id)->delete();
+                // This runs only on the first paid transition; repeated callbacks cannot consume the saved cart twice.
+                if ($benefitUser && ($savedCart = $benefitUser->carrito()->first())) {
+                    foreach ($pedido->items as $purchased) {
+                        $line = $savedCart->items()->where('variante_id',$purchased->variante_id)->lockForUpdate()->first();
+                        if (!$line) continue;
+                        if ($line->cantidad <= $purchased->cantidad) $line->delete();
+                        else $line->decrement('cantidad',$purchased->cantidad);
+                    }
+                }
                 $pedido->load('items');
                 $pedido->update(['invoice_snapshot' => InvoiceSnapshot::order($pedido)]);
 
-                DB::afterCommit(function () use ($pedido) {
-                    ProcessSunatInvoiceJob::dispatch($pedido);
-                });
+                \App\Services\Orders\StorefrontTaskService::recordPaid($pedido);
 
                 return true;
             }
@@ -386,14 +405,7 @@ class CheckoutService
     {
         $pedido = Pedido::where('codigo', $codigoPedido)->first();
         if ($pedido) {
-            $correoDestino = $paymentEmail ?: ($pedido->usuario ? $pedido->usuario->email : null);
-            if ($correoDestino) {
-                SendOrderConfirmationJob::dispatch($pedido->id, $correoDestino);
-            }
-            if ($pedido->usuario && ! empty($pedido->usuario->telefono)) {
-                $mensaje = "¡Hola {$pedido->usuario->nombres}! Tu pedido {$pedido->codigo} ha sido confirmado por un total de S/ {$pedido->total}. ¡Gracias por comprar en NOVAPE!";
-                SendWhatsAppNotification::dispatch($pedido->usuario->telefono, $mensaje);
-            }
+            \App\Services\Orders\StorefrontTaskService::recordPaid($pedido, $paymentEmail);
         }
     }
 }

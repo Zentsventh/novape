@@ -19,9 +19,11 @@ class UpdateOrderStateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'estado' => 'required|string|in:pendiente,procesando,enviado,completado,cancelado',
+            'estado' => 'required|string|in:pendiente,pagado,procesando,enviado,completado,cancelado',
             'tracking_number' => 'nullable|string|max:100',
-            'courier_name' => 'nullable|string|max:100'
+            'fulfillment_reference' => 'nullable|string|max:255',
+            'courier_name' => 'nullable|string|max:100',
+            'estado_envio' => 'nullable|string|in:Preparando,Enviado,Entregado,Listo para recoger,Recogido',
         ];
     }
 }

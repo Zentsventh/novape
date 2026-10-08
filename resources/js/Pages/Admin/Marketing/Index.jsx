@@ -1,115 +1,226 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import { Mail, MessageSquare, BarChart, Users, Target, Plus, Search } from 'lucide-react';
+import { Mail, MessageSquare, BarChart, Users, Target, Plus, Search, ChevronRight } from 'lucide-react';
 
 export default function MarketingIndex({ campaigns, stats }) {
     return (
         <AdminLayout>
             <Head title="Marketing Cloud" />
             
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+            <style>{`
+                .premium-card {
+                    background: #ffffff;
+                    border: 1px solid #E2E8F0;
+                    border-radius: 12px;
+                    padding: 24px;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+                }
+                .premium-card:hover {
+                    transform: translateY(-4px);
+                    box-shadow: 0 12px 24px -8px rgba(0, 71, 151, 0.12);
+                    border-color: #CBD5E1;
+                }
+                .primary-btn {
+                    background: #004797;
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 8px;
+                    font-weight: 600;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    cursor: pointer;
+                    text-decoration: none;
+                    transition: all 0.2s ease;
+                    box-shadow: 0 2px 4px rgba(0, 71, 151, 0.2);
+                }
+                .primary-btn:hover {
+                    background: #003675;
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 8px rgba(0, 71, 151, 0.3);
+                }
+                .search-input {
+                    padding: 10px 14px 10px 40px;
+                    border-radius: 8px;
+                    border: 1px solid #E2E8F0;
+                    background: #F8FAFC;
+                    color: #1E293B;
+                    transition: all 0.2s ease;
+                    width: 250px;
+                    font-size: 14px;
+                }
+                .search-input:focus {
+                    outline: none;
+                    border-color: #004797;
+                    background: #ffffff;
+                    box-shadow: 0 0 0 3px rgba(0, 71, 151, 0.1);
+                }
+                .table-row {
+                    transition: all 0.2s ease;
+                    border-bottom: 1px solid #F1F5F9;
+                }
+                .table-row:hover {
+                    background: #F8FAFC;
+                }
+                .action-link {
+                    color: #004797;
+                    font-weight: 600;
+                    font-size: 13px;
+                    text-decoration: none;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 4px;
+                    transition: all 0.2s ease;
+                }
+                .action-link:hover {
+                    color: #003675;
+                }
+                .action-link:hover svg {
+                    transform: translateX(3px);
+                }
+                .icon-container {
+                    padding: 12px;
+                    border-radius: 10px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+            `}</style>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
                 <div>
-                    <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--admin-text-main)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Target size={28} color="#f59e0b" />
+                    <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#1E293B', margin: 0, display: 'flex', alignItems: 'center', gap: '12px', letterSpacing: '-0.02em' }}>
+                        <div style={{ background: 'rgba(0, 71, 151, 0.08)', padding: '8px', borderRadius: '10px' }}>
+                            <Target size={24} color="#004797" />
+                        </div>
                         Marketing Cloud
                     </h1>
-                    <p style={{ color: 'var(--admin-text-muted)', margin: '4px 0 0 0', fontSize: '14px' }}>
-                        Gestiona tus campañas, automatizaciones y segmentación RFM.
+                    <p style={{ color: '#64748B', margin: '8px 0 0 0', fontSize: '15px', fontWeight: '400' }}>
+                        Diseña, automatiza y analiza tus campañas de marketing para segmentos RFM.
                     </p>
                 </div>
-                <Link 
-                    href={route('admin.marketing.campaigns.create')}
-                    style={{ background: '#f59e0b', color: 'white', border: 'none', padding: '10px 16px', borderRadius: '8px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', textDecoration: 'none' }}
-                >
-                    <Plus size={18} />
+                <Link href={route('admin.marketing.campaigns.create')} className="primary-btn">
+                    <Plus size={18} strokeWidth={2.5} />
                     Nueva Campaña
                 </Link>
             </div>
 
-            {/* Audiencia / RFM Stats */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '30px' }}>
-                <div style={{ background: 'var(--admin-bg-panel)', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '16px', borderRadius: '50%' }}>
-                        <Users size={28} color="#3b82f6" />
-                    </div>
-                    <div>
-                        <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--admin-text-main)' }}>{stats.total_audience}</div>
-                        <div style={{ fontSize: '14px', color: 'var(--admin-text-muted)' }}>Audiencia Total</div>
-                    </div>
-                </div>
-
-                <div style={{ background: 'var(--admin-bg-panel)', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <div style={{ background: 'rgba(245, 158, 11, 0.1)', padding: '16px', borderRadius: '50%' }}>
-                        <Target size={28} color="#f59e0b" />
-                    </div>
-                    <div>
-                        <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--admin-text-main)' }}>{stats.vip_customers}</div>
-                        <div style={{ fontSize: '14px', color: 'var(--admin-text-muted)' }}>Clientes VIP (RFM)</div>
+            {/* Resumen Estratégico (Tarjetas) */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginBottom: '40px' }}>
+                <div className="premium-card">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                        <div className="icon-container" style={{ background: 'rgba(0, 71, 151, 0.08)' }}>
+                            <Users size={24} color="#004797" />
+                        </div>
+                        <div>
+                            <div style={{ fontSize: '13px', color: '#64748B', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Audiencia Total</div>
+                            <div style={{ fontSize: '28px', fontWeight: '800', color: '#1E293B', marginTop: '4px' }}>{stats.total_audience}</div>
+                        </div>
                     </div>
                 </div>
 
-                <div style={{ background: 'var(--admin-bg-panel)', padding: '20px', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '16px', borderRadius: '50%' }}>
-                        <BarChart size={28} color="#ef4444" />
+                <div className="premium-card">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                        <div className="icon-container" style={{ background: 'rgba(16, 185, 129, 0.1)' }}>
+                            <Target size={24} color="#10B981" />
+                        </div>
+                        <div>
+                            <div style={{ fontSize: '13px', color: '#64748B', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Clientes VIP (RFM)</div>
+                            <div style={{ fontSize: '28px', fontWeight: '800', color: '#1E293B', marginTop: '4px' }}>{stats.vip_customers}</div>
+                        </div>
                     </div>
-                    <div>
-                        <div style={{ fontSize: '24px', fontWeight: 'bold', color: 'var(--admin-text-main)' }}>{stats.at_risk}</div>
-                        <div style={{ fontSize: '14px', color: 'var(--admin-text-muted)' }}>En Riesgo (&gt;90 días)</div>
+                </div>
+
+                <div className="premium-card">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                        <div className="icon-container" style={{ background: 'rgba(239, 68, 68, 0.1)' }}>
+                            <BarChart size={24} color="#EF4444" />
+                        </div>
+                        <div>
+                            <div style={{ fontSize: '13px', color: '#64748B', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>En Riesgo (&gt;90 días)</div>
+                            <div style={{ fontSize: '28px', fontWeight: '800', color: '#1E293B', marginTop: '4px' }}>{stats.at_risk}</div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* Campaign List */}
-            <div style={{ background: 'var(--admin-bg-panel)', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
-                <div style={{ padding: '20px', borderBottom: '1px solid var(--admin-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h2 style={{ fontSize: '18px', fontWeight: 'bold', margin: 0, color: 'var(--admin-text-main)' }}>Campañas Recientes</h2>
+            {/* Listado de Campañas */}
+            <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+                <div style={{ padding: '20px 24px', borderBottom: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h2 style={{ fontSize: '18px', fontWeight: '700', margin: 0, color: '#1E293B' }}>Campañas Recientes</h2>
                     <div style={{ position: 'relative' }}>
-                        <Search size={18} style={{ position: 'absolute', top: '10px', left: '10px', color: '#9ca3af' }} />
-                        <input type="text" placeholder="Buscar campañas..." style={{ padding: '8px 12px 8px 36px', borderRadius: '8px', border: '1px solid var(--admin-border)', background: 'var(--admin-bg)', color: 'var(--admin-text-main)' }} />
+                        <Search size={16} style={{ position: 'absolute', top: '50%', left: '12px', transform: 'translateY(-50%)', color: '#94A3B8' }} />
+                        <input type="text" placeholder="Buscar campañas..." className="search-input" />
                     </div>
                 </div>
                 
                 <div style={{ overflowX: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                         <thead>
-                            <tr style={{ background: 'var(--admin-bg)', color: 'var(--admin-text-muted)', fontSize: '12px', textTransform: 'uppercase' }}>
-                                <th style={{ padding: '16px 20px', fontWeight: 600 }}>Campaña</th>
-                                <th style={{ padding: '16px 20px', fontWeight: 600 }}>Estado</th>
-                                <th style={{ padding: '16px 20px', fontWeight: 600 }}>Audiencia</th>
-                                <th style={{ padding: '16px 20px', fontWeight: 600 }}>Apertura</th>
-                                <th style={{ padding: '16px 20px', fontWeight: 600 }}>ROI (S/)</th>
-                                <th style={{ padding: '16px 20px', textAlign: 'right', fontWeight: 600 }}>Acciones</th>
+                            <tr style={{ background: '#F8FAFC' }}>
+                                <th style={{ padding: '16px 24px', fontWeight: 600, color: '#64748B', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Campaña</th>
+                                <th style={{ padding: '16px 24px', fontWeight: 600, color: '#64748B', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Estado</th>
+                                <th style={{ padding: '16px 24px', fontWeight: 600, color: '#64748B', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Audiencia</th>
+                                <th style={{ padding: '16px 24px', fontWeight: 600, color: '#64748B', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Apertura</th>
+                                <th style={{ padding: '16px 24px', fontWeight: 600, color: '#64748B', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Retorno (ROI)</th>
+                                <th style={{ padding: '16px 24px', textAlign: 'right', fontWeight: 600, color: '#64748B', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {campaigns.map(camp => (
-                                <tr key={camp.id} style={{ borderBottom: '1px solid var(--admin-border)' }}>
-                                    <td style={{ padding: '16px 20px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                            <div style={{ background: camp.type === 'Email' ? 'rgba(59,130,246,0.1)' : 'rgba(16,185,129,0.1)', padding: '8px', borderRadius: '8px' }}>
-                                                {camp.type === 'Email' ? <Mail size={18} color="#3b82f6" /> : <MessageSquare size={18} color="#10b981" />}
+                            {campaigns.length === 0 ? (
+                                <tr>
+                                    <td colSpan="6" style={{ padding: '40px', textAlign: 'center', color: '#64748B' }}>
+                                        No hay campañas registradas aún.
+                                    </td>
+                                </tr>
+                            ) : campaigns.map(camp => (
+                                <tr key={camp.id} className="table-row">
+                                    <td style={{ padding: '16px 24px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                                            <div style={{ 
+                                                background: camp.type === 'Email' ? 'rgba(0, 71, 151, 0.08)' : 'rgba(16, 185, 129, 0.08)', 
+                                                padding: '10px', 
+                                                borderRadius: '8px',
+                                                border: `1px solid ${camp.type === 'Email' ? 'rgba(0, 71, 151, 0.1)' : 'rgba(16, 185, 129, 0.1)'}` 
+                                            }}>
+                                                {camp.type === 'Email' ? <Mail size={16} color="#004797" /> : <MessageSquare size={16} color="#10B981" />}
                                             </div>
                                             <div>
-                                                <div style={{ fontWeight: 'bold', color: 'var(--admin-text-main)', fontSize: '14px' }}>{camp.name}</div>
-                                                <div style={{ fontSize: '12px', color: 'var(--admin-text-muted)', marginTop: '2px' }}>{new Date(camp.created_at).toLocaleDateString()}</div>
+                                                <div style={{ fontWeight: '700', color: '#1E293B', fontSize: '14px' }}>{camp.name}</div>
+                                                <div style={{ fontSize: '13px', color: '#64748B', marginTop: '2px' }}>{new Date(camp.created_at).toLocaleDateString()}</div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td style={{ padding: '16px 20px' }}>
+                                    <td style={{ padding: '16px 24px' }}>
                                         <span style={{ 
-                                            background: camp.status === 'Completado' ? '#dcfce7' : (camp.status === 'Activo' ? '#dbeafe' : '#f3f4f6'), 
-                                            color: camp.status === 'Completado' ? '#166534' : (camp.status === 'Activo' ? '#1e40af' : '#374151'), 
-                                            padding: '4px 8px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold' 
+                                            background: camp.status === 'Completado' ? '#ECFDF5' : (camp.status === 'Activo' ? '#EFF6FF' : '#F1F5F9'), 
+                                            color: camp.status === 'Completado' ? '#059669' : (camp.status === 'Activo' ? '#1D4ED8' : '#475569'), 
+                                            padding: '4px 10px', 
+                                            borderRadius: '20px', 
+                                            fontSize: '12px', 
+                                            fontWeight: '700',
+                                            border: `1px solid ${camp.status === 'Completado' ? '#A7F3D0' : (camp.status === 'Activo' ? '#BFDBFE' : '#E2E8F0')}`
                                         }}>
                                             {camp.status}
                                         </span>
                                     </td>
-                                    <td style={{ padding: '16px 20px', color: 'var(--admin-text-main)', fontSize: '14px' }}>{camp.audience_size}</td>
-                                    <td style={{ padding: '16px 20px', color: 'var(--admin-text-main)', fontSize: '14px' }}>{camp.open_rate}%</td>
-                                    <td style={{ padding: '16px 20px', fontWeight: 'bold', color: '#10b981', fontSize: '14px' }}>{camp.roi == null ? 'Sin medición' : `S/ ${camp.roi}`}</td>
-                                    <td style={{ padding: '16px 20px', textAlign: 'right' }}>
-                                        <Link href={route('admin.marketing.campaigns.report', camp.id)} style={{ color: '#3b82f6', fontWeight: 'bold', fontSize: '13px' }}>Ver informe y envío</Link>
+                                    <td style={{ padding: '16px 24px', color: '#1E293B', fontSize: '14px', fontWeight: '500' }}>
+                                        {camp.audience_size?.toLocaleString() || 0}
+                                    </td>
+                                    <td style={{ padding: '16px 24px', color: '#1E293B', fontSize: '14px', fontWeight: '500' }}>
+                                        {camp.open_rate}%
+                                    </td>
+                                    <td style={{ padding: '16px 24px', fontWeight: '700', color: camp.roi == null ? '#94A3B8' : '#059669', fontSize: '14px' }}>
+                                        {camp.roi == null ? 'Sin medición' : `S/ ${camp.roi}`}
+                                    </td>
+                                    <td style={{ padding: '16px 24px', textAlign: 'right' }}>
+                                        <Link href={route('admin.marketing.campaigns.report', camp.id)} className="action-link">
+                                            Ver Informe
+                                            <ChevronRight size={14} style={{ transition: 'transform 0.2s ease' }} />
+                                        </Link>
                                     </td>
                                 </tr>
                             ))}

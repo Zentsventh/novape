@@ -14,7 +14,7 @@ class StoreDireccionRequest extends FormRequest
     }
 
     /**
-     * @return array<string, string>
+     * @return array<string, string|list<string>>
      */
     public function rules(): array
     {
@@ -24,7 +24,7 @@ class StoreDireccionRequest extends FormRequest
             'departamento' => 'required|string|max:100',
             'provincia' => 'required|string|max:100',
             'distrito' => 'required|string|max:100',
-            'codigo_postal' => 'nullable|string|max:20',
+            'codigo_postal' => ['nullable', 'regex:/^[0-9]{5}$/'],
             'principal' => 'nullable|boolean',
         ];
     }

@@ -2,7 +2,7 @@ import '../../../css/home/base.css';
 import '../../../css/home/header.css';
 import { useEffect, useState, useRef } from 'react';
 import { Link, usePage, router } from '@inertiajs/react';
-import { LOGO } from './constants';
+import { LOGO, DEFAULT_IMAGE } from './constants';
 import LoginModal from './LoginModal';
 import LocationModal from './LocationModal';
 import Swal from 'sweetalert2';
@@ -12,8 +12,8 @@ import { useLocation } from '@/Contexts/LocationContext';
 /* Renderiza la cabecera principal con logo, buscador y acciones. */
 export default function Header({
     cartCount = 0,
-    onOpenCart,
-    onOpenCategories,
+    onOpenCart = () => router.visit('/carrito'),
+    onOpenCategories = () => router.visit('/catalogo'),
     logoUrl,
     minimal = false,
     searchQuery = '',
@@ -29,6 +29,7 @@ export default function Header({
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
     const recognitionRef = useRef(null);
+    const searchRef = useRef(null);
 
     const [liveResults, setLiveResults] = useState({
         productos: [],
@@ -38,6 +39,31 @@ export default function Header({
     });
     const [isSearching, setIsSearching] = useState(false);
     const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+
+    useEffect(() => {
+        if (!showSearchDropdown) return;
+        const dismiss = event => {
+            if (!searchRef.current?.contains(event.target)) setShowSearchDropdown(false);
+        };
+        const measure = () => {
+            const element = searchRef.current;
+            if (!element) return;
+            const viewport = window.visualViewport;
+            const bottom = (viewport?.height ?? window.innerHeight) + (viewport?.offsetTop ?? 0);
+            element.style.setProperty('--search-available-height', `${Math.max(80, bottom - element.getBoundingClientRect().bottom - 16)}px`);
+        };
+        measure();
+        window.addEventListener('resize', measure);
+        window.addEventListener('scroll', measure, { passive: true });
+        window.visualViewport?.addEventListener('resize', measure);
+        document.addEventListener('pointerdown', dismiss);
+        return () => {
+            document.removeEventListener('pointerdown', dismiss);
+            window.removeEventListener('resize', measure);
+            window.removeEventListener('scroll', measure);
+            window.visualViewport?.removeEventListener('resize', measure);
+        };
+    }, [showSearchDropdown]);
 
     const [isListening, setIsListening] = useState(false);
     const [speechSupported, setSpeechSupported] = useState(false);
@@ -146,22 +172,25 @@ export default function Header({
         if (!searchTerm || searchTerm.length < 2 || searchTerm === searchQuery) {
             setLiveResults({ productos: [], marcas: [], categorias: [], sugerencias: [] });
             setShowSearchDropdown(false);
+            setIsSearching(false);
             return;
         }
 
+        const controller = new AbortController();
         const timer = setTimeout(() => {
             setIsSearching(true);
-            fetch(`/api/search/live?q=${encodeURIComponent(searchTerm)}`)
+            fetch(`/api/search/live?q=${encodeURIComponent(searchTerm)}`, { signal: controller.signal })
                 .then((res) => res.json())
                 .then((data) => {
+                    if (controller.signal.aborted) return;
                     setLiveResults(data);
                     setShowSearchDropdown(true);
                 })
-                .catch((err) => console.error(err))
-                .finally(() => setIsSearching(false));
+                .catch((err) => { if (err.name !== 'AbortError') setShowSearchDropdown(false); })
+                .finally(() => { if (!controller.signal.aborted) setIsSearching(false); });
         }, 300);
 
-        return () => clearTimeout(timer);
+        return () => { clearTimeout(timer); controller.abort(); };
     }, [searchTerm]);
 
     useEffect(() => {
@@ -183,9 +212,10 @@ export default function Header({
         });
     };
 
-    const handleSearchBlur = (e) => {
-        // Delay to allow clicking on results
-        setTimeout(() => setShowSearchDropdown(false), 200);
+    const handleSearchBlur = (event) => {
+        if (event.relatedTarget && !event.currentTarget.contains(event.relatedTarget)) {
+            setShowSearchDropdown(false);
+        }
     };
 
     const handleUserBlur = (event) => {
@@ -226,7 +256,12 @@ export default function Header({
                         </button>
                     )}
 
-                    <Link href="/" className="efe-header-logo-link">
+                    <Link href="/" className="efe-header-logo-link" prefetch="hover" cacheFor="10s" onClick={(event) => {
+                        if (window.location.pathname === '/' && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey && event.button === 0) {
+                            event.preventDefault();
+                            window.scrollTo({ top: 0, behavior: 'instant' });
+                        }
+                    }}>
                         <img
                             className={minimal ? 'efe-header-logo is-minimal' : 'efe-header-logo'}
                             src={currentLogo}
@@ -235,7 +270,13 @@ export default function Header({
                     </Link>
 
                     {!minimal && (
-                        <div className="efe-header-search-wrap" style={{ position: 'relative' }}>
+                        <div ref={searchRef} className="efe-header-search-wrap" style={{ position: 'relative' }}
+                            onBlur={handleSearchBlur} onKeyDown={event => {
+                                if (event.key === 'Escape') {
+                                    setShowSearchDropdown(false);
+                                    searchRef.current?.querySelector('input')?.focus();
+                                }
+                            }}>
                             <form className="efe-header-search" onSubmit={handleSearchSubmit}>
                                 <input
                                     id="main-search-input"
@@ -245,9 +286,10 @@ export default function Header({
                                     value={searchTerm}
                                     onChange={(event) => setSearchTerm(event.target.value)}
                                     onFocus={() => {
-                                        if (liveResults.length > 0) setShowSearchDropdown(true);
+                                        if (Object.values(liveResults).some(items => items?.length > 0)) setShowSearchDropdown(true);
                                     }}
-                                    onBlur={handleSearchBlur}
+                                    aria-expanded={showSearchDropdown}
+                                    aria-controls={showSearchDropdown ? 'store-search-results' : undefined}
                                     aria-label="Buscar productos"
                                     style={{
                                         paddingRight: '80px',
@@ -336,11 +378,7 @@ export default function Header({
 
                             {showSearchDropdown && (
                                 <>
-                                    <div
-                                        className="efe-search-overlay"
-                                        onClick={() => setShowSearchDropdown(false)}
-                                    ></div>
-                                    <div className="efe-search-dropdown efe-megamenu">
+                                    <div id="store-search-results" className="efe-search-dropdown efe-megamenu">
                                         {liveResults?.productos?.length > 0 ||
                                             liveResults?.sugerencias?.length > 0 ? (
                                             <div className="efe-megamenu-container">
@@ -427,29 +465,17 @@ export default function Header({
                                                 <div className="efe-megamenu-products">
                                                     <div className="efe-megamenu-header">
                                                         <h4>Productos para "{searchTerm}"</h4>
-                                                        <div
+                                                        <button type="button"
                                                             className="efe-search-all-link"
                                                             onClick={handleSearchSubmit}
                                                         >
                                                             Ver todos los resultados &rarr;
-                                                        </div>
+                                                        </button>
                                                     </div>
                                                     <div className="efe-megamenu-grid">
                                                         {liveResults.productos.map((prod) => {
-                                                            const isOffer = Math.random() > 0.6;
-                                                            const offerLabels = [
-                                                                '-50%',
-                                                                'Oferta Relámpago',
-                                                                'Envío Gratis',
-                                                                'Últimos',
-                                                            ];
-                                                            const randomLabel =
-                                                                offerLabels[
-                                                                Math.floor(
-                                                                    Math.random() *
-                                                                    offerLabels.length
-                                                                )
-                                                                ];
+                                                            const isOffer = Number(prod.descuento) > 0;
+                                                            const randomLabel = `-${prod.descuento}%`;
                                                             return (
                                                                 <Link
                                                                     key={prod.id}
@@ -465,7 +491,7 @@ export default function Header({
                                                                         <img
                                                                             src={
                                                                                 prod.imagen ||
-                                                                                '/storage/default.png'
+                                                                                DEFAULT_IMAGE
                                                                             }
                                                                             alt={prod.nombre}
                                                                         />

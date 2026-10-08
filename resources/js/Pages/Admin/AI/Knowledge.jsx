@@ -21,7 +21,21 @@ export default function Knowledge() {
         axios.get(endpoint, { params: { page }, signal: controller.signal }).then(({ data }) => setList(data)).catch(error => { if (!controller.signal.aborted) setError(message(error)); });
         return () => controller.abort();
     }, [page, revision]);
-    const reset = () => { setSource(blank()); setFile(null); setFileKey(v => v + 1); setDeleting(null); };
+    const reset = () => { 
+        setSource(blank()); 
+        setFile(null); 
+        setFileKey(v => v + 1); 
+        setDeleting(null); 
+        
+        // Timeout to ensure state updates before focusing
+        setTimeout(() => {
+            const form = document.querySelector('.knowledge-card form');
+            if (form) {
+                form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                form.querySelector('input[type="text"]')?.focus();
+            }
+        }, 100);
+    };
     const change = (key, value) => { setSource(current => ({ ...current, [key]: value })); setSuccess(''); };
     const save = async event => {
         event.preventDefault(); setBusy(true); setError(''); setSuccess('');

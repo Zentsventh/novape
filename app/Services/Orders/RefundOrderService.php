@@ -27,6 +27,9 @@ class RefundOrderService
             if ($pago?->estado === 'reembolso_pendiente') {
                 return ['success' => false, 'message' => 'El reembolso de Niubiz ya está pendiente de anulación manual.'];
             }
+            if (DB::table('refund_requests')->where('pedido_id', $pedido->id)->where('status', 'pending')->exists()) {
+                return ['success' => false, 'message' => 'Resuelve primero el reembolso parcial pendiente.'];
+            }
 
             $transaction = TransaccionPago::where('pedido_id', $pedido->id)
                 ->where('pasarela', 'niubiz')
@@ -42,8 +45,13 @@ class RefundOrderService
                 ['pedido_id' => $pedido->id],
                 ['metodo' => 'niubiz', 'monto' => $transaction->monto, 'estado' => 'reembolso_pendiente']
             );
+            $alreadyRefunded = (float) DB::table('refund_requests')->where('pedido_id', $pedido->id)->where('status', 'confirmed')->sum('amount');
+            $remaining = round((float) $transaction->monto - $alreadyRefunded, 2);
+            if ($remaining <= 0) throw new \InvalidArgumentException('No queda saldo reembolsable.');
+            DB::table('refund_requests')->insert(['pedido_id' => $pedido->id, 'request_key' => (string) \Illuminate\Support\Str::uuid(),
+                'amount' => $remaining, 'status' => 'pending', 'requested_by' => auth('admin')->id(), 'created_at' => now(), 'updated_at' => now()]);
 
-            return ['success' => true, 'message' => 'Reembolso pendiente: anula el pago en el portal Niubiz antes de cancelar el pedido y devolver el stock.'];
+            return ['success' => true, 'message' => 'Reembolso pendiente: confirma la devolución del dinero en Niubiz. Los artículos despachados requieren recepción e inspección mediante RMA.'];
         });
     }
 
@@ -60,6 +68,9 @@ class RefundOrderService
                 if ($pago?->estado !== 'reembolso_pendiente') {
                     return ['success' => false, 'message' => 'Este pedido no tiene una anulación Niubiz pendiente.'];
                 }
+                if (! DB::table('refund_requests')->where('pedido_id', $pedido->id)->whereNull('rma_id')->where('status', 'confirmed')->exists()) {
+                    return ['success' => false, 'message' => 'Registra primero la evidencia y referencia de la devolución de dinero.'];
+                }
 
                 $transaction = TransaccionPago::where('pedido_id', $pedido->id)
                     ->where('pasarela', 'niubiz')
@@ -75,7 +86,7 @@ class RefundOrderService
                 app(UpdateOrderStatusService::class)->execute($pedido, ['estado' => 'cancelado']);
                 $transaction->update(['estado' => 'reembolsado']);
 
-                return ['success' => true, 'message' => 'Anulación confirmada. El pedido fue cancelado y el stock devuelto.'];
+                return ['success' => true, 'message' => 'Anulación confirmada. El pedido fue cancelado; los artículos despachados requieren recepción física mediante RMA.'];
             });
         } catch (\Throwable $e) {
             return ['success' => false, 'message' => 'No se pudo confirmar la anulación del pedido.'];

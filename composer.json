@@ -17,13 +17,14 @@
         "laravel/reverb": "^1.11",
         "laravel/socialite": "^5.16",
         "laravel/tinker": "^2.10.1",
-        "luecano/numero-a-letras": "*",
+        "luecano/numero-a-letras": "^4.1",
         "maatwebsite/excel": "^4.0",
         "owen-it/laravel-auditing": "^14.0",
         "simplesoftwareio/simple-qrcode": "^4.2",
-        "smalot/pdfparser": "2.12",
+        "smalot/pdfparser": "^2.12",
         "spatie/browsershot": "^5.4",
         "spatie/laravel-schemaless-attributes": "^2.6",
+        "symfony/html-sanitizer": "^7.4.20",
         "tightenco/ziggy": "^2.6"
     },
     "require-dev": {

@@ -36,10 +36,13 @@ class DeliverOrderNotificationJob implements ShouldQueue
                     throw new \RuntimeException('Configura el transporte de correo antes de entregar notificaciones.');
                 }
                 $order = new Pedido(['codigo' => $payload['codigo'], 'estado' => $payload['estado']]);
+                $order->forceFill(['tracking_number' => $payload['tracking_number'] ?? null, 'courier_name' => $payload['courier_name'] ?? null,
+                    'delivery_status' => $payload['delivery_status'] ?? null, 'pickup' => $payload['pickup'] ?? null]);
                 $order->setRelation('usuario', new Usuario(['nombres' => $payload['nombres']]));
                 Mail::to($row->destination)->send(new OrderStatusUpdated($order));
             } else {
                 $message = 'Hola '.$payload['nombres'].'. Tu pedido '.$payload['codigo'].' está '.$payload['estado'].'.';
+                if (! empty($payload['delivery_status'])) $message .= ' Entrega: '.$payload['delivery_status'].'.';
                 if ($payload['tracking_number']) {
                     $message .= ' Rastreo: '.$payload['tracking_number'].' / '.$payload['courier_name'];
                 }

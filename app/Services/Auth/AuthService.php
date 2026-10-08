@@ -29,6 +29,11 @@ class AuthService
             ]);
 
             $rolCliente = Rol::where('nombre', 'cliente')->first();
+            $usuario->forceFill(['custom_fields' => ['store_consent' => [
+                'terms_accepted_at' => now()->toIso8601String(),
+                'promotions' => (bool) ($data['acepta_promociones'] ?? false),
+                'loyalty_program' => (bool) ($data['acepta_programa'] ?? false),
+            ]]])->save();
             if ($rolCliente) {
                 $usuario->roles()->attach($rolCliente->id);
             }

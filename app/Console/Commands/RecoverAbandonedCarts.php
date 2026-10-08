@@ -30,43 +30,20 @@ class RecoverAbandonedCarts extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): int
     {
-        $this->info('Iniciando búsqueda de carritos abandonados...');
-
-        // Buscar carritos que:
-        // 1. Tengan un usuario logueado (para saber el correo).
-        // 2. Tengan items.
-        // 3. Su última actualización fue hace más de 24 horas pero menos de 72 horas (para no enviar a carritos antiquísimos).
-        // 4. No hayan sido notificados previamente.
-        $carritos = Carrito::whereNotNull('usuario_id')
-            ->whereNull('notified_at')
-            ->where('updated_at', '<', Carbon::now()->subHours(24))
-            ->where('updated_at', '>', Carbon::now()->subHours(72))
-            ->with(['usuario', 'items.variante.producto.imagenes'])
-            ->get();
-
         $count = 0;
-
-        foreach ($carritos as $carrito) {
-            // Verificar que realmente tenga items
-            if ($carrito->items->count() > 0 && $carrito->usuario) {
-                try {
-                    Mail::to($carrito->usuario->email)->send(new AbandonedCartMail($carrito->usuario, $carrito->items));
-                    
-                    // Marcar como notificado
-                    $carrito->notified_at = Carbon::now();
-                    $carrito->save();
-
+        Carrito::whereNotNull('usuario_id')->whereNull('notified_at')
+            ->where('updated_at', '<', now()->subHours(24))->where('updated_at', '>', now()->subHours(72))
+            ->whereHas('items')->with('usuario')->chunkById(100, function ($carts) use (&$count) {
+                foreach ($carts as $cart) {
+                    if (! $cart->usuario || ! \App\Services\Marketing\MarketingConsent::allows($cart->usuario)) continue;
+                    \App\Services\Orders\StorefrontTaskService::record('cart:'.$cart->id.':'.$cart->updated_at->timestamp,
+                        'cart_recovery', null, $cart->usuario->email, ['cart_id' => $cart->id, 'activity' => $cart->updated_at->timestamp]);
                     $count++;
-                    $this->info("Correo enviado a: {$carrito->usuario->email}");
-                } catch (\Exception $e) {
-                    Log::error("Error enviando correo de carrito abandonado a {$carrito->usuario->email}: " . $e->getMessage());
-                    $this->error("Error enviando a {$carrito->usuario->email}");
                 }
-            }
-        }
-
-        $this->info("Proceso completado. Se enviaron {$count} correos de recuperación.");
+            });
+        $this->info('Recordatorios registrados: '.$count);
+        return self::SUCCESS;
     }
 }

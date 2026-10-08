@@ -81,7 +81,6 @@ export default function ProveedorForm({ proveedor }) {
                                     <Building2 size={18} style={iconStyle} />
                                     <input 
                                         type="text" value={data.nombre} onChange={e => setData('nombre', e.target.value)}
-                                        placeholder="Ej. TechNova S.A."
                                         style={{ ...inputStyle, border: errors.nombre ? '1px solid #EF4444' : inputStyle.border }} 
                                         onFocus={e => Object.assign(e.target.style, inputFocusStyle)}
                                         onBlur={e => { e.target.style.borderColor = errors.nombre ? '#EF4444' : '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }}
@@ -95,7 +94,6 @@ export default function ProveedorForm({ proveedor }) {
                                     <Hash size={18} style={iconStyle} />
                                     <input 
                                         type="text" value={data.ruc} onChange={e => setData('ruc', e.target.value)}
-                                        placeholder="Ej. 20123456781"
                                         style={{ ...inputStyle, border: errors.ruc ? '1px solid #EF4444' : inputStyle.border }} 
                                         onFocus={e => Object.assign(e.target.style, inputFocusStyle)}
                                         onBlur={e => { e.target.style.borderColor = errors.ruc ? '#EF4444' : '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }}
@@ -111,7 +109,6 @@ export default function ProveedorForm({ proveedor }) {
                                 <MapPin size={18} style={iconStyle} />
                                 <input 
                                     type="text" value={data.direccion} onChange={e => setData('direccion', e.target.value)}
-                                    placeholder="Ej. Av. Principal 123"
                                     style={{ ...inputStyle, border: errors.direccion ? '1px solid #EF4444' : inputStyle.border }} 
                                     onFocus={e => Object.assign(e.target.style, inputFocusStyle)}
                                     onBlur={e => { e.target.style.borderColor = errors.direccion ? '#EF4444' : '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }}
@@ -127,7 +124,6 @@ export default function ProveedorForm({ proveedor }) {
                                     <Phone size={18} style={{...iconStyle, left: '14px', width: '16px'}} />
                                     <input 
                                         type="text" value={data.telefono} onChange={e => setData('telefono', e.target.value)}
-                                        placeholder="Ej. 987 654 321"
                                         style={{ ...inputStyle, padding: '12px 16px 12px 40px', background: '#ffffff', border: errors.telefono ? '1px solid #EF4444' : inputStyle.border }} 
                                         onFocus={e => Object.assign(e.target.style, inputFocusStyle)}
                                         onBlur={e => { e.target.style.borderColor = errors.telefono ? '#EF4444' : '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#ffffff'; }}
@@ -141,7 +137,6 @@ export default function ProveedorForm({ proveedor }) {
                                     <Mail size={18} style={{...iconStyle, left: '14px', width: '16px'}} />
                                     <input 
                                         type="email" value={data.email} onChange={e => setData('email', e.target.value)}
-                                        placeholder="Ej. ventas@empresa.com"
                                         style={{ ...inputStyle, padding: '12px 16px 12px 40px', background: '#ffffff', border: errors.email ? '1px solid #EF4444' : inputStyle.border }} 
                                         onFocus={e => Object.assign(e.target.style, inputFocusStyle)}
                                         onBlur={e => { e.target.style.borderColor = errors.email ? '#EF4444' : '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#ffffff'; }}
@@ -155,7 +150,6 @@ export default function ProveedorForm({ proveedor }) {
                                     <User size={18} style={{...iconStyle, left: '14px', width: '16px'}} />
                                     <input 
                                         type="text" value={data.contacto} onChange={e => setData('contacto', e.target.value)}
-                                        placeholder="Ej. Juan Pérez"
                                         style={{ ...inputStyle, padding: '12px 16px 12px 40px', background: '#ffffff', border: errors.contacto ? '1px solid #EF4444' : inputStyle.border }} 
                                         onFocus={e => Object.assign(e.target.style, inputFocusStyle)}
                                         onBlur={e => { e.target.style.borderColor = errors.contacto ? '#EF4444' : '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#ffffff'; }}

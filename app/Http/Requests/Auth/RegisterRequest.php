@@ -19,11 +19,14 @@ class RegisterRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'acepta_terminos' => 'required|accepted',
+            'acepta_promociones' => 'nullable|boolean',
+            'acepta_programa' => 'nullable|boolean',
             'nombres' => 'required|string|max:100',
             'apellidos' => 'required|string|max:100',
             'tipo_documento' => 'required|string|in:DNI,CE,PASAPORTE',
             'dni' => 'required|string|max:20|unique:usuario,dni',
-            'email' => 'required|email|unique:usuario,email',
+            'email' => 'required|email|max:100|unique:usuario,email',
             'telefono' => 'nullable|string|max:15',
             'password' => [
                 'required',

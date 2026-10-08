@@ -30,6 +30,10 @@ class SendMarketingRecipientJob implements ShouldQueue
         $row = DB::table('marketing_deliveries')->where('id', $this->deliveryId)->firstOrFail();
         try {
             $user = Usuario::findOrFail($row->usuario_id);
+            if (! \App\Services\Marketing\MarketingConsent::allows($user) || ! hash_equals($user->email, $row->email)) {
+                DB::table('marketing_deliveries')->where('id', $this->deliveryId)->update(['status' => 'skipped', 'error' => 'Preferencias o destinatario actualizados.', 'updated_at' => now()]);
+                return;
+            }
             if ($user->estado !== 'activo' || ! filter_var($row->email, FILTER_VALIDATE_EMAIL)) {
                 throw new \RuntimeException('Destinatario inactivo o correo inválido.');
             }

@@ -40,30 +40,26 @@ export default function RolesIndex() {
             <div style={{ fontFamily: "'Inter', sans-serif", padding: '24px 32px', maxWidth: '1400px', margin: '0 auto' }}>
                 
                 {/* Header Section */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-                    <div>
-                        <h1 style={{ fontSize: '28px', margin: '0 0 8px 0', fontWeight: 800, color: '#1E293B', letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ background: '#E0F2FE', padding: '10px', borderRadius: '12px', color: '#004797', display: 'flex' }}>
-                                <ShieldCheck size={24} />
-                            </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
+                    <h1 style={{ fontSize: '24px', margin: 0, fontWeight: '700', color: '#1E293B', display: 'flex', alignItems: 'center', gap: '12px', letterSpacing: '-0.02em' }}>
+                        <div style={{ padding: '8px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', color: '#64748B', display: 'flex' }}>
+                            <ShieldCheck size={20} />
+                        </div>
+                        <div>
                             Roles y Permisos
-                        </h1>
-                        <p style={{ margin: 0, color: '#64748B', fontSize: '15px' }}>
-                            Gestiona los niveles de acceso y los privilegios de los usuarios del sistema.
-                        </p>
-                    </div>
+                            <p style={{ color: '#64748B', fontSize: '13px', margin: '4px 0 0 0', fontWeight: '500' }}>
+                                Gestiona los niveles de acceso y los privilegios de los usuarios del sistema.
+                            </p>
+                        </div>
+                    </h1>
                     
                     <Link 
                         href="/admin/roles/create" 
-                        style={{ 
-                            display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 24px', borderRadius: '12px', 
-                            border: 'none', background: '#004797', color: '#ffffff', fontWeight: 700, fontSize: '14px', 
-                            textDecoration: 'none', transition: 'all 0.2s', boxShadow: '0 4px 14px rgba(0, 71, 151, 0.3)'
-                        }}
-                        onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 71, 151, 0.4)'; }}
-                        onMouseOut={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 71, 151, 0.3)'; }}
+                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#003670'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 71, 151, 0.2)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#004797'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 71, 151, 0.15)'; }}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#004797', color: 'white', border: 'none', padding: '10px 20px', borderRadius: '10px', fontWeight: '600', fontSize: '13px', textDecoration: 'none', transition: 'all 0.2s ease', boxShadow: '0 2px 4px rgba(0, 71, 151, 0.15)' }}
                     >
-                        <Shield size={18} /> Nuevo Rol
+                        <Shield size={16} /> Nuevo Rol
                     </Link>
                 </div>
 
@@ -95,11 +91,19 @@ export default function RolesIndex() {
                                 onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }}
                             />
                         </div>
-                        <button type="submit" style={{ background: '#1E293B', color: 'white', border: 'none', padding: '0 24px', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }} onMouseOver={e => e.currentTarget.style.background = '#334155'} onMouseOut={e => e.currentTarget.style.background = '#1E293B'}>
+                        <button type="submit" 
+                            onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#003670'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 71, 151, 0.2)'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#004797'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 71, 151, 0.15)'; }}
+                            style={{ flexShrink: 0, padding: '0 24px', borderRadius: '10px', border: 'none', background: '#004797', color: 'white', fontWeight: '600', cursor: 'pointer', fontSize: '13px', transition: 'all 0.2s', boxShadow: '0 2px 4px rgba(0, 71, 151, 0.15)' }}
+                        >
                             Buscar
                         </button>
                         {search && (
-                            <Link href="/admin/roles" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#F1F5F9', border: 'none', color: '#64748B', padding: '0 20px', borderRadius: '12px', textDecoration: 'none', fontWeight: 700, transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.background = '#E2E8F0'; e.currentTarget.style.color = '#1E293B'; }} onMouseOut={e => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#64748B'; }}>
+                            <Link href="/admin/roles" 
+                                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#E2E8F0'; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#F8FAFC'; }}
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', flexShrink: 0, padding: '0 24px', borderRadius: '10px', border: '1px solid #E2E8F0', background: '#F8FAFC', color: '#475569', fontWeight: '600', cursor: 'pointer', fontSize: '13px', textDecoration: 'none', transition: 'all 0.2s' }}
+                            >
                                 <X size={16} /> Limpiar
                             </Link>
                         )}
@@ -129,7 +133,7 @@ export default function RolesIndex() {
                                         
                                         <td style={{ padding: '24px 32px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: isSystemRole ? '#F1F5F9' : '#E0F2FE', color: isSystemRole ? '#64748B' : '#004797', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: '#F8FAFC', border: '1px solid #E2E8F0', color: isSystemRole ? '#64748B' : '#004797', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                     <KeyRound size={20} />
                                                 </div>
                                                 <div>
@@ -137,7 +141,7 @@ export default function RolesIndex() {
                                                         {rol.nombre}
                                                     </span>
                                                     {isSystemRole && (
-                                                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#F1F5F9', color: '#475569', padding: '2px 6px', borderRadius: '6px', fontSize: '10px', fontWeight: 800, marginLeft: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', background: '#F8FAFC', border: '1px solid #E2E8F0', color: '#64748B', padding: '2px 6px', borderRadius: '6px', fontSize: '10px', fontWeight: 700, marginLeft: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                                                             <Lock size={10} /> Sistema
                                                         </div>
                                                     )}
@@ -163,15 +167,21 @@ export default function RolesIndex() {
                                         
                                         <td style={{ padding: '24px 32px', textAlign: 'right' }}>
                                             <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
-                                                <Link href={`/admin/roles/${rol.id}/edit`} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: '#F1F5F9', color: '#475569', borderRadius: '10px', textDecoration: 'none', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.background = '#E0F2FE'; e.currentTarget.style.color = '#004797'; }} onMouseOut={e => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#475569'; }} title="Editar Permisos">
+                                                <Link href={`/admin/roles/${rol.id}/edit`} 
+                                                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F8FAFC'; e.currentTarget.style.color = '#1E293B'; e.currentTarget.style.borderColor = '#CBD5E1'; }}
+                                                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#94A3B8'; e.currentTarget.style.borderColor = 'transparent'; }}
+                                                    style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', background: 'transparent', color: '#94A3B8', border: '1px solid transparent', borderRadius: '6px', textDecoration: 'none', transition: 'all 0.2s' }} title="Editar Permisos">
                                                     <Edit2 size={16} />
                                                 </Link>
                                                 {!isSystemRole ? (
-                                                    <button onClick={() => handleDelete(rol.id)} style={{ border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: '#FEF2F2', color: '#EF4444', borderRadius: '10px', transition: 'all 0.2s' }} onMouseOver={e => { e.currentTarget.style.background = '#EF4444'; e.currentTarget.style.color = '#ffffff'; }} onMouseOut={e => { e.currentTarget.style.background = '#FEF2F2'; e.currentTarget.style.color = '#EF4444'; }} title="Eliminar Rol">
+                                                    <button onClick={() => handleDelete(rol.id)} 
+                                                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#FEF2F2'; e.currentTarget.style.color = '#EF4444'; }}
+                                                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#94A3B8'; }}
+                                                        style={{ border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', background: 'transparent', color: '#94A3B8', borderRadius: '6px', transition: 'all 0.2s' }} title="Eliminar Rol">
                                                         <Trash2 size={16} />
                                                     </button>
                                                 ) : (
-                                                    <button disabled style={{ border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: '#F8FAFC', color: '#CBD5E1', borderRadius: '10px', cursor: 'not-allowed' }} title="Rol de sistema protegido">
+                                                    <button disabled style={{ border: 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', background: 'transparent', color: '#CBD5E1', borderRadius: '6px', cursor: 'not-allowed' }} title="Rol de sistema protegido">
                                                         <Lock size={16} />
                                                     </button>
                                                 )}

@@ -10,7 +10,7 @@ class ToggleWishlistRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return \Auth::check();
+        return \Illuminate\Support\Facades\Auth::check();
     }
 
     /**

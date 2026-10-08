@@ -12,6 +12,10 @@ export default function Form({ cupon }) {
         fecha_inicio: cupon?.fecha_inicio ? cupon.fecha_inicio.split('T')[0] : '',
         fecha_fin: cupon?.fecha_fin ? cupon.fecha_fin.split('T')[0] : '',
         activo: cupon ? cupon.activo : true,
+        combinable_points: cupon?.combinable_points ?? true,
+        unico_por_cliente: cupon?.unico_por_cliente ?? true,
+        monto_minimo: cupon?.monto_minimo ?? '',
+        limite_usos: cupon?.limite_usos ?? '',
     });
 
     const submit = (e) => {
@@ -38,6 +42,11 @@ export default function Form({ cupon }) {
 
             <div style={{ background: 'var(--admin-bg-panel)', borderRadius: '12px', padding: '30px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', maxWidth: '600px' }}>
                 <form onSubmit={submit} style={{ display: 'grid', gap: '20px' }}>
+                    <label><input type="checkbox" checked={data.combinable_points} onChange={e=>setData('combinable_points',e.target.checked)} /> Combinable con puntos si la tienda lo permite</label>
+                    <label><input type="checkbox" checked={data.unico_por_cliente} onChange={e=>setData('unico_por_cliente',e.target.checked)} /> Un uso por cliente (requiere iniciar sesión)</label>
+                    <label>Compra mínima (S/)<input type="number" min="0" step="0.01" value={data.monto_minimo} onChange={e=>setData('monto_minimo',e.target.value)} /></label>
+                    <label>Límite global de usos<input type="number" min="1" step="1" value={data.limite_usos} onChange={e=>setData('limite_usos',e.target.value)} /></label>
+                    <p>El descuento se limita al subtotal de productos y no descuenta el envío. El importe final debe cumplir el mínimo de pago de la tienda.</p>
                     
                     <div>
                         <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: 'var(--admin-text-main)' }}>Código del Cupón *</label>
@@ -45,7 +54,6 @@ export default function Form({ cupon }) {
                             type="text"
                             value={data.codigo}
                             onChange={e => setData('codigo', e.target.value.toUpperCase())}
-                            placeholder="EJ: VERANO2026"
                             style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--admin-border)', background: 'transparent', color: 'var(--admin-text-main)', textTransform: 'uppercase' }}
                             required
                         />
@@ -62,7 +70,7 @@ export default function Form({ cupon }) {
                                 required
                             >
                                 <option value="porcentaje">Porcentaje (%)</option>
-                                <option value="monto">Monto Fijo (S/)</option>
+                                <option value="fijo">Monto Fijo (S/)</option>
                             </select>
                             {errors.tipo && <div style={{ color: '#3b82f6', fontSize: '12px', marginTop: '4px' }}>{errors.tipo}</div>}
                         </div>

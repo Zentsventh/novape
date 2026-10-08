@@ -32,7 +32,9 @@ use Spatie\SchemalessAttributes\SchemalessAttributesTrait;
  * @property string $email
  * @property string $password_hash
  * @property bool $has_set_password
+ * @mixin \Illuminate\Database\Eloquent\Builder
  */
+/** @property \Illuminate\Database\Eloquent\Collection<int, Rol> $roles */
 class Usuario extends Authenticatable implements Auditable
 {
     use HasFactory, Notifiable, \OwenIt\Auditing\Auditable, SchemalessAttributesTrait, SoftDeletes;
@@ -58,6 +60,7 @@ class Usuario extends Authenticatable implements Auditable
     ];
 
     protected $hidden = [
+        'remember_token',
         'password_hash',
         'google_id',
     ];
@@ -192,8 +195,18 @@ class Usuario extends Authenticatable implements Auditable
             return true;
         }
 
-        return $this->roles()->whereHas('permisos', function ($q) use ($permiso) {
-            $q->where('nombre', $permiso);
-        })->exists();
+        if (! $this->relationLoaded('roles')) {
+            $this->load('roles.permisos');
+        }
+
+        foreach ($this->roles as $rol) {
+            foreach ($rol->permisos as $p) {
+                if ($p->nombre === $permiso) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

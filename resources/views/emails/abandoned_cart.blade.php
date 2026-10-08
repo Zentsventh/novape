@@ -46,6 +46,7 @@
         </div>
 
         <div class="footer">
+            <p><a href="{{ \Illuminate\Support\Facades\URL::signedRoute('marketing.unsubscribe', ['user' => $usuario->id, 'recipient' => hash('sha256', mb_strtolower($usuario->email))]) }}">Dejar de recibir promociones y recordatorios</a></p>
             <p>Si tienes alguna pregunta o necesitas ayuda, responde a este correo.</p>
             <p>&copy; {{ date('Y') }} {{ config('app.name') }}. Todos los derechos reservados.</p>
         </div>

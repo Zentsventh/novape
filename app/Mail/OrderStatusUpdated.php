@@ -19,7 +19,10 @@ class OrderStatusUpdated extends Mailable
 
     public function __construct(Pedido $pedido)
     {
-        $this->pedido = (object) ['codigo' => $pedido->codigo, 'estado' => $pedido->estado, 'usuario' => $pedido->usuario ? (object) ['nombres' => $pedido->usuario->nombres] : null];
+        $this->pedido = (object) ['codigo' => $pedido->codigo, 'estado' => $pedido->estado,
+            'tracking_number' => $pedido->tracking_number, 'courier_name' => $pedido->courier_name,
+            'delivery_status' => $pedido->getAttribute('delivery_status'), 'pickup' => $pedido->getAttribute('pickup'),
+            'usuario' => $pedido->usuario ? (object) ['nombres' => $pedido->usuario->nombres] : null];
     }
 
     public function envelope(): Envelope

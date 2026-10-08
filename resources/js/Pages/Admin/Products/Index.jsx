@@ -50,19 +50,19 @@ export default function Index({ productos, categorias, marcas, filters }) {
         <AdminLayout>
             <Head title="Productos" />
             
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
                 <h1 style={{ fontSize: '24px', margin: 0, fontWeight: '700', color: '#1E293B', display: 'flex', alignItems: 'center', gap: '12px', letterSpacing: '-0.02em' }}>
-                    <div style={{ padding: '8px', backgroundColor: '#F0F9FF', borderRadius: '10px', color: '#004797' }}>
-                        <Package size={24} />
+                    <div style={{ padding: '8px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', color: '#64748B', display: 'flex' }}>
+                        <Package size={20} />
                     </div>
                     Gestión de Productos
                 </h1>
                 
                 <Link 
                     href="/admin/products/create" 
-                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#009BE0'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 71, 151, 0.3)'; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#004797'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 71, 151, 0.2)'; }}
-                    style={{ background: '#004797', color: 'white', padding: '10px 16px', borderRadius: '8px', textDecoration: 'none', fontWeight: '600', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s ease', boxShadow: '0 2px 4px rgba(0, 71, 151, 0.2)' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#003670'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 71, 151, 0.2)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#004797'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 71, 151, 0.15)'; }}
+                    style={{ background: '#004797', color: 'white', padding: '10px 20px', borderRadius: '10px', textDecoration: 'none', fontWeight: '600', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', transition: 'all 0.2s ease', boxShadow: '0 2px 4px rgba(0, 71, 151, 0.15)' }}
                 >
                     <Plus size={16} />
                     Nuevo Producto
@@ -123,9 +123,9 @@ export default function Index({ productos, categorias, marcas, filters }) {
                             </div>
                             <button 
                                 type="submit" 
-                                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#009BE0'; }}
+                                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#003670'; }}
                                 onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#004797'; }}
-                                style={{ background: '#004797', color: 'white', border: 'none', padding: '0 20px', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s ease', fontSize: '13px' }}
+                                style={{ background: '#004797', color: 'white', border: 'none', padding: '0 20px', borderRadius: '10px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s ease', fontSize: '13px' }}
                             >
                                 <Filter size={16} /> Filtrar
                             </button>
@@ -133,9 +133,9 @@ export default function Index({ productos, categorias, marcas, filters }) {
                                 <button 
                                     type="button" 
                                     onClick={() => { setSearch(''); setCategoriaId(''); setMarcaId(''); router.get('/admin/products'); }} 
-                                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#E2E8F0'; }}
-                                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#F1F5F9'; }}
-                                    style={{ background: '#F1F5F9', color: '#475569', border: '1px solid #E2E8F0', padding: '0 16px', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s ease', fontSize: '13px' }}
+                                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F8FAFC'; e.currentTarget.style.color = '#1E293B'; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; e.currentTarget.style.color = '#475569'; }}
+                                    style={{ background: '#ffffff', color: '#475569', border: '1px solid #E2E8F0', padding: '0 16px', borderRadius: '10px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s ease', fontSize: '13px' }}
                                 >
                                     Limpiar
                                 </button>
@@ -147,23 +147,23 @@ export default function Index({ productos, categorias, marcas, filters }) {
 
             {/* Data Table */}
             <div style={{ background: '#ffffff', borderRadius: '12px', boxShadow: '0 4px 20px -2px rgba(0, 0, 0, 0.05)', border: '1px solid #E2E8F0', overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '900px' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '100%' }}>
                     <thead>
                         <tr style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
-                            <th style={{ padding: '16px 24px', fontSize: '12px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('id')}>
+                            <th style={{ padding: '16px 16px', fontSize: '12px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('id')}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>ID {getSortIndicator('id')}</div>
                             </th>
-                            <th style={{ padding: '16px 24px', fontSize: '12px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Imagen</th>
-                            <th style={{ padding: '16px 24px', fontSize: '12px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('nombre')}>
+                            <th style={{ padding: '16px 16px', fontSize: '12px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Imagen</th>
+                            <th style={{ padding: '16px 16px', fontSize: '12px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('nombre')}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>Nombre {getSortIndicator('nombre')}</div>
                             </th>
-                            <th style={{ padding: '16px 24px', fontSize: '12px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('sku_base')}>
+                            <th style={{ padding: '16px 16px', fontSize: '12px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', cursor: 'pointer', userSelect: 'none' }} onClick={() => handleSort('sku_base')}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>SKU {getSortIndicator('sku_base')}</div>
                             </th>
-                            <th style={{ padding: '16px 24px', fontSize: '12px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Categoría</th>
-                            <th style={{ padding: '16px 24px', fontSize: '12px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Marca</th>
-                            <th style={{ padding: '16px 24px', fontSize: '12px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Estado</th>
-                            <th style={{ padding: '16px 24px', fontSize: '12px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'right' }}>Acciones</th>
+                            <th style={{ padding: '16px 16px', fontSize: '12px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Categoría</th>
+                            <th style={{ padding: '16px 16px', fontSize: '12px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Marca</th>
+                            <th style={{ padding: '16px 16px', fontSize: '12px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Estado</th>
+                            <th style={{ padding: '16px 16px', fontSize: '12px', fontWeight: '600', color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'right' }}>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -175,8 +175,8 @@ export default function Index({ productos, categorias, marcas, filters }) {
                                     onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F8FAFC'; }}
                                     onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
                                 >
-                                    <td style={{ padding: '16px 24px', color: '#64748B', fontWeight: '500', fontSize: '13px' }}>#{producto.id}</td>
-                                    <td style={{ padding: '16px 24px' }}>
+                                    <td style={{ padding: '16px 16px', color: '#64748B', fontWeight: '500', fontSize: '13px' }}>#{producto.id}</td>
+                                    <td style={{ padding: '16px 16px' }}>
                                         {producto.imagenes && producto.imagenes.length > 0 ? (
                                             <div style={{ width: '48px', height: '48px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #E2E8F0', background: '#fff' }}>
                                                 <img src={producto.imagenes[0].url} alt={producto.nombre} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
@@ -187,15 +187,15 @@ export default function Index({ productos, categorias, marcas, filters }) {
                                             </div>
                                         )}
                                     </td>
-                                    <td style={{ padding: '16px 24px', fontWeight: '600', color: '#1E293B', fontSize: '14px', maxWidth: '300px' }}>
-                                        <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    <td style={{ padding: '16px 16px', fontWeight: '600', color: '#1E293B', fontSize: '14px' }}>
+                                        <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '240px' }}>
                                             {producto.nombre}
                                         </div>
                                     </td>
-                                    <td style={{ padding: '16px 24px', color: '#64748B', fontSize: '13px', fontFamily: 'monospace', letterSpacing: '0.02em' }}>
-                                        <span style={{ background: '#F1F5F9', padding: '4px 8px', borderRadius: '6px' }}>{producto.sku_base}</span>
+                                    <td style={{ padding: '16px 16px', color: '#64748B', fontSize: '13px', fontFamily: 'monospace', letterSpacing: '0.02em' }}>
+                                        <span style={{ border: '1px solid #E2E8F0', background: '#F8FAFC', padding: '4px 8px', borderRadius: '6px' }}>{producto.sku_base}</span>
                                     </td>
-                                    <td style={{ padding: '16px 24px', color: '#64748B' }}>
+                                    <td style={{ padding: '16px 16px', color: '#64748B' }}>
                                         {producto.categorias && producto.categorias.length > 0 
                                             ? (
                                                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
@@ -203,7 +203,7 @@ export default function Index({ productos, categorias, marcas, filters }) {
                                                         .sort((a, b) => (a.categoria_padre_id === null ? -1 : (b.categoria_padre_id === null ? 1 : 0)))
                                                         .slice(0, 2)
                                                         .map((c, i) => (
-                                                            <span key={i} style={{ background: c.categoria_padre_id === null ? '#F0F9FF' : '#F1F5F9', color: c.categoria_padre_id === null ? '#004797' : '#64748B', padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: '600', border: c.categoria_padre_id === null ? '1px solid rgba(0, 71, 151, 0.2)' : '1px solid #E2E8F0' }}>
+                                                            <span key={i} style={{ background: '#F8FAFC', color: '#475569', padding: '2px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: '600', border: '1px solid #E2E8F0' }}>
                                                                 {c.nombre}
                                                             </span>
                                                         ))
@@ -213,40 +213,40 @@ export default function Index({ productos, categorias, marcas, filters }) {
                                             : <span style={{ color: '#94A3B8', fontStyle: 'italic', fontSize: '13px' }}>-</span>
                                         }
                                     </td>
-                                    <td style={{ padding: '16px 24px', color: '#64748B', fontSize: '13px', fontWeight: '500' }}>{producto.marca ? producto.marca.nombre : '-'}</td>
-                                    <td style={{ padding: '16px 24px' }}>
-                                        <span style={{ padding: '4px 12px', borderRadius: '9999px', fontSize: '12px', fontWeight: '600', background: producto.activo ? '#ECFDF5' : '#F1F5F9', color: producto.activo ? '#10B981' : '#64748B' }}>
+                                    <td style={{ padding: '16px 16px', color: '#64748B', fontSize: '13px', fontWeight: '500' }}>{producto.marca ? producto.marca.nombre : '-'}</td>
+                                    <td style={{ padding: '16px 16px' }}>
+                                        <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: '600', border: producto.activo ? '1px solid #DCFCE7' : '1px solid #E2E8F0', background: producto.activo ? '#F0FDF4' : '#F8FAFC', color: producto.activo ? '#10B981' : '#64748B' }}>
                                             {producto.activo ? 'Activo' : 'Inactivo'}
                                         </span>
                                     </td>
-                                    <td style={{ padding: '16px 24px', textAlign: 'right' }}>
+                                    <td style={{ padding: '16px 16px', textAlign: 'right' }}>
                                         <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                                             <Link 
                                                 href={`/admin/products/${producto.id}`} 
                                                 title="Ver" 
-                                                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#ECFDF5'; e.currentTarget.style.color = '#059669'; }}
-                                                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#10B981'; }}
-                                                style={{ color: '#10B981', background: 'transparent', textDecoration: 'none', padding: '8px', borderRadius: '8px', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F0FDF4'; e.currentTarget.style.color = '#10B981'; }}
+                                                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#94A3B8'; }}
+                                                style={{ color: '#94A3B8', background: 'transparent', textDecoration: 'none', padding: '6px', borderRadius: '6px', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                             >
-                                                <Eye size={18} />
+                                                <Eye size={16} />
                                             </Link>
                                             <Link 
                                                 href={`/admin/products/${producto.id}/edit`} 
                                                 title="Editar" 
-                                                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F0F9FF'; e.currentTarget.style.color = '#009BE0'; }}
-                                                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#004797'; }}
-                                                style={{ color: '#004797', background: 'transparent', textDecoration: 'none', padding: '8px', borderRadius: '8px', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F8FAFC'; e.currentTarget.style.color = '#1E293B'; }}
+                                                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#94A3B8'; }}
+                                                style={{ color: '#94A3B8', background: 'transparent', border: '1px solid transparent', textDecoration: 'none', padding: '6px', borderRadius: '6px', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                             >
-                                                <Edit size={18} />
+                                                <Edit size={16} />
                                             </Link>
                                             <button 
                                                 onClick={() => handleDelete(producto.id)} 
                                                 title="Eliminar" 
-                                                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#FEF2F2'; e.currentTarget.style.color = '#DC2626'; }}
-                                                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#EF4444'; }}
-                                                style={{ color: '#EF4444', background: 'transparent', border: 'none', cursor: 'pointer', padding: '8px', borderRadius: '8px', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#FEF2F2'; e.currentTarget.style.color = '#EF4444'; }}
+                                                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#94A3B8'; }}
+                                                style={{ color: '#94A3B8', background: 'transparent', border: 'none', cursor: 'pointer', padding: '6px', borderRadius: '6px', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                             >
-                                                <Trash2 size={18} />
+                                                <Trash2 size={16} />
                                             </button>
                                         </div>
                                     </td>

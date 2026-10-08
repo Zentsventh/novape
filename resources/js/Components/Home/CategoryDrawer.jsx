@@ -1,15 +1,56 @@
 import '../../../css/home/category-drawer.css';
-import { useEffect, useRef, useState } from 'react';
+import useStoreDialog from '../../Hooks/useStoreDialog';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
-import { ChevronLeft, ChevronRight, X, ArrowUpRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, ArrowUpRight, Search } from 'lucide-react';
+import { CategoryBranch } from './CatalogFilters';
+import { filterCategoryTree } from '../../utils/categoryNavigation';
 
 export default function CategoryDrawer({ isOpen, onClose, categorias = [] }) {
     const [activeId, setActiveId] = useState(null);
-    const dialogRef = useRef(null);
-    const onCloseRef = useRef(onClose);
-    onCloseRef.current = onClose;
-    const { auth } = usePage().props;
+    const [subCategoriesCache, setSubCategoriesCache] = useState({});
+    const [loadingSub, setLoadingSub] = useState(false);
+    const [search, setSearch] = useState('');
+    const dialogRef = useStoreDialog(isOpen, onClose);
+    const { auth, filtros = {} } = usePage().props;
     const activeCat = categorias.find((category) => category.id === activeId);
+    const visibleCategories = useMemo(() => filterCategoryTree(categorias, search), [categorias, search]);
+    const visibleGroups = activeCat ? filterCategoryTree([{ ...activeCat, subcategorias: subCategoriesCache[activeCat.id] || activeCat.subcategorias || [] }], search)[0]?.subcategorias || [] : [];
+
+    useEffect(() => {
+        if (!isOpen || !search.trim() || !window.matchMedia('(min-width: 1024px)').matches) return;
+        setActiveId(current => visibleCategories.some(category => category.id === current) ? current : visibleCategories[0]?.id ?? null);
+    }, [isOpen, search, visibleCategories]);
+
+    // Fetch subcategories when activeId changes if not cached
+    useEffect(() => {
+        if (!activeId) return;
+        
+        // If we already have it in cache or it came fully loaded from props, skip fetching
+        if (subCategoriesCache[activeId] || (activeCat && activeCat.subcategorias && activeCat.subcategorias.length > 0)) {
+            return;
+        }
+
+        const fetchSubcategories = async () => {
+            setLoadingSub(true);
+            try {
+                const response = await fetch(`/api/categorias/${activeId}/subcategorias`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setSubCategoriesCache(prev => ({
+                        ...prev,
+                        [activeId]: data.subcategorias
+                    }));
+                }
+            } catch (error) {
+                console.error('Error fetching subcategories:', error);
+            } finally {
+                setLoadingSub(false);
+            }
+        };
+
+        fetchSubcategories();
+    }, [activeId, activeCat, subCategoriesCache]);
 
     useEffect(() => {
         const selectCategory = (event) => setActiveId(event.detail.id);
@@ -18,32 +59,10 @@ export default function CategoryDrawer({ isOpen, onClose, categorias = [] }) {
     }, []);
 
     useEffect(() => {
-        if (!isOpen) { setActiveId(null); return; }
+        if (!isOpen) { setActiveId(null); setSearch(''); return; }
         if (window.matchMedia('(min-width: 1024px)').matches) {
             setActiveId((id) => id ?? categorias[0]?.id ?? null);
         }
-        const previousFocus = document.activeElement;
-        const previousOverflow = document.body.style.overflow;
-        document.body.style.overflow = 'hidden';
-        dialogRef.current?.focus();
-        const handleKey = (event) => {
-            if (event.key === 'Escape') onCloseRef.current();
-            if (event.key !== 'Tab') return;
-            const items = [...dialogRef.current.querySelectorAll('button, a[href]')].filter((el) => el.getClientRects().length && getComputedStyle(el).visibility !== 'hidden');
-            const first = items[0];
-            const last = items.at(-1);
-            if (event.shiftKey && (document.activeElement === first || document.activeElement === dialogRef.current)) {
-                event.preventDefault(); last?.focus();
-            } else if (!event.shiftKey && (document.activeElement === last || document.activeElement === dialogRef.current)) {
-                event.preventDefault(); first?.focus();
-            }
-        };
-        document.addEventListener('keydown', handleKey);
-        return () => {
-            document.body.style.overflow = previousOverflow;
-            document.removeEventListener('keydown', handleKey);
-            previousFocus?.focus();
-        };
     }, [isOpen]);
 
     if (!isOpen) return null;
@@ -59,11 +78,13 @@ export default function CategoryDrawer({ isOpen, onClose, categorias = [] }) {
                         <button className="cat-icon-button" onClick={onClose} aria-label="Cerrar categorías"><X size={22} /></button>
                     </header>
                     <div className="efe-cat-drawer-list">
-                        {categorias.map((cat) => (
+                        <label className="store-filter-search cat-menu-search"><Search size={16} aria-hidden="true" /><input type="search" aria-label="Buscar en todas las categorías" placeholder="¿Qué estás buscando?" value={search} onChange={event => setSearch(event.target.value)} /></label>
+                        {visibleCategories.map((cat) => (
                             <button key={cat.id} className={`efe-cat-drawer-item ${activeId === cat.id ? 'is-active' : ''}`} onClick={() => setActiveId(cat.id)} aria-expanded={activeId === cat.id} aria-controls="category-detail">
                                 <span>{cat.nombre}</span><ChevronRight size={18} />
                             </button>
                         ))}
+                        {!visibleCategories.length && <p className="store-filter-empty" role="status">No encontramos esa categoría.</p>}
                     </div>
                 </div>
                 <div className="efe-cat-drawer-right" id="category-detail">
@@ -73,20 +94,23 @@ export default function CategoryDrawer({ isOpen, onClose, categorias = [] }) {
                     </div>
                     {activeCat && (
                         <>
-                            <div className="cat-detail-heading"><span className="cat-eyebrow">EXPLORA NUESTRA TIENDA</span><h3>{activeCat.nombre}</h3><Link className="cat-explore-link" href={href()} onClick={onClose}>Ver todos los productos<ArrowUpRight size={17} /></Link></div>
+                            <div className="cat-detail-heading"><span className="cat-eyebrow">EXPLORA NUESTRA TIENDA</span><h3>{activeCat.nombre}</h3><Link prefetch="hover" cacheFor="10s" className="cat-explore-link" href={href()} onClick={onClose}>Ver todos los productos<ArrowUpRight size={17} /></Link></div>
                             <div className="cat-detail-content">
-                                {activeCat.subcategorias?.length > 0 && <section aria-label="Subcategorías" className="cat-menu-groups">
-                                    {activeCat.subcategorias.map((group) => (
-                                        <article className="cat-menu-group" key={group.id}>
-                                            <h4><Link href={href({ categoria_id: group.id })} onClick={onClose}>{group.nombre}</Link></h4>
-                                            {group.subcategorias?.length > 0 ? <ul className="cat-menu-leaves">
-                                                {group.subcategorias.map((sub) => <li key={sub.id}><Link href={href({ categoria_id: sub.id })} onClick={onClose} className="cat-subcategory-link">{sub.nombre}</Link></li>)}
-                                            </ul> : <Link href={href({ categoria_id: group.id })} onClick={onClose} className="cat-subcategory-link">Explorar {group.nombre}<ChevronRight size={16} /></Link>}
-                                            <Link href={href({ categoria_id: group.id })} onClick={onClose} className="cat-group-explore">Ver todo<ArrowUpRight size={14} /></Link>
-                                        </article>
-                                    ))}
-                                </section>}
-                                {activeCat.marcas?.length > 0 && <section aria-label="Marcas"><h4>Tus marcas favoritas</h4><div className="cat-brand-grid">{activeCat.marcas.map((brand) => <Link key={brand.id} href={href({ marca: brand.nombre })} onClick={onClose} className="cat-brand-link">{brand.nombre}</Link>)}</div></section>}
+                                {loadingSub ? (
+                                    <div style={{ padding: '2rem', textAlign: 'center', opacity: 0.5 }}>Cargando subcategorías...</div>
+                                ) : (
+                                    (subCategoriesCache[activeCat.id] || activeCat.subcategorias)?.length > 0 && (
+                                        <section aria-label="Subcategorías" className="cat-menu-groups cat-menu-organized">
+                                            <ul className="store-category-tree">
+                                                {visibleGroups.map(group => (
+                                                    <CategoryBranch key={group.id} category={group} selectedId={filtros.categoria_id}
+                                                        selectedName={filtros.subcategoria} searching={Boolean(search.trim())} onNavigate={onClose} />
+                                                ))}
+                                            </ul>
+                                        </section>
+                                    )
+                                )}
+                                {activeCat.marcas?.length > 0 && <section aria-label="Marcas"><h4>Tus marcas favoritas</h4><div className="cat-brand-grid">{activeCat.marcas.map((brand) => <Link prefetch="hover" cacheFor="10s" key={brand.id} href={href({ marca: brand.nombre })} onClick={onClose} className="cat-brand-link">{brand.nombre}</Link>)}</div></section>}
                             </div>
                         </>
                     )}

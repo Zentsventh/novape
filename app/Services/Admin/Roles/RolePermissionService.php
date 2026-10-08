@@ -13,7 +13,7 @@ class RolePermissionService
 {
     public function getRoles(array $filters): LengthAwarePaginator
     {
-        $query = Rol::withCount('usuarios');
+        $query = Rol::withCount('usuarios')->where('nombre', '!=', 'cliente');
 
         if (! empty($filters['buscar'])) {
             $buscar = $filters['buscar'];
@@ -37,6 +37,7 @@ class RolePermissionService
             if (! empty($data['permisos'])) {
                 $rol->permisos()->attach($data['permisos']);
             }
+            \App\Services\Operations\OperationEvents::record('role.created', 'rol', $rol->id, ['permissions' => array_values($data['permisos'] ?? [])]);
 
             return $rol;
         });
@@ -57,6 +58,7 @@ class RolePermissionService
             ]);
 
             $rol->permisos()->sync($data['permisos'] ?? []);
+            \App\Services\Operations\OperationEvents::record('role.permissions_changed', 'rol', $rol->id, ['permissions' => array_values($data['permisos'] ?? [])]);
 
             return $rol;
         });
@@ -73,6 +75,7 @@ class RolePermissionService
         }
 
         DB::transaction(function () use ($rol) {
+            \App\Services\Operations\OperationEvents::record('role.deleted', 'rol', $rol->id, ['role' => $rol->nombre]);
             $rol->permisos()->detach();
             $rol->usuarios()->detach();
             $rol->delete();

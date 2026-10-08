@@ -32,11 +32,11 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
         ]);
         $middleware->validateCsrfTokens(except: [
-            '/checkout/niubiz/callback',
-            '/api/checkout/niubiz/session',
+            '/api/checkout/niubiz/authorize',
             '/api/documento/consultar',
             '/api/webhooks/*',
             '/logout',
+            '/chatbot/*',
         ]);
         $middleware->alias([
             'role' => CheckRole::class,

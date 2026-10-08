@@ -4,12 +4,13 @@ import AdminLayout from '../../../Layouts/AdminLayout';
 import { useConfirm } from '@/Contexts/ConfirmContext';
 import { Image as ImageIcon, Plus, Edit2, Trash2, Calendar, EyeOff, Eye, Link as LinkIcon, UploadCloud, X, Clock, AlertCircle, CheckCircle2, ImageOff } from 'lucide-react';
 
-export default function BannersIndex({ banners, logoUrl }) {
+export default function BannersIndex({ banners, categorias = [], logoUrl }) {
     const confirmDialog = useConfirm();
 
     const [showModal, setShowModal] = useState(false);
     const [editingBanner, setEditingBanner] = useState(null);
     const [imagePreview, setImagePreview] = useState(null);
+    const [linkType, setLinkType] = useState('url');
 
     const { data, setData, post, processing, reset, clearErrors, errors } = useForm({
         titulo: '', 
@@ -24,6 +25,7 @@ export default function BannersIndex({ banners, logoUrl }) {
     const openCreateModal = () => {
         setEditingBanner(null);
         setImagePreview(null);
+        setLinkType('url');
         reset();
         clearErrors();
         setShowModal(true);
@@ -31,6 +33,11 @@ export default function BannersIndex({ banners, logoUrl }) {
 
     const openEditModal = (banner) => {
         setEditingBanner(banner);
+        let initialLinkType = 'url';
+        if (banner.enlace_url && banner.enlace_url.includes('/catalogo?categoria_id=')) {
+            initialLinkType = 'categoria';
+        }
+        setLinkType(initialLinkType);
         setData({
             titulo: banner.titulo || '',
             subtitulo: banner.subtitulo || '',
@@ -111,31 +118,31 @@ export default function BannersIndex({ banners, logoUrl }) {
         <AdminLayout logoUrl={logoUrl}>
             <Head title="Gestión de Banners" />
 
-            <div style={{ fontFamily: "'Inter', sans-serif", padding: '24px 32px', maxWidth: '1400px', margin: '0 auto' }}>
+            <div style={{ fontFamily: 'inherit', padding: '32px', maxWidth: '960px', margin: '0 auto' }}>
                 {/* Header Section */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
                     <div>
-                        <h1 style={{ fontSize: '28px', margin: '0 0 8px 0', fontWeight: 800, color: '#1E293B', letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ background: '#E0F2FE', padding: '10px', borderRadius: '12px', color: '#004797', display: 'flex' }}>
-                                <ImageIcon size={24} />
+                        <h1 style={{ fontSize: '24px', margin: '0 0 8px 0', fontWeight: 700, color: '#1E293B', letterSpacing: '-0.02em', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div style={{ padding: '8px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', color: '#64748B', display: 'flex' }}>
+                                <ImageIcon size={20} />
                             </div>
                             Banners Publicitarios
                         </h1>
-                        <p style={{ margin: 0, color: '#64748B', fontSize: '15px' }}>
+                        <p style={{ margin: 0, color: '#64748B', fontSize: '14px', lineHeight: '1.5' }}>
                             Gestiona las campañas visuales, hero banners y promociones de la tienda.
                         </p>
                     </div>
                     <button 
                         onClick={openCreateModal} 
                         style={{ 
-                            background: '#004797', color: 'white', padding: '12px 24px', borderRadius: '12px', border: 'none', 
-                            cursor: 'pointer', fontWeight: 700, fontSize: '14px', boxShadow: '0 4px 14px rgba(0, 71, 151, 0.3)',
+                            background: '#004797', color: 'white', padding: '10px 20px', borderRadius: '10px', border: 'none', 
+                            cursor: 'pointer', fontWeight: 600, fontSize: '13px', boxShadow: '0 2px 4px rgba(0, 71, 151, 0.15)',
                             transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', gap: '8px'
                         }}
-                        onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 71, 151, 0.4)'; }}
-                        onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 71, 151, 0.3)'; }}
+                        onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 71, 151, 0.2)'; e.currentTarget.style.background = '#003670'; }}
+                        onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 71, 151, 0.15)'; e.currentTarget.style.background = '#004797'; }}
                     >
-                        <Plus size={18} /> Nuevo Banner
+                        <Plus size={16} /> Nuevo Banner
                     </button>
                 </div>
 
@@ -170,18 +177,16 @@ export default function BannersIndex({ banners, logoUrl }) {
 
                         return (
                         <div key={b.id} style={{ 
-                            background: '#ffffff', borderRadius: '20px', padding: '24px', boxShadow: '0 4px 20px -2px rgba(0,0,0,0.03)',
-                            display: 'grid', gridTemplateColumns: '180px 1fr 180px 180px', gap: '32px', alignItems: 'center',
+                            background: '#ffffff', borderRadius: '12px', padding: '16px 20px', boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
+                            display: 'grid', gridTemplateColumns: '120px 1fr 140px 120px', gap: '24px', alignItems: 'center',
                             border: '1px solid #E2E8F0', transition: 'all 0.2s', position: 'relative', overflow: 'hidden'
                         }}
-                        onMouseOver={e => { e.currentTarget.style.boxShadow = '0 10px 30px -5px rgba(0,0,0,0.08)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                        onMouseOut={e => { e.currentTarget.style.boxShadow = '0 4px 20px -2px rgba(0,0,0,0.03)'; e.currentTarget.style.transform = 'none'; }}
+                        onMouseOver={e => { e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.04)'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.borderColor = '#CBD5E1'; }}
+                        onMouseOut={e => { e.currentTarget.style.boxShadow = '0 1px 2px rgba(0,0,0,0.02)'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.borderColor = '#E2E8F0'; }}
                         >
-                            {/* Status Indicator Bar */}
-                            <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '4px', background: estadoColor }}></div>
 
                             {/* Preview Image */}
-                            <div style={{ width: '180px', height: '100px', background: '#F8FAFC', borderRadius: '12px', overflow: 'hidden', position: 'relative', border: '1px solid #E2E8F0' }}>
+                            <div style={{ width: '120px', height: '70px', background: '#F8FAFC', borderRadius: '8px', overflow: 'hidden', position: 'relative', border: '1px solid #E2E8F0' }}>
                                 {b.imagen_url ? (
                                     <>
                                         <img src={b.imagen_url.startsWith('/') ? b.imagen_url : '/' + b.imagen_url} alt={b.titulo} onError={handleImageError} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -200,68 +205,74 @@ export default function BannersIndex({ banners, logoUrl }) {
 
                             {/* Title & Info */}
                             <div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#1E293B', letterSpacing: '-0.5px' }}>{b.titulo}</h3>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
+                                    <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: '#1E293B', lineHeight: '1.4' }}>{b.titulo}</h3>
                                     <span style={{ 
-                                        background: b.posicion === 'hero' ? '#E0F2FE' : '#F1F5F9', 
-                                        color: b.posicion === 'hero' ? '#0284C7' : '#475569', 
-                                        padding: '4px 10px', borderRadius: '8px', fontSize: '11px', fontWeight: 800, letterSpacing: '0.5px'
+                                        background: '#F8FAFC', 
+                                        color: '#475569', 
+                                        border: '1px solid #E2E8F0',
+                                        padding: '2px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 600
                                     }}>
                                         {b.posicion.toUpperCase()}
                                     </span>
                                 </div>
-                                <p style={{ fontSize: '14px', color: '#64748B', margin: '0 0 12px 0', lineHeight: '1.4' }}>{b.subtitulo || 'Sin descripción adicional'}</p>
+                                <p style={{ fontSize: '13px', color: '#64748B', margin: '0 0 8px 0' }}>{b.subtitulo || 'Sin descripción adicional'}</p>
                                 {b.enlace_url && (
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#004797', fontSize: '13px', fontWeight: 500 }}>
-                                        <LinkIcon size={14} /> {b.enlace_url}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#004797', fontSize: '12px', fontWeight: 500 }}>
+                                        <LinkIcon size={12} /> {b.enlace_url}
                                     </div>
                                 )}
                             </div>
 
                             {/* Status & Dates */}
                             <div>
-                                <div style={{ fontSize: '12px', color: '#94A3B8', fontWeight: 700, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Visibilidad</div>
+                                <div style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase' }}>Visibilidad</div>
                                 <button 
                                     onClick={() => toggleActivo(b.id, b.activo)}
-                                    title="Haz clic para alternar visibilidad"
+                                    title="Alternar visibilidad"
                                     style={{ 
-                                        background: estadoBg, color: estadoColor, padding: '6px 12px', borderRadius: '10px', fontSize: '13px', fontWeight: 700, 
-                                        border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '12px', transition: 'all 0.2s'
+                                        background: '#FFFFFF', color: '#1E293B', padding: '4px 10px', borderRadius: '8px', fontSize: '12px', fontWeight: 600, 
+                                        border: '1px solid #E2E8F0', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '8px', transition: 'all 0.2s'
                                     }}
-                                    onMouseOver={e => e.currentTarget.style.transform = 'scale(1.05)'}
-                                    onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
+                                    onMouseOver={e => { e.currentTarget.style.background = '#F8FAFC'; e.currentTarget.style.borderColor = '#CBD5E1'; }}
+                                    onMouseOut={e => { e.currentTarget.style.background = '#FFFFFF'; e.currentTarget.style.borderColor = '#E2E8F0'; }}
                                 >
-                                    {estadoIcon} {estadoLabel}
+                                    <span style={{ color: estadoColor, display: 'flex' }}>{estadoIcon}</span> {estadoLabel}
                                 </button>
-                                <div style={{ fontSize: '13px', color: '#64748B', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 500 }}>
-                                    <Calendar size={14} color="#94A3B8" />
+                                <div style={{ fontSize: '12px', color: '#64748B', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 500 }}>
+                                    <Calendar size={12} color="#94A3B8" />
                                     {b.fecha_inicio ? `${b.fecha_inicio.split(' ')[0]} al ${b.fecha_fin ? b.fecha_fin.split(' ')[0] : 'Siempre'}` : 'Permanente'}
                                 </div>
                             </div>
 
                             {/* Actions */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                 <button onClick={() => openEditModal(b)} style={{ 
-                                    width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid #E2E8F0', background: '#ffffff', color: '#1E293B', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s', fontSize: '14px' 
-                                }} onMouseOver={e => { e.currentTarget.style.background = '#F8FAFC'; e.currentTarget.style.color = '#004797'; e.currentTarget.style.borderColor = '#004797'; }} onMouseOut={e => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.color = '#1E293B'; e.currentTarget.style.borderColor = '#E2E8F0'; }}>
-                                    <Edit2 size={16} /> Editar Banner
+                                    width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #E2E8F0', background: '#ffffff', color: '#475569', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', transition: 'all 0.2s', fontSize: '12px' 
+                                }} onMouseOver={e => { e.currentTarget.style.background = '#F8FAFC'; e.currentTarget.style.color = '#1E293B'; e.currentTarget.style.borderColor = '#CBD5E1'; }} onMouseOut={e => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.color = '#475569'; e.currentTarget.style.borderColor = '#E2E8F0'; }}>
+                                    <Edit2 size={14} /> Editar
                                 </button>
                                 <button onClick={() => handleDelete(b.id)} style={{ 
-                                    width: '100%', padding: '12px', borderRadius: '12px', border: 'none', background: '#FEE2E2', color: '#DC2626', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s', fontSize: '14px' 
-                                }} onMouseOver={e => { e.currentTarget.style.background = '#FECACA'; }} onMouseOut={e => { e.currentTarget.style.background = '#FEE2E2'; }}>
-                                    <Trash2 size={16} /> Eliminar
+                                    width: '100%', padding: '8px 12px', borderRadius: '8px', border: 'none', background: 'transparent', color: '#94A3B8', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', transition: 'all 0.2s', fontSize: '12px' 
+                                }} onMouseOver={e => { e.currentTarget.style.background = '#FEF2F2'; e.currentTarget.style.color = '#EF4444'; }} onMouseOut={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#94A3B8'; }}>
+                                    <Trash2 size={14} /> Eliminar
                                 </button>
                             </div>
                         </div>
                     )})}
                     {banners.length === 0 && (
-                        <div style={{ background: '#ffffff', borderRadius: '20px', padding: '60px', textAlign: 'center', border: '1px solid #E2E8F0' }}>
-                            <div style={{ width: '64px', height: '64px', background: '#F1F5F9', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94A3B8', margin: '0 auto 16px auto' }}>
-                                <ImageIcon size={32} />
+                        <div style={{ background: '#F8FAFC', borderRadius: '12px', padding: '60px', textAlign: 'center', border: '1px dashed #CBD5E1' }}>
+                            <div style={{ width: '48px', height: '48px', background: '#F1F5F9', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94A3B8', margin: '0 auto 16px auto' }}>
+                                <ImageIcon size={24} />
                             </div>
-                            <h3 style={{ margin: '0 0 8px 0', color: '#1E293B', fontSize: '18px', fontWeight: 700 }}>No hay banners publicitarios</h3>
-                            <p style={{ margin: '0 0 24px 0', color: '#64748B', fontSize: '15px' }}>Crea tu primer banner para empezar a promocionar ofertas o productos en tu tienda.</p>
-                            <button onClick={openCreateModal} style={{ background: '#004797', color: 'white', padding: '10px 20px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontWeight: 600 }}>
+                            <h3 style={{ margin: '0 0 8px 0', color: '#1E293B', fontSize: '16px', fontWeight: 600 }}>No hay banners</h3>
+                            <p style={{ margin: '0 0 24px 0', color: '#64748B', fontSize: '14px' }}>Crea tu primer banner para empezar a promocionar ofertas o productos en tu tienda.</p>
+                            <button 
+                                onClick={openCreateModal} 
+                                style={{ background: '#004797', color: 'white', padding: '10px 20px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: '13px', transition: 'all 0.2s' }}
+                                onMouseOver={e => e.currentTarget.style.background = '#003670'}
+                                onMouseOut={e => e.currentTarget.style.background = '#004797'}
+                            >
                                 Crear Primer Banner
                             </button>
                         </div>
@@ -287,19 +298,52 @@ export default function BannersIndex({ banners, logoUrl }) {
                             <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: 700, fontSize: '13px', color: '#475569', letterSpacing: '0.5px' }}>TÍTULO PRINCIPAL</label>
-                                    <input type="text" value={data.titulo} onChange={e => setData('titulo', e.target.value)} style={inputStyle} onFocus={e => Object.assign(e.target.style, inputFocusStyle)} onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }} required placeholder="Ej: Gran Venta de Verano" />
+                                    <input type="text" value={data.titulo} onChange={e => setData('titulo', e.target.value)} style={inputStyle} onFocus={e => Object.assign(e.target.style, inputFocusStyle)} onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }} required />
                                     {errors.titulo && <div style={{ color: '#EF4444', fontSize: '12px', marginTop: '4px' }}>{errors.titulo}</div>}
                                 </div>
                                 
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: 700, fontSize: '13px', color: '#475569', letterSpacing: '0.5px' }}>SUBTÍTULO / DESCRIPCIÓN (Opcional)</label>
-                                    <input type="text" value={data.subtitulo} onChange={e => setData('subtitulo', e.target.value)} style={inputStyle} onFocus={e => Object.assign(e.target.style, inputFocusStyle)} onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }} placeholder="Ej: Hasta 50% de descuento en seleccionados" />
+                                    <input type="text" value={data.subtitulo} onChange={e => setData('subtitulo', e.target.value)} style={inputStyle} onFocus={e => Object.assign(e.target.style, inputFocusStyle)} onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }} />
                                     {errors.subtitulo && <div style={{ color: '#EF4444', fontSize: '12px', marginTop: '4px' }}>{errors.subtitulo}</div>}
                                 </div>
                                 
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 700, fontSize: '13px', color: '#475569', letterSpacing: '0.5px' }}>POSICIÓN DEL BANNER</label>
+                                        <select value={data.posicion} onChange={e => setData('posicion', e.target.value)} style={inputStyle} onFocus={e => Object.assign(e.target.style, inputFocusStyle)} onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }}>
+                                            <option value="hero">Carrusel Principal (Hero)</option>
+                                            <option value="promocional_1">Promocional 1 (Ej. Cine en casa)</option>
+                                            <option value="promocional_2">Promocional 2 (Ej. Renueva tu hogar)</option>
+                                            <option value="promocional_3">Promocional 3 (Ej. Tecnología)</option>
+                                            <option value="lateral">Banner Lateral</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style={{ display: 'block', marginBottom: '8px', fontWeight: 700, fontSize: '13px', color: '#475569', letterSpacing: '0.5px' }}>TIPO DE ENLACE</label>
+                                        <select value={linkType} onChange={e => { setLinkType(e.target.value); setData('enlace_url', ''); }} style={inputStyle} onFocus={e => Object.assign(e.target.style, inputFocusStyle)} onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }}>
+                                            <option value="url">URL Personalizada</option>
+                                            <option value="categoria">Categoría del Catálogo</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
                                 <div>
-                                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 700, fontSize: '13px', color: '#475569', letterSpacing: '0.5px' }}>ENLACE DESTINO (Opcional)</label>
-                                    <input type="text" value={data.enlace_url} onChange={e => setData('enlace_url', e.target.value)} style={inputStyle} onFocus={e => Object.assign(e.target.style, inputFocusStyle)} onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }} placeholder="Ej: /catalogo/verano" />
+                                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: 700, fontSize: '13px', color: '#475569', letterSpacing: '0.5px' }}>DESTINO DEL ENLACE (Opcional)</label>
+                                    {linkType === 'categoria' ? (
+                                        <select 
+                                            value={(data.enlace_url || '').replace('/catalogo?categoria_id=', '')} 
+                                            onChange={e => setData('enlace_url', e.target.value ? '/catalogo?categoria_id=' + e.target.value : '')} 
+                                            style={inputStyle} onFocus={e => Object.assign(e.target.style, inputFocusStyle)} onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }}
+                                        >
+                                            <option value="">Seleccione una categoría...</option>
+                                            {categorias?.map(cat => (
+                                                <option key={cat.id} value={cat.id}>{cat.nombre}</option>
+                                            ))}
+                                        </select>
+                                    ) : (
+                                        <input type="text" placeholder="https://..." value={data.enlace_url} onChange={e => setData('enlace_url', e.target.value)} style={inputStyle} onFocus={e => Object.assign(e.target.style, inputFocusStyle)} onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }} />
+                                    )}
                                 </div>
 
                                 <div style={{ background: '#F8FAFC', padding: '24px', borderRadius: '16px', border: '1px dashed #CBD5E1', display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -367,3 +411,4 @@ export default function BannersIndex({ banners, logoUrl }) {
         </AdminLayout>
     );
 }
+

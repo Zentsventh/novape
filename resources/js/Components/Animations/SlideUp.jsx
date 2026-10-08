@@ -1,13 +1,14 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 
 export default function SlideUp({ children, delay = 0, duration = 0.5, y = 20, className = '' }) {
+    const reduce = useReducedMotion();
     return (
         <motion.div
-            initial={{ opacity: 0, y }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y }}
-            transition={{ duration, delay, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{ duration: reduce ? 0 : Math.min(duration, 0.15), delay: 0, ease: [0.25, 0.1, 0.25, 1] }}
             className={className}
         >
             {children}

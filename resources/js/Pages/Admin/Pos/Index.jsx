@@ -32,7 +32,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
     const [notice, setNotice] = useState(null);
     const notify = (text, type = 'error') => setNotice({ text, type });
     const canDiscount = auth?.user?.roles?.some(r => r.nombre === 'admin') || auth?.user?.permisos?.includes('pos.descontar');
-    const [montoInicial, setMontoInicial] = useState('');
+    const [montoInicial, setMontoInicial] = useState(0);
     const [montoDeclarado, setMontoDeclarado] = useState('');
     const [isAperturando, setIsAperturando] = useState(false);
 
@@ -335,7 +335,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                 icon: 'error',
                 title: 'Error',
                 text: flash.error,
-                confirmButtonColor: '#0066cc',
+                confirmButtonColor: '#004797',
                 confirmButtonText: 'Aceptar'
             });
         }
@@ -344,7 +344,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                 icon: 'success',
                 title: '¡Venta Exitosa!',
                 text: flash.success,
-                confirmButtonColor: '#0066cc',
+                confirmButtonColor: '#004797',
                 confirmButtonText: 'Aceptar',
                 timer: 3000,
                 timerProgressBar: true
@@ -553,7 +553,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                                 </div>
                                 <div>
                                     <div style={{ fontWeight: '700', color: '#1E293B', fontSize: '16px', marginTop: '12px' }}>S/ {Number(prod.precio).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
-                                    <div style={{ fontSize: '11px', fontWeight: '600', color: prod.stock <= 5 ? '#EF4444' : '#10B981', marginTop: '6px', padding: '2px 6px', backgroundColor: prod.stock <= 5 ? '#FEF2F2' : '#ECFDF5', borderRadius: '4px', display: 'inline-block' }}>Stock: {prod.stock}</div>
+                                    <div style={{ fontSize: '11px', fontWeight: '600', color: prod.stock <= 5 ? '#004797' : '#10B981', marginTop: '6px', padding: '2px 6px', backgroundColor: prod.stock <= 5 ? '#FEF2F2' : '#ECFDF5', borderRadius: '4px', display: 'inline-block' }}>Stock: {prod.stock}</div>
                                 </div>
                             </div>
                         ))}
@@ -571,7 +571,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                     <div style={{ flex: 1, overflowY: 'auto', marginBottom: '16px' }}>
                         {carrito.length === 0 ? (
                             <div style={{ textAlign: 'center', color: '#94A3B8', marginTop: '60px' }}>
-                                <div style={{ background: '#F8FAFC', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', marginBottom: '16px' }}>
+                                <div style={{ background: '#F8FAFC', width: '64px', height: '64px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto', marginBottom: '16px' }}>
                                     <ShoppingCart size={32} style={{ color: '#CBD5E1' }} />
                                 </div>
                                 <p style={{ fontSize: '14px', fontWeight: '500' }}>Selecciona productos de la grilla</p>
@@ -594,7 +594,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                                         </div>
                                         <button 
                                             onClick={() => eliminarItem(index)} 
-                                            onMouseEnter={(e) => e.currentTarget.style.color = '#EF4444'}
+                                            onMouseEnter={(e) => e.currentTarget.style.color = '#004797'}
                                             onMouseLeave={(e) => e.currentTarget.style.color = '#94A3B8'}
                                             style={{ color: '#94A3B8', background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px', transition: 'color 0.2s ease', display: 'flex' }}
                                         >
@@ -679,7 +679,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', color: '#1E293B' }}>
                                     <User size={16} style={{ color: '#004797' }} /> <strong style={{ fontSize: '13px' }}>Datos del Cliente</strong> 
                                     {tipoComprobante === 'factura' || (tipoComprobante === 'boleta' && total >= 700) ? (
-                                        <span style={{ fontSize: '11px', color: '#EF4444', fontWeight: '600' }}>(Obligatorio)</span>
+                                        <span style={{ fontSize: '11px', color: '#004797', fontWeight: '600' }}>(Obligatorio)</span>
                                     ) : (
                                         <span style={{ fontSize: '11px', color: '#94A3B8' }}>(Opcional)</span>
                                     )}
@@ -697,7 +697,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                                     <button
                                         onClick={buscarCliente}
                                         disabled={isSearchingCliente || !clienteDoc}
-                                        onMouseEnter={(e) => { if(!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = '#009BE0'; }}
+                                        onMouseEnter={(e) => { if(!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = '#003B7D'; }}
                                         onMouseLeave={(e) => { if(!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = '#004797'; }}
                                         style={{ padding: '0 16px', background: '#004797', color: 'white', border: 'none', borderRadius: '6px', cursor: (isSearchingCliente || !clienteDoc) ? 'not-allowed' : 'pointer', fontSize: '13px', fontWeight: '600', transition: 'all 0.2s ease', opacity: (isSearchingCliente || !clienteDoc) ? 0.6 : 1 }}
                                     >
@@ -753,9 +753,9 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                             <button
                                 onClick={iniciarCobro}
                                 disabled={carrito.length === 0 || !cajaAbierta}
-                                onMouseEnter={(e) => { if(!e.currentTarget.disabled) { e.currentTarget.style.backgroundColor = '#009BE0'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 71, 151, 0.3)'; } }}
+                                onMouseEnter={(e) => { if(!e.currentTarget.disabled) { e.currentTarget.style.backgroundColor = '#003B7D'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 71, 151, 0.3)'; } }}
                                 onMouseLeave={(e) => { if(!e.currentTarget.disabled) { e.currentTarget.style.backgroundColor = '#004797'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 71, 151, 0.2)'; } }}
-                                style={{ flex: 2, padding: '12px', background: '#004797', color: 'white', fontSize: '14px', fontWeight: '700', borderRadius: '8px', border: 'none', cursor: (carrito.length === 0 || !cajaAbierta) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s ease', opacity: (carrito.length === 0 || !cajaAbierta) ? 0.6 : 1, boxShadow: '0 2px 4px rgba(0, 71, 151, 0.2)' }}
+                                style={{ flex: 2, padding: '12px', background: '#004797', color: 'white', fontSize: '14px', fontWeight: '700', borderRadius: '8px', border: 'none', cursor: (carrito.length === 0 || !cajaAbierta) ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s ease', opacity: (carrito.length === 0 || !cajaAbierta) ? 0.6 : 1, boxShadow: '0 4px 6px rgba(0, 71, 151, 0.2)' }}
                             >
                                 <ShoppingCart size={18} />
                                 COBRAR (F2)
@@ -776,86 +776,129 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                 </div>
             </div>
 
-            {/* OVERLAY APERTURA DE CAJA */}
+                        {/* OVERLAY APERTURA DE CAJA */}
             {!cajaAbierta && (
                 <div style={{
                     position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-                    background: 'rgba(0,0,0,0.8)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(5px)'
+                    background: 'rgba(15, 23, 42, 0.6)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(8px)', transition: 'all 0.3s ease'
                 }}>
-                    <div style={{ background: 'white', padding: '40px', borderRadius: '16px', width: '100%', maxWidth: '400px', textAlign: 'center', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}>
-                        <h2 style={{ margin: '0 0 10px 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: 'var(--admin-text-main)' }}>
-                            <Lock size={20} /> Caja Cerrada
+                    <div style={{ background: '#ffffff', padding: '40px', borderRadius: '16px', width: '100%', maxWidth: '420px', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0, 71, 151, 0.15)', border: '1px solid #E2E8F0' }}>
+                        <div style={{ width: '48px', height: '48px', background: '#F0F9FF', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px auto', color: '#004797' }}>
+                            <Lock size={24} />
+                        </div>
+                        <h2 style={{ margin: '0 0 12px 0', fontSize: '20px', fontWeight: '700', color: '#1E293B', letterSpacing: '-0.01em' }}>
+                            Apertura de Caja
                         </h2>
-                        <p style={{ color: '#4B5563', marginBottom: '25px', fontSize: '14px' }}>Para empezar a vender, debes aperturar tu turno ingresando el dinero base que hay actualmente en caja.</p>
+                        <p style={{ color: '#64748B', marginBottom: '32px', fontSize: '14px', lineHeight: '1.5' }}>
+                            Para empezar a vender, configura tu turno ingresando la sucursal y el dinero base en efectivo.
+                        </p>
 
-                        <form onSubmit={aperturarCaja}>
-                            <label htmlFor="physical-register">Caja y sucursal</label>
-                            <select id="physical-register" required value={cajaId} onChange={e => setCajaId(e.target.value)} style={{width: "100%", marginBottom: 16, padding: 10}}>
-                                <option value="">Selecciona una caja</option>
-                                {cajas.map(c => <option key={c.id} value={c.id}>{c.sucursal_nombre} / {c.nombre}</option>)}
-                            </select>
-                            {!cajas.length && <p role="alert">Configura una caja con almacén en Sucursales antes de vender.</p>}
-                            {errors.caja_id && <p role="alert">{errors.caja_id}</p>}
-                            <div style={{ textAlign: 'left', marginBottom: '20px' }}>
-                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#374151' }}>Monto Inicial (Efectivo Base) S/</label>
+                        <form onSubmit={aperturarCaja} style={{ textAlign: 'left' }}>
+                            <div style={{ marginBottom: '20px' }}>
+                                <label htmlFor="physical-register" style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: '600', color: '#1E293B' }}>Caja y Sucursal</label>
+                                <select 
+                                    id="physical-register" 
+                                    required 
+                                    value={cajaId} 
+                                    onChange={e => setCajaId(e.target.value)} 
+                                    onFocus={(e) => { e.target.style.borderColor = '#004797'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.15)'; }}
+                                    onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; }}
+                                    style={{ width: '100%', padding: '12px 16px', borderRadius: '10px', border: '1px solid #E2E8F0', fontSize: '14px', outline: 'none', backgroundColor: '#F8FAFC', color: '#1E293B', transition: 'all 0.2s ease', cursor: 'pointer' }}
+                                >
+                                    <option value="">Selecciona una caja</option>
+                                    {cajas.map(c => <option key={c.id} value={c.id}>{c.sucursal_nombre} / {c.nombre}</option>)}
+                                </select>
+                                {!cajas.length && <p role="alert" style={{color: '#004797', fontSize: '12px', marginTop: '4px'}}>Configura una caja con almacén en Sucursales antes de vender.</p>}
+                                {errors.caja_id && <p role="alert" style={{color: '#004797', fontSize: '12px', marginTop: '4px'}}>{errors.caja_id}</p>}
+                            </div>
+
+                            <div style={{ marginBottom: '32px' }}>
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: '600', color: '#1E293B' }}>Efectivo Base Inicial (S/)</label>
                                 <input
                                     type="number"
-                                    step="0.01"
-                                    min="0"
                                     required
+                                    min="0"
+                                    step="0.10"
+                                    placeholder="0.00"
                                     value={montoInicial}
-                                    onChange={(e) => setMontoInicial(e.target.value)}
-                                    placeholder="Ej. 50.00"
-                                    style={{ width: '100%', padding: '12px', border: '2px solid #E5E7EB', borderRadius: '8px', fontSize: '18px', fontWeight: 'bold' }}
+                                    onChange={e => setMontoInicial(e.target.value)}
+                                    onFocus={(e) => { e.target.style.borderColor = '#004797'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.15)'; e.target.style.backgroundColor = '#ffffff'; }}
+                                    onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; e.target.style.backgroundColor = '#F8FAFC'; }}
+                                    style={{ width: '100%', padding: '12px 16px', borderRadius: '10px', border: '1px solid #E2E8F0', fontSize: '16px', outline: 'none', backgroundColor: '#F8FAFC', color: '#1E293B', transition: 'all 0.2s ease', boxSizing: 'border-box' }}
                                 />
                             </div>
-                            <button type="submit" disabled={isAperturando || !cajaId} style={{ width: '100%', padding: '12px', background: 'var(--admin-text-main)', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: isAperturando ? 'not-allowed' : 'pointer', opacity: isAperturando ? 0.7 : 1 }}>
-                                {isAperturando ? 'Aperturando...' : 'Aperturar Caja'}
-                            </button>
+
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                                <Link 
+                                    href="/admin" 
+                                    style={{ flex: 1, padding: '14px', background: '#F8FAFC', color: '#475569', border: '1px solid #E2E8F0', borderRadius: '10px', fontSize: '15px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s ease', textDecoration: 'none', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F1F5F9'; e.currentTarget.style.color = '#1E293B'; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#F8FAFC'; e.currentTarget.style.color = '#475569'; }}
+                                >
+                                    Volver
+                                </Link>
+                                <button 
+                                    type="submit" 
+                                    disabled={isAperturando} 
+                                    onMouseEnter={(e) => { if(!e.currentTarget.disabled) { e.currentTarget.style.backgroundColor = '#003B7D'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 71, 151, 0.3)'; } }}
+                                    onMouseLeave={(e) => { if(!e.currentTarget.disabled) { e.currentTarget.style.backgroundColor = '#004797'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 71, 151, 0.2)'; } }}
+                                    style={{ flex: 1, padding: '14px', background: '#004797', color: 'white', border: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: '600', cursor: isAperturando ? 'not-allowed' : 'pointer', transition: 'all 0.2s ease', boxShadow: '0 2px 4px rgba(0, 71, 151, 0.2)', opacity: isAperturando ? 0.7 : 1 }}
+                                >
+                                    {isAperturando ? 'Abriendo...' : 'Aperturar Caja'}
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>
             )}
 
-            {/* MODAL CIERRE DE CAJA */}
+                        {/* MODAL CIERRE DE CAJA */}
             {showCierre && cajaAbierta && (
                 <div style={{
                     position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-                    background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center'
+                    background: 'rgba(15, 23, 42, 0.6)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(8px)', transition: 'all 0.3s ease'
                 }}>
-                    <div style={{ background: 'white', padding: '30px', borderRadius: '12px', width: '100%', maxWidth: '450px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}>
-                        <h2 style={{ margin: '0 0 20px 0', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--admin-text-main)' }}>
-                            <Lock size={20} /> Arqueo y Cierre de Caja
-                        </h2>
+                    <div style={{ background: '#ffffff', padding: '40px', borderRadius: '16px', width: '100%', maxWidth: '450px', boxShadow: '0 25px 50px -12px rgba(0, 71, 151, 0.15)', border: '1px solid #E2E8F0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                            <div style={{ width: '48px', height: '48px', background: '#E6F0F9', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#004797' }}>
+                                <Lock size={24} />
+                            </div>
+                            <div>
+                                <h2 style={{ margin: '0 0 4px 0', fontSize: '20px', fontWeight: '700', color: '#1E293B', letterSpacing: '-0.01em' }}>
+                                    Cierre de Caja
+                                </h2>
+                                <div style={{ fontSize: '13px', color: '#64748B' }}>Arqueo de efectivo final</div>
+                            </div>
+                        </div>
 
-                        <div style={{ background: '#F3F4F6', padding: '15px', borderRadius: '8px', marginBottom: '20px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                <span style={{ color: '#4B5563' }}>Fondo Inicial:</span>
-                                <span style={{ fontWeight: 'bold' }}>S/ {Number(cajaAbierta.monto_inicial).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                        <div style={{ background: '#F8FAFC', padding: '20px', borderRadius: '12px', marginBottom: '24px', border: '1px solid #E2E8F0' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px' }}>
+                                <span style={{ color: '#64748B' }}>Fondo Inicial:</span>
+                                <span style={{ fontWeight: '600', color: '#1E293B' }}>S/ {Number(cajaAbierta.monto_inicial).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                <span style={{ color: '#4B5563' }}>Ingresos Manuales:</span>
-                                <span style={{ fontWeight: 'bold', color: '#2563eb' }}>+ S/ {Number(cajaIngresos).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px' }}>
+                                <span style={{ color: '#64748B' }}>Ingresos Manuales:</span>
+                                <span style={{ fontWeight: '600', color: '#1E293B' }}>+ S/ {Number(cajaIngresos).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                <span style={{ color: '#4B5563' }}>Egresos Manuales:</span>
-                                <span style={{ fontWeight: 'bold', color: '#3b82f6' }}>- S/ {Number(cajaEgresos).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px' }}>
+                                <span style={{ color: '#64748B' }}>Egresos Manuales:</span>
+                                <span style={{ fontWeight: '600', color: '#004797' }}>- S/ {Number(cajaEgresos).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                <span style={{ color: '#4B5563' }}>Ventas del Turno (Efectivo):</span>
-                                <span style={{ fontWeight: 'bold' }}>S/ {Number(ventasCajaEfectivo).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px' }}>
+                                <span style={{ color: '#64748B' }}>Ventas en Efectivo:</span>
+                                <span style={{ fontWeight: '600', color: '#1E293B' }}>S/ {Number(ventasCajaEfectivo).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #D1D5DB', paddingTop: '8px', marginTop: '8px' }}>
-                                <span style={{ color: '#4B5563', fontWeight: 'bold' }}>Esperado en EFECTIVO:</span>
-                                <span style={{ fontWeight: 'bold', color: '#2563eb', fontSize: '16px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #E2E8F0', paddingTop: '12px', marginTop: '12px', alignItems: 'center' }}>
+                                <span style={{ color: '#1E293B', fontWeight: '700', fontSize: '14px' }}>Esperado en EFECTIVO:</span>
+                                <span style={{ fontWeight: '800', color: '#004797', fontSize: '18px' }}>
                                     S/ {(Number(cajaAbierta.monto_inicial) + Number(ventasCajaEfectivo) + Number(cajaIngresos) - Number(cajaEgresos)).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                                 </span>
                             </div>
                         </div>
 
                         <form onSubmit={cerrarCaja}>
-                            <div style={{ marginBottom: '20px' }}>
-                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#374151' }}>¿Cuánto dinero en EFECTIVO hay realmente en la caja?</label>
+                            <div style={{ marginBottom: '24px' }}>
+                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#1E293B', fontSize: '14px' }}>¿Cuánto efectivo real hay en caja?</label>
                                 <input
                                     type="number"
                                     step="0.01"
@@ -864,55 +907,78 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                                     value={montoDeclarado}
                                     onChange={(e) => setMontoDeclarado(e.target.value)}
                                     placeholder="0.00"
-                                    style={{ width: '100%', padding: '12px', border: '2px solid #E5E7EB', borderRadius: '8px', fontSize: '18px', fontWeight: 'bold' }}
+                                    onFocus={(e) => { e.target.style.borderColor = '#004797'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.15)'; e.target.style.backgroundColor = '#ffffff'; }}
+                                    onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'none'; e.target.style.backgroundColor = '#F8FAFC'; }}
+                                    style={{ width: '100%', padding: '12px 16px', borderRadius: '10px', border: '1px solid #E2E8F0', fontSize: '18px', fontWeight: '700', outline: 'none', backgroundColor: '#F8FAFC', color: '#1E293B', transition: 'all 0.2s ease', boxSizing: 'border-box' }}
                                 />
                             </div>
-                            <div style={{ display: 'flex', gap: '10px' }}>
-                                <button type="button" onClick={() => setShowCierre(false)} style={{ flex: 1, padding: '12px', background: '#E5E7EB', color: '#374151', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                                <button type="button" onClick={() => setShowCierre(false)} 
+                                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#F1F5F9'; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#ffffff'; }}
+                                    style={{ flex: 1, padding: '14px', background: '#ffffff', color: '#475569', border: '1px solid #E2E8F0', borderRadius: '10px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s ease', fontSize: '15px' }}>
                                     Cancelar
                                 </button>
-                                <div style={{ display: 'flex', gap: '8px' }}>
-                                    <button 
-                                        type="button"
-                                        onClick={() => setShowMovimiento(true)} 
-                                        style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>
-                                        Registrar Movimiento
-                                    </button>
-                                    <button type="submit" style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>
-                                        Cerrar Turno
-                                    </button>
-                                </div>
+                                <button type="submit" 
+                                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#003670'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 71, 151, 0.25)'; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#004797'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 71, 151, 0.15)'; }}
+                                    style={{ flex: 1, padding: '14px', background: '#004797', color: 'white', border: 'none', borderRadius: '10px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s ease', fontSize: '15px', boxShadow: '0 2px 4px rgba(0, 71, 151, 0.15)' }}>
+                                    Cerrar Caja
+                                </button>
                             </div>
                         </form>
                     </div>
                 </div>
             )}
 
-            {/* MODAL MOVIMIENTOS CAJA CHICA */}
+            {/* OVERLAY REGISTRO MOVIMIENTO CAJA */}
             {showMovimiento && cajaAbierta && (
                 <div style={{
                     position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-                    background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center'
+                    background: 'rgba(30, 41, 59, 0.4)', backdropFilter: 'blur(8px)',
+                    zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center',
+                    animation: 'fadeIn 0.2s ease'
                 }}>
-                    <div style={{ background: 'white', padding: '30px', borderRadius: '12px', width: '100%', maxWidth: '450px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}>
-                        <h2 style={{ margin: '0 0 20px 0', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--admin-text-main)' }}>
-                            <Settings size={20} /> Registrar Movimiento de Caja
-                        </h2>
+                    <div style={{ 
+                        background: 'var(--admin-surface)', 
+                        padding: '30px', 
+                        borderRadius: '12px', 
+                        width: '100%', 
+                        maxWidth: '450px', 
+                        boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)',
+                        border: '1px solid #E2E8F0',
+                        animation: 'slideUp 0.3s ease'
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                            <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: 'var(--admin-text-main)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <Settings size={22} style={{ color: '#004797' }} /> 
+                                Registrar Movimiento
+                            </h2>
+                            <button onClick={() => setShowMovimiento(false)} style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#94A3B8', padding: '4px' }}>
+                                <X size={20} />
+                            </button>
+                        </div>
 
                         <form onSubmit={registrarMovimiento}>
-                            <div style={{ marginBottom: '15px' }}>
-                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>Tipo de Movimiento</label>
+                            <div style={{ marginBottom: '16px' }}>
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: '600', color: '#475569' }}>TIPO DE MOVIMIENTO</label>
                                 <select 
                                     value={movimientoData.tipo}
                                     onChange={e => setMovimientoData({...movimientoData, tipo: e.target.value})}
-                                    style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #E5E7EB' }}
+                                    style={{ 
+                                        width: '100%', padding: '12px 16px', borderRadius: '8px', 
+                                        border: '1px solid #CBD5E1', fontSize: '14px',
+                                        transition: 'all 0.2s ease', outline: 'none', background: '#F8FAFC'
+                                    }}
+                                    onFocus={e => { e.target.style.borderColor = '#004797'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.1)'; }}
+                                    onBlur={e => { e.target.style.borderColor = '#CBD5E1'; e.target.style.boxShadow = 'none'; }}
                                 >
                                     <option value="ingreso">Ingreso de Dinero (+)</option>
                                     <option value="egreso">Egreso de Dinero (-)</option>
                                 </select>
                             </div>
-                            <div style={{ marginBottom: '15px' }}>
-                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>Monto (S/)</label>
+                            <div style={{ marginBottom: '16px' }}>
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: '600', color: '#475569' }}>MONTO (S/)</label>
                                 <input
                                     type="number"
                                     step="0.01"
@@ -921,26 +987,57 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                                     value={movimientoData.monto}
                                     onChange={(e) => setMovimientoData({...movimientoData, monto: e.target.value})}
                                     placeholder="0.00"
-                                    style={{ width: '100%', padding: '10px', border: '1px solid #E5E7EB', borderRadius: '8px' }}
+                                    style={{ 
+                                        width: '100%', padding: '12px 16px', borderRadius: '8px', 
+                                        border: '1px solid #CBD5E1', fontSize: '14px',
+                                        transition: 'all 0.2s ease', outline: 'none'
+                                    }}
+                                    onFocus={e => { e.target.style.borderColor = '#004797'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.1)'; }}
+                                    onBlur={e => { e.target.style.borderColor = '#CBD5E1'; e.target.style.boxShadow = 'none'; }}
                                 />
                             </div>
-                            <div style={{ marginBottom: '20px' }}>
-                                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>Concepto / Motivo</label>
+                            <div style={{ marginBottom: '24px' }}>
+                                <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: '600', color: '#475569' }}>CONCEPTO / MOTIVO</label>
                                 <input
                                     type="text"
                                     required
                                     value={movimientoData.concepto}
                                     onChange={(e) => setMovimientoData({...movimientoData, concepto: e.target.value})}
-                                    placeholder="Ej. Pago de agua, Sencillo..."
-                                    style={{ width: '100%', padding: '10px', border: '1px solid #E5E7EB', borderRadius: '8px' }}
+                                    style={{ 
+                                        width: '100%', padding: '12px 16px', borderRadius: '8px', 
+                                        border: '1px solid #CBD5E1', fontSize: '14px',
+                                        transition: 'all 0.2s ease', outline: 'none'
+                                    }}
+                                    onFocus={e => { e.target.style.borderColor = '#004797'; e.target.style.boxShadow = '0 0 0 3px rgba(0, 71, 151, 0.1)'; }}
+                                    onBlur={e => { e.target.style.borderColor = '#CBD5E1'; e.target.style.boxShadow = 'none'; }}
                                 />
                             </div>
-                            <div style={{ display: 'flex', gap: '10px' }}>
-                                <button type="button" onClick={() => setShowMovimiento(false)} style={{ flex: 1, padding: '12px', background: '#E5E7EB', color: '#374151', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                                <button 
+                                    type="button" 
+                                    onClick={() => setShowMovimiento(false)} 
+                                    style={{ 
+                                        flex: 1, padding: '12px', background: '#F1F5F9', color: '#475569', 
+                                        border: '1px solid #E2E8F0', borderRadius: '8px', fontWeight: '600', 
+                                        cursor: 'pointer', transition: 'all 0.2s ease'
+                                    }}
+                                    onMouseOver={e => e.currentTarget.style.background = '#E2E8F0'}
+                                    onMouseOut={e => e.currentTarget.style.background = '#F1F5F9'}
+                                >
                                     Cancelar
                                 </button>
-                                <button type="submit" style={{ flex: 1, padding: '10px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
-                                    Guardar
+                                <button 
+                                    type="submit" 
+                                    style={{ 
+                                        flex: 1, padding: '12px', background: '#004797', color: 'white', 
+                                        border: 'none', borderRadius: '8px', fontWeight: '600', 
+                                        cursor: 'pointer', transition: 'all 0.2s ease',
+                                        boxShadow: '0 4px 6px -1px rgba(0, 71, 151, 0.2)'
+                                    }}
+                                    onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 8px -1px rgba(0, 71, 151, 0.3)'; }}
+                                    onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 71, 151, 0.2)'; }}
+                                >
+                                    Guardar Movimiento
                                 </button>
                             </div>
                         </form>
@@ -950,8 +1047,8 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
 
             {/* Modal de Pagos Mixtos / Checkout */}
             {showCheckoutModal && (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div style={{ background: 'var(--admin-surface)', padding: '25px', borderRadius: '12px', width: '100%', maxWidth: '400px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(30, 41, 59, 0.4)', backdropFilter: 'blur(8px)', zIndex: 9999, animation: 'fadeIn 0.2s ease', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ background: 'var(--admin-surface)', padding: '30px', borderRadius: '12px', width: '100%', maxWidth: '420px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', border: '1px solid #E2E8F0', animation: 'slideUp 0.3s ease' }}>
                         <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '15px', color: 'var(--admin-text-main)' }}>Confirmar Pago</h2>
 
                         <div style={{ background: '#F8FAFC', padding: '15px', borderRadius: '8px', marginBottom: '15px', textAlign: 'center', border: '1px solid #E2E8F0' }}>
@@ -1067,7 +1164,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                                 type="button"
                                 onClick={completarVenta}
                                 disabled={isSelling || cajaRequiereCierre}
-                                style={{ flex: 1, padding: '12px', background: '#0F172A', color: 'white', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
+                                style={{ flex: 1, padding: '12px', background: '#004797', color: 'white', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', transition: 'all 0.2s ease', boxShadow: '0 4px 6px -1px rgba(0, 71, 151, 0.2)' }}
                             >
                                 <DollarSign size={18} />
                                 Confirmar Venta
@@ -1080,9 +1177,9 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
             {showPausadas && (
                 <div style={{
                     position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
-                    background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center'
+                    background: 'rgba(30, 41, 59, 0.4)', backdropFilter: 'blur(8px)', zIndex: 9999, animation: 'fadeIn 0.2s ease', display: 'flex', justifyContent: 'center', alignItems: 'center'
                 }}>
-                    <div style={{ background: 'white', padding: '30px', borderRadius: '12px', width: '100%', maxWidth: '500px', maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}>
+                    <div style={{ background: 'white', padding: '30px', borderRadius: '12px', width: '100%', maxWidth: '500px', maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', border: '1px solid #E2E8F0', animation: 'slideUp 0.3s ease' }}>
                         <h2 style={{ margin: '0 0 20px 0', color: 'var(--admin-text-main)' }}>Ventas Pausadas</h2>
                         
                         {ventasPausadas.length === 0 ? (
@@ -1111,7 +1208,7 @@ export default function PosIndex({ productos, metodosPago, categorias = [], vent
                         )}
                         
                         <div style={{ marginTop: '20px', textAlign: 'right' }}>
-                            <button onClick={() => setShowPausadas(false)} style={{ padding: '10px 20px', background: '#E5E7EB', color: '#374151', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
+                            <button onClick={() => setShowPausadas(false)} style={{ padding: '10px 20px', background: '#E5E7EB', color: '#1E293B', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
                                 Cerrar
                             </button>
                         </div>

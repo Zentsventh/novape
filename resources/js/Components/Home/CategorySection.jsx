@@ -1,8 +1,12 @@
 import ProductCarousel from './ProductCarousel';
 
-/* Mapeo de iconos SVG monocromáticos para headers de sección. */
 const SectionIcon = ({ name }) => {
     const icons = {
+        'Tecnología': (
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="3" width="20" height="14" rx="2" /><line x1="2" y1="20" x2="22" y2="20" /><line x1="9" y1="17" x2="9" y2="20" /><line x1="15" y1="17" x2="15" y2="20" />
+            </svg>
+        ),
         'Celulares': (
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="5" y="2" width="14" height="20" rx="2" /><line x1="12" y1="18" x2="12.01" y2="18" />
@@ -59,7 +63,9 @@ const SectionIcon = ({ name }) => {
 };
 
 /* Renderiza una sección de productos agrupados por categoría. */
-export default function CategorySection({ categoria, index }) {
+export default function CategorySection({ categoria, index, customTitle }) {
+    const title = customTitle || categoria.nombre;
+    
     return (
         <section
             id={`cat-section-${categoria.id}`}
@@ -68,10 +74,10 @@ export default function CategorySection({ categoria, index }) {
         >
             <div className="efe-section-header">
                 <div className="efe-section-icon">
-                    <SectionIcon name={categoria.nombre} />
+                    <SectionIcon name={title} />
                 </div>
                 <div>
-                    <h2 className="efe-section-title">{categoria.nombre}</h2>
+                    <h2 className="efe-section-title">{title}</h2>
                 </div>
             </div>
 

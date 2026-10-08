@@ -33,10 +33,12 @@ class Producto extends Model implements Auditable
         'fuente_url',
         'fuente_consultada_at',
         'sku_base',
+        'retiro_tienda', 'envio_domicilio',
     ];
 
     protected $casts = [
         'activo' => 'boolean',
+        'retiro_tienda' => 'boolean', 'envio_domicilio' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
@@ -63,6 +65,7 @@ class Producto extends Model implements Auditable
             \Illuminate\Support\Facades\Cache::forget('home_category_product_ids_v2');
             \Illuminate\Support\Facades\Cache::forget('home_weekly_product_ids_v2');
             Cache::forget('home_categorias');
+            Cache::forget('home_categorias_menu_v3');
             Cache::forget('home_mejor_semana');
         };
 
@@ -112,5 +115,22 @@ class Producto extends Model implements Auditable
     public function scopeActivos(Builder $query): Builder
     {
         return $query->where('activo', true);
+    }
+
+    public function promociones(): BelongsToMany
+    {
+        return $this->belongsToMany(Promocion::class, 'producto_promocion', 'producto_id', 'promocion_id')
+                    ->where('activa', true)
+                    ->where(function ($q) {
+                        $q->whereNull('fecha_inicio')->orWhere('fecha_inicio', '<=', now());
+                    })
+                    ->where(function ($q) {
+                        $q->whereNull('fecha_fin')->orWhere('fecha_fin', '>=', now());
+                    });
+    }
+
+    public function getPromocionActivaAttribute()
+    {
+        return $this->promociones->first();
     }
 }

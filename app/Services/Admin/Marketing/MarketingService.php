@@ -35,14 +35,15 @@ class MarketingService
             }
         }
 
-        $orden = DB::table('banners')->where('posicion', 'hero')->max('orden') + 1;
+        $posicion = $data['posicion'] ?? 'hero';
+        $orden = DB::table('banners')->where('posicion', $posicion)->max('orden') + 1;
 
         DB::table('banners')->insert([
             'titulo' => $data['titulo'],
             'subtitulo' => $data['subtitulo'] ?? null,
             'imagen_url' => $imagenUrl,
             'enlace_url' => $data['enlace_url'] ?? null,
-            'posicion' => 'hero',
+            'posicion' => $posicion,
             'orden' => $orden,
             'activo' => true,
             'fecha_inicio' => $data['fecha_inicio'] ?? null,
@@ -50,6 +51,7 @@ class MarketingService
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+        \Illuminate\Support\Facades\Cache::forget('home_banners');
     }
 
     public function updateBanner(int $id, array $data, ?UploadedFile $imagen = null): void
@@ -59,6 +61,7 @@ class MarketingService
                 'activo' => $data['activo'],
                 'updated_at' => now(),
             ]);
+            \Illuminate\Support\Facades\Cache::forget('home_banners');
             return;
         }
 
@@ -66,6 +69,7 @@ class MarketingService
             'titulo' => $data['titulo'],
             'subtitulo' => $data['subtitulo'] ?? null,
             'enlace_url' => $data['enlace_url'] ?? null,
+            'posicion' => $data['posicion'] ?? 'hero',
             'fecha_inicio' => $data['fecha_inicio'] ?? null,
             'fecha_fin' => $data['fecha_fin'] ?? null,
             'updated_at' => now(),
@@ -88,11 +92,13 @@ class MarketingService
         }
 
         DB::table('banners')->where('id', $id)->update($updateData);
+        \Illuminate\Support\Facades\Cache::forget('home_banners');
     }
 
     public function deleteBanner(int $id): void
     {
         DB::table('banners')->where('id', $id)->delete();
+        \Illuminate\Support\Facades\Cache::forget('home_banners');
     }
 
     public function getCoupons()

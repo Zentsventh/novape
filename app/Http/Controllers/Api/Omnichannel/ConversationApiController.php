@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Models\CrmCase;
 use App\Models\Omnichannel\CannedResponse;
 use App\Models\Omnichannel\OmnichannelAgentConfig;
+use App\Models\Omnichannel\OmnichannelAuditLog;
 use App\Models\Omnichannel\OmnichannelConversation;
 use App\Models\Omnichannel\OmnichannelMessage;
 use App\Models\Omnichannel\OmnichannelQueue;
@@ -27,11 +28,41 @@ use Illuminate\Support\Facades\Log;
 
 class ConversationApiController extends Controller
 {
+    public function updatePriority(Request $request, OmnichannelConversation $conversation)
+    {
+        ConversationAccess::authorize($conversation);
+        $data = $request->validate(['priority' => 'required|in:urgent,high,normal,low']);
+        $conversation = DB::transaction(function () use ($conversation, $data) {
+            $locked = OmnichannelConversation::query()->lockForUpdate()->findOrFail($conversation->id);
+            ConversationAccess::authorize($locked);
+            if ($locked->priority !== $data['priority']) {
+                $previous = $locked->priority;
+                $locked->update($data);
+                OmnichannelAuditLog::create(['conversation_id' => $locked->id, 'user_id' => auth('admin')->id(), 'action' => 'priority_changed', 'description' => 'Prioridad actualizada', 'meta_data' => ['previous' => $previous, 'priority' => $locked->priority]]);
+            }
+
+            return $locked;
+        });
+        $this->broadcastSafely(new ConversationUpdated($conversation));
+
+        return response()->json(['success' => true, 'priority' => $conversation->priority]);
+    }
+
+    private function broadcastSafely(ConversationUpdated|NewMessageReceived $event): void
+    {
+        try {
+            broadcast($event)->toOthers();
+        } catch (\Throwable $error) {
+            Log::warning('Omnichannel realtime unavailable; polling will refresh persisted changes', ['event' => get_class($event), 'exception' => get_class($error)]);
+        }
+    }
+
     /**
      * Listar conversaciones con filtros de canal, estado y búsqueda.
      */
     public function conversations(Request $request)
     {
+        $request->validate(['view' => 'nullable|in:all,mine,unassigned,waiting,unread,priority,bot', 'sort' => 'nullable|in:latest,oldest,priority', 'priority' => 'nullable|in:all,urgent,high,normal,low', 'page' => 'nullable|integer|min:1', 'search' => 'nullable|string|max:150', 'channel' => 'nullable|in:all,whatsapp,messenger,instagram,web', 'status' => 'nullable|in:all,open,closed,waiting,bot_active']);
         $user = auth()->user();
         $isAdmin = $user->roles()->where('nombre', 'admin')->exists();
 
@@ -42,6 +73,36 @@ class ConversationApiController extends Controller
         if (! $isAdmin) {
             // Si es un asesor, SOLO ve los chats que están explícitamente asignados a él.
             $query->where('assigned_user_id', $user->id);
+        }
+
+        $stats = (clone $query)->withoutEagerLoads()->reorder()->selectRaw("COUNT(*) as total,
+            SUM(CASE WHEN status NOT IN ('resolved','closed') THEN 1 ELSE 0 END) as open,
+            SUM(CASE WHEN status IN ('resolved','closed') THEN 1 ELSE 0 END) as closed,
+            SUM(CASE WHEN status NOT IN ('resolved','closed') AND assigned_user_id = ? THEN 1 ELSE 0 END) as mine,
+            SUM(CASE WHEN status NOT IN ('resolved','closed') AND assigned_user_id IS NULL THEN 1 ELSE 0 END) as unassigned,
+            SUM(CASE WHEN status = 'waiting' THEN 1 ELSE 0 END) as waiting,
+            SUM(CASE WHEN status NOT IN ('resolved','closed') AND unread_count > 0 THEN 1 ELSE 0 END) as unread,
+            SUM(CASE WHEN status NOT IN ('resolved','closed') AND priority IN ('urgent','high') THEN 1 ELSE 0 END) as priority,
+            SUM(CASE WHEN status = 'bot_active' THEN 1 ELSE 0 END) as bot", [$user->id])->first()->getAttributes();
+        $stats = array_map(fn ($value) => (int) $value, $stats);
+        $channels = (clone $query)->withoutEagerLoads()->reorder()->whereNotIn('status', ['resolved', 'closed'])->select('channel')->selectRaw('COUNT(*) as total')->groupBy('channel')->pluck('total', 'channel');
+        match ($request->input('view', 'all')) {
+            'mine' => $query->where('assigned_user_id', $user->id),
+            'unassigned' => $query->whereNull('assigned_user_id'),
+            'waiting' => $query->where('status', 'waiting'),
+            'unread' => $query->where('unread_count', '>', 0),
+            'priority' => $query->whereIn('priority', ['urgent', 'high']),
+            'bot' => $query->where('status', 'bot_active'),
+            default => null,
+        };
+        if ($request->filled('priority') && $request->priority !== 'all') {
+            $query->where('priority', $request->priority);
+        }
+        if ($request->input('sort') === 'oldest') {
+            $query->reorder()->orderBy('last_message_at')->orderBy('id');
+        }
+        if ($request->input('sort') === 'priority') {
+            $query->reorder()->orderByRaw("CASE priority WHEN 'urgent' THEN 0 WHEN 'high' THEN 1 WHEN 'normal' THEN 2 ELSE 3 END")->orderByDesc('last_message_at')->orderByDesc('id');
         }
 
         // Filtro por canal
@@ -65,7 +126,9 @@ class ConversationApiController extends Controller
             $search = $request->search;
             $query->whereHas('contact', function ($q) use ($search) {
                 $q->where('name', 'like', '%'.$search.'%')
-                    ->orWhere('phone_number', 'like', '%'.$search.'%');
+                    ->orWhere('phone_number', 'like', '%'.$search.'%')
+                    ->orWhere('email', 'like', '%'.$search.'%')
+                    ->orWhereHas('usuario', fn ($user) => $user->where('nombres', 'like', '%'.$search.'%')->orWhere('apellidos', 'like', '%'.$search.'%')->orWhere('email', 'like', '%'.$search.'%'));
             });
         }
 
@@ -91,6 +154,7 @@ class ConversationApiController extends Controller
                 'lastMessagePreview' => $conv->last_message_preview,
                 'lastMessageTime' => $conv->last_message_at?->format('H:i'),
                 'lastMessageDate' => $conv->last_message_at?->format('d/m'),
+                'lastMessageAt' => $conv->last_message_at?->toIso8601String(),
                 'unreadCount' => $conv->unread_count,
                 'priority' => $conv->priority,
                 'status' => $conv->status,
@@ -101,7 +165,7 @@ class ConversationApiController extends Controller
             ];
         });
 
-        return response()->json($conversations);
+        return response()->json(array_merge($conversations->toArray(), ['summary' => $stats, 'channels' => $channels]));
     }
 
     /**
@@ -110,6 +174,7 @@ class ConversationApiController extends Controller
     public function messages(Request $request, OmnichannelConversation $conversation)
     {
         ConversationAccess::authorize($conversation);
+        $request->validate(['page' => 'nullable|integer|min:1']);
         $user = auth()->user();
         $isAdmin = $user->roles()->where('nombre', 'admin')->exists();
 
@@ -119,8 +184,10 @@ class ConversationApiController extends Controller
         }
 
         // Marcar como leídos
-        $conversation->update(['unread_count' => 0]);
-        broadcast(new ConversationUpdated($conversation))->toOthers();
+        if ($conversation->unread_count > 0) {
+            $conversation->update(['unread_count' => 0]);
+            $this->broadcastSafely(new ConversationUpdated($conversation));
+        }
 
         $messages = $conversation->messages()
             ->orderByDesc('id')->paginate(100);
@@ -139,6 +206,7 @@ class ConversationApiController extends Controller
     public function sendMessage(Request $request, OmnichannelConversation $conversation)
     {
         ConversationAccess::authorize($conversation);
+        abort_if(in_array($conversation->status, ['resolved', 'closed'], true), 422, 'Reabre la conversación antes de enviar una respuesta al cliente.');
         $user = auth()->user();
         $isAdmin = $user->roles()->where('nombre', 'admin')->exists();
 
@@ -174,8 +242,8 @@ class ConversationApiController extends Controller
         // Enviar por el canal correspondiente
         $this->dispatchToChannel($conversation, $message, $content);
 
-        broadcast(new NewMessageReceived($message))->toOthers();
-        broadcast(new ConversationUpdated($conversation->refresh()))->toOthers();
+        $this->broadcastSafely(new NewMessageReceived($message));
+        $this->broadcastSafely(new ConversationUpdated($conversation->refresh()));
 
         return response()->json([
             'success' => true,
@@ -219,7 +287,7 @@ class ConversationApiController extends Controller
             'status' => 'sent',
         ]);
 
-        broadcast(new ConversationUpdated($conversation->load('assignedUser')))->toOthers();
+        $this->broadcastSafely(new ConversationUpdated($conversation->load('assignedUser')));
 
         return response()->json(['success' => true]);
     }
@@ -238,7 +306,7 @@ class ConversationApiController extends Controller
             'bot_paused_by' => null,
         ]);
 
-        broadcast(new ConversationUpdated($conversation))->toOthers();
+        $this->broadcastSafely(new ConversationUpdated($conversation));
 
         return response()->json(['success' => true]);
     }
@@ -255,7 +323,7 @@ class ConversationApiController extends Controller
             'resolved_by' => $request->user()->id,
         ]);
 
-        broadcast(new ConversationUpdated($conversation))->toOthers();
+        $this->broadcastSafely(new ConversationUpdated($conversation));
 
         return response()->json(['success' => true]);
     }
@@ -274,7 +342,7 @@ class ConversationApiController extends Controller
             'resolved_by' => null,
         ]);
 
-        broadcast(new ConversationUpdated($conversation))->toOthers();
+        $this->broadcastSafely(new ConversationUpdated($conversation));
 
         return response()->json(['success' => true]);
     }
@@ -299,7 +367,7 @@ class ConversationApiController extends Controller
             'status' => 'sent',
         ]);
 
-        broadcast(new NewMessageReceived($message))->toOthers();
+        $this->broadcastSafely(new NewMessageReceived($message));
 
         return response()->json([
             'success' => true,
@@ -429,7 +497,7 @@ class ConversationApiController extends Controller
             'status' => 'sent',
         ]);
 
-        broadcast(new ConversationUpdated($conversation))->toOthers();
+        $this->broadcastSafely(new ConversationUpdated($conversation));
 
         return response()->json(['success' => true]);
     }
@@ -576,7 +644,7 @@ class ConversationApiController extends Controller
             'status' => 'sent',
         ]);
 
-        broadcast(new ConversationUpdated($conversation->refresh()))->toOthers();
+        $this->broadcastSafely(new ConversationUpdated($conversation->refresh()));
 
         return response()->json(['success' => true]);
     }
@@ -595,7 +663,7 @@ class ConversationApiController extends Controller
             $conversation, auth()->user(), $request->input('reason')
         );
 
-        broadcast(new ConversationUpdated($conversation->refresh()))->toOthers();
+        $this->broadcastSafely(new ConversationUpdated($conversation->refresh()));
 
         return response()->json(['success' => true]);
     }

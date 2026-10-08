@@ -55,8 +55,12 @@ class CatalogManagementService
 
     public function updateCategory(Categoria $categoria, array $data): Categoria
     {
-        $categoria->update($data);
-        return $categoria;
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($categoria, $data) {
+            // Serialize hierarchy edits so two simultaneous reparents cannot form a cycle.
+            \Illuminate\Support\Facades\DB::table('categoria')->orderBy('id')->lockForUpdate()->get(['id']);
+            $categoria->update($data);
+            return $categoria;
+        });
     }
 
     public function deleteCategory(Categoria $categoria): void

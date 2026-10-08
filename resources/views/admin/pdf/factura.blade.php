@@ -2,102 +2,307 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Factura Pedido #{{ $pedido->id }}</title>
+    <title>Comprobante {{ $pedido->codigo }}</title>
     <style>
-        body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 14px; color: #333; }
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #8a2be2; padding-bottom: 10px; }
-        .header h1 { margin: 0; color: #8a2be2; font-size: 24px; }
-        .header p { margin: 5px 0 0; color: #666; font-size: 12px; }
-        .details-table { width: 100%; margin-bottom: 30px; border-collapse: collapse; }
-        .details-table td { padding: 5px; vertical-align: top; }
-        .details-table h3 { margin: 0 0 10px 0; font-size: 14px; color: #555; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-        .items-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-        .items-table th { background: #f8f8f8; padding: 10px; text-align: left; border-bottom: 2px solid #ddd; }
-        .items-table td { padding: 10px; border-bottom: 1px solid #eee; }
-        .totals { float: right; width: 300px; }
-        .totals-table { width: 100%; border-collapse: collapse; }
-        .totals-table td { padding: 5px 10px; text-align: right; }
-        .totals-table .total-row { font-weight: bold; font-size: 18px; color: #8a2be2; border-top: 2px solid #ddd; }
-        .footer { clear: both; margin-top: 50px; text-align: center; font-size: 12px; color: #888; border-top: 1px solid #eee; padding-top: 10px; }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            color: #000;
+            font-size: 11px;
+            margin: 0;
+            padding: 20px;
+        }
+        .header-table {
+            width: 100%;
+            margin-bottom: 15px;
+            border-collapse: collapse;
+        }
+        .company-info {
+            width: 55%;
+            vertical-align: top;
+        }
+        .company-info img {
+            max-width: 220px;
+            max-height: 80px;
+            margin-bottom: 15px;
+        }
+        .company-name {
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .company-details {
+            font-size: 10px;
+            line-height: 1.4;
+        }
+        .invoice-box {
+            width: 45%;
+            vertical-align: top;
+            padding-left: 20px;
+        }
+        .invoice-details {
+            border: 1px solid #999;
+            border-radius: 8px;
+            background-color: #EAEAEA;
+            text-align: center;
+            padding: 15px 10px;
+        }
+        .invoice-details h2 {
+            margin: 8px 0;
+            font-size: 15px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .invoice-details p {
+            margin: 0;
+            font-size: 15px;
+            font-weight: bold;
+        }
+        .client-info-box {
+            border: 1px solid #999;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 15px;
+        }
+        .client-info-table {
+            width: 100%;
+            font-size: 10px;
+            border-collapse: collapse;
+        }
+        .client-info-table td {
+            padding: 3px 0;
+            vertical-align: top;
+        }
+        .client-label {
+            width: 110px;
+            font-weight: bold;
+        }
+        .items-box {
+            border: 1px solid #999;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .items-table th {
+            background-color: #EAEAEA;
+            color: #000;
+            padding: 6px 8px;
+            text-align: left;
+            font-size: 10px;
+            border-bottom: 1px solid #999;
+        }
+        .items-table td {
+            padding: 6px 8px;
+            font-size: 10px;
+            vertical-align: top;
+        }
+        .text-right { text-align: right !important; }
+        .text-center { text-align: center !important; }
+        
+        .totals-table {
+            width: 100%;
+            border-collapse: collapse;
+            border-top: 1px solid #999;
+        }
+        .totals-table td {
+            padding: 4px 8px;
+            font-size: 10px;
+        }
+        .totals-label {
+            font-weight: bold;
+            text-align: right;
+        }
+        .totals-currency {
+            text-align: center;
+            width: 20px;
+        }
+        .totals-value {
+            text-align: right;
+            width: 60px;
+        }
+        .layout-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+        .layout-table td {
+            vertical-align: top;
+        }
+        .letras-box {
+            border: 1px solid #999;
+            border-radius: 8px;
+            padding: 8px 12px;
+            height: 90px;
+        }
+        .letras-title {
+            font-weight: bold;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+        .qr-cell {
+            width: 110px;
+            text-align: right;
+            padding-left: 10px;
+        }
+        .qr-cell img {
+            width: 105px;
+            height: 105px;
+            border: 1px solid #ccc;
+            padding: 2px;
+            border-radius: 4px;
+        }
+        .observaciones-box {
+            border: 1px solid #999;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 10px;
+            min-height: 25px;
+        }
+        .footer-text {
+            text-align: center;
+            font-size: 10px;
+            margin-top: 15px;
+            color: #333;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>NOVAPE</h1>
-        <p>Factura de Venta / Comprobante</p>
-    </div>
 
-    <table class="details-table">
+    <table class="header-table">
         <tr>
-            <td width="50%">
-                <h3>Datos del Cliente</h3>
-                <strong>{{ $pedido->usuario->nombres }} {{ $pedido->usuario->apellidos }}</strong><br>
-                Email: {{ $pedido->usuario->email }}<br>
-                Teléfono: {{ $pedido->usuario->telefono ?? 'N/A' }}<br>
-                DNI: {{ $pedido->usuario->dni ?? 'N/A' }}
+            <td class="company-info">
+                <div class="company-name">NOVAPE</div>
+                <div class="company-details">
+                    ATENCIÓN AL CLIENTE<br>
+                    Correo electrónico: admin@novape.me<br>
+                </div>
             </td>
-            <td width="50%" style="text-align: right;">
-                <h3>Detalles del Pedido</h3>
-                <strong>Pedido #:</strong> {{ $pedido->codigo }}<br>
-                <strong>Fecha:</strong> {{ $pedido->created_at->format('d/m/Y H:i') }}<br>
-                <strong>Estado:</strong> {{ strtoupper($pedido->estado) }}<br>
-                <strong>Método de Pago:</strong> {{ $pedido->pago ? ucfirst($pedido->pago->metodo) : 'Pendiente' }}
+            <td class="invoice-box">
+                <div class="invoice-details">
+                    <p>R.U.C. N° 20000000001</p>
+                    <h2>
+                        BOLETA DE VENTA ELECTRÓNICA
+                    </h2>
+                    <p>{{ $pedido->codigo }}</p>
+                </div>
             </td>
         </tr>
     </table>
 
-    <table class="items-table">
-        <thead>
+    <div class="client-info-box">
+        <table class="client-info-table">
             <tr>
-                <th>Producto / SKU</th>
-                <th style="text-align: center;">Cant.</th>
-                <th style="text-align: right;">Precio Unit.</th>
-                <th style="text-align: right;">Subtotal</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($pedido->items as $item)
-            <tr>
-                <td>
-                    {{ $item->variante->producto->nombre }}
-                    @if($item->variante->sku)
-                    <br><small style="color: #888;">SKU: {{ $item->variante->sku }}</small>
-                    @endif
-                </td>
-                <td style="text-align: center;">{{ $item->cantidad }}</td>
-                <td style="text-align: right;">S/ {{ number_format($item->precio_unitario, 2) }}</td>
-                <td style="text-align: right;">S/ {{ number_format($item->cantidad * $item->precio_unitario, 2) }}</td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
-
-    <div class="totals">
-        <table class="totals-table">
-            <tr>
-                <td>Subtotal:</td>
-                <td>S/ {{ number_format($pedido->subtotal, 2) }}</td>
+                <td class="client-label">Fecha emisión</td>
+                <td>: {{ $pedido->created_at->format('d/m/Y') }}</td>
             </tr>
             <tr>
-                <td>Costo de Envío:</td>
-                <td>S/ {{ number_format($pedido->costo_envio, 2) }}</td>
+                <td class="client-label">Señor(es)</td>
+                <td>: {{ $pedido->usuario->nombres }} {{ $pedido->usuario->apellidos }}</td>
             </tr>
-            @if($pedido->descuento > 0)
             <tr>
-                <td>Descuento:</td>
-                <td style="color: #e53e3e;">- S/ {{ number_format($pedido->descuento, 2) }}</td>
+                <td class="client-label">DNI</td>
+                <td>: {{ $pedido->usuario->dni ?? '---' }}</td>
             </tr>
-            @endif
-            <tr class="total-row">
-                <td>Total a Pagar:</td>
-                <td>S/ {{ number_format($pedido->total, 2) }}</td>
+            <tr>
+                <td class="client-label">Dirección</td>
+                <td>: {{ $pedido->direccion_envio_snapshot['direccion'] ?? '-' }}</td>
             </tr>
         </table>
     </div>
 
-    <div class="footer">
-        Gracias por su compra en Novape.<br>
-        Documento generado automáticamente el {{ date('d/m/Y H:i:s') }}.
+    <div class="items-box">
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th width="8%" class="text-center">Cant.</th>
+                    <th width="12%" class="text-center">Unidad</th>
+                    <th width="15%">Código</th>
+                    <th width="35%">Descripción</th>
+                    <th width="15%" class="text-right">P.U.</th>
+                    <th width="15%" class="text-right">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($pedido->items as $item)
+                <tr>
+                    <td class="text-center">{{ $item->cantidad }}</td>
+                    <td class="text-center">UNIDAD</td>
+                    <td>{{ $item->variante->sku ?? '---' }}</td>
+                    <td>{{ $item->variante->producto->nombre }}</td>
+                    <td class="text-right">{{ number_format($item->precio_unitario, 2) }}</td>
+                    <td class="text-right">{{ number_format($item->cantidad * $item->precio_unitario, 2) }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+        
+        <table class="totals-table">
+            <tr>
+                <td colspan="4"></td>
+                <td class="totals-label">SUB TOTAL</td>
+                <td class="totals-currency">S/</td>
+                <td class="totals-value">{{ number_format($pedido->subtotal, 2) }}</td>
+            </tr>
+            @if($pedido->costo_envio > 0)
+            <tr>
+                <td colspan="4"></td>
+                <td class="totals-label">ENVÍO</td>
+                <td class="totals-currency">S/</td>
+                <td class="totals-value">{{ number_format($pedido->costo_envio, 2) }}</td>
+            </tr>
+            @endif
+            @if($pedido->descuento > 0)
+            <tr>
+                <td colspan="4"></td>
+                <td class="totals-label">DESCUENTO</td>
+                <td class="totals-currency">S/</td>
+                <td class="totals-value" style="color: #e53e3e;">-{{ number_format($pedido->descuento, 2) }}</td>
+            </tr>
+            @endif
+            <tr>
+                <td colspan="4"></td>
+                <td class="totals-label">I.G.V</td>
+                <td class="totals-currency">S/</td>
+                <td class="totals-value">{{ number_format($pedido->total - ($pedido->total / 1.18), 2) }}</td>
+            </tr>
+            <tr>
+                <td colspan="4"></td>
+                <td class="totals-label">TOTAL</td>
+                <td class="totals-currency">S/</td>
+                <td class="totals-value">{{ number_format($pedido->total, 2) }}</td>
+            </tr>
+        </table>
     </div>
+
+    <table class="layout-table">
+        <tr>
+            <td style="padding-right: 10px;">
+                <div class="letras-box">
+                    <span class="letras-title">IMPORTE EN LETRAS:</span>
+                    <br><br>
+                    SON: {{ number_format($pedido->total, 2) }} CON 00/100 SOLES
+                </div>
+            </td>
+            <td class="qr-cell">
+                <!-- Fallback QR -->
+                <div style="width:105px; height:105px; border: 1px solid #ccc; display: flex; align-items:center; justify-content:center; font-size:10px; color:#888;">
+                    [QR]
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <div class="observaciones-box">
+        <strong>OBSERVACIONES:</strong> Estado del pedido: {{ strtoupper($pedido->estado) }}. Método de pago: {{ $pedido->pago ? ucfirst($pedido->pago->metodo) : 'Pendiente' }}.
+    </div>
+
+    <div class="footer-text">
+        Representación impresa de la Boleta de venta electrónica. Consulte su documento en <strong>https://novape.me/comprobantes</strong>
+    </div>
+
 </body>
 </html>

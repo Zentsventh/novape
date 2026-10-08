@@ -25,11 +25,11 @@ export default function RmaShow({ rma, categoriaProductos = [] }) {
     const StatusIcon = getStatusInfo(rma.status).icon;
 
     return (
-        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#f8fafc' }}>
+        <div style={{ minHeight: '100vh', display: 'flex', flexWrap: 'wrap', flexDirection: 'column', backgroundColor: '#f8fafc' }}>
             <Head title={`RMA #${rma.id}`} />
             
-            <Header onCartClick={() => setIsCartOpen(true)} cartItemCount={cart?.items?.length || 0} user={auth.user} />
-            <CategoryNavBar categories={categoriaProductos} />
+            <Header onOpenCart={() => setIsCartOpen(true)} cartCount={cart?.count || 0} user={auth.user} />
+            <CategoryNavBar categorias={categoriaProductos} />
             <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} cart={cart} />
 
             <main style={{ flex: 1, padding: '40px 20px', maxWidth: '900px', width: '100%', margin: '0 auto' }}>
@@ -39,7 +39,7 @@ export default function RmaShow({ rma, categoriaProductos = [] }) {
 
                 <div style={{ background: 'white', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)', padding: 'clamp(0.75rem, 3vw, 2rem)' }}>
                     
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #e2e8f0', paddingBottom: '24px', marginBottom: '24px' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #e2e8f0', paddingBottom: '24px', marginBottom: '24px' }}>
                         <div>
                             <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#0f172a', margin: '0 0 8px 0' }}>
                                 Solicitud de RMA #{rma.id.toString().padStart(6, '0')}
@@ -49,7 +49,7 @@ export default function RmaShow({ rma, categoriaProductos = [] }) {
                             </div>
                         </div>
                         <div style={{ 
-                            display: 'flex', alignItems: 'center', gap: '8px',
+                            display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px',
                             background: getStatusInfo(rma.status).bg, 
                             color: getStatusInfo(rma.status).text,
                             padding: '8px 16px', borderRadius: '24px', fontWeight: '600'
@@ -62,7 +62,7 @@ export default function RmaShow({ rma, categoriaProductos = [] }) {
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 16rem), 1fr))', gap: '24px', marginBottom: '32px' }}>
                         <div>
                             <h3 style={{ fontSize: '13px', textTransform: 'uppercase', color: '#64748b', fontWeight: '700', marginBottom: '12px' }}>Detalles de la Solicitud</h3>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', flexDirection: 'column', gap: '12px' }}>
                                 <div>
                                     <span style={{ color: '#64748b', fontSize: '14px', display: 'block', marginBottom: '4px' }}>Tipo</span>
                                     <span style={{ fontWeight: '500', color: '#0f172a' }}>
@@ -87,11 +87,11 @@ export default function RmaShow({ rma, categoriaProductos = [] }) {
                         <div>
                             <h3 style={{ fontSize: '13px', textTransform: 'uppercase', color: '#64748b', fontWeight: '700', marginBottom: '12px' }}>Producto Afectado</h3>
                             {rma.producto ? (
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', background: '#f8fafc', padding: '16px', borderRadius: '12px' }}>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '16px', background: '#f8fafc', padding: '16px', borderRadius: '12px' }}>
                                     {rma.producto.imagenes && rma.producto.imagenes[0] ? (
                                         <img src={`/storage/${rma.producto.imagenes[0]}`} alt={rma.producto.nombre} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '8px' }} />
                                     ) : (
-                                        <div style={{ width: '60px', height: '60px', background: '#e2e8f0', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                        <div style={{ width: '60px', height: '60px', background: '#e2e8f0', borderRadius: '8px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center' }}>
                                             <Package size={24} color="#94a3b8" />
                                         </div>
                                     )}
@@ -118,7 +118,7 @@ export default function RmaShow({ rma, categoriaProductos = [] }) {
                     {rma.images && rma.images.length > 0 && (
                         <div>
                             <h3 style={{ fontSize: '13px', textTransform: 'uppercase', color: '#64748b', fontWeight: '700', marginBottom: '12px' }}>Imágenes Adjuntas</h3>
-                            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
                                 {rma.images.map((img, i) => (
                                     <a key={i} href={img} target="_blank" rel="noreferrer" style={{ display: 'block', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e2e8f0' }}>
                                         <img src={img} alt={`Evidencia ${i+1}`} style={{ width: '120px', height: '120px', objectFit: 'cover' }} />
@@ -130,7 +130,7 @@ export default function RmaShow({ rma, categoriaProductos = [] }) {
 
                     {rma.admin_notes && (
                         <div style={{ marginTop: '32px', background: '#fffbeb', border: '1px solid #fde68a', padding: '20px', borderRadius: '12px' }}>
-                            <h3 style={{ fontSize: '13px', textTransform: 'uppercase', color: '#d97706', fontWeight: '700', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <h3 style={{ fontSize: '13px', textTransform: 'uppercase', color: '#d97706', fontWeight: '700', marginBottom: '8px', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px' }}>
                                 <FileText size={16} /> Respuesta de Soporte Técnico
                             </h3>
                             <div style={{ color: '#92400e', lineHeight: '1.6' }}>

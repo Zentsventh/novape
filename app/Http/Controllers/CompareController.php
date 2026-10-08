@@ -32,10 +32,10 @@ class CompareController extends Controller
 
     public function add(Request $request): RedirectResponse
     {
-        $id = (int) $request->input('producto_id');
+        $id = (int) $request->validate(['producto_id' => 'required|integer|exists:producto,id'])['producto_id'];
         $compare = session('compare', []);
 
-        if (count($compare) >= 4) {
+        if (count($compare) >= 4 && !in_array($id, $compare)) {
             return back()->with('error', 'Solo puedes comparar hasta 4 productos a la vez.');
         }
 

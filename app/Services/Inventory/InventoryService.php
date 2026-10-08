@@ -16,6 +16,9 @@ class InventoryService
      */
     public function returnStockForOrder(Pedido $pedido, int $usuarioId = 1, string $motivo = 'Cancelación/Reembolso'): void
     {
+        DB::table('variante')->whereIn('id', $pedido->items->pluck('variante_id')->filter()->unique())->orderBy('id')->lockForUpdate()->get(['id']);
+        $warehouses = $pedido->items->map(fn ($item) => (int) ($item->almacen_id ?: ConfiguracionSitio::obtener('almacen_ecommerce_id', 1)))->unique()->sort()->values();
+        DB::table('almacenes')->whereIn('id', $warehouses)->orderBy('id')->lockForUpdate()->get(['id']);
         foreach ($pedido->items->sortBy('variante_id') as $item) {
             $returned = (int) DB::table('inventory_returns')->where('pedido_item_id', $item->id)->sum('cantidad');
             $remaining = (int) $item->cantidad - $returned;

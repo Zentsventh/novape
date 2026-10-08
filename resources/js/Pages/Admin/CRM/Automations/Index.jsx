@@ -305,7 +305,7 @@ export default function Index({ automations = [] }) {
                     <div className="drawer-form-group">
                         <label className="drawer-label">Nombre de la automatización</label>
                         <input 
-                            type="text" required className="drawer-input" placeholder="Ej: Enviar webhook al crear oportunidad"
+                            type="text" required className="drawer-input"
                             value={form.nombre} onChange={e => setForm({...form, nombre: e.target.value})}
                         />
                     </div>
@@ -346,7 +346,7 @@ export default function Index({ automations = [] }) {
                         <div className="drawer-form-group">
                             <label className="drawer-label">URL del Webhook</label>
                             <input 
-                                type="url" required className="drawer-input" placeholder="https://api.ejemplo.com/webhook"
+                                type="url" required className="drawer-input"
                                 value={form.acciones[0].url || ''} 
                                 onChange={e => {
                                     const newAcc = [...form.acciones];
@@ -361,7 +361,7 @@ export default function Index({ automations = [] }) {
                         <div className="drawer-form-group">
                             <label className="drawer-label">Mensaje / Asunto</label>
                             <input 
-                                type="text" required className="drawer-input" placeholder="Ej: ¡Gracias por tu compra!"
+                                type="text" required className="drawer-input"
                                 value={form.acciones[0].message || ''} 
                                 onChange={e => {
                                     const newAcc = [...form.acciones];

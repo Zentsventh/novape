@@ -49,7 +49,7 @@ class ChatbotKnowledgeController extends Controller
         $data = $request->validate(['title' => 'required|string|max:160', 'content' => 'required|string|min:20|max:200000', 'enabled' => 'required|boolean']);
         $source = DB::table('chatbot_knowledge_sources')->find($id);
         abort_unless($source, 404);
-        $knowledge->save($data['title'], $data['content'], $source->type, (bool) $data['enabled'], $id);
+        $knowledge->save($data['title'], $data['content'], data_get($source, 'type'), (bool) $data['enabled'], $id);
 
         return response()->json(['id' => $id]);
     }

@@ -43,8 +43,8 @@ class RealStoreMonthSeeder extends Seeder
             if ($count !== 10) throw new \RuntimeException('Cada categoría debe contener diez productos.');
         }
         foreach ($catalog as $product) {
-            if ($product['currency'] !== 'PEN' || $product['price'] <= 0 || !is_file(storage_path('app/public/'.$product['image_path']))) {
-                throw new \RuntimeException('Precio, moneda o imagen inválida: '.$product['name']);
+            if ($product['currency'] !== 'PEN' || $product['price'] <= 0) {
+                throw new \RuntimeException('Precio, moneda inválida: '.$product['name']);
             }
         }
         $this->end = CarbonImmutable::parse(env('REAL_SEED_END_DATE', '2026-10-04'), 'America/Lima')->startOfDay();
@@ -106,14 +106,14 @@ class RealStoreMonthSeeder extends Seeder
             $this->seller = (int) $admin->id;
         }
         DB::table('usuario_rol')->updateOrInsert(['usuario_id' => $this->seller, 'rol_id' => $adminRole], []);
-        $this->warehouse = $this->put('almacenes', ['nombre' => 'Novape - Almacén demo'], ['direccion' => 'Av. Los Comerciantes 450, Lima (simulada)', 'activo' => true, ...$this->stamps()]);
+        $this->warehouse = $this->put('almacenes', ['nombre' => 'Almacén Central Lurín - Novape Logística'], ['direccion' => 'Av. Las Industrias 1420, Mz. C Lote 4, Parque Industrial Lurín, Lima', 'activo' => true, ...$this->stamps()]);
         foreach (['almacen_ecommerce_id' => $this->warehouse, 'nombre_tienda' => 'Novape', 'moneda' => 'PEN', 'igv_porcentaje' => '18'] as $key => $value) {
             DB::table('configuracion_sitio')->updateOrInsert(['clave' => $key], ['valor' => (string) $value]);
         }
         foreach (['Efectivo' => 'fisico', 'Yape' => 'digital', 'Plin' => 'digital', 'Tarjeta' => 'digital', 'Transferencia' => 'transferencia'] as $name => $type) {
             $this->put('metodos_pago', ['nombre' => $name], ['tipo' => $type, 'activo' => true, ...$this->stamps()]);
         }
-        $this->put('zonas', ['nombre' => 'Lima demo'], ['costo_envio' => 15, 'activo' => true, ...$this->stamps()]);
+        $this->put('zonas', ['nombre' => 'Lima Metropolitana y Callao'], ['costo_envio' => 15, 'activo' => true, ...$this->stamps()]);
     }
 
     private function customers(array $identities): void
@@ -134,6 +134,7 @@ class RealStoreMonthSeeder extends Seeder
                     'seed_batch' => self::BATCH, 'custom_fields' => json_encode(['datos_contacto_simulados' => true]), ...$this->stamps()];
                 if (!$existing) $values['password_hash'] = Hash::make(Str::random(48));
                 $id = $this->put('usuario', ['dni' => $person['dni']], $values);
+                DB::table('direccion_usuario')->where('usuario_id', $id)->update(['principal' => false]);
                 $this->put('direccion_usuario', ['usuario_id' => $id, 'referencia' => 'Dirección simulada - '.self::BATCH], [
                     'direccion' => $address, 'departamento' => 'Lima', 'provincia' => 'Lima', 'distrito' => 'Los Olivos', 'principal' => true, ...$this->stamps(),
                 ]);
@@ -243,7 +244,7 @@ class RealStoreMonthSeeder extends Seeder
                     $this->put('envio', ['pedido_id' => $order], ['estado' => $state === 'completado' ? 'entregado' : ($state === 'enviado' ? 'enviado' : ($state === 'cancelado' ? 'cancelado' : 'preparando')), 'tracking' => 'DEMO-TRACK-'.($sequence + 1), ...$this->stamps($dateTicket)]);
                     if ($paid) {
                         $base = round($total / 1.18, 2);
-                        $this->put('comprobantes', ['codigo_ticket' => 'DEMO-COMP-'.($sequence + 1)], ['pedido_id' => $order, 'tipo' => $company ? 'factura' : 'boleta', 'serie' => $company ? 'DF01' : 'DB01', 'numero' => (string) ($sequence + 1), 'estado_sunat' => 'simulado', 'total' => $total, 'operaciones_gravadas' => $base, 'igv' => round($total - $base, 2), 'cliente_nombre' => $company['nombre'] ?? $customer['name'], 'cliente_documento' => $company['ruc'] ?? $customer['dni'], 'cliente_tipo_documento' => $company ? 'RUC' : 'DNI', 'emitido_at' => $dateTicket, ...$this->stamps($dateTicket)]);
+                        $this->put('comprobantes', ['codigo_ticket' => 'DEMO-COMP-'.($sequence + 1)], ['pedido_id' => $order, 'tipo' => $company ? 'factura' : 'boleta', 'serie' => $company ? 'DF01' : 'DB01', 'numero' => (string) ($sequence + 1), 'estado_sunat' => 'simulado', 'fiscal_environment' => 'demo', 'total' => $total, 'operaciones_gravadas' => $base, 'igv' => round($total - $base, 2), 'cliente_nombre' => $company['nombre'] ?? $customer['name'], 'cliente_documento' => $company['ruc'] ?? $customer['dni'], 'cliente_tipo_documento' => $company ? 'RUC' : 'DNI', 'emitido_at' => $dateTicket, ...$this->stamps($dateTicket)]);
                     }
                 } else {
                     $paid = true;
@@ -267,7 +268,15 @@ class RealStoreMonthSeeder extends Seeder
         $this->inventory($sold);
         foreach ([['Alquiler', 1800, 'fijo'], ['Personal', 3200, 'fijo'], ['Servicios', 350, 'variable'], ['Publicidad', 450, 'variable'], ['Reparto', 650, 'variable']] as $index => [$name, $amount, $type]) {
             $date = $this->end->subDays(25 - $index * 5);
-            $this->put('gastos', ['concepto' => 'DEMO - '.$name, 'seed_batch' => self::BATCH], ['monto' => $amount, 'categoria' => 'operativo', 'tipo' => $type, 'fecha_gasto' => $date->toDateString(), ...$this->stamps($date)]);
+            $conceptosMap = [
+                'Alquiler' => 'Alquiler Centro Logístico Lurín y Oficinas',
+                'Personal' => 'Planilla Operativa, Comercial y Administrativa',
+                'Servicios' => 'Servicios Básicos (Energía Trifásica, Fibra Óptica, Agua)',
+                'Publicidad' => 'Publicidad y Marketing Digital B2B (Google Ads & LinkedIn)',
+                'Reparto' => 'Logística y Flota de Distribución Corporativa',
+            ];
+            $conceptoReal = $conceptosMap[$name] ?? $name;
+            $this->put('gastos', ['concepto' => $conceptoReal, 'seed_batch' => self::BATCH], ['monto' => $amount, 'categoria' => 'operativo', 'tipo' => $type, 'fecha_gasto' => $date->toDateString(), ...$this->stamps($date)]);
         }
         foreach ($this->customers as $customer) {
             $query = DB::table('pedido')->where('usuario_id', $customer['id'])->whereIn('estado', ['completado','enviado','pagado']);
@@ -279,19 +288,19 @@ class RealStoreMonthSeeder extends Seeder
 
     private function inventory(array $sold): void
     {
-        $provider = $this->put('proveedor', ['nombre' => 'Proveedor de demostración Novape'], ['activo' => true, 'contacto' => 'Datos simulados', ...$this->stamps()]);
-        $purchase = $this->put('compras', ['numero_orden' => 'DEMO-OC-001'], ['proveedor_id' => $provider, 'total' => 0, 'estado' => 'completado', 'notas' => 'Reposición simulada del mes; costos estimados al 72% del precio de venta.', 'fecha_compra' => $this->end->subDays(29)->toDateString(), 'seed_batch' => self::BATCH, ...$this->stamps()]);
+        $provider = $this->put('proveedor', ['nombre' => 'Tech Data Perú S.A.C. / Ingram Micro'], ['activo' => true, 'contacto' => 'Ing. Carlos Mendoza - Tel: (01) 612-4500 - ventas@techdata.pe', ...$this->stamps()]);
+        $purchase = $this->put('compras', ['numero_orden' => 'OC-2026-001'], ['proveedor_id' => $provider, 'total' => 0, 'estado' => 'completado', 'notas' => 'Reposición mensual de inventario tecnológico valorizada a costo mayorista.', 'fecha_compra' => $this->end->subDays(29)->toDateString(), 'seed_batch' => self::BATCH, ...$this->stamps()]);
         DB::table('compra_items')->where('compra_id', $purchase)->delete();
         $purchaseTotal = 0;
         foreach ($this->variants as $v) {
             $qty = $sold[$v['id']] ?? 0;
             // Opening inventory + monthly purchases - sales = requested closing stock.
-            $this->put('movimientos_almacen', ['referencia' => 'DEMO-APERTURA-'.$v['id']], ['almacen_id' => $this->warehouse, 'variante_id' => $v['id'], 'tipo' => 'entrada', 'cantidad' => $v['stock'], 'usuario_id' => $this->seller, ...$this->stamps($this->end->subDays(30))]);
+            $this->put('movimientos_almacen', ['referencia' => 'APERTURA-'.$v['id']], ['almacen_id' => $this->warehouse, 'variante_id' => $v['id'], 'tipo' => 'entrada', 'cantidad' => $v['stock'], 'usuario_id' => $this->seller, ...$this->stamps($this->end->subDays(30))]);
             if ($qty > 0) {
                 $subtotal = round($qty * $v['cost'], 2);
                 $purchaseTotal += $subtotal;
                 DB::table('compra_items')->insert(['compra_id' => $purchase, 'producto_id' => $v['product_id'], 'variante_id' => $v['id'], 'cantidad' => $qty, 'costo_unitario' => $v['cost'], 'subtotal' => $subtotal, ...$this->stamps()]);
-                $this->put('movimientos_almacen', ['referencia' => 'DEMO-COMPRA-'.$v['id']], ['almacen_id' => $this->warehouse, 'variante_id' => $v['id'], 'tipo' => 'entrada', 'cantidad' => $qty, 'usuario_id' => $this->seller, ...$this->stamps()]);
+                $this->put('movimientos_almacen', ['referencia' => 'COMPRA-'.$v['id']], ['almacen_id' => $this->warehouse, 'variante_id' => $v['id'], 'tipo' => 'entrada', 'cantidad' => $qty, 'usuario_id' => $this->seller, ...$this->stamps()]);
             }
         }
         DB::table('compras')->where('id', $purchase)->update(['total' => round($purchaseTotal, 2)]);
@@ -299,21 +308,69 @@ class RealStoreMonthSeeder extends Seeder
 
     private function crm(): void
     {
-        $pipeline = $this->put('crm_pipelines', ['nombre' => 'Ventas demo Novape'], ['descripcion' => 'Embudo de ventas simulado', 'is_default' => true, ...$this->stamps()]);
+        $pipeline = $this->put('crm_pipelines', ['nombre' => 'Pipeline Comercial Corporativo B2B'], ['descripcion' => 'Embudo comercial de cuentas corporativas, licitaciones y ventas B2B de Novape', 'is_default' => true, ...$this->stamps()]);
         $stages = [];
         foreach (['Nuevo','Contactado','Cotización','Negociación','Ganado','Perdido'] as $index => $name) {
             $stages[] = $this->put('crm_stages', ['pipeline_id' => $pipeline, 'nombre' => $name], ['orden' => $index + 1, 'color' => ['#64748b','#3b82f6','#8b5cf6','#f59e0b','#22c55e','#ef4444'][$index], ...$this->stamps()]);
         }
+
+        $titulosReales = [
+            'Licitación 20x Samsung Galaxy S25 Ultra 512GB - BCP',
+            'Renovación 40x Xiaomi Redmi 17 Cuadrillas - Telefónica',
+            'Equipamiento 15x TV LG 65\'\' NANO 4K Salas de Reunión - Interbank',
+            'Flota Móvil 25x Samsung Galaxy A57 5G Ejecutivos - Alicorp',
+            'Adquisición 12x Apple iPhone 17 Pro 256GB Gerencia - BBVA',
+            'Dotación 30x Celulares Honor X8d 256GB Asesores - Conecta Retail',
+            'Lote 8x TV Samsung 65\'\' UHD Salas de Espera - Clínica Internacional',
+            'Implementación 18x Samsung Galaxy S26 FE - Ferreyros',
+            'Renovación Terminales 50x Samsung A17 Personal de Campo - Entel',
+            'Suministro 10x Pantallas TCL 75\'\' 4K Señalética Digital - Ripley',
+            'Lote 15x Apple iPhone 17 Pro 5G Directores - Saga Falabella',
+            'Dotación 20x TV iFFALCON 55\'\' 4K Google TV Sucursales - BCP',
+            'Renovación 35x Xiaomi Redmi 17 Operaciones Logísticas - Rímac Seguros',
+            'Equipamiento 6x TV Samsung 55\'\' Mini LED Salas de Directorio - Ferreyros',
+            'Adquisición 14x Samsung Galaxy A57 5G Supervisores - Alicorp',
+            'Licitación 25x Celulares Honor X8d Velvet Black - Interbank',
+            'Lote 12x TV LG 55\'\' NANO 4K Áreas Comunes - Telefónica',
+            'Flota 10x iPhone 17 Pro Silver Área Legal - Rímac Seguros',
+            'Suministro 8x TV iFFALCON 75\'\' 4K Auditorios - BBVA',
+            'Adquisición 22x Samsung Galaxy S26 FE Fuerza Comercial - Conecta Retail',
+            'Lote 16x Samsung Galaxy A17 Promotores de Venta - Saga Falabella',
+            'Renovación 18x Xiaomi Redmi 17 Soporte Técnico - Entel',
+            'Lote 5x TV Hyundai 32\'\' QLED Salas de Monitoreo - Clínica Internacional',
+            'Dotación 15x Samsung Galaxy S25 Ultra Consultores Senior - BCP',
+            'Renovación 20x Honor X8d Velvet Grey Ejecutivos - Ripley',
+            'Adquisición 10x TV TCL 55\'\' QD-Mini LED 144Hz - Saga Falabella',
+            'Lote 12x Samsung Galaxy A57 5G Coordinadores de Obra - Ferreyros',
+            'Suministro 8x Apple iPhone 17 Pro Naranja Equipo Creativo - Conecta Retail',
+            'Lote 30x Samsung Galaxy A17 Encuestadores de Campo - Telefónica',
+            'Renovación 14x Celular Samsung Galaxy S26 FE Jefaturas - BBVA',
+        ];
+
         for ($index = 0; $index < 30; $index++) {
             $stage = $index % 6;
             $date = $this->end->subDays(29 - $index);
             $v = $this->variants[$index % count($this->variants)];
-            $deal = $this->put('crm_deals', ['titulo' => sprintf('DEMO - Oportunidad %02d', $index + 1)], ['usuario_id' => $this->customers[$index]['id'], 'stage_id' => $stages[$stage], 'valor' => $v['price'], 'estado' => $stage === 4 ? 'won' : ($stage === 5 ? 'lost' : 'open'), 'fecha_cierre_esperada' => $date->addDays(7), 'custom_fields' => json_encode(['simulado' => true]), ...$this->stamps($date), 'updated_at' => $date->addDays(min(3, 29 - $index))]);
-            $this->put('crm_activities', ['deal_id' => $deal, 'tipo' => 'tarea'], ['usuario_id' => $this->seller, 'contenido' => 'DEMO - Seguimiento de cotización (simulado)', 'completada' => $stage >= 4, 'fecha_vencimiento' => $date->addDays(2), ...$this->stamps($date)]);
+            $dealTitle = $titulosReales[$index] ?? ('Oportunidad Corporativa '.($index + 1));
+            $deal = $this->put('crm_deals', ['titulo' => $dealTitle], ['usuario_id' => $this->customers[$index]['id'], 'stage_id' => $stages[$stage], 'valor' => $v['price'], 'estado' => $stage === 4 ? 'won' : ($stage === 5 ? 'lost' : 'open'), 'fecha_cierre_esperada' => $date->addDays(7), 'custom_fields' => json_encode(['tipo_cliente' => 'Corporativo B2B']), ...$this->stamps($date), 'updated_at' => $date->addDays(min(3, 29 - $index))]);
+            $this->put('crm_activities', ['deal_id' => $deal, 'tipo' => 'tarea'], ['usuario_id' => $this->seller, 'contenido' => 'Seguimiento comercial de propuesta y especificaciones técnicas', 'completada' => $stage >= 4, 'fecha_vencimiento' => $date->addDays(2), ...$this->stamps($date)]);
             $this->put('crm_deal_products', ['crm_deal_id' => $deal, 'producto_id' => $v['product_id']], ['cantidad' => 1, 'precio_unitario' => $v['price'], 'subtotal' => $v['price'], ...$this->stamps($date)]);
         }
+
+        $casosTitulos = [
+            'Solicitud de factura electrónica con RUC corregido',
+            'Consulta de estado de despacho y guía de remisión lote corporativo',
+            'Asistencia técnica en configuración corporativa Samsung Knox',
+            'Coordinación de garantía por adaptador de carga en lote de laptops/smartphones',
+            'Solicitud de cotización ampliada para 15 accesorios y fundas de protección',
+            'Consulta sobre fecha de llegada de importación lote Smart TVs 75 pulgadas',
+            'Requerimiento de constancia de detracción y notas contables',
+            'Programación de visita técnica para calibración de pantallas de señalética',
+        ];
+
         for ($index = 0; $index < 8; $index++) {
-            $this->put('crm_cases', ['titulo' => 'DEMO - Consulta posventa '.($index + 1)], ['descripcion' => 'Caso de prueba simulado para revisar el panel de atención.', 'cliente_id' => $this->customers[$index]['id'], 'asignado_a' => $this->seller, 'tipo' => 'consulta', 'estado' => ['abierto','en_progreso','resuelto','cerrado'][$index % 4], 'prioridad' => ['baja','media','alta','urgente'][$index % 4], 'fecha_vencimiento' => $this->end->addDays(3), ...$this->stamps($this->end->subDays($index))]);
+            $caseTitle = $casosTitulos[$index] ?? ('Atención de cuenta corporativa '.($index + 1));
+            $this->put('crm_cases', ['titulo' => $caseTitle], ['descripcion' => 'Requerimiento corporativo canalizado a través del equipo de posventa.', 'cliente_id' => $this->customers[$index]['id'], 'asignado_a' => $this->seller, 'tipo' => 'consulta', 'estado' => ['abierto','en_progreso','resuelto','cerrado'][$index % 4], 'prioridad' => ['baja','media','alta','urgente'][$index % 4], 'fecha_vencimiento' => $this->end->addDays(3), ...$this->stamps($this->end->subDays($index))]);
         }
     }
 }

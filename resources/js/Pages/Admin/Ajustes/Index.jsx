@@ -18,6 +18,9 @@ export default function Index({ configuraciones }) {
         whatsapp_phone_number_id: configuraciones?.whatsapp_phone_number_id || '',
         whatsapp_verify_token: configuraciones?.whatsapp_verify_token || '',
         whatsapp_app_secret: configuraciones?.whatsapp_app_secret || '',
+        seo_title: configuraciones?.seo_title || '',
+        seo_description: configuraciones?.seo_description || '',
+        seo_keywords: configuraciones?.seo_keywords || '',
     });
 
     const submit = (e) => {
@@ -61,18 +64,18 @@ export default function Index({ configuraciones }) {
             <div style={{ fontFamily: "'Inter', sans-serif", padding: '24px 32px', maxWidth: '1200px', margin: '0 auto' }}>
                 
                 {/* Header Section */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-                    <div>
-                        <h1 style={{ fontSize: '28px', margin: '0 0 8px 0', fontWeight: 800, color: '#1E293B', letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ background: '#E0F2FE', padding: '10px', borderRadius: '12px', color: '#004797', display: 'flex' }}>
-                                <Settings size={24} />
-                            </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
+                    <h1 style={{ fontSize: '24px', margin: 0, fontWeight: '700', color: '#1E293B', display: 'flex', alignItems: 'center', gap: '12px', letterSpacing: '-0.02em' }}>
+                        <div style={{ padding: '8px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', color: '#64748B', display: 'flex' }}>
+                            <Settings size={20} />
+                        </div>
+                        <div>
                             Ajustes del Sistema
-                        </h1>
-                        <p style={{ margin: 0, color: '#64748B', fontSize: '15px' }}>
-                            Configura las preferencias globales, moneda, impuestos y conexiones de API.
-                        </p>
-                    </div>
+                            <p style={{ color: '#64748B', fontSize: '13px', margin: '4px 0 0 0', fontWeight: '500' }}>
+                                Configura las preferencias globales, moneda, impuestos y conexiones de API.
+                            </p>
+                        </div>
+                    </h1>
                 </div>
 
                 {/* Custom Alert */}
@@ -98,36 +101,50 @@ export default function Index({ configuraciones }) {
                 <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: '32px', alignItems: 'start' }}>
                     
                     {/* Sidebar Tabs */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: '#ffffff', padding: '16px', borderRadius: '24px', boxShadow: '0 10px 30px -10px rgba(0,0,0,0.05)', border: '1px solid #E2E8F0' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', background: '#ffffff', padding: '16px', borderRadius: '16px', boxShadow: '0 4px 20px -2px rgba(0,0,0,0.05)', border: '1px solid #E2E8F0' }}>
                         <button 
                             onClick={() => setActiveTab('general')}
                             style={{ 
-                                padding: '14px 16px', textAlign: 'left', borderRadius: '12px', border: 'none', 
-                                background: activeTab === 'general' ? '#F0F9FF' : 'transparent', 
-                                color: activeTab === 'general' ? '#0284C7' : '#475569', 
-                                cursor: 'pointer', fontWeight: 700, fontSize: '15px',
-                                display: 'flex', alignItems: 'center', gap: '12px', transition: 'all 0.2s',
-                                boxShadow: activeTab === 'general' ? 'inset 2px 0 0 0 #004797' : 'none'
+                                padding: '12px 16px', textAlign: 'left', borderRadius: '10px', border: 'none', 
+                                background: activeTab === 'general' ? '#F8FAFC' : 'transparent', 
+                                color: activeTab === 'general' ? '#004797' : '#64748B', 
+                                cursor: 'pointer', fontWeight: 600, fontSize: '14px',
+                                display: 'flex', alignItems: 'center', gap: '12px', transition: 'all 0.2s'
                             }}
-                            onMouseOver={e => { if (activeTab !== 'general') { e.currentTarget.style.background = '#F8FAFC'; e.currentTarget.style.color = '#1E293B'; } }}
-                            onMouseOut={e => { if (activeTab !== 'general') { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#475569'; } }}
+                            onMouseEnter={e => { if (activeTab !== 'general') { e.currentTarget.style.background = '#F8FAFC'; e.currentTarget.style.color = '#1E293B'; } }}
+                            onMouseLeave={e => { if (activeTab !== 'general') { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748B'; } }}
                         >
-                            <Store size={18} color={activeTab === 'general' ? '#004797' : '#94A3B8'} /> Configuración General
+                            <Store size={18} /> Configuración General
                         </button>
                         <button 
+                            type="button"
                             onClick={() => setActiveTab('omnichannel')}
                             style={{ 
-                                padding: '14px 16px', textAlign: 'left', borderRadius: '12px', border: 'none', 
-                                background: activeTab === 'omnichannel' ? '#F0F9FF' : 'transparent', 
-                                color: activeTab === 'omnichannel' ? '#0284C7' : '#475569', 
-                                cursor: 'pointer', fontWeight: 700, fontSize: '15px',
-                                display: 'flex', alignItems: 'center', gap: '12px', transition: 'all 0.2s',
-                                boxShadow: activeTab === 'omnichannel' ? 'inset 2px 0 0 0 #004797' : 'none'
+                                padding: '12px 16px', textAlign: 'left', borderRadius: '10px', border: 'none', 
+                                background: activeTab === 'omnichannel' ? '#F8FAFC' : 'transparent', 
+                                color: activeTab === 'omnichannel' ? '#004797' : '#64748B', 
+                                cursor: 'pointer', fontWeight: 600, fontSize: '14px',
+                                display: 'flex', alignItems: 'center', gap: '12px', transition: 'all 0.2s'
                             }}
-                            onMouseOver={e => { if (activeTab !== 'omnichannel') { e.currentTarget.style.background = '#F8FAFC'; e.currentTarget.style.color = '#1E293B'; } }}
-                            onMouseOut={e => { if (activeTab !== 'omnichannel') { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#475569'; } }}
+                            onMouseEnter={e => { if (activeTab !== 'omnichannel') { e.currentTarget.style.background = '#F8FAFC'; e.currentTarget.style.color = '#1E293B'; } }}
+                            onMouseLeave={e => { if (activeTab !== 'omnichannel') { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748B'; } }}
                         >
-                            <MessageCircle size={18} color={activeTab === 'omnichannel' ? '#004797' : '#94A3B8'} /> Omnichannel (API)
+                            <MessageCircle size={18} /> Omnichannel (API)
+                        </button>
+                        <button 
+                            type="button"
+                            onClick={() => setActiveTab('seo')}
+                            style={{ 
+                                padding: '12px 16px', textAlign: 'left', borderRadius: '10px', border: 'none', 
+                                background: activeTab === 'seo' ? '#F8FAFC' : 'transparent', 
+                                color: activeTab === 'seo' ? '#004797' : '#64748B', 
+                                cursor: 'pointer', fontWeight: 600, fontSize: '14px',
+                                display: 'flex', alignItems: 'center', gap: '12px', transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={e => { if (activeTab !== 'seo') { e.currentTarget.style.background = '#F8FAFC'; e.currentTarget.style.color = '#1E293B'; } }}
+                            onMouseLeave={e => { if (activeTab !== 'seo') { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748B'; } }}
+                        >
+                            <LinkIcon size={18} /> SEO Global
                         </button>
                     </div>
 
@@ -273,7 +290,6 @@ export default function Index({ configuraciones }) {
                                                         style={inputStyle}
                                                         onFocus={e => Object.assign(e.target.style, inputFocusStyle)}
                                                         onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }}
-                                                        placeholder="Ej: miclavesecreta"
                                                     />
                                                 </div>
                                             </div>
@@ -298,6 +314,54 @@ export default function Index({ configuraciones }) {
                                 </div>
                             )}
 
+                            {activeTab === 'seo' && (
+                                <div style={{ animation: 'fadeIn 0.3s ease-in-out' }}>
+                                    <div style={{ marginBottom: '32px' }}>
+                                        <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#1E293B', margin: '0 0 8px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            Configuración Global de SEO
+                                        </h2>
+                                        <p style={{ fontSize: '14px', color: '#64748B', margin: 0, lineHeight: '1.5' }}>
+                                            Define los metadatos globales de tu tienda. Se utilizarán en las páginas que no tengan un SEO específico.
+                                        </p>
+                                    </div>
+
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                                        <div>
+                                            <label style={labelStyle}>Meta Title (Título Global) *</label>
+                                            <input
+                                                type="text"
+                                                value={data.seo_title}
+                                                onChange={e => setData('seo_title', e.target.value)}
+                                                style={{ ...inputStyle, paddingLeft: '16px' }}
+                                                placeholder="Ej: Novape | La mejor tienda en línea"
+                                                required
+                                            />
+                                            {errors.seo_title && <div style={{ color: '#EF4444', fontSize: '12px', marginTop: '6px', fontWeight: 600 }}>{errors.seo_title}</div>}
+                                        </div>
+                                        <div>
+                                            <label style={labelStyle}>Meta Description (Descripción) *</label>
+                                            <textarea
+                                                value={data.seo_description}
+                                                onChange={e => setData('seo_description', e.target.value)}
+                                                style={{ ...inputStyle, paddingLeft: '16px', minHeight: '80px', resize: 'vertical' }}
+                                                placeholder="Descripción general de la tienda para buscadores."
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <label style={labelStyle}>Keywords (Palabras Clave)</label>
+                                            <input
+                                                type="text"
+                                                value={data.seo_keywords}
+                                                onChange={e => setData('seo_keywords', e.target.value)}
+                                                style={{ ...inputStyle, paddingLeft: '16px' }}
+                                                placeholder="Ej: ecommerce, tecnología, hogar"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Botonera Fija */}
                             <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '24px', borderTop: '1px solid #E2E8F0' }}>
                                 <button
@@ -307,22 +371,22 @@ export default function Index({ configuraciones }) {
                                         background: '#004797',
                                         color: 'white',
                                         border: 'none',
-                                        padding: '14px 32px',
-                                        borderRadius: '12px',
-                                        fontWeight: 800,
-                                        fontSize: '15px',
+                                        padding: '12px 24px',
+                                        borderRadius: '10px',
+                                        fontWeight: '600',
+                                        fontSize: '13px',
                                         cursor: processing ? 'not-allowed' : 'pointer',
                                         opacity: processing ? 0.7 : 1,
-                                        boxShadow: '0 4px 14px rgba(0, 71, 151, 0.3)',
+                                        boxShadow: '0 2px 4px rgba(0, 71, 151, 0.15)',
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: '8px',
-                                        transition: 'all 0.2s'
+                                        transition: 'all 0.2s ease'
                                     }}
-                                    onMouseOver={e => { if(!processing) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 71, 151, 0.4)'; } }}
-                                    onMouseOut={e => { if(!processing) { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 71, 151, 0.3)'; } }}
+                                    onMouseEnter={e => { if(!processing) { e.currentTarget.style.backgroundColor = '#003670'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 71, 151, 0.2)'; } }}
+                                    onMouseLeave={e => { if(!processing) { e.currentTarget.style.backgroundColor = '#004797'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 71, 151, 0.15)'; } }}
                                 >
-                                    <Save size={18} />
+                                    <Save size={16} />
                                     {processing ? 'Guardando...' : 'Guardar Cambios'}
                                 </button>
                             </div>

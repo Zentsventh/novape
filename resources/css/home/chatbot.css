@@ -5,73 +5,18 @@
     position: fixed;
     bottom: 24px;
     right: 24px;
-    width: 90px;
-    height: 90px;
+    width: 110px;
+    height: 110px;
     z-index: 9990;
     will-change: transform;
 }
 
-/* Efecto de radar / pulso - sutil */
-.efe-chatbot-wrapper::before,
-.efe-chatbot-wrapper::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    border: 1px solid rgba(0, 71, 151, 0.3);
-    animation: radarPulse 3s ease-out infinite;
-    pointer-events: none;
-}
-
-.efe-chatbot-wrapper::after {
-    animation-delay: 1.5s;
-}
-
-/* Anillos adicionales de radar */
-.efe-chatbot-radar-ring {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    border: 1px solid rgba(0, 71, 151, 0.2);
-    animation: radarPulse 3s ease-out infinite;
-    animation-delay: 0.75s;
-    pointer-events: none;
-}
-
-.efe-chatbot-radar-ring:nth-child(2) {
-    animation-delay: 2.25s;
-}
-
-@keyframes radarPulse {
-    0% {
-        width: 90px;
-        height: 90px;
-        opacity: 0.45;
-        border-color: rgba(0, 71, 151, 0.3);
-    }
-    50% {
-        opacity: 0.2;
-    }
-    100% {
-        width: 140px;
-        height: 140px;
-        opacity: 0;
-        border-color: rgba(0, 71, 151, 0);
-    }
-}
+/* Efectos de radar eliminados a petición del usuario */
 
 .efe-chatbot-btn {
     position: relative;
-    width: 90px;
-    height: 90px;
+    width: 110px;
+    height: 110px;
     border-radius: 50%;
     background: transparent;
     border: none;
@@ -95,11 +40,18 @@
 
 /* Imagen del robot mascota */
 .efe-chatbot-btn img {
-    width: 95px;
-    height: 95px;
+    width: 115px;
+    height: 115px;
     object-fit: contain;
     filter: drop-shadow(0 4px 14px rgba(0, 71, 151, 0.35));
-    transition: filter 0.3s ease;
+    transition: filter 0.3s ease, transform 0.3s ease;
+    animation: float-bot 3s ease-in-out infinite;
+}
+
+@keyframes float-bot {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
 }
 
 .efe-chatbot-btn:hover img {
@@ -430,7 +382,7 @@
     border: 1px solid #E2E8F0;
     border-radius: 20px;
     padding: 12px 18px;
-    font-size: 14px;
+    font-size: 14px !important;
     font-family: 'Inter', sans-serif;
     outline: none;
     transition: all 0.2s ease;

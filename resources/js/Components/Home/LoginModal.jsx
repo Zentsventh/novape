@@ -1,7 +1,9 @@
 import { useForm, Link } from '@inertiajs/react';
 import { useState } from 'react';
+import useStoreDialog from '../../Hooks/useStoreDialog';
 
 export default function LoginModal({ isOpen, onClose, onSuccessCallback }) {
+    const panel = useStoreDialog(isOpen, onClose);
     const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
         password: '',
@@ -35,7 +37,7 @@ export default function LoginModal({ isOpen, onClose, onSuccessCallback }) {
             justifyContent: 'center',
             padding: '20px'
         }}>
-            <div className="store-modal-panel" style={{
+            <div ref={panel} role="dialog" aria-modal="true" aria-label="Iniciar sesión" tabIndex={-1} className="store-modal-panel" style={{
                 background: 'white',
                 padding: 'clamp(0.75rem, 3vw, 2.5rem)',
                 borderRadius: '12px',
@@ -70,7 +72,7 @@ export default function LoginModal({ isOpen, onClose, onSuccessCallback }) {
                         </div>
                         <input 
                             type="email" 
-                            name="email" 
+                            name="email" aria-label="Correo electrónico" autoComplete="email" 
                             value={data.email} 
                             onChange={e => setData('email', e.target.value)} 
                             placeholder="Email" 
@@ -89,7 +91,7 @@ export default function LoginModal({ isOpen, onClose, onSuccessCallback }) {
                         </div>
                         <input 
                             type={showPassword ? "text" : "password"} 
-                            name="password" 
+                            name="password" aria-label="Contraseña" autoComplete="current-password" 
                             value={data.password} 
                             onChange={e => setData('password', e.target.value)} 
                             placeholder="********" 
@@ -116,7 +118,7 @@ export default function LoginModal({ isOpen, onClose, onSuccessCallback }) {
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'flex-end', fontSize: '13px' }}>
-                        <a href="#" style={{ color: 'var(--color-primary)', textDecoration: 'none', fontWeight: '500' }}>¿Olvidaste tu contraseña?</a>
+                        <a href="/recuperar-contrasena" style={{ color: 'var(--color-primary)', textDecoration: 'none', fontWeight: '500' }}>¿Olvidaste tu contraseña?</a>
                     </div>
 
                     <button type="submit" disabled={processing} style={{ width: '100%', background: 'var(--color-primary)', color: 'white', border: 'none', padding: '15px', borderRadius: '8px', cursor: processing ? 'not-allowed' : 'pointer', fontWeight: 'bold', fontSize: '16px', marginTop: '5px', boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)', letterSpacing: '1px' }}>

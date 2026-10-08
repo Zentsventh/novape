@@ -28,13 +28,58 @@ class ProfileController extends Controller
         $usuario = Auth::user();
 
         $pedidos = $usuario->pedidos()->with(['items.variante.producto.imagenes', 'items.variante.producto.proveedor'])->orderBy('id', 'desc')->get();
+        $pedidos->each(fn ($order) => $this->prepareOrder($order));
         $direcciones = $usuario->direcciones()->get();
         $tarjetas = $usuario->tarjetas()->get();
         $datosReembolso = $usuario->datosReembolso()->first();
         $listas = $usuario->listas()->with('items.producto.imagenes')->get();
-        $sesiones = \DB::table('sessions')->where('user_id', $usuario->id)->orderBy('last_activity', 'desc')->get();
+
+        $currentSessionId = $request->session()->getId();
+        try {
+            \Illuminate\Support\Facades\DB::table('sessions')
+                ->where('id', $currentSessionId)
+                ->whereNull('user_id')
+                ->update(['user_id' => $usuario->id]);
+        } catch (\Throwable) {}
+
+        $sesiones = \Illuminate\Support\Facades\DB::table('sessions')
+            ->select('id', 'user_id', 'ip_address', 'user_agent', 'last_activity')
+            ->where('user_id', $usuario->id)
+            ->orderBy('last_activity', 'desc')
+            ->get();
+
+        $hasCurrentSession = $sesiones->contains(function ($s) use ($currentSessionId) {
+            return (string)$s->id === (string)$currentSessionId;
+        });
+
+        if (! $hasCurrentSession) {
+            $currentSession = (object) [
+                'id' => $currentSessionId,
+                'user_id' => $usuario->id,
+                'ip_address' => $request->ip() ?: '127.0.0.1',
+                'user_agent' => $request->userAgent() ?: 'Navegador Web',
+                'last_activity' => time(),
+            ];
+            $sesiones = $sesiones->prepend($currentSession);
+
+            try {
+                \Illuminate\Support\Facades\DB::table('sessions')->updateOrInsert(
+                    ['id' => $currentSessionId],
+                    [
+                        'user_id' => $usuario->id,
+                        'ip_address' => $request->ip() ?: '127.0.0.1',
+                        'user_agent' => $request->userAgent() ?: 'Navegador Web',
+                        'payload' => '',
+                        'last_activity' => time(),
+                    ]
+                );
+            } catch (\Throwable) {}
+        }
+
         $pointsHistory = \App\Models\LoyaltyPointsHistory::where('usuario_id', $usuario->id)->orderBy('created_at', 'desc')->get();
         $tab = $request->query('tab', 'home');
+        if ($tab === 'ordenes') $tab = 'compras';
+        if (! in_array($tab, ['home', 'compras', 'perfil', 'direcciones', 'tarjetas', 'reembolso', 'listas', 'puntos', 'sesiones', 'configuracion'], true)) $tab = 'home';
 
         $categoriaProductos = \Illuminate\Support\Facades\Cache::remember('home_categorias', 3600, function () {
             return \App\Models\Categoria::whereNull('categoria_padre_id')
@@ -46,17 +91,21 @@ class ProfileController extends Controller
         });
 
         return Inertia::render('Auth/Profile', [
-            'usuario' => $usuario,
+            'usuario' => $usuario->only(['id', 'nombres', 'apellidos', 'email', 'telefono', 'telefono_secundario', 'tipo_documento', 'dni', 'fecha_nacimiento', 'has_set_password', 'loyalty_points']),
             'pedidos' => $pedidos,
             'direcciones' => $direcciones,
             'tarjetas' => $tarjetas,
             'datosReembolso' => $datosReembolso,
             'listas' => $listas,
-            'sesiones' => $sesiones,
+            'sesiones' => $sesiones->map(fn ($s) => [
+                'id' => hash_hmac('sha256', (string) $s->id, config('app.key')),
+                'ip_address' => $s->ip_address, 'user_agent' => $s->user_agent,
+                'last_activity' => $s->last_activity, 'is_current' => (string) $s->id === $currentSessionId,
+            ]),
             'pointsHistory' => $pointsHistory,
             'activeTabParam' => $tab,
             'categoriaProductos' => $categoriaProductos,
-            'session_id' => $request->session()->getId(),
+            'deliveryDistricts' => \App\Services\Shipping\LimaCoverage::DISTRICTS,
         ]);
     }
 
@@ -70,8 +119,20 @@ class ProfileController extends Controller
             ->firstOrFail();
 
         return Inertia::render('Auth/OrderDetails', [
-            'pedido' => $pedido,
+            'pedido' => $this->prepareOrder($pedido),
+            'categoriaProductos' => \Illuminate\Support\Facades\Cache::get('home_categorias', []),
         ]);
+    }
+
+    private function prepareOrder(\App\Models\Pedido $order): \App\Models\Pedido
+    {
+        $order->items->each(function ($item) {
+            $product = $item->variante?->producto;
+            $item->setAttribute('image_url', $product?->imagenes->sortBy('orden')->first()?->url);
+            $item->setAttribute('product_name', $item->producto_nombre ?: $product?->nombre ?: 'Producto de tu pedido');
+            $item->setAttribute('product_id', $product?->id);
+        });
+        return $order;
     }
 
     public function update(UpdateProfileRequest $request)
@@ -120,10 +181,10 @@ class ProfileController extends Controller
 
     public function storeDireccion(StoreDireccionRequest $request)
     {
-        Log::info('Store address', ['user_id'=>Auth::id(), 'data'=>$request->all()]);
+        Log::info('Store address', ['user_id' => Auth::id()]);
 
 
-        $this->profileService->addAddress(Auth::user(), $request->all(), (bool) $request->input('principal', false));
+        $this->profileService->addAddress(Auth::user(), $request->validated(), $request->boolean('principal'));
         return back()->with('success', 'Dirección agregada correctamente.');
     }
 
@@ -143,13 +204,9 @@ class ProfileController extends Controller
         return back()->with('success', 'Dirección eliminada.');
     }
 
-    public function storeTarjeta(StoreTarjetaRequest $request)
+    public function storeTarjeta(\Illuminate\Http\Request $request)
     {
-        Log::info('Store card', ['user_id' => Auth::id()]);
-
-
-        $this->profileService->addCard(Auth::user(), $request->all());
-        return back()->with('success', 'Tarjeta agregada exitosamente (Simulación).');
+        return back()->withErrors(['tarjeta' => 'El guardado de tarjetas aún no está disponible. Usa la pasarela de pago.']);
     }
 
     public function destroyTarjeta($id)
@@ -183,9 +240,10 @@ class ProfileController extends Controller
 
     public function destroySession($id)
     {
-        Log::info('Destroy session', ['user_id'=>Auth::id(), 'session_id'=>$id]);
-
-        $this->profileService->deleteSession(Auth::user(), (string) $id);
+        $session = \Illuminate\Support\Facades\DB::table('sessions')->where('user_id', Auth::id())->select('id')->get()
+            ->first(fn ($s) => hash_equals(hash_hmac('sha256', (string) $s->id, config('app.key')), (string) $id));
+        abort_unless($session && $session->id !== request()->session()->getId(), 404);
+        $this->profileService->deleteSession(Auth::user(), (string) $session->id);
         return back()->with('success', 'Sesión cerrada exitosamente.');
     }
 

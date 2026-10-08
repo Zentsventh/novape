@@ -80,22 +80,22 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
         });
     };
 
-    const getPriorityColor = (prioridad) => {
+    const getPriorityStyle = (prioridad) => {
         switch(prioridad) {
-            case 'urgente': return 'bg-red-100 text-red-700';
-            case 'alta': return 'bg-orange-100 text-orange-700';
-            case 'media': return 'bg-yellow-100 text-yellow-700';
-            case 'baja': return 'bg-green-100 text-green-700';
-            default: return 'bg-gray-100 text-gray-700';
+            case 'urgente': return { color: '#EF4444', background: '#FEF2F2', border: '1px solid #FEE2E2' };
+            case 'alta': return { color: '#F97316', background: '#FFF7ED', border: '1px solid #FFEDD5' };
+            case 'media': return { color: '#EAB308', background: '#FEFCE8', border: '1px solid #FEF08A' };
+            case 'baja': return { color: '#10B981', background: '#F0FDF4', border: '1px solid #DCFCE7' };
+            default: return { color: '#64748B', background: '#F8FAFC', border: '1px solid #E2E8F0' };
         }
     };
 
     const getStatusIcon = (estado) => {
         switch(estado) {
-            case 'abierto': return <AlertCircle size={14} className="text-red-500" />;
-            case 'en_progreso': return <Clock size={14} className="text-blue-500" />;
-            case 'resuelto': return <CheckCircle size={14} className="text-green-500" />;
-            case 'cerrado': return <CheckCircle size={14} className="text-gray-500" />;
+            case 'abierto': return <AlertCircle size={14} color="#EF4444" />;
+            case 'en_progreso': return <Clock size={14} color="#004797" />;
+            case 'resuelto': return <CheckCircle size={14} color="#10B981" />;
+            case 'cerrado': return <CheckCircle size={14} color="#64748B" />;
             default: return null;
         }
     };
@@ -105,7 +105,7 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
             key: 'id',
             header: 'ID',
             accessor: 'id',
-            render: (row) => <span style={{ fontWeight: 600, color: 'var(--twenty-text-main)' }}>#{row.id}</span>
+            render: (row) => <span style={{ fontWeight: 600, color: '#1E293B' }}>#{row.id}</span>
         },
         {
             key: 'titulo',
@@ -114,9 +114,9 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
             primary: true,
             render: (row) => (
                 <div>
-                    <div style={{ fontWeight: 600, color: 'var(--twenty-text-main)' }}>{row.titulo}</div>
+                    <div style={{ fontWeight: 600, color: '#1E293B', fontSize: '14px' }}>{row.titulo}</div>
                     {row.pedido_id && (
-                        <div style={{ fontSize: '12px', color: 'var(--twenty-text-muted)', marginTop: '4px' }}>
+                        <div style={{ fontSize: '12px', color: '#64748B', marginTop: '4px' }}>
                             Pedido: #{row.pedido_id}
                         </div>
                     )}
@@ -128,7 +128,7 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
             header: 'Tipo',
             accessor: 'tipo',
             render: (row) => (
-                <span style={{ textTransform: 'capitalize', fontSize: '13px', background: 'var(--twenty-bg-hover)', padding: '4px 8px', borderRadius: '4px', color: 'var(--twenty-text-secondary)' }}>
+                <span style={{ textTransform: 'capitalize', fontSize: '12px', background: '#F8FAFC', padding: '4px 10px', borderRadius: '6px', color: '#475569', border: '1px solid #E2E8F0', fontWeight: 500 }}>
                     {row.tipo}
                 </span>
             )
@@ -138,7 +138,7 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
             header: 'Prioridad',
             accessor: 'prioridad',
             render: (row) => (
-                <span className={`crm-badge ${getPriorityColor(row.prioridad)}`} style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 600 }}>
+                <span style={{ ...getPriorityStyle(row.prioridad), padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 600 }}>
                     {row.prioridad.toUpperCase()}
                 </span>
             )
@@ -148,7 +148,7 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
             header: 'Estado',
             accessor: 'estado',
             render: (row) => (
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', textTransform: 'capitalize', fontWeight: 600, color: 'var(--twenty-text-main)', background: 'var(--twenty-bg-surface)', padding: '6px 12px', borderRadius: '16px', border: '1px solid var(--twenty-border)' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', textTransform: 'capitalize', fontWeight: 600, color: '#1E293B', background: '#FFFFFF', padding: '4px 10px', borderRadius: '12px', border: '1px solid #E2E8F0' }}>
                     {getStatusIcon(row.estado)}
                     {row.estado.replace('_', ' ')}
                 </div>
@@ -159,10 +159,10 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
             header: 'Vencimiento',
             accessor: 'fecha_vencimiento',
             render: (row) => {
-                if (!row.fecha_vencimiento) return <span style={{ color: 'var(--twenty-text-muted)', fontSize: '13px' }}>-</span>;
+                if (!row.fecha_vencimiento) return <span style={{ color: '#94A3B8', fontSize: '13px' }}>-</span>;
                 const isOverdue = new Date(row.fecha_vencimiento) < new Date() && row.estado !== 'resuelto' && row.estado !== 'cerrado';
                 return (
-                    <span style={{ fontSize: '13px', color: isOverdue ? 'var(--twenty-danger)' : 'var(--twenty-text-main)', fontWeight: isOverdue ? 600 : 500 }}>
+                    <span style={{ fontSize: '13px', color: isOverdue ? '#EF4444' : '#475569', fontWeight: isOverdue ? 600 : 500 }}>
                         {new Date(row.fecha_vencimiento).toLocaleDateString()}
                     </span>
                 );
@@ -175,20 +175,20 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
             render: (row) => (
                 row.cliente ? (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div className="crm-avatar" style={{ width: 32, height: 32, fontSize: '12px', background: 'var(--twenty-primary-bg)', color: 'var(--twenty-primary)', borderRadius: '50%' }}>
+                        <div style={{ width: 28, height: 28, fontSize: '11px', background: '#F8FAFC', color: '#1E293B', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, border: '1px solid #E2E8F0' }}>
                             {row.cliente.nombres?.charAt(0) || 'C'}
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--twenty-text-main)' }}>
+                            <span style={{ fontSize: '13px', fontWeight: 600, color: '#1E293B' }}>
                                 {row.cliente.nombres} {row.cliente.apellidos}
                             </span>
-                            <span style={{ fontSize: '11px', color: 'var(--twenty-text-muted)' }}>
+                            <span style={{ fontSize: '11px', color: '#64748B' }}>
                                 {row.cliente.email || 'Sin correo'}
                             </span>
                         </div>
                     </div>
                 ) : (
-                    <span style={{ color: 'var(--twenty-text-muted)', fontSize: '13px' }}>Sin asignar</span>
+                    <span style={{ color: '#94A3B8', fontSize: '13px' }}>Sin asignar</span>
                 )
             )
         },
@@ -198,12 +198,13 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
             accessor: 'acciones',
             render: (row) => (
                 <button 
-                    className="twenty-btn-icon" 
                     onClick={(e) => { e.stopPropagation(); handleDelete(row.id); }} 
-                    style={{ padding: '6px' }}
+                    style={{ background: 'transparent', border: 'none', padding: '6px', cursor: 'pointer', borderRadius: '6px', color: '#94A3B8', transition: 'all 0.2s' }}
                     title="Eliminar Caso"
+                    onMouseOver={(e) => { e.currentTarget.style.color = '#EF4444'; e.currentTarget.style.background = '#FEF2F2'; }}
+                    onMouseOut={(e) => { e.currentTarget.style.color = '#94A3B8'; e.currentTarget.style.background = 'transparent'; }}
                 >
-                    <Trash2 size={16} style={{ color: 'var(--twenty-danger)' }} />
+                    <Trash2 size={16} />
                 </button>
             )
         }
@@ -219,19 +220,19 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
                     display: 'flex', 
                     alignItems: 'center', 
                     gap: '8px', 
-                    background: 'linear-gradient(135deg, #004797 0%, #007BFF 100%)', 
+                    background: '#004797', 
                     color: 'white', 
                     border: 'none', 
-                    borderRadius: '8px', 
-                    padding: '8px 18px', 
-                    fontSize: '14px', 
+                    borderRadius: '10px', 
+                    padding: '10px 20px', 
+                    fontSize: '13px', 
                     fontWeight: 600, 
                     cursor: 'pointer', 
-                    boxShadow: '0 4px 12px rgba(0, 71, 151, 0.25)',
+                    boxShadow: '0 2px 4px rgba(0, 71, 151, 0.15)',
                     transition: 'all 0.2s ease'
                 }}
-                onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 14px rgba(0, 71, 151, 0.35)'; }}
-                onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 71, 151, 0.25)'; }}
+                onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 71, 151, 0.2)'; e.currentTarget.style.background = '#003670'; }}
+                onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 71, 151, 0.15)'; e.currentTarget.style.background = '#004797'; }}
             >
                 <Plus size={18} strokeWidth={2.5} />
                 Nuevo Caso
@@ -314,11 +315,22 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
                 {/* Main Table Card */}
                 <div className="twenty-card" style={{ padding: 0, overflow: 'hidden' }}>
                     {casos.data.length === 0 ? (
-                        <div style={{ padding: '60px', textAlign: 'center', color: 'var(--twenty-text-muted)' }}>
+                        <div style={{ padding: '60px', textAlign: 'center', color: '#94A3B8' }}>
                             <Ticket size={48} style={{ margin: '0 auto 16px', opacity: 0.2 }} />
-                            <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--twenty-text-main)', marginBottom: '8px' }}>No hay casos</h3>
+                            <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#1E293B', marginBottom: '8px' }}>No hay casos</h3>
                             <p style={{ fontSize: '14px', marginBottom: '24px' }}>Crea tu primer ticket de soporte para hacer seguimiento.</p>
-                            <button className="twenty-btn-primary" onClick={() => setIsCreateModalOpen(true)}>Crear Caso</button>
+                            <button 
+                                onClick={() => setIsCreateModalOpen(true)}
+                                style={{
+                                    background: '#004797', color: 'white', border: 'none', borderRadius: '10px', 
+                                    padding: '10px 20px', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                                    transition: 'all 0.2s ease'
+                                }}
+                                onMouseOver={e => e.currentTarget.style.background = '#003670'}
+                                onMouseOut={e => e.currentTarget.style.background = '#004797'}
+                            >
+                                Crear Caso
+                            </button>
                         </div>
                     ) : (
                         <TwentyTable 
@@ -390,7 +402,6 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
                                     }}
                                     value={formData.titulo}
                                     onChange={e => setFormData({...formData, titulo: e.target.value})}
-                                    placeholder="Ej. Producto dañado en el envío"
                                 />
                             </div>
                             
@@ -535,24 +546,26 @@ export default function CasesIndex({ casos = { data: [], links: [] }, filters = 
                                 <button 
                                     type="submit" 
                                     style={{
-                                        background: 'linear-gradient(135deg, #004797 0%, #007BFF 100%)',
+                                        background: '#004797',
                                         color: 'white',
                                         border: 'none',
-                                        borderRadius: '8px',
+                                        borderRadius: '10px',
                                         padding: '10px 24px',
-                                        fontSize: '14px',
+                                        fontSize: '13px',
                                         fontWeight: 600,
                                         cursor: 'pointer',
-                                        boxShadow: '0 4px 12px rgba(0, 71, 151, 0.25)',
+                                        boxShadow: '0 2px 4px rgba(0, 71, 151, 0.15)',
                                         transition: 'all 0.2s ease',
                                     }}
                                     onMouseOver={e => {
                                         e.currentTarget.style.transform = 'translateY(-1px)';
-                                        e.currentTarget.style.boxShadow = '0 6px 14px rgba(0, 71, 151, 0.35)';
+                                        e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 71, 151, 0.2)';
+                                        e.currentTarget.style.background = '#003670';
                                     }}
                                     onMouseOut={e => {
                                         e.currentTarget.style.transform = 'translateY(0)';
-                                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 71, 151, 0.25)';
+                                        e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 71, 151, 0.15)';
+                                        e.currentTarget.style.background = '#004797';
                                     }}
                                 >
                                     Guardar Caso

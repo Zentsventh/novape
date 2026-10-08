@@ -29,6 +29,13 @@ return [
     */
 
     'disks' => [
+        'database_secondary' => [
+            'driver' => 'local',
+            'root' => env('DB_BACKUP_SECONDARY_PATH'),
+            'visibility' => 'private',
+            'throw' => true,
+            'serve' => false,
+        ],
 
         'local' => [
             'driver' => 'local',

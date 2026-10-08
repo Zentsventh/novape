@@ -1,3 +1,4 @@
+import { cartPost } from '../utils/cartRequest';
 import { useState, useEffect } from 'react';
 import { Head, usePage, router, Link } from '@inertiajs/react';
 import { fireConfetti } from '../utils/confetti';
@@ -8,6 +9,7 @@ import Header from '../Components/Home/Header';
 import CategoryNavBar from '../Components/Home/CategoryNavBar';
 import CategoryDrawer from '../Components/Home/CategoryDrawer';
 import Footer from '../Components/Home/Footer';
+import ProductReviews from '../Components/Home/ProductReviews';
 import LoginModal from '../Components/Home/LoginModal';
 import AddToListModal from '../Components/Home/AddToListModal';
 import { DEFAULT_IMAGE } from '../Components/Home/constants';
@@ -27,9 +29,116 @@ const formatPrice = (price) =>
         price
     );
 
+const BundleSection = ({ producto, recomendados, fireConfetti, cartPost }) => {
+    const accesorios = recomendados?.filter(r => r.categoria_id !== producto.categoria_id) || [];
+    if (accesorios.length === 0) return null;
+
+    const [selectedItems, setSelectedItems] = useState(accesorios.length > 0 ? [accesorios[0].id] : []);
+    const [isAddingBundle, setIsAddingBundle] = useState(false);
+
+    const toggleItem = (id) => {
+        setSelectedItems(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+    };
+
+    const totalPaquete = producto.precio_actual + accesorios.filter(a => selectedItems.includes(a.id)).reduce((sum, a) => sum + a.precio_actual, 0);
+
+    const handleAdd = () => {
+        setIsAddingBundle(true);
+        cartPost('/cart/add', {
+            producto_id: producto.id,
+            variante_id: producto.variante_id,
+            cantidad: 1,
+            precio: producto.precio_actual,
+        }, {
+            preserveScroll: true,
+            onSuccess: () => {
+                if (selectedItems.length === 0) {
+                    setIsAddingBundle(false);
+                    fireConfetti();
+                    window.dispatchEvent(new CustomEvent('open-cart'));
+                    return;
+                }
+                const addNext = (index) => {
+                    if (index >= selectedItems.length) {
+                        setIsAddingBundle(false);
+                        fireConfetti();
+                        window.dispatchEvent(new CustomEvent('open-cart'));
+                        return;
+                    }
+                    const accId = selectedItems[index];
+                    const acc = accesorios.find(a => a.id === accId);
+                    cartPost('/cart/add', {
+                        producto_id: acc.id,
+                        cantidad: 1,
+                        precio: acc.precio_actual,
+                    }, {
+                        preserveScroll: true,
+                        onSuccess: () => addNext(index + 1),
+                        onError: () => addNext(index + 1)
+                    });
+                };
+                addNext(0);
+            },
+            onError: () => { setIsAddingBundle(false); }
+        });
+    };
+
+    return (
+        <div style={{ maxWidth: '1200px', margin: '60px auto 40px', padding: '0 20px' }}>
+            <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '24px', color: '#1e293b' }}>
+                Comprados frecuentemente juntos
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', backgroundColor: '#ffffff', padding: '32px', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.03)', border: '1px solid #f1f5f9' }}>
+                
+                <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '24px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '160px' }}>
+                        <div style={{ width: '100%', aspectRatio: '1', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '16px', backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', marginBottom: '12px' }}>
+                            <img src={producto.imagen || DEFAULT_IMAGE} alt={producto.nombre} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = DEFAULT_IMAGE; }} />
+                        </div>
+                        <span style={{ fontSize: '13px', textAlign: 'center', fontWeight: '600', color: '#334155', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{producto.nombre}</span>
+                    </div>
+
+                    <div style={{ fontSize: '24px', fontWeight: '300', color: '#cbd5e1' }}>+</div>
+
+                    {accesorios.slice(0, 3).map((acc, idx) => (
+                        <div key={acc.id} style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '160px', cursor: 'pointer', transition: 'all 0.2s ease', opacity: selectedItems.includes(acc.id) ? 1 : 0.6 }} onClick={() => toggleItem(acc.id)}>
+                                <div style={{ width: '100%', aspectRatio: '1', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '16px', backgroundColor: selectedItems.includes(acc.id) ? '#f0f9ff' : '#f8fafc', borderRadius: '12px', border: `1px solid ${selectedItems.includes(acc.id) ? '#004797' : '#e2e8f0'}`, marginBottom: '12px', transition: 'all 0.2s ease', position: 'relative' }}>
+                                    <img src={acc.imagen || DEFAULT_IMAGE} alt={acc.nombre} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = DEFAULT_IMAGE; }} />
+                                    <div style={{ position: 'absolute', top: 8, right: 8, width: 20, height: 20, borderRadius: 4, border: `2px solid ${selectedItems.includes(acc.id) ? '#004797' : '#cbd5e1'}`, backgroundColor: selectedItems.includes(acc.id) ? '#004797' : 'white', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                        {selectedItems.includes(acc.id) && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
+                                    </div>
+                                </div>
+                                <span style={{ fontSize: '13px', textAlign: 'center', fontWeight: selectedItems.includes(acc.id) ? '600' : '500', color: selectedItems.includes(acc.id) ? '#004797' : '#64748b', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{acc.nombre}</span>
+                                <span style={{ fontSize: '14px', fontWeight: 'bold', color: '#1e293b', marginTop: 4 }}>S/ {formatPrice(acc.precio_actual)}</span>
+                            </div>
+                            {idx < accesorios.slice(0, 3).length - 1 && <div style={{ fontSize: '24px', fontWeight: '300', color: '#cbd5e1' }}>+</div>}
+                        </div>
+                    ))}
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', paddingTop: '24px', borderTop: '1px solid #f1f5f9', flexWrap: 'wrap', gap: '20px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <span style={{ fontSize: '14px', color: '#64748b', fontWeight: '500' }}>Precio total de tu selección ({selectedItems.length + 1} productos)</span>
+                        <span style={{ fontSize: '28px', fontWeight: '800', color: '#004797' }}>S/ {formatPrice(totalPaquete)}</span>
+                    </div>
+                    <button onClick={handleAdd} disabled={isAddingBundle} style={{ padding: '14px 32px', backgroundColor: '#004797', color: 'white', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: '600', cursor: isAddingBundle ? 'not-allowed' : 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 12px rgba(0, 71, 151, 0.2)', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', minWidth: '220px' }} onMouseEnter={(e) => { if (!isAddingBundle) e.currentTarget.style.backgroundColor = '#003370'; }} onMouseLeave={(e) => { if (!isAddingBundle) e.currentTarget.style.backgroundColor = '#004797'; }}>
+                        {isAddingBundle ? 'Agregando paquete...' : 'Agregar al carrito'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 export default function Producto() {
-    const { producto, detalles, auth, logoUrl, recomendados, flash, cart, categorias } =
+    const { producto: baseProducto, detalles, auth, logoUrl, recomendados, flash, cart, categorias, canonicalUrl } =
         usePage().props;
+    const [selectedVariantId, setSelectedVariantId] = useState(baseProducto?.variante_id);
+    const selectedVariant = baseProducto?.variantes?.find(v => v.variante_id === Number(selectedVariantId));
+    const producto = { ...baseProducto, ...selectedVariant };
+    producto.descuento = producto.precio_anterior > producto.precio_actual ? Math.round(100*(1-producto.precio_actual/producto.precio_anterior)) : 0;
+    useEffect(()=>setSelectedVariantId(baseProducto?.variante_id),[baseProducto?.id,baseProducto?.variante_id]);
     const { isMobile } = useDeviceContext();
     const [isCatOpen, setIsCatOpen] = useState(false);
     const [isCartOpen, setIsCartOpen] = useState(false);
@@ -69,7 +178,7 @@ export default function Producto() {
             window.removeEventListener('open-cart', handleOpenCart);
             window.removeEventListener('open-categories', handleOpenCategories);
         };
-    }, [producto]);
+    }, [producto.id]);
 
     // Producto
     const [quantity, setQuantity] = useState(1);
@@ -79,6 +188,11 @@ export default function Producto() {
             : [producto?.imagen || DEFAULT_IMAGE];
     const [activeImage, setActiveImage] = useState(images[0] || DEFAULT_IMAGE);
 
+    useEffect(() => {
+        setQuantity(1);
+        setActiveImage(images[0] || DEFAULT_IMAGE);
+    }, [producto?.id]);
+
     const handleMouseMove = (e) => {
         const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
         const x = ((e.clientX - left) / width) * 100;
@@ -87,7 +201,7 @@ export default function Producto() {
     };
 
     // Obtener max permitido
-    const maxPermitido = Math.min(5, producto?.stock || 0);
+    const maxPermitido = Math.min(usePage().props.commercePolicy?.max_quantity || 5, producto?.stock || 0);
 
     // Animación de agregar
     const [isAdding, setIsAdding] = useState(false);
@@ -99,22 +213,23 @@ export default function Producto() {
     const handleBuyNow = (e) => {
         setIsAdding(true);
         // Agregar al carrito y redirigir al checkout o mostrar éxito
-        router.post(
+        cartPost(
             '/cart/add',
             {
                 producto_id: producto.id,
+                variante_id: producto.variante_id,
                 cantidad: quantity,
                 precio: producto.precio_actual,
             },
             {
                 preserveScroll: true,
                 onSuccess: () => {
-                    if (e) fireConfetti(e);
+                    if (e?.currentTarget) fireConfetti(e);
                     setIsAdding(false);
                     setAddSuccess(true);
+                    window.dispatchEvent(new CustomEvent('open-cart'));
                     setTimeout(() => {
                         setAddSuccess(false);
-                        window.dispatchEvent(new CustomEvent('open-cart'));
                     }, 800);
                 },
                 onError: () => {
@@ -126,10 +241,11 @@ export default function Producto() {
 
     const handleQuickBuy = (e) => {
         setIsAdding(true);
-        router.post(
+        cartPost(
             '/cart/add',
             {
                 producto_id: producto.id,
+                variante_id: producto.variante_id,
                 cantidad: quantity,
                 precio: producto.precio_actual,
             },
@@ -148,10 +264,11 @@ export default function Producto() {
     const handleAddBundle = (recId, recPrice) => {
         setIsAdding(true);
         // Añadir principal
-        router.post(
+        cartPost(
             '/cart/add',
             {
                 producto_id: producto.id,
+                variante_id: producto.variante_id,
                 cantidad: 1,
                 precio: producto.precio_actual,
             },
@@ -159,7 +276,7 @@ export default function Producto() {
                 preserveScroll: true,
                 onSuccess: () => {
                     // Añadir recomendado
-                    router.post(
+                    cartPost(
                         '/cart/add',
                         {
                             producto_id: recId,
@@ -185,11 +302,12 @@ export default function Producto() {
     return (
         <div className="efe-producto-page">
             <Head>
+                <link head-key="canonical" rel="canonical" href={canonicalUrl} />
                 <title>
-                    {producto?.nombre ? `${producto.nombre} - NOVAPE` : 'Producto no encontrado'}
+                    {producto?.nombre ? producto.nombre : 'Producto no encontrado'}
                 </title>
                 <meta
-                    name="description"
+                    head-key="description" name="description"
                     content={
                         producto?.descripcion?.substring(0, 150) ||
                         'Descubre nuestros productos en NOVAPE.'
@@ -209,8 +327,8 @@ export default function Producto() {
                     }
                 />
                 <meta property="og:type" content="product" />
-                {detalles?.imagenes?.[0] && (
-                    <meta property="og:image" content={detalles.imagenes[0].url} />
+                {detalles?.todas_imagenes?.[0] && (
+                    <meta property="og:image" content={detalles.todas_imagenes[0]} />
                 )}
                 <meta property="product:price:amount" content={producto?.precio_actual} />
                 <meta property="product:price:currency" content="PEN" />
@@ -243,7 +361,7 @@ export default function Producto() {
                     }
                     @media (min-width: 992px) {
                         .premium-product-main {
-                            grid-template-columns: 50% 50%;
+                            grid-template-columns: repeat(2, minmax(0, 1fr));
                             padding: 40px;
                         }
                     }
@@ -308,18 +426,18 @@ export default function Producto() {
                         margin-bottom: 12px;
                     }
                     .premium-title {
-                        font-size: 32px;
-                        font-weight: 800;
-                        color: #0f172a;
-                        line-height: 1.2;
+                        font-size: clamp(22px, 3vw, 26px);
+                        font-weight: 700;
+                        color: #1e293b;
+                        line-height: 1.35;
                         margin: 0 0 16px 0;
-                        letter-spacing: -0.5px;
+                        letter-spacing: -0.3px;
                     }
                     .premium-price {
-                        font-size: 36px;
+                        font-size: clamp(26px, 4vw, 32px);
                         font-weight: 800;
                         color: #0f172a;
-                        margin-bottom: 32px;
+                        margin-bottom: 28px;
                         display: flex;
                         align-items: center;
                         gap: 16px;
@@ -482,7 +600,7 @@ export default function Producto() {
                     }
                     .status-ok { background: #dcfce7; color: #166534; }
                     .status-no { background: #fee2e2; color: #991b1b; }
-                    
+
                     .premium-tabs-container {
                         margin-top: 48px;
                         border-radius: 20px;
@@ -536,6 +654,7 @@ export default function Producto() {
                         <div className="premium-thumbs">
                             {images.map((imgUrl, idx) => (
                                 <img
+                                    onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = DEFAULT_IMAGE; }}
                                     key={idx}
                                     src={imgUrl}
                                     alt={`Thumb ${idx}`}
@@ -544,11 +663,11 @@ export default function Producto() {
                                 />
                             ))}
                         </div>
-                        <div className="premium-main-img">
+                        <div className="premium-main-img" style={{ position: 'relative' }}>
                             <div
                                 className="efe-zoom-container"
-                                onMouseMove={handleMouseMove}
-                                onMouseEnter={() => setIsZooming(true)}
+                                onMouseMove={isZooming ? handleMouseMove : undefined}
+                                onClick={() => setIsZooming(!isZooming)}
                                 onMouseLeave={() => setIsZooming(false)}
                                 style={{
                                     width: '100%',
@@ -560,12 +679,13 @@ export default function Producto() {
                                         : 'center',
                                     backgroundSize: isZooming ? '150%' : 'contain',
                                     backgroundRepeat: 'no-repeat',
-                                    cursor: 'zoom-in',
+                                    cursor: isZooming ? 'zoom-out' : 'zoom-in',
                                     transition:
                                         'background-size 0.3s ease-out',
                                 }}
                             >
                                 <img
+                                    onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = DEFAULT_IMAGE; setActiveImage(DEFAULT_IMAGE); }}
                                     src={activeImage || DEFAULT_IMAGE}
                                     alt={producto.nombre}
                                     style={{
@@ -578,6 +698,25 @@ export default function Producto() {
                                     }}
                                 />
                             </div>
+                            
+                            {!isZooming && (
+                                <div style={{
+                                    position: 'absolute',
+                                    bottom: '20px',
+                                    right: '20px',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                                    padding: '10px',
+                                    borderRadius: '50%',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                                    pointerEvents: 'none',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: '#475569'
+                                }}>
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -601,9 +740,33 @@ export default function Producto() {
 
                         {/* Neuromarketing: Indicador de Urgencia */}
                         {producto?.stock > 0 && producto?.stock <= 5 && (
-                            <div style={{ backgroundColor: '#fff7ed', border: '1px solid #fdba74', color: '#ea580c', padding: '12px 16px', borderRadius: '12px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px', fontWeight: '600', fontSize: '14px', animation: 'pulse-urgency 2s infinite' }}>
+                            <div style={{ 
+                                backgroundColor: '#fef2f2', 
+                                border: '1px solid #fecaca', 
+                                color: '#991b1b', 
+                                padding: '14px 18px', 
+                                borderRadius: '10px', 
+                                marginBottom: '24px', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: '12px', 
+                                fontWeight: '500', 
+                                fontSize: '14px',
+                                boxShadow: '0 2px 10px rgba(0,0,0,0.02)',
+                                transition: 'all 0.2s ease',
+                                cursor: 'default'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0 4px 15px rgba(239, 68, 68, 0.1)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = '0 2px 10px rgba(0,0,0,0.02)';
+                            }}
+                            >
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
-                                <span>¡Date prisa! Solo quedan {producto.stock} unidades disponibles.</span>
+                                <span>Solo quedan <strong>{producto.stock} unidades</strong> en stock.</span>
                             </div>
                         )}
 
@@ -616,6 +779,10 @@ export default function Producto() {
                             </div>
                         </div>
 
+                        {baseProducto?.variantes?.length > 1 && <label style={{display:'block',marginBottom:16}}>Elige tu opción
+                            <select value={selectedVariantId || ''} onChange={e => { setSelectedVariantId(Number(e.target.value)); setQuantity(1); }} style={{display:'block',width:'100%',padding:12}}>
+                                {baseProducto.variantes.map(v => <option key={v.variante_id} value={v.variante_id}>{v.label || v.sku} · S/ {formatPrice(v.precio_actual)}{v.stock <= 0 ? ' · Agotado' : ''}</option>)}
+                            </select></label>}
                         {producto.stock > 0 ? (
                             <div className="premium-actions">
                                 <button className="premium-btn-cart" onClick={(e) => handleBuyNow(e)} disabled={isAdding || addSuccess}>
@@ -801,272 +968,7 @@ export default function Producto() {
             </div>
 
             {/* Frecuentemente comprados juntos */}
-            {recomendados && recomendados.length > 0 && (
-                <div style={{ maxWidth: '1200px', margin: '50px auto 30px', padding: '0 20px' }}>
-                    <h2
-                        style={{
-                            fontSize: '24px',
-                            fontWeight: 'bold',
-                            marginBottom: '24px',
-                            color: '#1e293b',
-                        }}
-                    >
-                        Comprados frecuentemente juntos
-                    </h2>
-
-                    <div
-                        style={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            alignItems: 'center',
-                            gap: '30px',
-                            backgroundColor: '#ffffff',
-                            padding: 'clamp(0.75rem, 3vw, 1.875rem)',
-                            borderRadius: '16px',
-                            boxShadow: '0 4px 20px rgba(0, 71, 151, 0.08)',
-                            border: '1px solid rgba(0, 71, 151, 0.15)',
-                        }}
-                    >
-                        {/* Producto Principal */}
-                        <div
-                            style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                width: '160px',
-                                position: 'relative',
-                            }}
-                        >
-                            <div
-                                style={{
-                                    width: '100%',
-                                    aspectRatio: '1',
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    padding: '15px',
-                                    backgroundColor: '#f8fafc',
-                                    borderRadius: '12px',
-                                    border: '1px solid #e2e8f0',
-                                    marginBottom: '12px',
-                                }}
-                            >
-                                <img
-                                    src={producto.imagen || DEFAULT_IMAGE}
-                                    alt={producto.nombre}
-                                    style={{
-                                        maxWidth: '100%',
-                                        maxHeight: '100%',
-                                        objectFit: 'contain',
-                                    }}
-                                />
-                            </div>
-                            <span
-                                style={{
-                                    fontSize: '13px',
-                                    textAlign: 'center',
-                                    fontWeight: '600',
-                                    color: '#334155',
-                                    display: '-webkit-box',
-                                    WebkitLineClamp: 2,
-                                    WebkitBoxOrient: 'vertical',
-                                    overflow: 'hidden',
-                                }}
-                            >
-                                {producto.nombre}
-                            </span>
-                        </div>
-
-                        <div style={{ fontSize: '28px', fontWeight: '300', color: '#004797' }}>
-                            +
-                        </div>
-
-                        {/* Producto Recomendado (Primer elemento) */}
-                        <div
-                            style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                width: '160px',
-                                position: 'relative',
-                            }}
-                        >
-                            <Link
-                                href={`/producto/${recomendados[0].id}`}
-                                style={{
-                                    width: '100%',
-                                    aspectRatio: '1',
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    padding: '15px',
-                                    backgroundColor: '#f8fafc',
-                                    borderRadius: '12px',
-                                    border: '1px solid #e2e8f0',
-                                    marginBottom: '12px',
-                                    transition: 'all 0.3s ease',
-                                    textDecoration: 'none',
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.borderColor = '#004797';
-                                    e.currentTarget.style.boxShadow =
-                                        '0 4px 12px rgba(0, 71, 151, 0.15)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.borderColor = '#e2e8f0';
-                                    e.currentTarget.style.boxShadow = 'none';
-                                }}
-                            >
-                                <img
-                                    src={recomendados[0].imagen || DEFAULT_IMAGE}
-                                    alt={recomendados[0].nombre}
-                                    style={{
-                                        maxWidth: '100%',
-                                        maxHeight: '100%',
-                                        objectFit: 'contain',
-                                    }}
-                                />
-                            </Link>
-                            <Link
-                                href={`/producto/${recomendados[0].id}`}
-                                style={{
-                                    fontSize: '13px',
-                                    textAlign: 'center',
-                                    fontWeight: '600',
-                                    color: '#334155',
-                                    display: '-webkit-box',
-                                    WebkitLineClamp: 2,
-                                    WebkitBoxOrient: 'vertical',
-                                    overflow: 'hidden',
-                                    textDecoration: 'none',
-                                    transition: 'color 0.2s',
-                                }}
-                                onMouseEnter={(e) => (e.currentTarget.style.color = '#004797')}
-                                onMouseLeave={(e) => (e.currentTarget.style.color = '#334155')}
-                            >
-                                {recomendados[0].nombre}
-                            </Link>
-                        </div>
-
-                        <div style={{ fontSize: '28px', fontWeight: '300', color: '#004797' }}>
-                            =
-                        </div>
-
-                        {/* Total y Botón */}
-                        <div
-                            style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: '15px',
-                                marginLeft: 'auto',
-                                minWidth: 'min(100%, 15rem)',
-                                padding: '20px',
-                                backgroundColor: '#f0f9ff',
-                                borderRadius: '12px',
-                                border: '1px dashed rgba(0, 71, 151, 0.4)',
-                            }}
-                        >
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                <span
-                                    style={{
-                                        fontSize: '13px',
-                                        color: '#64748b',
-                                        fontWeight: '500',
-                                        textTransform: 'uppercase',
-                                        letterSpacing: '0.5px',
-                                    }}
-                                >
-                                    Precio total del paquete
-                                </span>
-                                <span
-                                    style={{
-                                        fontSize: '28px',
-                                        fontWeight: '800',
-                                        color: '#004797',
-                                    }}
-                                >
-                                    S/{' '}
-                                    {formatPrice(
-                                        (producto.precio_actual || 0) +
-                                            (recomendados[0].precio_actual || 0)
-                                    )}
-                                </span>
-                            </div>
-                            <button
-                                onClick={() =>
-                                    handleAddBundle(
-                                        recomendados[0].id,
-                                        recomendados[0].precio_actual
-                                    )
-                                }
-                                disabled={isAdding}
-                                style={{
-                                    width: '100%',
-                                    padding: '14px 20px',
-                                    backgroundColor: '#004797',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '8px',
-                                    fontSize: '15px',
-                                    fontWeight: '600',
-                                    cursor: isAdding ? 'not-allowed' : 'pointer',
-                                    transition: 'all 0.2s',
-                                    boxShadow: '0 4px 12px rgba(0, 71, 151, 0.3)',
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    gap: '8px',
-                                }}
-                                onMouseEnter={(e) => {
-                                    if (!isAdding)
-                                        e.currentTarget.style.backgroundColor = '#0096d6';
-                                }}
-                                onMouseLeave={(e) => {
-                                    if (!isAdding)
-                                        e.currentTarget.style.backgroundColor = '#004797';
-                                }}
-                            >
-                                {isAdding ? (
-                                    <>
-                                        <svg
-                                            width="18"
-                                            height="18"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            strokeWidth="2"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            style={{ animation: 'spin 1s linear infinite' }}
-                                        >
-                                            <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83" />
-                                        </svg>
-                                        Agregando...
-                                    </>
-                                ) : (
-                                    <>
-                                        <svg
-                                            width="18"
-                                            height="18"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            strokeWidth="2"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                        >
-                                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                                            <line x1="3" y1="6" x2="21" y2="6"></line>
-                                            <path d="M16 10a4 4 0 0 1-8 0"></path>
-                                        </svg>
-                                        Agregar ambos al carrito
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <BundleSection producto={producto} recomendados={recomendados} fireConfetti={fireConfetti} cartPost={cartPost} />
 
             {recomendados && recomendados.length > 1 && (
                 <div style={{ maxWidth: '1200px', margin: '40px auto 60px', padding: '0 20px' }}>
@@ -1134,6 +1036,7 @@ export default function Producto() {
                                         }}
                                     >
                                         <img
+                                    onError={e => { e.currentTarget.onerror = null; e.currentTarget.src = DEFAULT_IMAGE; }}
                                             src={rec.imagen || DEFAULT_IMAGE}
                                             alt={rec.nombre}
                                             style={{
@@ -1258,9 +1161,9 @@ export default function Producto() {
                         )}
                     </div>
                     <button
-                        onClick={(e) => handleBuyNow(false, e)}
+                        onClick={handleBuyNow}
                         className={`efe-producto-btn efe-producto-btn-buy efe-btn-anim ${isAdding ? 'is-adding' : ''}`}
-                        disabled={!producto?.stock || producto.stock <= 0}
+                        disabled={!producto?.stock || producto.stock <= 0 || isAdding || addSuccess}
                         style={{ width: '100%', minHeight: '44px' }}
                     >
                         {isAdding ? 'Agregando...' : 'Comprar ahora'}
@@ -1268,6 +1171,8 @@ export default function Producto() {
                 </div>
             )}
 
+            <ProductReviews productId={producto.id} />
+            <div style={{ flexGrow: 1 }}></div>
             <Footer />
 
             <CategoryDrawer
@@ -1281,7 +1186,7 @@ export default function Producto() {
             <LoginModal
                 isOpen={isLoginOpen}
                 onClose={() => setIsLoginOpen(false)}
-                onSuccessCallback={() => handleBuyNow(true)}
+                onSuccessCallback={() => handleBuyNow()}
             />
 
             <AddToListModal

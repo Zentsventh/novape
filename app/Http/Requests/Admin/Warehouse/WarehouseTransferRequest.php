@@ -20,7 +20,8 @@ class WarehouseTransferRequest extends FormRequest
             'almacen_destino_id' => 'required|exists:almacenes,id|different:almacen_origen_id',
             'variante_id' => 'required|exists:variante,id',
             'cantidad' => 'required|integer|min:1',
-            'referencia' => 'nullable|string'
+            'referencia' => 'nullable|string|max:200',
+            'operation_key' => 'required|uuid',
         ];
     }
 }

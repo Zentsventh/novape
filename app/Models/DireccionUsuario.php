@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 class DireccionUsuario extends Model
 {
     protected $table = 'direccion_usuario';
+    protected $casts = ['principal' => 'boolean'];
 
     protected $fillable = [
         'usuario_id',

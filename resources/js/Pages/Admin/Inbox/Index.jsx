@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
 import TwentyCrmLayout from '../../../Layouts/TwentyCrmLayout';
-import { 
-    MessageSquare, Send, Paperclip, Check, CheckCheck, 
+import {
+    MessageSquare, Send, Paperclip, Check, CheckCheck,
     ChevronLeft, Search, Bot, User, Clock, CheckCircle2,
     Smile, Plus, MoreVertical, Image as ImageIcon,
     Inbox, Zap, StickyNote, RefreshCw, ArrowRightLeft,
@@ -12,6 +12,9 @@ import {
 } from 'lucide-react';
 import '../../../../css/admin/admin.css';
 import '../../../../css/admin/inbox.css';
+import '../../../../css/admin/omni-workspace.css';
+import { InboxRail, InboxTopbar, InboxWelcome, inboxViews } from '../../../Components/Admin/InboxWorkspaceChrome';
+import useDialog from '../../../Components/Admin/useDialog';
 
 // ─── SVG Icons para los canales ───────────────────────────────
 const WhatsAppIcon = () => (
@@ -256,55 +259,59 @@ class ErrorBoundary extends React.Component {
 function TransferForm({ agents, onTransfer, onCancel }) {
     const [selectedAgent, setSelectedAgent] = useState('');
     const [reason, setReason] = useState('');
-    
+
     const getStatusDot = (status) => {
-        const colors = { online: '#22c55e', busy: '#f59e0b', away: '#eab308', offline: '#ef4444' };
-        return <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: colors[status] || '#6b7280', marginRight: 6 }} />;
+        const colors = { online: '#10b981', busy: '#f59e0b', away: '#eab308', offline: '#ef4444' };
+        return <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: colors[status] || '#9ca3af', marginRight: 8, boxShadow: `0 0 0 2px rgba(255,255,255,0.8)` }} />;
     };
 
     return (
-        <div style={{ padding: '16px' }}>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: '#b0b3c6' }}>
+        <div style={{ padding: '20px 24px' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '10px', color: '#4B5563' }}>
                 Seleccionar Asesor
             </label>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '200px', overflowY: 'auto', marginBottom: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '220px', overflowY: 'auto', marginBottom: '16px', paddingRight: '4px' }}>
                 {agents.length === 0 ? (
-                    <div style={{ padding: '12px', textAlign: 'center', color: '#8b8fa3', fontSize: '13px' }}>No hay asesores disponibles</div>
+                    <div style={{ padding: '24px', textAlign: 'center', color: '#9CA3AF', fontSize: '13px', background: '#F9FAFB', borderRadius: '8px', border: '1px dashed #E5E7EB' }}>No hay asesores disponibles</div>
                 ) : agents.map(agent => (
                     <button
                         key={agent.id}
                         onClick={() => setSelectedAgent(agent.id)}
                         style={{
                             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                            padding: '10px 12px', borderRadius: '8px', border: 'none', cursor: 'pointer',
-                            background: selectedAgent === agent.id ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.05)',
-                            color: '#e0e0e0', fontSize: '13px', textAlign: 'left'
+                            padding: '12px 14px', borderRadius: '8px', border: selectedAgent === agent.id ? '1px solid #004797' : '1px solid #E5E7EB', cursor: 'pointer',
+                            background: selectedAgent === agent.id ? '#F0F7FF' : '#ffffff',
+                            color: '#111827', fontSize: '14px', textAlign: 'left',
+                            transition: 'all 0.2s', boxShadow: selectedAgent === agent.id ? '0 2px 8px rgba(0,71,151,0.05)' : 'none'
                         }}
                     >
-                        <span>{getStatusDot(agent.status)} {agent.name}</span>
-                        <span style={{ fontSize: '11px', color: '#8b8fa3' }}>{agent.activeChats}/{agent.maxChats}</span>
+                        <span style={{ fontWeight: 500, display: 'flex', alignItems: 'center' }}>{getStatusDot(agent.status)} {agent.name}</span>
+                        <span style={{ fontSize: '12px', color: selectedAgent === agent.id ? '#004797' : '#6B7280', fontWeight: 600, background: selectedAgent === agent.id ? '#ffffff' : '#F3F4F6', padding: '2px 8px', borderRadius: '12px' }}>{agent.activeChats}/{agent.maxChats} chats</span>
                     </button>
                 ))}
             </div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px', color: '#b0b3c6' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: '#4B5563' }}>
                 Motivo (opcional)
             </label>
             <textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="Ej: El cliente necesita soporte técnico..."
                 rows={2}
+                placeholder="Explica brevemente el motivo de la transferencia..."
                 style={{
-                    width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: '8px', padding: '10px', color: '#e0e0e0', fontSize: '13px', resize: 'none', outline: 'none'
+                    width: '100%', background: '#ffffff', border: '1px solid #D1D5DB',
+                    borderRadius: '8px', padding: '12px 14px', color: '#111827', fontSize: '14px', resize: 'none', outline: 'none',
+                    transition: 'border-color 0.2s'
                 }}
+                onFocus={(e) => e.target.style.borderColor = '#004797'}
+                onBlur={(e) => e.target.style.borderColor = '#D1D5DB'}
             />
-            <div style={{ display: 'flex', gap: '8px', marginTop: '14px', justifyContent: 'flex-end' }}>
-                <button onClick={onCancel} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: '#b0b3c6', cursor: 'pointer', fontSize: '13px' }}>Cancelar</button>
+            <div style={{ display: 'flex', gap: '12px', marginTop: '24px', justifyContent: 'flex-end', paddingTop: '16px', borderTop: '1px solid #E5E7EB' }}>
+                <button onClick={onCancel} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #D1D5DB', background: '#ffffff', color: '#374151', cursor: 'pointer', fontSize: '14px', fontWeight: 600, transition: 'background 0.2s' }} onMouseOver={e=>e.target.style.background='#F9FAFB'} onMouseOut={e=>e.target.style.background='#ffffff'}>Cancelar</button>
                 <button
                     onClick={() => selectedAgent && onTransfer(selectedAgent, reason)}
                     disabled={!selectedAgent}
-                    style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: selectedAgent ? '#3b82f6' : '#374151', color: 'white', cursor: selectedAgent ? 'pointer' : 'not-allowed', fontSize: '13px', fontWeight: 600 }}
+                    style={{ padding: '8px 20px', borderRadius: '8px', border: 'none', background: selectedAgent ? '#004797' : '#E5E7EB', color: selectedAgent ? '#ffffff' : '#9CA3AF', cursor: selectedAgent ? 'pointer' : 'not-allowed', fontSize: '14px', fontWeight: 600, transition: 'all 0.2s', boxShadow: selectedAgent ? '0 2px 4px rgba(0,71,151,0.1)' : 'none' }}
                 >Transferir</button>
             </div>
         </div>
@@ -323,30 +330,31 @@ function CloseReasonForm({ onClose, onCancel }) {
     ];
 
     return (
-        <div style={{ padding: '16px' }}>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: '#b0b3c6' }}>
+        <div style={{ padding: '20px 24px' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '12px', color: '#4B5563' }}>
                 Motivo del cierre
             </label>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
                 {reasons.map(r => (
                     <button
                         key={r}
                         onClick={() => setReason(r)}
                         style={{
-                            display: 'flex', alignItems: 'center', gap: '8px',
-                            padding: '10px 12px', borderRadius: '8px', border: 'none', cursor: 'pointer',
-                            background: reason === r ? 'rgba(59,130,246,0.15)' : 'rgba(255,255,255,0.05)',
-                            color: '#e0e0e0', fontSize: '13px', textAlign: 'left'
+                            display: 'flex', alignItems: 'center', gap: '10px',
+                            padding: '12px 14px', borderRadius: '8px', border: reason === r ? '1px solid #004797' : '1px solid #E5E7EB', cursor: 'pointer',
+                            background: reason === r ? '#F0F7FF' : '#ffffff',
+                            color: '#111827', fontSize: '14px', textAlign: 'left', fontWeight: reason === r ? 600 : 400,
+                            transition: 'all 0.2s', boxShadow: reason === r ? '0 2px 4px rgba(0,71,151,0.05)' : 'none'
                         }}
                     >
-                        <span style={{ width: 16, height: 16, borderRadius: '50%', border: `2px solid ${reason === r ? '#3b82f6' : '#555'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            {reason === r && <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#3b82f6' }} />}
+                        <span style={{ width: 18, height: 18, borderRadius: '50%', border: `2px solid ${reason === r ? '#004797' : '#D1D5DB'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#ffffff' }}>
+                            {reason === r && <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#004797' }} />}
                         </span>
                         {r}
                     </button>
                 ))}
             </div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '6px', color: '#b0b3c6' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, marginBottom: '8px', color: '#4B5563' }}>
                 O escribe un motivo personalizado
             </label>
             <input
@@ -355,16 +363,19 @@ function CloseReasonForm({ onClose, onCancel }) {
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="Motivo personalizado..."
                 style={{
-                    width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: '8px', padding: '10px', color: '#e0e0e0', fontSize: '13px', outline: 'none'
+                    width: '100%', background: '#ffffff', border: '1px solid #D1D5DB',
+                    borderRadius: '8px', padding: '12px 14px', color: '#111827', fontSize: '14px', outline: 'none',
+                    transition: 'border-color 0.2s'
                 }}
+                onFocus={(e) => e.target.style.borderColor = '#004797'}
+                onBlur={(e) => e.target.style.borderColor = '#D1D5DB'}
             />
-            <div style={{ display: 'flex', gap: '8px', marginTop: '14px', justifyContent: 'flex-end' }}>
-                <button onClick={onCancel} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: '#b0b3c6', cursor: 'pointer', fontSize: '13px' }}>Cancelar</button>
+            <div style={{ display: 'flex', gap: '12px', marginTop: '24px', justifyContent: 'flex-end', paddingTop: '16px', borderTop: '1px solid #E5E7EB' }}>
+                <button onClick={onCancel} style={{ padding: '8px 16px', borderRadius: '8px', border: '1px solid #D1D5DB', background: '#ffffff', color: '#374151', cursor: 'pointer', fontSize: '14px', fontWeight: 600, transition: 'background 0.2s' }} onMouseOver={e=>e.target.style.background='#F9FAFB'} onMouseOut={e=>e.target.style.background='#ffffff'}>Cancelar</button>
                 <button
                     onClick={() => reason && onClose(reason)}
                     disabled={!reason}
-                    style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: reason ? '#ef4444' : '#374151', color: 'white', cursor: reason ? 'pointer' : 'not-allowed', fontSize: '13px', fontWeight: 600 }}
+                    style={{ padding: '8px 20px', borderRadius: '8px', border: 'none', background: reason ? '#DC2626' : '#E5E7EB', color: reason ? '#ffffff' : '#9CA3AF', cursor: reason ? 'pointer' : 'not-allowed', fontSize: '14px', fontWeight: 600, transition: 'all 0.2s', boxShadow: reason ? '0 2px 4px rgba(220,38,38,0.2)' : 'none' }}
                 >Cerrar Conversación</button>
             </div>
         </div>
@@ -373,59 +384,66 @@ function CloseReasonForm({ onClose, onCancel }) {
 
 // ─── Supervisor Panel Component ──────────────────────────────
 function SupervisorPanel({ data, onRefresh }) {
-    if (!data) return <div style={{ padding: '24px', textAlign: 'center', color: '#8b8fa3' }}><Loader2 size={24} className="animate-spin" /> Cargando...</div>;
+    if (!data) return <div style={{ padding: '32px', textAlign: 'center', color: '#6B7280' }}><Loader2 size={24} className="animate-spin" style={{ margin: '0 auto 12px' }} /> Cargando datos...</div>;
 
     const getStatusDot = (status) => {
-        const colors = { online: '#22c55e', busy: '#f59e0b', away: '#eab308', offline: '#ef4444' };
-        return <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', background: colors[status] || '#6b7280' }} />;
+        const colors = { online: '#10b981', busy: '#f59e0b', away: '#eab308', offline: '#ef4444' };
+        return <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: colors[status] || '#9CA3AF' }} />;
     };
 
     return (
-        <div style={{ padding: '16px' }}>
+        <div style={{ padding: '24px' }}>
             {/* Metrics Row */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
                 {[
-                    { label: 'Chats Activos', value: data.metrics.activeConversations, color: '#3b82f6' },
-                    { label: 'En Bot', value: data.metrics.botConversations, color: '#a855f7' },
-                    { label: 'En Cola', value: data.metrics.queueCount, color: '#f59e0b' },
-                    { label: 'Cerrados Hoy', value: data.metrics.closedToday, color: '#22c55e' },
+                    { label: 'Chats Activos', value: data.metrics.activeConversations, color: '#004797', bg: '#F0F7FF', border: '#D6E8FF' },
+                    { label: 'En Bot', value: data.metrics.botConversations, color: '#7C3AED', bg: '#F5F3FF', border: '#EDE9FE' },
+                    { label: 'En Cola', value: data.metrics.queueCount, color: '#D97706', bg: '#FFFBEB', border: '#FEF3C7' },
+                    { label: 'Cerrados Hoy', value: data.metrics.closedToday, color: '#059669', bg: '#ECFDF5', border: '#D1FAE5' },
                 ].map((m, i) => (
-                    <div key={i} style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '12px', padding: '14px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '28px', fontWeight: 800, color: m.color }}>{m.value}</div>
-                        <div style={{ fontSize: '11px', color: '#8b8fa3', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{m.label}</div>
+                    <div key={i} style={{ background: m.bg, border: `1px solid ${m.border}`, borderRadius: '12px', padding: '16px', textAlign: 'center' }}>
+                        <div style={{ fontSize: '28px', fontWeight: 800, color: m.color, lineHeight: 1.2 }}>{m.value}</div>
+                        <div style={{ fontSize: '11px', color: '#4B5563', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px', marginTop: '4px' }}>{m.label}</div>
                     </div>
                 ))}
             </div>
 
             {/* Agents Table */}
-            <div style={{ marginBottom: '16px' }}>
-                <div style={{ fontSize: '14px', fontWeight: 700, color: '#e0e0e0', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Users size={16} /> Asesores
+            <div style={{ marginBottom: '24px' }}>
+                <div style={{ fontSize: '14px', fontWeight: 700, color: '#111827', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Users size={18} color="#4B5563" /> Estado de Asesores
                 </div>
-                <div style={{ borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid #E5E7EB', background: '#ffffff', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                         <thead>
-                            <tr style={{ background: 'rgba(255,255,255,0.03)' }}>
-                                <th style={{ padding: '10px 14px', textAlign: 'left', color: '#8b8fa3', fontWeight: 600 }}>Asesor</th>
-                                <th style={{ padding: '10px 14px', textAlign: 'center', color: '#8b8fa3', fontWeight: 600 }}>Estado</th>
-                                <th style={{ padding: '10px 14px', textAlign: 'center', color: '#8b8fa3', fontWeight: 600 }}>Chats</th>
-                                <th style={{ padding: '10px 14px', textAlign: 'center', color: '#8b8fa3', fontWeight: 600 }}>Resueltos Hoy</th>
+                            <tr style={{ background: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
+                                <th style={{ padding: '12px 16px', textAlign: 'left', color: '#4B5563', fontWeight: 600, textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.05em' }}>Asesor</th>
+                                <th style={{ padding: '12px 16px', textAlign: 'center', color: '#4B5563', fontWeight: 600, textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.05em' }}>Estado</th>
+                                <th style={{ padding: '12px 16px', textAlign: 'center', color: '#4B5563', fontWeight: 600, textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.05em' }}>Ocupación</th>
+                                <th style={{ padding: '12px 16px', textAlign: 'center', color: '#4B5563', fontWeight: 600, textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.05em' }}>Resueltos Hoy</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {data.agents.map(agent => (
-                                <tr key={agent.id} style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <td style={{ padding: '10px 14px', color: '#e0e0e0' }}>{agent.name}</td>
-                                    <td style={{ padding: '10px 14px', textAlign: 'center' }}>
-                                        {getStatusDot(agent.status)}
-                                        <span style={{ marginLeft: '4px', fontSize: '11px', textTransform: 'uppercase', color: '#b0b3c6' }}>{agent.status}</span>
+                            {data.agents.map((agent, i) => (
+                                <tr key={agent.id} style={{ borderBottom: i !== data.agents.length -1 ? '1px solid #F3F4F6' : 'none' }}>
+                                    <td style={{ padding: '12px 16px', color: '#111827', fontWeight: 500 }}>{agent.name}</td>
+                                    <td style={{ padding: '12px 16px', textAlign: 'center' }}>
+                                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#F9FAFB', padding: '4px 10px', borderRadius: '12px', border: '1px solid #F3F4F6' }}>
+                                            {getStatusDot(agent.status)}
+                                            <span style={{ fontSize: '11px', textTransform: 'uppercase', color: '#4B5563', fontWeight: 600 }}>{agent.status}</span>
+                                        </div>
                                     </td>
-                                    <td style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 700, color: agent.activeChats >= agent.maxChats ? '#ef4444' : '#e0e0e0' }}>
-                                        {agent.activeChats}/{agent.maxChats}
+                                    <td style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 700, color: agent.activeChats >= agent.maxChats ? '#DC2626' : '#111827' }}>
+                                        {agent.activeChats} / {agent.maxChats}
                                     </td>
-                                    <td style={{ padding: '10px 14px', textAlign: 'center', color: '#22c55e' }}>{agent.resolvedToday}</td>
+                                    <td style={{ padding: '12px 16px', textAlign: 'center', color: '#059669', fontWeight: 600 }}>{agent.resolvedToday}</td>
                                 </tr>
                             ))}
+                            {data.agents.length === 0 && (
+                                <tr>
+                                    <td colSpan="4" style={{ textAlign: 'center', padding: '24px', color: '#6B7280' }}>No hay asesores configurados o conectados.</td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>
@@ -434,21 +452,21 @@ function SupervisorPanel({ data, onRefresh }) {
             {/* Queue */}
             {data.queue.count > 0 && (
                 <div>
-                    <div style={{ fontSize: '14px', fontWeight: 700, color: '#f59e0b', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Clock size={16} /> Cola de Espera ({data.queue.count})
+                    <div style={{ fontSize: '14px', fontWeight: 700, color: '#D97706', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Clock size={18} /> Cola de Espera Crítica ({data.queue.count})
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         {data.queue.items.map(item => (
                             <div key={item.id} style={{
                                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                padding: '10px 14px', borderRadius: '8px', background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.15)'
+                                padding: '12px 16px', borderRadius: '8px', background: '#FFFBEB', border: '1px solid #FDE68A'
                             }}>
                                 <div>
-                                    <span style={{ color: '#e0e0e0', fontSize: '13px', fontWeight: 600 }}>{item.contactName}</span>
-                                    <span style={{ color: '#8b8fa3', fontSize: '11px', marginLeft: '8px' }}>{item.channel}</span>
+                                    <span style={{ color: '#92400E', fontSize: '13px', fontWeight: 600 }}>{item.contactName}</span>
+                                    <span style={{ color: '#D97706', fontSize: '11px', marginLeft: '10px', fontWeight: 600, background: '#FEF3C7', padding: '2px 8px', borderRadius: '12px' }}>{item.channel}</span>
                                 </div>
-                                <div style={{ fontSize: '12px', color: item.waitingMinutes > 5 ? '#ef4444' : '#f59e0b', fontWeight: 600 }}>
-                                    {item.waitingTime}
+                                <div style={{ fontSize: '12px', color: item.waitingMinutes > 5 ? '#DC2626' : '#D97706', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                    <Timer size={14} /> {item.waitingTime}
                                 </div>
                             </div>
                         ))}
@@ -456,9 +474,9 @@ function SupervisorPanel({ data, onRefresh }) {
                 </div>
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '16px' }}>
-                <button onClick={onRefresh} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', color: '#b0b3c6', cursor: 'pointer', fontSize: '13px' }}>
-                    <RefreshCw size={14} /> Actualizar
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px', paddingTop: '16px', borderTop: '1px solid #E5E7EB' }}>
+                <button onClick={onRefresh} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '8px', border: '1px solid #D1D5DB', background: '#ffffff', color: '#374151', cursor: 'pointer', fontSize: '13px', fontWeight: 600, boxShadow: '0 1px 2px rgba(0,0,0,0.05)', transition: 'background 0.2s' }} onMouseOver={e=>e.target.style.background='#F9FAFB'} onMouseOut={e=>e.target.style.background='#ffffff'}>
+                    <RefreshCw size={16} /> Actualizar Panel
                 </button>
             </div>
         </div>
@@ -479,18 +497,19 @@ function AgentStatusDropdown({ status, onChange }) {
     }, []);
 
     const statuses = [
-        { value: 'online', label: 'Online', color: '#10b981' },
+        { value: 'online', label: 'Disponible', color: '#10b981' },
         { value: 'busy', label: 'Ocupado', color: '#f59e0b' },
         { value: 'away', label: 'Ausente', color: '#eab308' },
-        { value: 'offline', label: 'Offline', color: '#ef4444' }
+        { value: 'offline', label: 'Desconectado', color: '#7b8498' }
     ];
 
     const currentStatus = statuses.find(s => s.value === status) || statuses[3];
 
     return (
         <div style={{ position: 'relative' }} ref={dropdownRef}>
-            <button 
+            <button
                 onClick={() => setIsOpen(!isOpen)}
+                aria-label="Mi disponibilidad" aria-expanded={isOpen}
                 style={{
                     display: 'flex', alignItems: 'center', gap: '8px',
                     background: '#ffffff',
@@ -569,7 +588,13 @@ function InboxIndex() {
     const inboxChannel = auth?.user?.roles?.some(r => r.nombre === "admin") ? "novape-inbox.supervisors" : `novape-inbox.agent.${auth?.user?.id}`;
     const [conversations, setConversations] = useState([]);
     const [activeConv, setActiveConv] = useState(null);
+    const isSupervisor = auth?.user?.roles?.some(role=>role.nombre==='admin');
     const [messages, setMessages] = useState([]);
+    const [historyPage, setHistoryPage] = useState(1);
+    const [historyLastPage, setHistoryLastPage] = useState(1);
+    const [loadingHistory, setLoadingHistory] = useState(false);
+    const historyRequestRef = useRef(0);
+    const messagesViewportRef = useRef(null);
     const [messageInput, setMessageInput] = useState('');
     useEffect(() => {
         const handler = event => {
@@ -582,6 +607,30 @@ function InboxIndex() {
     const [filter, setFilter] = useState('all');
     const [statusFilter, setStatusFilter] = useState('open');
     const [searchQuery, setSearchQuery] = useState('');
+    const [view, setView] = useState('all');
+    const [sort, setSort] = useState('latest');
+    const [page, setPage] = useState(1);
+    const [pagination, setPagination] = useState({ total: 0, last_page: 1 });
+    const [summary, setSummary] = useState(null);
+    const [channelCounts, setChannelCounts] = useState(null);
+    const [showProfile, setShowProfile] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 1280);
+    const [showHelp, setShowHelp] = useState(false);
+    const [showEmoji, setShowEmoji] = useState(false);
+    const [realtime, setRealtime] = useState(false);
+    const searchInputRef = useRef(null);
+    const listRequestRef = useRef(null);
+    const listSequence = useRef(0);
+    const queryRef = useRef(null);
+    queryRef.current = { filter, statusFilter, searchQuery, view, sort, page };
+    const selectView = id => { setView(id === 'closed' ? 'all' : id); setStatusFilter(id === 'closed' ? 'closed' : 'open'); setPage(1); };
+    const selectChannel = channel => { setFilter(channel); setPage(1); };
+    const selectedView = statusFilter === 'closed' ? 'closed' : view;
+    const selectedViewLabel = inboxViews.find(item => item.id === selectedView)?.label;
+    const draftKey = (id, mode) => `novape.inbox.draft.${auth?.user?.id}.${id}.${mode}`;
+    const readDraft = (id, mode) => { try { return sessionStorage.getItem(draftKey(id,mode)) || ''; } catch { return ''; } };
+    const saveDraft = (id, mode, text) => { if (!id) return; try { text ? sessionStorage.setItem(draftKey(id,mode),text) : sessionStorage.removeItem(draftKey(id,mode)); } catch {} };
+    const changeReplyMode = mode => { saveDraft(activeConv?.id, replyMode, messageInput); setReplyMode(mode); setMessageInput(readDraft(activeConv?.id,mode)); };
+
     const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
     const [isLoadingChat, setIsLoadingChat] = useState(false);
     const [isLoadingConversations, setIsLoadingConversations] = useState(true);
@@ -589,8 +638,12 @@ function InboxIndex() {
     const [showCannedDropdown, setShowCannedDropdown] = useState(false);
     const [showActionsMenu, setShowActionsMenu] = useState(false);
     const [toast, setToast] = useState(null);
+    const [replyMode, setReplyMode] = useState('reply'); // 'reply' or 'note'
+    const replyModeRef = useRef(replyMode);
+    replyModeRef.current = replyMode;
 
     // Enterprise state
+    const [isUpdatingPriority, setIsUpdatingPriority] = useState(false);
     const [agentStatus, setAgentStatus] = useState('offline');
     const [agentActiveChats, setAgentActiveChats] = useState(0);
     const [agentMaxChats, setAgentMaxChats] = useState(5);
@@ -599,9 +652,19 @@ function InboxIndex() {
     const [availableAgents, setAvailableAgents] = useState([]);
     const [supervisorData, setSupervisorData] = useState(null);
     const [showSupervisorPanel, setShowSupervisorPanel] = useState(false);
+    const transferDialogRef = useRef(null);
+    const closeDialogRef = useRef(null);
+    const supervisorDialogRef = useRef(null);
+    const dismissTransfer = useCallback(() => setShowTransferModal(false), []);
+    const dismissClose = useCallback(() => setShowCloseModal(false), []);
+    const dismissSupervisor = useCallback(() => setShowSupervisorPanel(false), []);
+    useDialog(showTransferModal, transferDialogRef, dismissTransfer);
+    useDialog(showCloseModal, closeDialogRef, dismissClose);
+    useDialog(showSupervisorPanel, supervisorDialogRef, dismissSupervisor);
 
     const messagesEndRef = useRef(null);
     const searchTimeoutRef = useRef(null);
+    const searchMountedRef = useRef(false);
     const actionsMenuRef = useRef(null);
     const pollingRef = useRef(null);
     const activeConvRef = useRef(null);
@@ -611,10 +674,29 @@ function InboxIndex() {
         activeConvRef.current = activeConv;
     }, [activeConv]);
 
+    useEffect(() => { saveDraft(activeConv?.id, replyMode, messageInput); }, [activeConv?.id, replyMode, messageInput]);
+    useEffect(() => {
+        const keyboard = event => {
+            if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === 'f') {
+                event.preventDefault(); searchInputRef.current?.focus();
+            }
+            if (event.key === 'Escape') {
+                setShowHelp(false); setShowEmoji(false); setShowActionsMenu(false); setShowCannedDropdown(false);
+                setShowTransferModal(false); setShowCloseModal(false); setShowSupervisorPanel(false);
+            }
+        };
+        window.addEventListener('keydown', keyboard);
+        return () => { window.removeEventListener('keydown', keyboard); listRequestRef.current?.abort(); };
+    }, []);
+
     // ─── Efecto inicial ───────────────────────────────────────
     useEffect(() => {
-        fetchConversations();
         fetchAgentStatus();
+
+        const connection = window.Echo?.connector?.pusher?.connection;
+        const connectionChanged = () => setRealtime(connection?.state === 'connected');
+        connectionChanged();
+        connection?.bind('state_change', connectionChanged);
 
         // Escuchar eventos de broadcasting
         if (window.Echo) {
@@ -634,6 +716,7 @@ function InboxIndex() {
         pollingRef.current = setInterval(() => {
             if (document.hidden) return;
             fetchConversationsSilent();
+            fetchAgentStatus();
             // Si hay una conversación activa, refrescar sus mensajes
             if (activeConvRef.current) {
                 fetchMessagesSilent(activeConvRef.current.id);
@@ -641,6 +724,7 @@ function InboxIndex() {
         }, 30000);
 
         return () => {
+            connection?.unbind('state_change', connectionChanged);
             if (window.Echo) {
                 window.Echo.leave(inboxChannel);
             }
@@ -652,19 +736,16 @@ function InboxIndex() {
 
     // ─── Refetch al cambiar filtro o estado ────────────────────
     useEffect(() => {
-        setActiveConv(null);
-        setMessages([]);
-        setContactProfile(null);
-        setIsMobileChatOpen(false);
         fetchConversations();
-    }, [filter, statusFilter]);
+    }, [filter, statusFilter, view, sort, page]);
 
     // ─── Búsqueda con debounce ────────────────────────────────
     useEffect(() => {
+        if (!searchMountedRef.current) { searchMountedRef.current = true; return; }
         if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
         searchTimeoutRef.current = setTimeout(() => {
-            fetchConversations();
-        }, 400);
+            if (queryRef.current.page !== 1) setPage(1); else fetchConversations();
+        }, 300);
         return () => {
             if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
         };
@@ -682,55 +763,46 @@ function InboxIndex() {
     }, []);
 
     // ─── Fetch conversaciones ─────────────────────────────────
-    const fetchConversations = async () => {
-        setIsLoadingConversations(true);
+    const loadConversations = async (silent = false) => {
+        const sequence = ++listSequence.current;
+        listRequestRef.current?.abort();
+        const controller = new AbortController(); listRequestRef.current = controller;
+        if (!silent) setIsLoadingConversations(true);
         try {
-            const params = new URLSearchParams();
-            if (filter !== 'all') params.append('channel', filter);
-            if (searchQuery) params.append('search', searchQuery);
-            params.append('status', statusFilter);
-            const res = await fetch(`/admin/api/omnichannel/conversations?${params}`);
-            if (!res.ok) throw new Error('Error al cargar conversaciones');
-            const data = await res.json();
-            setConversations(data.data || []);
+            const query = queryRef.current;
+            const params = new URLSearchParams({ status: query.statusFilter, view: query.view, sort: query.sort, page: query.page });
+            if (query.filter !== 'all') params.set('channel',query.filter);
+            if (query.searchQuery) params.set('search',query.searchQuery);
+            const response = await fetch(`/admin/api/omnichannel/conversations?${params}`, { signal: controller.signal, headers: { Accept: 'application/json' } });
+            if (!response.ok) throw new Error('No se pudieron cargar las conversaciones.');
+            const data = await response.json();
+            if (sequence !== listSequence.current) return;
+            setConversations(data.data || []); setSummary(data.summary || null); setChannelCounts(data.channels || {});
+            const refreshedActive = (data.data || []).find(conversation=>conversation.id===activeConvRef.current?.id);
+            if (refreshedActive) setActiveConv(current=>current?.id === refreshedActive.id ? {...current,...refreshedActive} : current);
+            setPagination({ total: data.total, last_page: data.last_page, from: data.from, to: data.to });
+            if (query.page > data.last_page) setPage(Math.max(1, data.last_page));
         } catch (error) {
-            console.error('Error fetching conversations:', error);
-            showToast('Error al cargar conversaciones', 'error');
-        } finally {
-            setIsLoadingConversations(false);
-        }
+            if (error.name !== 'AbortError' && !silent) showToast(error.message, 'error');
+        } finally { if (sequence === listSequence.current) setIsLoadingConversations(false); }
     };
+    const fetchConversations = () => loadConversations();
+    const fetchConversationsSilent = () => loadConversations(true);
 
-    // ─── Fetch conversaciones silencioso (polling) ────────────
-    const fetchConversationsSilent = async () => {
-        try {
-            const params = new URLSearchParams();
-            if (filter !== 'all') params.append('channel', filter);
-            if (searchQuery) params.append('search', searchQuery);
-            params.append('status', statusFilter);
-            const res = await fetch(`/admin/api/omnichannel/conversations?${params}`);
-            if (!res.ok) return;
-            const data = await res.json();
-            setConversations(data.data || []);
-        } catch (error) {
-            // Silencioso: no mostrar toast en polling
-            console.warn('Polling conversations failed:', error);
-        }
-    };
-
-    // ─── Fetch mensajes ───────────────────────────────────────
     const fetchMessages = async (convId) => {
         try {
             const res = await fetch(`/admin/api/omnichannel/conversations/${convId}/messages`);
             if (!res.ok) throw new Error('Error al cargar mensajes');
             const data = await res.json();
+            if (activeConvRef.current?.id !== convId) return;
             setMessages(data.data || []);
+            setHistoryLastPage(data.last_page || 1);
             scrollToBottom();
         } catch (error) {
             console.error('Error fetching messages:', error);
             showToast('Error al cargar mensajes', 'error');
         } finally {
-            setIsLoadingChat(false);
+            if (activeConvRef.current?.id === convId) setIsLoadingChat(false);
         }
     };
 
@@ -740,12 +812,17 @@ function InboxIndex() {
             const res = await fetch(`/admin/api/omnichannel/conversations/${convId}/messages`);
             if (!res.ok) return;
             const data = await res.json();
+            if (activeConvRef.current?.id !== convId) return;
             const newMsgs = data.data || [];
+            setHistoryLastPage(data.last_page || 1);
             setMessages(prev => {
-                if (newMsgs.length !== prev.length) {
-                    // Hay mensajes nuevos, actualizar y hacer scroll
-                    setTimeout(() => scrollToBottom(), 100);
-                    return newMsgs;
+                if (prev.some(message => String(message.id).startsWith('temp-') && message.status === 'queued')) return prev;
+                const ids = new Set(newMsgs.map(message => message.id));
+                const merged = [...prev.filter(message => !ids.has(message.id) && !String(message.id).startsWith('temp-')), ...newMsgs];
+                if (JSON.stringify(merged) !== JSON.stringify(prev)) {
+                    const viewport = messagesViewportRef.current;
+                    if (viewport && viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 120) setTimeout(() => scrollToBottom(), 100);
+                    return merged;
                 }
                 return prev;
             });
@@ -754,13 +831,30 @@ function InboxIndex() {
         }
     };
 
+    const fetchOlderMessages = async () => {
+        if (!activeConv || loadingHistory || historyPage >= historyLastPage) return;
+        const id = activeConv.id; const sequence = ++historyRequestRef.current;
+        const viewport = messagesViewportRef.current; const previousHeight = viewport?.scrollHeight || 0;
+        setLoadingHistory(true);
+        try {
+            const response = await fetch(`/admin/api/omnichannel/conversations/${id}/messages?page=${historyPage + 1}`, {headers:{Accept:'application/json'}});
+            if (!response.ok) throw new Error('No se pudo cargar el historial');
+            const data = await response.json();
+            if (activeConvRef.current?.id !== id || sequence !== historyRequestRef.current) return;
+            setMessages(current => { const ids = new Set(current.map(message=>message.id)); return [...(data.data || []).filter(message=>!ids.has(message.id)), ...current]; });
+            setHistoryPage(data.current_page); setHistoryLastPage(data.last_page);
+            requestAnimationFrame(() => { if (messagesViewportRef.current && activeConvRef.current?.id === id) messagesViewportRef.current.scrollTop += messagesViewportRef.current.scrollHeight - previousHeight; });
+        } catch (error) { if (activeConvRef.current?.id === id) showToast(error.message,'error'); }
+        finally { if (sequence === historyRequestRef.current) setLoadingHistory(false); }
+    };
+
     // ─── Fetch perfil contacto ────────────────────────────────
     const fetchContactProfile = async (convId) => {
         try {
             const res = await fetch(`/admin/api/omnichannel/conversations/${convId}/contact-profile`);
             if (!res.ok) throw new Error('Error al cargar perfil');
             const data = await res.json();
-            setContactProfile(data);
+            if (activeConvRef.current?.id === convId) setContactProfile(data);
         } catch (error) {
             console.error('Error fetching contact profile:', error);
         }
@@ -770,6 +864,11 @@ function InboxIndex() {
     const handleSelectConversation = (conv) => {
         if (activeConv?.id === conv.id) return;
 
+        saveDraft(activeConv?.id, replyMode, messageInput);
+        activeConvRef.current = conv;
+        setMessageInput(readDraft(conv.id, replyMode));
+        setMessages([]);
+        historyRequestRef.current++; setHistoryPage(1); setHistoryLastPage(1); setLoadingHistory(false);
         setActiveConv(conv);
         setIsMobileChatOpen(true);
         setIsLoadingChat(true);
@@ -782,22 +881,12 @@ function InboxIndex() {
         setConversations(prev => prev.map(c =>
             c.id === conv.id ? { ...c, unreadCount: 0 } : c
         ));
+        if (conv.unreadCount > 0) setSummary(current => current ? {...current,unread:Math.max(0,current.unread - 1)} : current);
     };
 
     // ─── Eventos de broadcasting ──────────────────────────────
     const handleNewMessage = useCallback((msg) => {
-        // Actualizar mensajes si la conversación está activa
-        setActiveConv(current => {
-            if (current && msg.conversation_id === current.id) {
-                setMessages(prev => {
-                    // Evitar duplicados
-                    if (prev.some(m => m.id === msg.id)) return prev;
-                    return [...prev, msg];
-                });
-                scrollToBottom();
-            }
-            return current;
-        });
+        if (activeConvRef.current?.id === msg.conversation_id) fetchMessagesSilent(msg.conversation_id);
     }, []);
 
     const handleMessageStatusUpdate = useCallback((statusData) => {
@@ -807,14 +896,7 @@ function InboxIndex() {
     }, []);
 
     const updateConversationInList = useCallback((updatedConv) => {
-        setConversations(prev => {
-            const exists = prev.find(c => c.id === updatedConv.id);
-            if (exists) {
-                return prev.map(c => c.id === updatedConv.id ? { ...updatedConv, unreadCount: updatedConv.unreadCount } : c)
-                    .sort((a, b) => (b.lastMessageTime || '').localeCompare(a.lastMessageTime || ''));
-            }
-            return [updatedConv, ...prev];
-        });
+        fetchConversationsSilent();
 
         setActiveConv(current => {
             if (current && current.id === updatedConv.id) {
@@ -824,31 +906,38 @@ function InboxIndex() {
         });
     }, []);
 
-    // ─── Enviar mensaje ───────────────────────────────────────
+    // ─── Enviar mensaje o nota ───────────────────────────────
     const handleSendMessage = async (e) => {
         e.preventDefault();
         if (!messageInput.trim() || !activeConv || isSending) return;
 
         const content = messageInput;
+        const currentMode = replyMode;
+        const conversationId = activeConv.id;
+        saveDraft(conversationId,currentMode,'');
         setMessageInput('');
         setIsSending(true);
 
         const tempMsg = {
             id: 'temp-' + Date.now(),
-            direction: 'outbound',
+            direction: currentMode === 'note' ? 'internal' : 'outbound',
             messageType: 'text',
             content: content,
             time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
             date_formatted: 'Hoy',
             status: 'queued',
-            isInternalNote: false,
+            isInternalNote: currentMode === 'note',
             isAiGenerated: false,
         };
         setMessages(prev => [...prev, tempMsg]);
         scrollToBottom();
 
         try {
-            const res = await fetch(`/admin/api/omnichannel/conversations/${activeConv.id}/messages`, {
+            const endpoint = currentMode === 'note'
+                ? `/admin/api/omnichannel/conversations/${activeConv.id}/notes`
+                : `/admin/api/omnichannel/conversations/${activeConv.id}/messages`;
+
+            const res = await fetch(endpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -865,14 +954,22 @@ function InboxIndex() {
             const data = await res.json();
 
             if (data.success) {
-                setMessages(prev => prev.map(m => m.id === tempMsg.id ? data.message : m));
+                if (activeConvRef.current?.id === conversationId) setMessages(prev => prev.map(m => m.id === tempMsg.id ? (data.message || tempMsg) : m));
+                fetchConversationsSilent();
+                if (data.message?.status === 'failed') {
+                    saveDraft(conversationId,currentMode,content);
+                    if (activeConvRef.current?.id === conversationId && replyModeRef.current === currentMode) setMessageInput(content);
+                    showToast('El canal no pudo entregar el mensaje. Tu respuesta se conserva para reintentar.', 'error');
+                }
+                if (currentMode === 'note') showToast('Nota interna añadida', 'success');
             } else {
-                throw new Error('No se pudo enviar el mensaje');
+                throw new Error('No se pudo enviar');
             }
         } catch (error) {
-            console.error('Error sending message:', error);
+            console.error('Error sending:', error);
             showToast(`Error al enviar: ${error.message}`, 'error');
-            // Marcar el mensaje temporal como fallido
+            saveDraft(conversationId,currentMode,content);
+            if (activeConvRef.current?.id === conversationId && replyModeRef.current === currentMode) { setMessageInput(current => current || content); }
             setMessages(prev => prev.map(m =>
                 m.id === tempMsg.id ? { ...m, status: 'failed' } : m
             ));
@@ -882,6 +979,33 @@ function InboxIndex() {
     };
 
     // ─── Acciones de conversación ─────────────────────────────
+    const handlePriority = async priority => {
+        if (!activeConv || isUpdatingPriority) return;
+        const id = activeConv.id;
+        setIsUpdatingPriority(true);
+        try {
+            const response = await fetch(`/admin/api/omnichannel/conversations/${id}/priority`, {
+                method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]')?.content || ''}, body:JSON.stringify({priority}),
+            });
+            if (!response.ok) throw new Error('No se pudo actualizar la prioridad');
+            if (activeConvRef.current?.id === id) setActiveConv(current=>({...current,priority}));
+            fetchConversationsSilent(); showToast('Prioridad actualizada', 'success');
+        } catch (error) { showToast(error.message, 'error'); }
+        finally { setIsUpdatingPriority(false); }
+    };
+
+    const handleAssignSelf = async () => {
+        if (!activeConv || !isSupervisor) return;
+        const id = activeConv.id;
+        try {
+            const response = await fetch(`/admin/api/omnichannel/conversations/${id}/assign`, {method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]')?.content || ''},body:JSON.stringify({user_id:auth.user.id})});
+            if (!response.ok) throw new Error('No se pudo asignar la conversación');
+            setActiveConv(current=>current?.id===id ? {...current,assignedUserId:auth.user.id,agentName:auth.user.nombres,status:'human_active',isBotActive:false} : current);
+            fetchConversationsSilent(); fetchAgentStatus(); fetchMessagesSilent(id); fetchContactProfile(id);
+            setShowActionsMenu(false); showToast('Conversación asignada a ti', 'success');
+        } catch(error) { showToast(error.message, 'error'); }
+    };
+
     const handleResolve = async () => {
         if (!activeConv) return;
         try {
@@ -889,7 +1013,10 @@ function InboxIndex() {
                 method: 'POST',
                 headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' }
             });
+            if (!res.ok) throw new Error('No se pudo resolver');
             if (res.ok) {
+                setActiveConv(current=>current?.id === activeConv.id ? {...current,status:'resolved',isBotActive:false} : current);
+                fetchConversationsSilent(); fetchAgentStatus();
                 showToast('Conversación marcada como resuelta', 'success');
                 setShowActionsMenu(false);
             }
@@ -905,7 +1032,10 @@ function InboxIndex() {
                 method: 'POST',
                 headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' }
             });
+            if (!res.ok) throw new Error('No se pudo reabrir');
             if (res.ok) {
+                setActiveConv(current=>current?.id === activeConv.id ? {...current,status:current.assignedUserId ? 'human_active' : 'bot_active',isBotActive:!current.assignedUserId} : current);
+                fetchConversationsSilent(); fetchAgentStatus();
                 showToast('Conversación reabierta', 'success');
                 setShowActionsMenu(false);
             }
@@ -921,7 +1051,10 @@ function InboxIndex() {
                 method: 'POST',
                 headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' }
             });
+            if (!res.ok) throw new Error('No se pudo transferir');
             if (res.ok) {
+                setActiveConv(current=>current?.id === activeConv.id ? {...current,status:'bot_active',isBotActive:true,assignedUserId:null,agentName:null} : current);
+                fetchConversationsSilent(); fetchAgentStatus();
                 showToast('Transferido al asistente IA', 'success');
                 setShowActionsMenu(false);
             }
@@ -930,29 +1063,8 @@ function InboxIndex() {
         }
     };
 
-    const handleAddNote = async () => {
-        const note = prompt('Escribe una nota interna:');
-        if (!note?.trim()) return;
-        try {
-            const res = await fetch(`/admin/api/omnichannel/conversations/${activeConv.id}/notes`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
-                },
-                body: JSON.stringify({ content: note })
-            });
-            if (res.ok) {
-                const data = await res.json();
-                if (data.success) {
-                    setMessages(prev => [...prev, data.message]);
-                    scrollToBottom();
-                    showToast('Nota interna añadida', 'success');
-                }
-            }
-        } catch (error) {
-            showToast('Error al añadir nota', 'error');
-        }
+    const handleAddNote = () => {
+        changeReplyMode('note');
         setShowActionsMenu(false);
     };
 
@@ -979,6 +1091,7 @@ function InboxIndex() {
                 },
                 body: JSON.stringify({ status: newStatus })
             });
+            if (!res.ok) throw new Error('No se pudo actualizar la disponibilidad');
             if (res.ok) {
                 setAgentStatus(newStatus);
                 showToast(`Estado cambiado a ${newStatus.toUpperCase()}`, 'success');
@@ -997,7 +1110,14 @@ function InboxIndex() {
                 },
                 body: JSON.stringify({ to_user_id: toUserId, reason })
             });
+            if (!res.ok) throw new Error('No se pudo transferir la conversación');
             if (res.ok) {
+                if (!isSupervisor && Number(toUserId) !== Number(auth?.user?.id)) {
+                    saveDraft(activeConv.id,replyMode,messageInput); activeConvRef.current=null; setActiveConv(null); setMessages([]); setMessageInput(''); setContactProfile(null); setIsMobileChatOpen(false);
+                } else {
+                    setActiveConv(current=>current?.id===activeConv.id ? {...current,assignedUserId:Number(toUserId),status:'human_active',isBotActive:false,agentName:availableAgents.find(agent=>Number(agent.id)===Number(toUserId))?.name || null} : current);
+                    fetchMessagesSilent(activeConv.id); fetchContactProfile(activeConv.id);
+                }
                 showToast('Conversación transferida exitosamente', 'success');
                 setShowTransferModal(false);
                 setShowActionsMenu(false);
@@ -1018,7 +1138,9 @@ function InboxIndex() {
                 },
                 body: JSON.stringify({ reason })
             });
+            if (!res.ok) throw new Error('No se pudo cerrar la conversación');
             if (res.ok) {
+                setActiveConv(current=>current?.id===activeConv.id ? {...current,status:'closed',isBotActive:false} : current);
                 showToast('Conversación cerrada', 'success');
                 setShowCloseModal(false);
                 setShowActionsMenu(false);
@@ -1089,6 +1211,13 @@ function InboxIndex() {
         setToast({ message, type });
     };
 
+    const conversationTimestamp = conversation => {
+        if (!conversation.lastMessageAt) return conversation.lastMessageTime || conversation.lastMessageDate;
+        const date = new Date(conversation.lastMessageAt);
+        if (Number.isNaN(date.getTime())) return conversation.lastMessageDate || '—';
+        return date.toDateString() === new Date().toDateString() ? date.toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'}) : date.toLocaleDateString('es-PE',{day:'2-digit',month:'2-digit'});
+    };
+
     const scrollToBottom = () => {
         requestAnimationFrame(() => {
             setTimeout(() => {
@@ -1130,9 +1259,12 @@ function InboxIndex() {
     // ═══════════════════════════════════════════════════════════
     // ═══════════════════════════════════════════════════════════
     return (
-        <TwentyCrmLayout title="Omnicanal CRM">
-            <div className={`inbox-root ${isMobileChatOpen ? 'chat-open' : ''}`} style={{ height: '100%', width: '100%', position: 'relative' }}>
-                <Head title="Omnicanal CRM" />
+        <TwentyCrmLayout title="Centro de conversaciones">
+            <div className={`inbox-root omni-workspace ${isMobileChatOpen ? 'chat-open' : ''} ${showProfile ? 'with-profile' : 'without-profile'}`}>
+                <Head title="Centro de conversaciones" />
+                <InboxTopbar summary={summary} showProfile={showProfile} onProfile={() => setShowProfile(!showProfile)} showHelp={showHelp} onHelp={() => setShowHelp(!showHelp)} realtime={realtime}/>
+                <InboxRail selected={selectedView} onSelect={selectView} summary={summary} channels={channelCounts} supervisor={auth?.user?.roles?.some(role => role.nombre === 'admin')} onSupervisor={openSupervisorPanel} user={auth?.user}/>
+
 
                 {/* Toast de notificaciones */}
             {toast && (
@@ -1145,10 +1277,11 @@ function InboxIndex() {
 
             {/* ─── COLUMNA 1: LISTA DE CHATS ─── */}
             <div className="inbox-sidebar">
+                <div className="omni-mobile-views"><label htmlFor="inbox-view">Bandeja de atención</label><select id="inbox-view" value={selectedView} onChange={event=>selectView(event.target.value)}>{inboxViews.filter(item=>!item.supervisor || auth?.user?.roles?.some(role=>role.nombre==='admin')).map(item=><option key={item.id} value={item.id}>{item.label} · {summary?.[item.stat] ?? '—'}</option>)}</select></div>
                 <div className="inbox-sidebar__header">
                     <div className="inbox-sidebar__title">
-                        Mensajes
-                        <span style={{ fontSize: '11px', opacity: 0.7, marginLeft: '6px' }}>{agentActiveChats}/{agentMaxChats}</span>
+                        {selectedViewLabel}
+                        <span className="omni-list-total">{pagination.total}</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         {/* Agent Status Selector */}
@@ -1163,15 +1296,15 @@ function InboxIndex() {
                 </div>
 
                 <div className="inbox-sidebar__tabs">
-                    <button 
-                        className={`inbox-tab-btn ${statusFilter === 'open' ? 'active' : ''}`} 
-                        onClick={() => setStatusFilter('open')}
+                    <button
+                        className={`inbox-tab-btn ${statusFilter === 'open' ? 'active' : ''}`}
+                        onClick={() => selectView('all')}
                     >
                         Abiertos
                     </button>
-                    <button 
-                        className={`inbox-tab-btn ${statusFilter === 'closed' ? 'active' : ''}`} 
-                        onClick={() => setStatusFilter('closed')}
+                    <button
+                        className={`inbox-tab-btn ${statusFilter === 'closed' ? 'active' : ''}`}
+                        onClick={() => selectView('closed')}
                     >
                         Cerrados
                     </button>
@@ -1180,6 +1313,9 @@ function InboxIndex() {
                 <div className="inbox-sidebar__search">
                     <Search size={16} className="inbox-sidebar__search-icon" />
                     <input
+                        ref={searchInputRef}
+                        aria-label="Buscar conversaciones"
+                        maxLength={150}
                         type="text"
                         placeholder="Buscar cliente o número..."
                         value={searchQuery}
@@ -1188,23 +1324,25 @@ function InboxIndex() {
                 </div>
 
                 <div className="inbox-sidebar__filters">
-                    <button className={`inbox-filter-btn ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>
+                    <button className={`inbox-filter-btn ${filter === 'all' ? 'active' : ''}`} onClick={() => selectChannel('all')}>
                         Todos
                     </button>
-                    <button className={`inbox-filter-btn ${filter === 'whatsapp' ? 'active' : ''}`} onClick={() => setFilter('whatsapp')}>
-                        <WhatsAppIcon /> WA
+                    <button className={`inbox-filter-btn ${filter === 'whatsapp' ? 'active' : ''}`} onClick={() => selectChannel('whatsapp')}>
+                        <WhatsAppIcon /> WhatsApp
                     </button>
-                    <button className={`inbox-filter-btn ${filter === 'messenger' ? 'active' : ''}`} onClick={() => setFilter('messenger')}>
-                        <MessengerIcon /> MSN
+                    <button className={`inbox-filter-btn ${filter === 'messenger' ? 'active' : ''}`} onClick={() => selectChannel('messenger')}>
+                        <MessengerIcon /> Messenger
                     </button>
-                    <button className={`inbox-filter-btn ${filter === 'instagram' ? 'active' : ''}`} onClick={() => setFilter('instagram')}>
-                        <InstagramIcon /> IG
+                    <button className={`inbox-filter-btn ${filter === 'instagram' ? 'active' : ''}`} onClick={() => selectChannel('instagram')}>
+                        <InstagramIcon /> Instagram
                     </button>
-                    <button className={`inbox-filter-btn ${filter === 'web' ? 'active' : ''}`} onClick={() => setFilter('web')}>
+                    <button className={`inbox-filter-btn ${filter === 'web' ? 'active' : ''}`} onClick={() => selectChannel('web')}>
                         <Bot size={14} /> Web
                     </button>
                 </div>
 
+                <div className="omni-list-controls"><span>{pagination.total} conversaciones</span><select aria-label="Ordenar conversaciones" value={sort} onChange={event=>{setSort(event.target.value);setPage(1);}}><option value="latest">Recientes primero</option><option value="oldest">Antiguas primero</option><option value="priority">Prioridad primero</option></select></div>
+                <div className="omni-capacity"><span>Mi carga de atención</span><strong>{agentActiveChats} / {agentMaxChats}</strong><progress max={Math.max(1,agentMaxChats)} value={agentActiveChats} aria-label="Conversaciones activas y capacidad"/></div>
                 <div className="inbox-sidebar__list inbox-scrollable">
                     {isLoadingConversations ? (
                         <ConversationsSkeleton />
@@ -1218,6 +1356,8 @@ function InboxIndex() {
                             <div
                                 key={conv.id}
                                 className={`inbox-conversation-item ${activeConv?.id === conv.id ? 'active' : ''} ${['resolved', 'closed'].includes(conv.status) ? 'resolved' : ''}`}
+                                role="button" tabIndex={0} aria-label={`Abrir conversación de ${conv.contactName}`} aria-pressed={activeConv?.id === conv.id}
+                                onKeyDown={event=>{if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); handleSelectConversation(conv); }}}
                                 onClick={() => handleSelectConversation(conv)}
                             >
                                 <div className="inbox-conv__avatar">
@@ -1258,7 +1398,7 @@ function InboxIndex() {
                                     )}
                                 </div>
                                 <div className="inbox-conv__meta">
-                                    <div className="inbox-conv__time">{conv.lastMessageTime || conv.lastMessageDate}</div>
+                                    <div className="inbox-conv__time" title={conv.lastMessageAt ? new Date(conv.lastMessageAt).toLocaleString('es-PE') : undefined}>{conversationTimestamp(conv)}</div>
                                     {conv.unreadCount > 0 && (
                                         <div className="inbox-conv__badge">{conv.unreadCount}</div>
                                     )}
@@ -1273,6 +1413,7 @@ function InboxIndex() {
                         ))
                     )}
                 </div>
+                <div className="omni-pagination"><span>{pagination.from || 0}–{pagination.to || 0} de {pagination.total}</span><div><button type="button" aria-label="Página anterior" disabled={page<=1||isLoadingConversations} onClick={()=>setPage(page-1)}><ChevronLeft size={16}/></button><span>{page}/{pagination.last_page || 1}</span><button type="button" aria-label="Página siguiente" disabled={page>=pagination.last_page||isLoadingConversations} onClick={()=>setPage(page+1)}><ChevronLeft size={16} style={{transform:'rotate(180deg)'}}/></button></div></div>
             </div>
 
             {/* ─── COLUMNA 2: CHAT ACTIVO ─── */}
@@ -1295,10 +1436,12 @@ function InboxIndex() {
                                             <span className="inbox-bot-badge human-active"><User size={12}/> Agente</span>
                                         )}
                                         {activeConv.phone && <span>• {activeConv.phone}</span>}
+                                        <span className="omni-assigned-agent">{activeConv.agentName ? `· ${activeConv.agentName}` : '· Sin asignar'}</span>
                                     </div>
                                 </div>
                             </div>
                             <div className="inbox-chat__header-actions">
+                                <select className="omni-priority-select" aria-label="Prioridad de la conversación" value={activeConv.priority || 'normal'} disabled={isUpdatingPriority} onChange={event=>handlePriority(event.target.value)}><option value="low">Baja</option><option value="normal">Normal</option><option value="high">Alta</option><option value="urgent">Urgente</option></select>
                                 <button className="inbox-chat__header-btn" title="Asistente privado del panel" onClick={() => window.dispatchEvent(new CustomEvent('panel-assistant:open', { detail: { id: activeConv.id, contactName: activeConv.contactName } }))}><Bot size={16}/> Asistente</button>
                                 {!['resolved', 'closed'].includes(activeConv.status) ? (
                                     <button className="inbox-chat__header-btn resolve" onClick={handleResolve} title="Marcar como Resuelto">
@@ -1319,6 +1462,7 @@ function InboxIndex() {
                                     </button>
                                     {showActionsMenu && (
                                         <div className="inbox-actions-menu">
+                                            {isSupervisor && activeConv.assignedUserId !== auth?.user?.id && !['closed','resolved'].includes(activeConv.status) && <button onClick={handleAssignSelf}><User size={14}/> Asignarme conversación</button>}
                                             <button onClick={handleAddNote}>
                                                 <StickyNote size={14} /> Añadir Nota Interna
                                             </button>
@@ -1339,7 +1483,8 @@ function InboxIndex() {
                             </div>
                         </div>
 
-                        <div className="inbox-chat__messages inbox-scrollable">
+                        <div className="inbox-chat__messages inbox-scrollable" ref={messagesViewportRef}>
+                            {!isLoadingChat && historyPage < historyLastPage && <button className="omni-history-button" type="button" disabled={loadingHistory} onClick={fetchOlderMessages}>{loadingHistory ? 'Cargando historial…' : 'Cargar mensajes anteriores'}</button>}
                             {isLoadingChat ? (
                                 <div className="inbox-chat__loading">
                                     <Loader2 size={28} className="animate-spin" />
@@ -1374,58 +1519,92 @@ function InboxIndex() {
                             <div ref={messagesEndRef} />
                         </div>
 
-                        {/* Input de mensaje */}
-                        <div className="inbox-chat__input-wrapper">
-                            {showCannedDropdown && (
+                        {/* Composer SaaS Premium */}
+                        <div className={`inbox-chat__input-wrapper ${replyMode === 'note' ? 'note-mode' : ''}`}>
+                            {showCannedDropdown && replyMode !== 'note' && (
                                 <CannedResponsesDropdown
                                     onSelect={(content) => setMessageInput(prev => prev + content)}
                                     onClose={() => setShowCannedDropdown(false)}
                                 />
                             )}
-                            <form onSubmit={handleSendMessage} className="inbox-chat__input">
-                                <button
-                                    type="button"
-                                    className="inbox-chat__input-btn"
-                                    onClick={() => setShowCannedDropdown(!showCannedDropdown)}
-                                    title="Respuestas rápidas"
-                                >
-                                    <Zap size={20} />
-                                </button>
-                                <textarea
-                                    value={messageInput}
-                                    onChange={(e) => setMessageInput(e.target.value)}
-                                    placeholder={['resolved', 'closed'].includes(activeConv.status) ? 'La conversación ha finalizado' : 'Escribe un mensaje...'}
-                                    rows="1"
-                                    disabled={['resolved', 'closed'].includes(activeConv.status)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' && !e.shiftKey) {
-                                            e.preventDefault();
-                                            handleSendMessage(e);
+                            <div className={`inbox-composer ${replyMode === 'note' ? 'is-note' : ''}`}>
+                                <div className="inbox-composer__tabs">
+                                    <button
+                                        className={`inbox-composer__tab ${replyMode === 'reply' ? 'active' : ''}`}
+                                        type="button"
+                                        onClick={() => changeReplyMode('reply')}
+                                    >
+                                        <MessageSquare size={14} /> Responder
+                                    </button>
+                                    <button
+                                        className={`inbox-composer__tab note ${replyMode === 'note' ? 'active' : ''}`}
+                                        type="button"
+                                        onClick={() => changeReplyMode('note')}
+                                    >
+                                        <StickyNote size={14} /> Nota Interna
+                                    </button>
+                                </div>
+                                <div className="omni-composer-context">{replyMode === 'note' ? <><Shield size={13}/> Solo visible para el equipo</> : <><MessageCircle size={13}/> Responder a {activeConv.contactName} por {activeConv.channel === 'web' ? 'chat de la tienda' : activeConv.channel}</>}</div>
+                                {showEmoji && <div className="omni-emoji" aria-label="Elegir emoji">{['👋','😊','👍','🙌','❤','📦','✅','✨'].map(emoji=><button type="button" key={emoji} aria-label={`Insertar ${emoji}`} onClick={()=>{setMessageInput(current=>current+emoji);setShowEmoji(false);}}>{emoji}</button>)}</div>}
+                                <form onSubmit={handleSendMessage} className="inbox-composer__form">
+                                    <textarea
+                                        value={messageInput}
+                                        maxLength={4096}
+                                        onChange={(e) => { setMessageInput(e.target.value); saveDraft(activeConv.id,replyMode,e.target.value); }}
+                                        placeholder={
+                                            replyMode === 'reply' && ['resolved', 'closed'].includes(activeConv.status)
+                                                ? 'La conversación ha finalizado'
+                                                : replyMode === 'note'
+                                                    ? 'Deja una nota privada para el equipo (invisible para el cliente)...'
+                                                    : 'Escribe tu respuesta... Usa "/" para respuestas rápidas'
                                         }
-                                    }}
-                                />
-                                <button
-                                    type="submit"
-                                    className="inbox-chat__send-btn"
-                                    disabled={!messageInput.trim() || isSending || ['resolved', 'closed'].includes(activeConv.status)}
-                                >
-                                    {isSending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
-                                    <span className="inbox-chat__send-text">Enviar</span>
-                                </button>
-                            </form>
+                                        rows="2"
+                                        disabled={isSending || (replyMode === 'reply' && ['resolved', 'closed'].includes(activeConv.status))}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+                                                e.preventDefault();
+                                                handleSendMessage(e);
+                                            }
+                                            if (e.key === '/' && replyMode === 'reply') {
+                                                setShowCannedDropdown(true);
+                                            }
+                                        }}
+                                    />
+                                    <div className="inbox-composer__toolbar">
+                                        <div className="inbox-composer__tools">
+                                            {replyMode === 'reply' && (
+                                                <button type="button" onClick={() => setShowCannedDropdown(!showCannedDropdown)} title="Respuestas rápidas (/)">
+                                                    <Zap size={16} />
+                                                </button>
+                                            )}
+                                            <button type="button" disabled title="Los adjuntos desde este panel aún no están habilitados">
+                                                <Paperclip size={16} />
+                                            </button>
+                                            <button type="button" onClick={()=>setShowEmoji(!showEmoji)} aria-expanded={showEmoji} title="Insertar Emoji">
+                                                <Smile size={16} />
+                                            </button>
+                                        </div>
+                                        <button
+                                            type="submit"
+                                            className="inbox-composer__send"
+                                            disabled={!messageInput.trim() || isSending || (replyMode === 'reply' && ['resolved', 'closed'].includes(activeConv.status))}
+                                            style={replyMode === 'note' ? { background: '#D97706', color: 'white' } : {}}
+                                        >
+                                            {isSending ? <Loader2 size={16} className="animate-spin" /> : (replyMode === 'note' ? <StickyNote size={16} /> : <Send size={16} />)}
+                                            <span>{replyMode === 'note' ? 'Guardar Nota' : 'Enviar'}</span>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </>
                 ) : (
-                    <div className="inbox-empty-state">
-                        <Inbox />
-                        <p>Bandeja Omnicanal</p>
-                        <span>Selecciona una conversación del panel izquierdo para ver el historial y responder.</span>
-                    </div>
+                    <InboxWelcome summary={summary} onView={selectView}/>
                 )}
             </div>
 
             {/* ─── COLUMNA 3: PERFIL DEL CLIENTE ─── */}
-            <div className="inbox-detail inbox-scrollable">
+            <div className="inbox-detail inbox-scrollable"><div className="omni-context-heading"><User size={15}/><strong>Contexto del cliente</strong><button type="button" className="omni-icon-button" onClick={()=>setShowProfile(false)} aria-label="Cerrar perfil"><X size={16}/></button></div>
                 {contactProfile ? (
                     <>
                         <div className="inbox-detail__header">
@@ -1477,9 +1656,9 @@ function InboxIndex() {
                             )}
                             {contactProfile.activeCase && (
                                 <div className="inbox-detail__info-row" style={{ marginTop: '12px' }}>
-                                    <a 
-                                        href={`/admin/crm/cases/${contactProfile.activeCase.id}`} 
-                                        target="_blank" 
+                                    <a
+                                        href={`/admin/crm/cases/${contactProfile.activeCase.id}`}
+                                        target="_blank"
                                         rel="noopener noreferrer"
                                         style={{
                                             display: 'inline-flex',
@@ -1530,9 +1709,22 @@ function InboxIndex() {
                 ) : activeConv ? (
                     <ProfileSkeleton />
                 ) : (
-                    <div className="inbox-detail__empty">
-                        <User size={48} />
-                        <span>El perfil del cliente aparecerá aquí</span>
+                    <div className="inbox-detail__empty" style={{
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                        height: '100%', padding: '40px 24px', textAlign: 'center', color: '#94A3B8',
+                        background: '#FFFFFF'
+                    }}>
+                        <div style={{
+                            width: '64px', height: '64px', borderRadius: '50%',
+                            background: '#F1F5F9', border: '1px dashed #CBD5E1',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            marginBottom: '16px'
+                        }}>
+                            <User size={28} color="#94A3B8" />
+                        </div>
+                        <span style={{ fontSize: '13px', lineHeight: 1.5, maxWidth: '200px' }}>
+                            El perfil del cliente aparecerá aquí
+                        </span>
                     </div>
                 )}
             </div>
@@ -1540,7 +1732,7 @@ function InboxIndex() {
             {/* ─── MODAL: TRANSFERIR CONVERSACIÓN ─── */}
             {showTransferModal && (
                 <div className="inbox-modal-overlay" onClick={() => setShowTransferModal(false)}>
-                    <div className="inbox-modal" onClick={(e) => e.stopPropagation()}>
+                    <div className="inbox-modal" ref={transferDialogRef} role="dialog" aria-modal="true" aria-label="Transferir conversación" tabIndex={-1} onClick={(e) => e.stopPropagation()}>
                         <div className="inbox-modal__header">
                             <PhoneForwarded size={18} />
                             <span>Transferir Conversación</span>
@@ -1554,7 +1746,7 @@ function InboxIndex() {
             {/* ─── MODAL: CERRAR CON MOTIVO ─── */}
             {showCloseModal && (
                 <div className="inbox-modal-overlay" onClick={() => setShowCloseModal(false)}>
-                    <div className="inbox-modal" onClick={(e) => e.stopPropagation()}>
+                    <div className="inbox-modal" ref={closeDialogRef} role="dialog" aria-modal="true" aria-label="Cerrar conversación" tabIndex={-1} onClick={(e) => e.stopPropagation()}>
                         <div className="inbox-modal__header">
                             <XCircle size={18} />
                             <span>Cerrar Conversación</span>
@@ -1568,7 +1760,7 @@ function InboxIndex() {
             {/* ─── MODAL: SUPERVISOR DASHBOARD ─── */}
             {showSupervisorPanel && (
                 <div className="inbox-modal-overlay" onClick={() => setShowSupervisorPanel(false)}>
-                    <div className="inbox-modal inbox-modal--wide" onClick={(e) => e.stopPropagation()}>
+                    <div className="inbox-modal inbox-modal--wide" ref={supervisorDialogRef} role="dialog" aria-modal="true" aria-label="Panel de supervisión" tabIndex={-1} onClick={(e) => e.stopPropagation()}>
                         <div className="inbox-modal__header">
                             <Activity size={18} />
                             <span>Panel del Supervisor</span>

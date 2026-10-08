@@ -3,8 +3,10 @@ import { useShipping } from '@/Contexts/ShippingContext';
 import { useLocation } from '@/Contexts/LocationContext';
 import Swal from 'sweetalert2';
 import axios from 'axios';
+import useStoreDialog from '../../Hooks/useStoreDialog';
 
 export default function LocationModal({ isOpen, onClose, onLocationSelect }) {
+    const panel = useStoreDialog(isOpen, onClose);
     const [departamento, setDepartamento] = useState('');
     const [provincia, setProvincia] = useState('');
     const [distrito, setDistrito] = useState('');
@@ -109,7 +111,7 @@ export default function LocationModal({ isOpen, onClose, onLocationSelect }) {
 
     return (
         <div className="loc-modal-overlay">
-            <div className="loc-modal-container animate-slide-up">
+            <div ref={panel} role="dialog" aria-modal="true" aria-label="Seleccionar ubicación" tabIndex={-1} className="loc-modal-container animate-slide-up">
                 <div className="loc-modal-header">
                     <h3>Ingresar ubicación</h3>
                     <button onClick={onClose} className="loc-modal-close" aria-label="Cerrar modal">
@@ -138,7 +140,7 @@ export default function LocationModal({ isOpen, onClose, onLocationSelect }) {
                     </div>
 
                     <div className="loc-form-group">
-                        <label>Departamento</label>
+                        <label htmlFor="location-departamento">Departamento</label>
                         <div className="loc-input-wrapper">
                             <svg className="loc-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round">
                                 <circle cx="11" cy="11" r="8"></circle>
@@ -147,14 +149,14 @@ export default function LocationModal({ isOpen, onClose, onLocationSelect }) {
                             <input 
                                 type="text" 
                                 placeholder="Ingrese su departamento" 
-                                value={departamento}
+                                id="location-departamento" value={departamento}
                                 onChange={(e) => setDepartamento(e.target.value)}
                             />
                         </div>
                     </div>
 
                     <div className="loc-form-group">
-                        <label>Provincia</label>
+                        <label htmlFor="location-provincia">Provincia</label>
                         <div className="loc-input-wrapper">
                             <svg className="loc-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round">
                                 <circle cx="11" cy="11" r="8"></circle>
@@ -163,14 +165,14 @@ export default function LocationModal({ isOpen, onClose, onLocationSelect }) {
                             <input 
                                 type="text" 
                                 placeholder="Ingrese su provincia"
-                                value={provincia}
+                                id="location-provincia" value={provincia}
                                 onChange={(e) => setProvincia(e.target.value)}
                             />
                         </div>
                     </div>
 
                     <div className="loc-form-group">
-                        <label>Distrito</label>
+                        <label htmlFor="location-distrito">Distrito</label>
                         <div className="loc-input-wrapper">
                             <svg className="loc-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2" strokeLinecap="round">
                                 <circle cx="11" cy="11" r="8"></circle>
@@ -179,7 +181,7 @@ export default function LocationModal({ isOpen, onClose, onLocationSelect }) {
                             <input 
                                 type="text" 
                                 placeholder="Ingrese su distrito"
-                                value={distrito}
+                                id="location-distrito" value={distrito}
                                 onChange={(e) => setDistrito(e.target.value)}
                             />
                         </div>

@@ -63,7 +63,7 @@ class CrmTaskController extends Controller
         CrmActivity::create([
             'deal_id' => $request->deal_id,
             'empresa_id' => $request->empresa_id,
-            'usuario_id' => auth()->id() ?? 1, // Fallback si auth no está disponible en esta capa
+            'usuario_id' => (int) (auth('admin')->id() ?? auth()->id() ?? 1),
             'tipo' => $request->tipo,
             'contenido' => $request->contenido,
             'fecha_vencimiento' => $request->fecha_vencimiento,

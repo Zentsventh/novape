@@ -31,7 +31,8 @@
         </div>
     </div>
 
-    <p>Te enviaremos otro correo cuando tu pedido sea enviado.</p>
+    <p>Te informaremos cuando tu pedido avance a entrega o retiro.</p>
+    <p><a href="{{ \Illuminate\Support\Facades\URL::temporarySignedRoute('store.order.access', now()->addDays(60), ['codigo'=>$pedido->codigo]) }}">Consultar mi compra y solicitar posventa</a>. Conserva este enlace privado; también funciona sin iniciar sesión.</p>
 
     @if($pedido->comprobante)
         <div style="background: #e9ecef; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;">

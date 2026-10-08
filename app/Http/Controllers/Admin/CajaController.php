@@ -20,7 +20,8 @@ class CajaController extends Controller
     public function aperturar(OpenCashRegisterRequest $request)
     {
         try {
-            $this->cashFlowService->openRegister($request->validated(), auth()->id() ?? 1);
+            $adminId = (int) (auth('admin')->id() ?? auth()->id() ?? 1);
+            $this->cashFlowService->openRegister($request->validated(), $adminId);
             return redirect()->back()->with('success', 'Turno iniciado y caja aperturada exitosamente.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
@@ -30,7 +31,8 @@ class CajaController extends Controller
     public function cerrar(CloseCashRegisterRequest $request)
     {
         try {
-            $message = $this->cashFlowService->closeRegister($request->validated(), auth()->id() ?? 1);
+            $adminId = (int) (auth('admin')->id() ?? auth()->id() ?? 1);
+            $message = $this->cashFlowService->closeRegister($request->validated(), $adminId);
             return redirect()->back()->with('success', $message);
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Ocurrió un error al cerrar la caja: ' . $e->getMessage());
@@ -40,7 +42,8 @@ class CajaController extends Controller
     public function movimiento(CashMovementRequest $request)
     {
         try {
-            $this->cashFlowService->recordMovement($request->validated(), auth()->id() ?? 1);
+            $adminId = (int) (auth('admin')->id() ?? auth()->id() ?? 1);
+            $this->cashFlowService->recordMovement($request->validated(), $adminId);
             return redirect()->back()->with('success', 'Movimiento registrado correctamente.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());

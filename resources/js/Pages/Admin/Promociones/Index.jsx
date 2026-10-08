@@ -43,6 +43,7 @@ export default function Index() {
                             <th style={{ padding: '12px', width: '50px' }}>ID</th>
                             <th style={{ padding: '12px' }}>Nombre</th>
                             <th style={{ padding: '12px' }}>Fechas</th>
+                            <th style={{ padding: '12px' }}>Descuento</th>
                             <th style={{ padding: '12px' }}>Productos</th>
                             <th style={{ padding: '12px' }}>Estado</th>
                             <th style={{ padding: '12px', textAlign: 'right' }}>Acciones</th>
@@ -58,6 +59,9 @@ export default function Index() {
                                         <strong>Inicio:</strong> {promo.fecha_inicio ? new Date(promo.fecha_inicio).toLocaleDateString() : 'Sin definir'}<br/>
                                         <strong>Fin:</strong> {promo.fecha_fin ? new Date(promo.fecha_fin).toLocaleDateString() : 'Sin definir'}
                                     </div>
+                                </td>
+                                <td style={{ padding: '12px', color: '#16a34a', fontWeight: 'bold' }}>
+                                    {promo.tipo_descuento === 'porcentaje' ? `-${Number(promo.valor_descuento)}%` : `-S/ ${Number(promo.valor_descuento).toFixed(2)}`}
                                 </td>
                                 <td style={{ padding: '12px', color: 'var(--admin-text-muted)' }}>
                                     {promo.productos_count !== undefined ? (

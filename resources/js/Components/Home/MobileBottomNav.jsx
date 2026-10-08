@@ -13,7 +13,7 @@ export default function MobileBottomNav({ user, cart }) {
     const openCart = (e) => {
         e.preventDefault();
         if (document.querySelector('.efe-cart-drawer')) window.dispatchEvent(new CustomEvent('open-cart'));
-        else router.visit('/cart');
+        else router.visit('/carrito');
     };
 
     const openCategories = (e) => {

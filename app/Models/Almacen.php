@@ -18,4 +18,14 @@ class Almacen extends Model
         'direccion',
         'activo'
     ];
+
+    public function stocks()
+    {
+        return $this->hasMany(StockAlmacen::class, 'almacen_id');
+    }
+
+    public function movimientos()
+    {
+        return $this->hasMany(InventarioMovimiento::class, 'almacen_id');
+    }
 }

@@ -19,7 +19,11 @@ class CalculateShippingRequest extends FormRequest
             'address.departamento' => 'required|string',
             'address.provincia' => 'required|string',
             'address.distrito' => 'required|string',
-            'address.codigo_postal' => 'nullable|string',
+            'address.codigo_postal' => ['nullable', 'regex:/^[0-9]{5}$/'],
+            'address.direccion' => 'nullable|string|max:255',
+            'address.nombres' => 'nullable|string|max:100',
+            'address.apellidos' => 'nullable|string|max:100',
+            'address.celular' => 'nullable|string|max:20',
         ];
     }
 }

@@ -294,7 +294,6 @@ export default function Index({ cupones }) {
                                             value={form.codigo} 
                                             onChange={e => setForm({...form, codigo: e.target.value.toUpperCase()})} 
                                             required 
-                                            placeholder="Ej: VERANO2026" 
                                             style={{...inputStyle, paddingLeft: '16px', fontWeight: 700, fontSize: '16px', letterSpacing: '1px', textTransform: 'uppercase'}} 
                                             onFocus={e => Object.assign(e.target.style, inputFocusStyle)} 
                                             onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }} 
@@ -355,7 +354,6 @@ export default function Index({ cupones }) {
                                             value={form.monto_minimo} 
                                             onChange={e => setForm({...form, monto_minimo: e.target.value})} 
                                             min="0" 
-                                            placeholder="Ej: 100.00" 
                                             style={{...inputStyle, paddingLeft: '44px'}} 
                                             onFocus={e => Object.assign(e.target.style, inputFocusStyle)} 
                                             onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }} 
@@ -400,7 +398,6 @@ export default function Index({ cupones }) {
                                                 value={form.limite_usos} 
                                                 onChange={e => setForm({...form, limite_usos: e.target.value})} 
                                                 min="1" 
-                                                placeholder="Ej: 100" 
                                                 style={{...inputStyle, paddingLeft: '44px'}} 
                                                 onFocus={e => Object.assign(e.target.style, inputFocusStyle)} 
                                                 onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }} 

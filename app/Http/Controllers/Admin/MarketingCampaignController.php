@@ -32,7 +32,7 @@ class MarketingCampaignController extends Controller
 
         // Segmentación base RFM
         $stats = [
-            'total_audience' => Usuario::whereHas('roles', fn ($q) => $q->where('nombre', 'cliente'))->count(),
+            'total_audience' => \App\Services\Marketing\MarketingConsent::audience()->count(),
             'vip_customers' => $this->calculateAudienceSize('vip'),
             'at_risk' => $this->calculateAudienceSize('at_risk'),
         ];
@@ -45,7 +45,15 @@ class MarketingCampaignController extends Controller
 
     public function create()
     {
-        return Inertia::render('Admin/Marketing/Create');
+        $stats = [
+            'all' => $this->calculateAudienceSize('all'),
+            'vip' => $this->calculateAudienceSize('vip'),
+            'at_risk' => $this->calculateAudienceSize('at_risk'),
+        ];
+
+        return Inertia::render('Admin/Marketing/Create', [
+            'stats' => $stats,
+        ]);
     }
 
     public function report(MarketingCampaign $campaign)
@@ -72,7 +80,7 @@ class MarketingCampaignController extends Controller
             'segment' => $validated['segment'],
             'content' => $validated['content'],
             'status' => 'draft',
-            'author_id' => auth()->id() ?? 1,
+            'author_id' => (int) (auth('admin')->id() ?? auth()->id() ?? 1),
             'target_count' => $this->calculateAudienceSize($validated['segment']),
         ]);
 
@@ -104,8 +112,7 @@ class MarketingCampaignController extends Controller
 
     private function calculateAudienceSize(string $segment): int
     {
-        $query = Usuario::where('estado', 'activo')->whereNotNull('email')
-            ->whereHas('roles', fn ($q) => $q->where('nombre', 'cliente'));
+        $query = \App\Services\Marketing\MarketingConsent::audience();
 
         return match ($segment) {
             'vip' => $query->where('total_orders', '>=', 5)->count(),

@@ -15,7 +15,7 @@ class SocialAuthService
 {
     public function handleGoogleUser(SocialiteUser $googleUser, string $sessionId, array $sessionCart): Usuario
     {
-        return DB::transaction(function () use ($googleUser, $sessionId, $sessionCart) {
+        return DB::transaction(function () use ($googleUser) {
             $user = Usuario::where('email', $googleUser->getEmail())->first();
 
             if (!$user) {
@@ -42,7 +42,7 @@ class SocialAuthService
                 }
             }
 
-            $this->syncCart($user, $sessionId, $sessionCart);
+            // Cart reconciliation runs once after authentication and session migration.
 
             return $user;
         });

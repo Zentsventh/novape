@@ -26,6 +26,9 @@ class UpdateSettingRequest extends FormRequest
             'whatsapp_phone_number_id' => 'nullable|string',
             'whatsapp_verify_token' => 'nullable|string',
             'whatsapp_app_secret' => 'nullable|string',
+            'seo_title' => 'nullable|string|max:150',
+            'seo_description' => 'nullable|string|max:300',
+            'seo_keywords' => 'nullable|string|max:300',
         ];
     }
 }

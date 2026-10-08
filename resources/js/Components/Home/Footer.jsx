@@ -45,7 +45,7 @@ export default function Footer() {
                     <h4 className="efe-footer-title">Síguenos en:</h4>
                     <div className="efe-footer-socials" style={{ marginBottom: '24px' }}>
                         {socials.map(social => (
-                            <a key={social.href} href={social.href} className="efe-footer-social" target="_blank" rel="noreferrer" title={social.label}>
+                            <a key={social.href} href={social.label === 'Facebook' ? globalConfig?.facebook_url || social.href : globalConfig?.instagram_url || social.href} className="efe-footer-social" target="_blank" rel="noreferrer" title={social.label}>
                                 {social.icon}
                             </a>
                         ))}
@@ -53,12 +53,11 @@ export default function Footer() {
 
                     <h4 className="efe-footer-title" style={{ marginBottom: '12px' }}>Contáctanos:</h4>
                     <div className="efe-footer-contact" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <div>Teléfono: +51 986 784 384</div>
-                        <div>Email: atencionalcliente@novape.me</div>
-                        <div>Lunes a Viernes: 09:00 am - 18:00 pm</div>
-                        <div>Sábados: 09:00 am - 13:00 pm</div>
+                        <div>Teléfono: {globalConfig?.telefono_contacto || '+51 986 784 384'}</div>
+                        <div>Email: <a href={`mailto:${globalConfig?.email_contacto || 'atencionalcliente@novape.me'}`}>{globalConfig?.email_contacto || 'atencionalcliente@novape.me'}</a></div>
+                        {globalConfig?.contact_hours && <div>{globalConfig.contact_hours}</div>}
                         
-                        <a href="https://wa.me/51986784384" target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: 'white', textDecoration: 'none', marginTop: '8px', fontWeight: '600', borderBottom: '1px solid transparent', transition: 'border 0.3s' }} onMouseOver={e => e.currentTarget.style.borderBottom = '1px solid white'} onMouseOut={e => e.currentTarget.style.borderBottom = '1px solid transparent'}>
+                        <a href={`https://wa.me/${(globalConfig?.telefono_contacto || '+51 986 784 384').replace(/\D/g, '')}`} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: 'white', textDecoration: 'none', marginTop: '8px', fontWeight: '600', borderBottom: '1px solid transparent', transition: 'border 0.3s' }} onMouseOver={e => e.currentTarget.style.borderBottom = '1px solid white'} onMouseOut={e => e.currentTarget.style.borderBottom = '1px solid transparent'}>
                             Comprar por WhatsApp 
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
                         </a>

@@ -20,13 +20,25 @@ class CheckoutController extends Controller
 
     public function checkout()
     {
-        Log::info('Checkout accessed', ['user_id' => auth()->id(), 'cart' => session('cart', [])]);
+        if ($completed = app(\App\Services\Checkout\CheckoutCompletion::class)->recover()) {
+            return $completed;
+        }
+        Log::info('Checkout accessed', ['user_id' => auth()->id(), 'item_count' => count(session('cart', []))]);
     
         $cart = session('cart', []);
         $monto = array_reduce($cart, fn($carry, $item) => $carry + ($item['precio'] * $item['cantidad']), 0);
 
-        if ($monto <= 0) {
+        if (empty($cart)) {
             return redirect('/')->with('error', 'El carrito está vacío.');
+        }
+
+        try {
+            $calculated = $this->checkoutService->validateAndCalculateTotal($cart, null, 0, false, false);
+            $cart = $calculated['cart'];
+            $monto = $calculated['total'];
+            session(['cart' => $cart]);
+        } catch (\Exception $exception) {
+            return redirect('/carrito')->with('error', $exception->getMessage());
         }
 
         $loyaltyPoints = auth()->check() ? auth()->user()->loyalty_points : 0;
@@ -35,6 +47,9 @@ class CheckoutController extends Controller
             'cart' => array_values($cart),
             'montoTotal' => $monto,
             'loyaltyPoints' => $loyaltyPoints,
+            'pickupLocations' => \App\Services\Shipping\PickupService::options(),
+            'googleMapsKey' => config('services.google.maps_key'),
+            'savedAddress' => auth()->check() ? auth()->user()->direcciones()->orderByDesc('principal')->orderByDesc('id')->first()?->only(['direccion', 'referencia', 'distrito', 'codigo_postal']) : null,
         ]);
     }
 
@@ -48,7 +63,7 @@ class CheckoutController extends Controller
 
         try {
             $cart = session()->get('cart', []);
-            $checkoutData = $this->checkoutService->validateAndCalculateTotal($cart, $codigo, 0);
+            $checkoutData = $this->checkoutService->validateAndCalculateTotal($cart, $codigo, 0, false, false);
             
             $cupon = \App\Models\Cupon::find($checkoutData['couponId']);
             if (!$cupon) {

@@ -67,16 +67,18 @@ use Inertia\Inertia;
 Route::controller(HomeController::class)->group(function () {
     Route::get('/', 'index')->name('home');
     Route::get('/catalogo', 'catalogo')->name('catalogo');
-    Route::get('/api/search/live', 'liveSearch')->name('api.search.live');
+    Route::get('/api/search/live', 'liveSearch')->middleware('throttle:90,1,store-search:')->name('api.search.live');
     Route::get('/producto/{slug}', 'producto')->name('producto');
-    Route::get('/seguimiento', 'seguimiento')->name('seguimiento');
+    Route::get('/seguimiento', 'seguimiento')->middleware('throttle:30,1')->name('seguimiento');
 });
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
-Route::post('/chatbot/message', [ChatbotController::class, 'message'])->name('chatbot.message');
-Route::get('/chatbot/poll', [ChatbotController::class, 'pollMessages'])->name('chatbot.poll');
-Route::get('/chatbot/history', [ChatbotController::class, 'history'])->name('chatbot.history');
-Route::post('/chatbot/close', [ChatbotController::class, 'closeConversation'])->name('chatbot.close');
+Route::get('/comunicaciones/baja', [\App\Http\Controllers\MarketingPreferenceController::class, 'unsubscribePage'])->middleware(['signed', 'throttle:15,1'])->name('marketing.unsubscribe');
+Route::post('/comunicaciones/baja', [\App\Http\Controllers\MarketingPreferenceController::class, 'unsubscribe'])->middleware(['signed', 'throttle:15,1']);
+Route::post('/chatbot/message', [ChatbotController::class, 'message'])->middleware('throttle:15,1')->name('chatbot.message');
+Route::get('/chatbot/poll', [ChatbotController::class, 'pollMessages'])->middleware('throttle:60,1,store-chatbot-poll:')->name('chatbot.poll');
+Route::get('/chatbot/history', [ChatbotController::class, 'history'])->middleware('throttle:30,1,store-chatbot-history:')->name('chatbot.history');
+Route::post('/chatbot/close', [ChatbotController::class, 'closeConversation'])->middleware('throttle:15,1')->name('chatbot.close');
 
 Route::controller(PageController::class)->group(function () {
     Route::get('/nosotros', 'nosotros')->name('nosotros');
@@ -103,6 +105,13 @@ Route::controller(AuthController::class)->group(function () {
     Route::any('/logout', 'logout')->name('logout');
 });
 
+Route::middleware('guest')->controller(\App\Http\Controllers\StorePasswordController::class)->group(function () {
+    Route::get('/recuperar-contrasena', 'requestPage')->name('password.request');
+    Route::post('/recuperar-contrasena', 'send')->middleware('throttle:3,1')->name('password.email');
+    Route::get('/restablecer-contrasena/{token}', 'resetPage')->name('password.reset');
+    Route::post('/restablecer-contrasena', 'reset')->middleware('throttle:5,1')->name('password.update');
+});
+
 Route::controller(GoogleAuthController::class)->prefix('auth/google')->group(function () {
     Route::get('/', 'redirect')->name('google.redirect');
     Route::get('/callback', 'callback')->name('google.callback');
@@ -113,16 +122,21 @@ Route::controller(GoogleAuthController::class)->prefix('auth/google')->group(fun
 // ==========================================
 
 Route::controller(CartController::class)->prefix('cart')->group(function () {
-    Route::post('/add', 'add')->middleware('throttle:10,1')->name('cart.add');
-    Route::post('/update', 'update')->middleware('throttle:5,1')->name('cart.update');
-    Route::post('/remove', 'remove')->middleware('throttle:5,1')->name('cart.remove');
-    Route::post('/clear', 'clear')->middleware('throttle:5,1')->name('cart.clear');
+    Route::post('/add', 'add')->middleware('throttle:10,1,store-cart-add:')->name('cart.add')->block(30, 30);
+    Route::post('/update', 'update')->middleware('throttle:60,1,store-cart-mutate:')->name('cart.update')->block(30, 30);
+    Route::post('/remove', 'remove')->middleware('throttle:60,1,store-cart-mutate:')->name('cart.remove')->block(30, 30);
+    Route::post('/clear', 'clear')->middleware('throttle:60,1,store-cart-mutate:')->name('cart.clear')->block(30, 30);
 });
 
 Route::get('/carrito', fn () => Inertia::render('Cart'))->name('cart.page');
+Route::get('/devoluciones/evidencia/{rmaId}/{index}', [RmaRequestController::class, 'evidence'])
+    ->whereNumber(['rmaId', 'index'])->middleware('throttle:60,1')->name('rma.evidence');
+Route::get('/mi-compra/{codigo}', [\App\Http\Controllers\GuestOrderController::class, 'show'])->middleware(['signed','throttle:30,1'])->name('store.order.access');
+Route::post('/mi-compra/{codigo}/posventa', [\App\Http\Controllers\GuestOrderController::class, 'requestReturn'])->middleware(['signed','throttle:10,1'])->name('store.order.return');
+Route::post('/mi-compra/{codigo}/continuar', [\App\Http\Controllers\GuestOrderController::class, 'resume'])->middleware(['signed','throttle:10,1'])->name('store.order.resume');
 
 Route::controller(ShippingController::class)->prefix('api/shipping')->group(function () {
-    Route::post('/calculate', 'calculate')->middleware('throttle:10,1')->name('shipping.calculate');
+    Route::post('/calculate', 'calculate')->middleware('throttle:60,1,store-shipping:')->name('shipping.calculate');
     Route::post('/validate-address', 'validateAddress')->name('shipping.validate-address');
 });
 
@@ -132,8 +146,9 @@ Route::controller(CheckoutController::class)->group(function () {
 });
 
 Route::controller(NiubizController::class)->group(function () {
-    Route::post('/api/checkout/niubiz/session', 'createSession');
-    Route::post('/api/checkout/niubiz/authorize', 'authorizeTransaction')->name('checkout.niubiz.authorize');
+    Route::post('/api/checkout/niubiz/session', 'createSession')->middleware('throttle:20,1,store-payment:')->block(60, 60);
+    Route::post('/api/checkout/niubiz/authorize', 'authorizeTransaction')->middleware('signed')->name('checkout.niubiz.authorize')->block(60, 60);
+    Route::get('/api/checkout/niubiz/authorize', 'recoverAuthorization')->middleware(['signed','throttle:20,1,store-payment-recovery:'])->block(60, 60);
     Route::get('/checkout/niubiz/success', 'success')->name('checkout.niubiz.success');
 });
 
@@ -153,12 +168,15 @@ Route::get('/comprobante/ecommerce/{codigo}', [InvoiceController::class, 'verCom
 // ==========================================
 
 Route::middleware('auth')->group(function () {
+    Route::post('/producto/{product}/resenas', [\App\Http\Controllers\ReviewController::class, 'store'])->whereNumber('product')->middleware('throttle:5,1');
+    Route::get('/perfil/comunicaciones', [\App\Http\Controllers\MarketingPreferenceController::class, 'show']);
+    Route::post('/perfil/comunicaciones', [\App\Http\Controllers\MarketingPreferenceController::class, 'update'])->middleware('throttle:10,1');
     Route::controller(ProfileController::class)->prefix('perfil')->group(function () {
         Route::get('/', 'index')->name('perfil');
         Route::get('/compras/{codigo}', 'showOrder')->name('perfil.compras.show');
         Route::post('/update', 'update')->middleware('throttle:5,1')->name('perfil.update');
         Route::post('/celular/solicitar-codigo', 'requestPhoneUpdateOtp')->middleware('throttle:3,1')->name('perfil.celular.solicitar');
-        Route::post('/celular/verificar-codigo', 'verifyPhoneUpdateOtp')->name('perfil.celular.verificar');
+        Route::post('/celular/verificar-codigo', 'verifyPhoneUpdateOtp')->middleware('throttle:10,1')->name('perfil.celular.verificar');
         Route::post('/password', 'updatePassword')->middleware('throttle:5,1')->name('perfil.password');
 
         // Direcciones
@@ -206,6 +224,22 @@ Route::controller(AdminAuthController::class)->prefix('admin')->group(function (
 });
 
 Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'])->group(function () {
+    Route::get('/tienda/operaciones', [\App\Http\Controllers\Admin\StorefrontOperationsController::class, 'index'])->middleware('permiso:editar_pedido');
+    Route::post('/tienda/pagos/{id}/resolver', [\App\Http\Controllers\Admin\StorefrontOperationsController::class, 'reconcile'])->whereNumber('id')->middleware('permiso:editar_pedido');
+    Route::post('/tienda/tareas/{id}/resolver', [\App\Http\Controllers\Admin\StorefrontOperationsController::class, 'resolveTask'])->whereNumber('id')->middleware('permiso:editar_pedido');
+    Route::post('/tienda/notificaciones/{id}/resolver', [\App\Http\Controllers\Admin\StorefrontOperationsController::class, 'resolveNotification'])->whereNumber('id')->middleware('permiso:editar_pedido');
+    Route::get('/tienda/configuracion', [\App\Http\Controllers\Admin\StorefrontSettingController::class, 'index'])->middleware('permiso:gestionar_ajustes');
+    Route::post('/tienda/configuracion', [\App\Http\Controllers\Admin\StorefrontSettingController::class, 'update'])->middleware('permiso:gestionar_ajustes');
+    Route::get('/reviews', [\App\Http\Controllers\ReviewController::class, 'index'])->middleware('permiso:ver_productos');
+    Route::post('/reviews/{id}/toggle', [\App\Http\Controllers\ReviewController::class, 'toggle'])->whereNumber('id')->middleware('permiso:editar_producto');
+    Route::delete('/reviews/{id}', [\App\Http\Controllers\ReviewController::class, 'destroy'])->whereNumber('id')->middleware('permiso:eliminar_producto');
+
+    // Libro de Reclamaciones
+    Route::controller(\App\Http\Controllers\Admin\ReclamoController::class)->prefix('reclamos')->middleware('permiso:editar_pedido')->group(function () {
+        Route::get('/', 'index')->name('admin.reclamos.index');
+        Route::get('/{id}', 'show')->name('admin.reclamos.show');
+        Route::put('/{id}', 'update')->name('admin.reclamos.update');
+    });
 
     Route::controller(DashboardController::class)->group(function () {
         Route::get('/', 'dashboard')->name('admin.dashboard')->middleware('permiso:ver_dashboard');
@@ -397,7 +431,11 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
         Route::delete('/{id}', 'destroy')->name('admin.compras.destroy');
     });
 
-    Route::get('/inventario', [InventarioController::class, 'dashboard'])->name('admin.inventario')->middleware('permiso:inventario.gestionar');
+    Route::controller(InventarioController::class)->prefix('inventario')->middleware('permiso:inventario.gestionar')->group(function () {
+        Route::get('/', 'dashboard')->name('admin.inventario');
+        Route::get('/movimientos', 'movimientos')->name('admin.inventario.movimientos');
+        Route::post('/movimientos', 'ajustarStock')->name('admin.inventario.movimientos.store');
+    });
 
     Route::controller(ZonaController::class)->prefix('zonas')->middleware('permiso:gestionar_ajustes')->group(function () {
         Route::get('/', 'index')->name('admin.zonas.index');
@@ -424,6 +462,13 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
 
     Route::resource('proveedores', ProveedorController::class)->middleware('permiso:inventario.gestionar');
     Route::resource('cupones', CuponController::class)->middleware('permiso:gestionar_cupones');
+    Route::resource('promociones', \App\Http\Controllers\Admin\PromocionController::class)
+        ->parameters(['promociones' => 'promocion'])->except('show')->middleware('permiso:gestionar_cupones');
+    Route::resource('pages', \App\Http\Controllers\Admin\PageController::class)
+        ->except('show')->middleware('permiso:gestionar_ajustes');
+    
+    Route::get('abandoned-carts', [\App\Http\Controllers\Admin\AbandonedCartController::class, 'index'])->name('admin.abandoned_carts')->middleware('permiso:marketing.gestionar');
+    Route::post('abandoned-carts/{cart}/notify', [\App\Http\Controllers\Admin\AbandonedCartController::class, 'notify'])->name('admin.abandoned_carts.notify')->middleware('permiso:marketing.gestionar');
 
     Route::controller(OrderController::class)->prefix('pedidos')->group(function () {
         Route::get('/', 'index')->name('admin.pedidos')->middleware('permiso:ver_pedidos');
@@ -432,7 +477,8 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
         Route::get('/{id}/factura', 'facturaVista')->name('admin.pedidos.factura')->middleware('permiso:ver_pedidos');
         Route::put('/{id}/estado', 'updateEstado')->name('admin.pedidos.update_estado')->middleware('permiso:editar_pedido');
         Route::post('/{id}/reembolsar', 'reembolsar')->name('admin.pedidos.reembolsar')->middleware('permiso:editar_pedido');
-        Route::post('/{id}/reembolso-confirmar', 'confirmarReembolso')->name('admin.pedidos.reembolso_confirmar')->middleware('permiso:editar_pedido');
+        Route::post('/{id}/reembolso-parcial', 'solicitarParcial')->middleware('permiso:editar_pedido');
+        Route::post('/{id}/reembolsos/{refundId}/confirmar', 'confirmarSolicitud')->whereNumber('refundId')->middleware('permiso:editar_pedido');
     });
 
     Route::controller(SettingController::class)->prefix('ajustes')->middleware('permiso:gestionar_ajustes')->group(function () {
@@ -458,8 +504,8 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
 
         Route::post('/', 'store')->name('admin.clientes.store')->middleware('permiso:editar_usuario');
         Route::post('/bulk-delete', 'bulkDestroy')->name('admin.clientes.bulk_destroy')->middleware('permiso:editar_usuario');
-        Route::get('/{id}', 'show')->name('admin.clientes.show')->middleware('permiso:usuarios.gestionar');
-        Route::get('/{id}/api-profile', 'apiProfile')->name('admin.clientes.api_profile')->middleware('permiso:usuarios.gestionar');
+        Route::get('/{id}', 'show')->name('admin.clientes.show')->middleware('permiso:ver_usuarios');
+        Route::get('/{id}/api-profile', 'apiProfile')->name('admin.clientes.api_profile')->middleware('permiso:ver_usuarios');
         Route::get('/{id}/edit', 'edit')->name('admin.clientes.edit')->middleware('permiso:editar_usuario');
         Route::put('/{id}', 'update')->name('admin.clientes.update')->middleware('permiso:editar_usuario');
         Route::delete('/{id}', 'destroy')->name('admin.clientes.destroy')->middleware('permiso:editar_usuario');
@@ -474,7 +520,7 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
         Route::get('/exportar', 'export')->name('admin.exportar.trabajadores')->middleware('permiso:ver_usuarios');
         Route::get('/create', 'create')->name('admin.trabajadores.create')->middleware('permiso:editar_usuario');
         Route::post('/', 'store')->name('admin.trabajadores.store')->middleware('permiso:editar_usuario');
-        Route::get('/{id}', 'show')->name('admin.trabajadores.show')->middleware('permiso:usuarios.gestionar');
+        Route::get('/{id}', 'show')->name('admin.trabajadores.show')->middleware('permiso:ver_usuarios');
         Route::get('/{id}/edit', 'edit')->name('admin.trabajadores.edit')->middleware('permiso:editar_usuario');
         Route::put('/{id}', 'update')->name('admin.trabajadores.update')->middleware('permiso:editar_usuario');
         Route::delete('/{id}', 'destroy')->name('admin.trabajadores.destroy')->middleware('permiso:editar_usuario');
@@ -502,16 +548,41 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
         Route::get('/api/chatbot-knowledge/{id}', 'show')->whereNumber('id');
         Route::put('/api/chatbot-knowledge/{id}', 'update')->whereNumber('id');
         Route::delete('/api/chatbot-knowledge/{id}', 'destroy')->whereNumber('id');
+        Route::get('/api/chatbot-knowledge/settings', 'settings');
+        Route::put('/api/chatbot-knowledge/settings', 'updateSettings');
+        Route::post('/api/chatbot-knowledge/{id}/reindex', 'reindex')->whereNumber('id');
+        Route::post('/api/chatbot-knowledge/test', 'testReply');
     });
     Route::get('/equipo', [\App\Http\Controllers\Admin\TeamChatController::class, 'index'])->name('admin.equipo');
     Route::get('/asistente', [\App\Http\Controllers\Admin\PanelAssistantController::class, 'index'])->name('admin.asistente');
-    Route::prefix('api/team')->controller(\App\Http\Controllers\Admin\TeamChatController::class)->group(function () {
+    Route::prefix('api/team')->withoutMiddleware('throttle:60,1')->middleware('throttle:team-workspace')->controller(\App\Http\Controllers\Admin\TeamWorkspaceController::class)->group(function () {
         Route::get('/workers', 'workers');
         Route::get('/threads', 'threads');
         Route::post('/threads', 'create')->middleware('throttle:team-create');
         Route::get('/threads/{thread}/messages', 'messages');
         Route::post('/threads/{thread}/messages', 'send')->middleware('throttle:team-send');
         Route::post('/threads/{thread}/read', 'read');
+        Route::post('/presence', 'presence')->middleware('throttle:team-presence');
+        Route::get('/attachments/{attachment}', 'attachment')->whereNumber('attachment')->name('admin.team.attachment');
+        Route::post('/threads/{thread}/typing', 'typing')->middleware('throttle:team-presence');
+        Route::post('/threads/{thread}/preferences', 'preferences');
+        Route::post('/threads/{thread}/manage', 'manage');
+        Route::post('/threads/{thread}/leave', 'leaveGroup');
+        Route::get('/threads/{thread}/files', 'files');
+        Route::post('/threads/{thread}/messages/{message}/edit', 'edit')->middleware('throttle:team-send');
+        Route::post('/threads/{thread}/messages/{message}/delete', 'deleteMessage');
+        Route::post('/threads/{thread}/messages/{message}/reaction', 'reaction')->middleware('throttle:team-send');
+    });
+    Route::prefix('api/team')->withoutMiddleware('throttle:60,1')->middleware('throttle:team-workspace')->controller(\App\Http\Controllers\Admin\TeamCallController::class)->group(function () {
+        Route::get('/call-config', 'config');
+        Route::get('/calls', 'listing');
+        Route::post('/threads/{thread}/call', 'create')->middleware('throttle:team-create');
+        Route::get('/calls/{call}', 'state')->whereUuid('call');
+        Route::post('/calls/{call}/join', 'join')->whereUuid('call');
+        Route::post('/calls/{call}/heartbeat', 'heartbeat')->whereUuid('call')->middleware('throttle:team-presence');
+        Route::post('/calls/{call}/signal', 'signal')->whereUuid('call')->middleware('throttle:team-signal');
+        Route::post('/calls/{call}/leave', 'leave')->whereUuid('call');
+        Route::post('/calls/{call}/meeting', 'updateMeeting')->whereUuid('call');
     });
     Route::prefix('api/panel-assistant')->controller(\App\Http\Controllers\Admin\PanelAssistantController::class)->group(function () {
         Route::get('/sessions', 'sessions');
@@ -533,6 +604,7 @@ Route::prefix('admin')->middleware(['auth:admin', 'admin.staff', 'throttle:60,1'
             Route::post('/conversations/{conversation}/reopen', [ConversationApiController::class, 'reopenConversation']);
             Route::post('/conversations/{conversation}/transfer-to-bot', [ConversationApiController::class, 'transferToBot']);
             Route::post('/conversations/{conversation}/notes', [ConversationApiController::class, 'addInternalNote']);
+            Route::post('/conversations/{conversation}/priority', [ConversationApiController::class, 'updatePriority']);
             Route::get('/conversations/{conversation}/contact-profile', [ConversationApiController::class, 'contactProfile']);
             Route::get('/canned-responses', [ConversationApiController::class, 'cannedResponses']);
 

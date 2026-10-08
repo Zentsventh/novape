@@ -1,6 +1,9 @@
 <?php
 
 return [
+    'environment' => env('INVOICE_ENVIRONMENT', 'sandbox'),
+    'notify_email' => env('INVOICE_NOTIFY_EMAIL', false),
+    'notify_whatsapp' => env('INVOICE_NOTIFY_WHATSAPP', false),
     'company' => [
         'razon_social' => env('INVOICE_COMPANY_NAME', 'NOVAPE'),
         'ruc' => env('INVOICE_COMPANY_RUC', 'No configurado'),

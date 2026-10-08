@@ -33,18 +33,18 @@ export default function Index({ audits }) {
             <div style={{ fontFamily: "'Inter', sans-serif", padding: '24px 32px', maxWidth: '1400px', margin: '0 auto' }}>
                 
                 {/* Header Section */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-                    <div>
-                        <h1 style={{ fontSize: '28px', margin: '0 0 8px 0', fontWeight: 800, color: '#1E293B', letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ background: '#E0F2FE', padding: '10px', borderRadius: '12px', color: '#004797', display: 'flex' }}>
-                                <History size={24} />
-                            </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
+                    <h1 style={{ fontSize: '24px', margin: 0, fontWeight: '700', color: '#1E293B', display: 'flex', alignItems: 'center', gap: '12px', letterSpacing: '-0.02em' }}>
+                        <div style={{ padding: '8px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '10px', color: '#64748B', display: 'flex' }}>
+                            <History size={20} />
+                        </div>
+                        <div>
                             Registro de Auditoría
-                        </h1>
-                        <p style={{ margin: 0, color: '#64748B', fontSize: '15px' }}>
-                            Monitoreo en tiempo real de todas las acciones de seguridad y cambios en el sistema.
-                        </p>
-                    </div>
+                            <p style={{ color: '#64748B', fontSize: '13px', margin: '4px 0 0 0', fontWeight: '500' }}>
+                                Monitoreo en tiempo real de todas las acciones de seguridad y cambios en el sistema.
+                            </p>
+                        </div>
+                    </h1>
                 </div>
 
                 {/* Table Area */}
@@ -67,7 +67,7 @@ export default function Index({ audits }) {
                                         {/* Usuario */}
                                         <td style={{ padding: '20px 32px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: audit.user ? '#F0F9FF' : '#F1F5F9', color: audit.user ? '#004797' : '#94A3B8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                                <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#F8FAFC', border: '1px solid #E2E8F0', color: audit.user ? '#004797' : '#94A3B8', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                                     {audit.user ? <User size={18} /> : <Fingerprint size={18} />}
                                                 </div>
                                                 <div>
@@ -89,7 +89,7 @@ export default function Index({ audits }) {
                                         {/* Modelo */}
                                         <td style={{ padding: '20px 32px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                <div style={{ background: '#F1F5F9', padding: '6px', borderRadius: '8px', color: '#64748B' }}>
+                                                <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '6px', borderRadius: '8px', color: '#64748B' }}>
                                                     <FileText size={16} />
                                                 </div>
                                                 <div>
@@ -161,21 +161,21 @@ export default function Index({ audits }) {
                             
                             <div style={{ display: 'flex', gap: '8px' }}>
                                 {audits.prev_page_url ? (
-                                    <Link href={audits.prev_page_url} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '10px', background: '#ffffff', border: '1px solid #E2E8F0', color: '#475569', transition: 'all 0.2s', textDecoration: 'none' }} onMouseOver={e => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#1E293B'; }} onMouseOut={e => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.color = '#475569'; }}>
+                                    <Link href={audits.prev_page_url} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '10px', background: '#ffffff', border: '1px solid #E2E8F0', color: '#475569', transition: 'all 0.2s', textDecoration: 'none' }} onMouseEnter={e => { e.currentTarget.style.background = '#F8FAFC'; e.currentTarget.style.color = '#1E293B'; }} onMouseLeave={e => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.color = '#475569'; }}>
                                         <ChevronLeft size={18} />
                                     </Link>
                                 ) : (
-                                    <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '10px', background: '#F1F5F9', border: '1px solid #E2E8F0', color: '#CBD5E1', cursor: 'not-allowed' }}>
+                                    <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '10px', background: '#F8FAFC', border: '1px solid #E2E8F0', color: '#CBD5E1', cursor: 'not-allowed' }}>
                                         <ChevronLeft size={18} />
                                     </div>
                                 )}
                                 
                                 {audits.next_page_url ? (
-                                    <Link href={audits.next_page_url} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '10px', background: '#ffffff', border: '1px solid #E2E8F0', color: '#475569', transition: 'all 0.2s', textDecoration: 'none' }} onMouseOver={e => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#1E293B'; }} onMouseOut={e => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.color = '#475569'; }}>
+                                    <Link href={audits.next_page_url} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '10px', background: '#ffffff', border: '1px solid #E2E8F0', color: '#475569', transition: 'all 0.2s', textDecoration: 'none' }} onMouseEnter={e => { e.currentTarget.style.background = '#F8FAFC'; e.currentTarget.style.color = '#1E293B'; }} onMouseLeave={e => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.color = '#475569'; }}>
                                         <ChevronRight size={18} />
                                     </Link>
                                 ) : (
-                                    <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '10px', background: '#F1F5F9', border: '1px solid #E2E8F0', color: '#CBD5E1', cursor: 'not-allowed' }}>
+                                    <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '10px', background: '#F8FAFC', border: '1px solid #E2E8F0', color: '#CBD5E1', cursor: 'not-allowed' }}>
                                         <ChevronRight size={18} />
                                     </div>
                                 )}

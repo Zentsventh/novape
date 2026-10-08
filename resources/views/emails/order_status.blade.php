@@ -18,7 +18,10 @@
         {{ strtoupper($pedido->estado) }}
     </div>
 
-    <p>Puedes revisar los detalles de tu compra ingresando a tu cuenta en nuestra web.</p>
+    @if($pedido->delivery_status)<p>Entrega: {{ $pedido->delivery_status }}</p>@endif
+    @if($pedido->tracking_number)<p>Seguimiento: {{ $pedido->tracking_number }} · {{ $pedido->courier_name }}</p>@endif
+    @if($pedido->pickup)<p>Retiro: {{ $pedido->pickup['address'] ?? '' }}. Horario: {{ $pedido->pickup['hours'] ?? '' }}.</p>@endif
+    <p>Puedes consultar el estado con tu código en <a href="{{ url('/seguimiento') }}">seguimiento de pedido</a>.</p>
     <p>Gracias por confiar en nosotros.</p>
 
     <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #888; text-align: center;">

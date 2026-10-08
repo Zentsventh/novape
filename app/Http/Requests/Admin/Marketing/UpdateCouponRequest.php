@@ -27,6 +27,7 @@ class UpdateCouponRequest extends FormRequest
             'limite_usos' => 'nullable|integer|min:1',
             'activo' => 'boolean',
             'unico_por_cliente' => 'boolean',
+            'combinable_points' => 'sometimes|boolean',
         ];
     }
 }

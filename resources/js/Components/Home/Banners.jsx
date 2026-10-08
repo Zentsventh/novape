@@ -1,11 +1,14 @@
-import { SHIPPING_BANNER, UNICA_BANNER, BOTTOM_BANNER } from './constants';
+import { UNICA_BANNER, BOTTOM_BANNER } from './constants';
+import { Link, usePage } from '@inertiajs/react';
 
 /* Renderiza el banner de envío gratuito. */
 export function ShippingBanner() {
+    const { globalConfig } = usePage().props;
+    if (globalConfig?.free_shipping_enabled === false) return null;
     return (
-        <div className="efe-banner-full" style={{ maxHeight: '38px', overflow: 'hidden', backgroundColor: '#0b243b' }}>
-            <img src={SHIPPING_BANNER} alt="Envío Gratis a todo el Perú" style={{ width: '100%', height: '38px', objectFit: 'cover', objectPosition: 'center', display: 'block' }} />
-        </div>
+        <Link href="/ayuda" style={{ display: 'block', padding: '10px 16px', backgroundColor: '#0b243b', color: '#fff', textAlign: 'center', textDecoration: 'none', fontSize: 13 }}>
+            Envío gratis desde S/ {globalConfig?.free_shipping_threshold ?? 299} en Lima Metropolitana. Consulta cobertura y condiciones.
+        </Link>
     );
 }
 

@@ -1,9 +1,10 @@
-import { createInertiaApp, usePage } from '@inertiajs/react';
+import { createInertiaApp, router, usePage } from '@inertiajs/react';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 const ChatBot = React.lazy(() => import('./Components/Home/ChatBot'));
 const PanelAssistant = React.lazy(() => import('./Components/Admin/PanelAssistant'));
+const TeamCallProvider = React.lazy(() => import('./Contexts/TeamCallContext'));
 const MobileBottomNav = React.lazy(() => import('./Components/Home/MobileBottomNav'));
 import { ConfirmProvider } from '@/Contexts/ConfirmContext';
 import { DeviceProvider, useDeviceContext } from '@/Contexts/DeviceContext';
@@ -49,11 +50,14 @@ function GlobalLayout({ children }) {
     const { component: pageName, props } = usePage();
     const isAdmin = pageName.startsWith('Admin/');
     const hasWidgets = !isAdmin && !pageName.startsWith('Auth/') && !pageName.startsWith('Checkout');
-    const content = isAdmin ? <>{children}{props.auth?.user && !pageName.startsWith('Admin/Auth') && pageName !== 'Admin/Assistant/Index' && <React.Suspense fallback={null}><PanelAssistant/></React.Suspense>}</> : (
+    const sharedState = JSON.stringify([props.auth?.user?.id, props.cart]);
+    React.useEffect(() => { if (!isAdmin) router.flushAll(); }, [sharedState, isAdmin]);
+    const adminContent = <>{children}{props.auth?.user && !pageName.startsWith('Admin/Auth') && pageName !== 'Admin/Assistant/Index' && <React.Suspense fallback={null}><PanelAssistant/></React.Suspense>}</>;
+    const content = isAdmin ? (props.auth?.user && !pageName.startsWith('Admin/Auth') ? <React.Suspense fallback={children}><TeamCallProvider user={props.auth.user}>{adminContent}</TeamCallProvider></React.Suspense> : adminContent) : (
         <div className={`storefront${hasWidgets ? ' storefront--with-nav' : ''}`}>
             {children}
-            {hasWidgets && <MobileBottomNav user={props.auth?.user} cart={props.cart} />}
-            {hasWidgets && <ChatBot user={props.auth?.user} />}
+            {hasWidgets && <React.Suspense fallback={null}><MobileBottomNav user={props.auth?.user} cart={props.cart} /></React.Suspense>}
+            {hasWidgets && <React.Suspense fallback={null}><ChatBot user={props.auth?.user} /></React.Suspense>}
         </div>
     );
 
@@ -69,7 +73,11 @@ function GlobalLayout({ children }) {
 }
 
 createInertiaApp({
-    title: (title) => title ? `${title} - Novape` : 'Novape',
+    title: (title) => {
+        if (!title) return 'Novape';
+        if (title.includes('Novape')) return title;
+        return `${title} | Novape`;
+    },
     resolve: async (name) => {
         const page = await resolvePageComponent(`./Pages/${name}.jsx`, import.meta.glob('./Pages/**/*.jsx'));
         page.default.layout = (children) => <GlobalLayout>{children}</GlobalLayout>;

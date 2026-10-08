@@ -23,6 +23,7 @@ import {
   Image,
   Mail,
   MessagesSquare,
+  ArrowLeftRight,
   Sparkles,
   BookOpen,
   UserCog,
@@ -30,9 +31,15 @@ import {
   Settings2,
   CreditCard,
   History,
+  Star,
+  FileText,
 } from "lucide-react";
 
 export const navigation = [
+  { label: 'Tienda online', items: [
+    { href: '/admin/tienda/operaciones', label: 'Operación de tienda', icon: ShoppingBag, permission: 'editar_pedido' },
+    { href: '/admin/tienda/configuracion', label: 'Información comercial', icon: Settings2, permission: 'gestionar_ajustes' },
+  ] },
   {
     label: "Resumen",
     items: [
@@ -70,6 +77,12 @@ export const navigation = [
         href: "/admin/rma",
         label: "Garantías y cambios",
         icon: ShieldCheck,
+        permission: "editar_pedido",
+      },
+      {
+        href: "/admin/reclamos",
+        label: "Libro de Reclamaciones",
+        icon: BookOpen,
         permission: "editar_pedido",
       },
     ],
@@ -143,6 +156,12 @@ export const navigation = [
         permission: "ver_productos",
       },
       {
+        href: "/admin/reviews",
+        label: "Reseñas",
+        icon: MessagesSquare,
+        permission: "ver_productos",
+      },
+      {
         href: "/admin/categorias",
         label: "Categorías",
         icon: Tags,
@@ -158,6 +177,12 @@ export const navigation = [
         href: "/admin/inventario",
         label: "Inventario",
         icon: Boxes,
+        permission: "inventario.gestionar",
+      },
+      {
+        href: "/admin/inventario/movimientos",
+        label: "Kardex",
+        icon: ArrowLeftRight,
         permission: "inventario.gestionar",
       },
       {
@@ -201,6 +226,12 @@ export const navigation = [
     label: "Marketing",
     items: [
       {
+        href: "/admin/promociones",
+        label: "Promociones",
+        icon: Ticket,
+        permission: "gestionar_cupones",
+      },
+      {
         href: "/admin/cupones",
         label: "Cupones",
         icon: Ticket,
@@ -211,6 +242,12 @@ export const navigation = [
         label: "Banners de la tienda",
         icon: Image,
         permission: "gestionar_ajustes",
+      },
+      {
+        href: "/admin/abandoned-carts",
+        label: "Carritos Abandonados",
+        icon: ShoppingCart,
+        permission: "marketing.gestionar",
       },
       {
         href: "/admin/marketing/campaigns",
@@ -255,6 +292,12 @@ export const navigation = [
         label: "Roles y permisos",
         icon: Shield,
         permission: "usuarios.gestionar",
+      },
+      {
+        href: "/admin/pages",
+        label: "Páginas (CMS)",
+        icon: FileText,
+        permission: "gestionar_ajustes",
       },
       {
         href: "/admin/ajustes",

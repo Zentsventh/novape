@@ -116,6 +116,7 @@ class SupplyChainService
             $compraId = DB::table('compras')->insertGetId([
                 'numero_orden' => $numeroOrden,
                 'proveedor_id' => $data['proveedor_id'],
+                'proveedor_snapshot' => json_encode((array) DB::table('proveedor')->where('id', $data['proveedor_id'])->first(['id', 'nombre', 'ruc', 'direccion']), JSON_THROW_ON_ERROR),
                 'total' => $total,
                 'estado' => 'pendiente',
                 'notas' => $data['notas'] ?? null,
@@ -161,6 +162,8 @@ class SupplyChainService
             $items = DB::table('compra_items')->where('compra_id', $id)->orderBy('variante_id')->get();
             $almacenId = ConfiguracionSitio::obtener('almacen_ecommerce_id', 1);
 
+            DB::table('variante')->whereIn('id', $items->pluck('variante_id')->filter()->unique())->orderBy('id')->lockForUpdate()->get(['id']);
+
             foreach ($items as $item) {
                 $variante = DB::table('variante')->where('id', $item->variante_id)->lockForUpdate()->first();
                 if (! $variante || $variante->deleted_at || $variante->producto_id != $item->producto_id) {
@@ -178,40 +181,21 @@ class SupplyChainService
                 }
 
                 DB::table('variante')->where('id', $item->variante_id)->update([
-                    'precio_compra' => $nuevoPPP,
+                    'precio_compra' => round($nuevoPPP, 4),
                     'updated_at' => now(),
                 ]);
 
-                $stockAlmacen = DB::table('stock_almacen')
-                    ->where('almacen_id', $almacenId)
-                    ->where('variante_id', $item->variante_id)
-                    ->lockForUpdate()
-                    ->first();
-
-                if ($stockAlmacen) {
-                    DB::table('stock_almacen')->where('id', $stockAlmacen->id)->increment('cantidad', $item->cantidad);
-                } else {
-                    DB::table('stock_almacen')->insert([
-                        'almacen_id' => $almacenId,
-                        'variante_id' => $item->variante_id,
-                        'cantidad' => $item->cantidad,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-                }
-
-                DB::statement('UPDATE variante SET stock = (SELECT COALESCE(SUM(cantidad), 0) FROM stock_almacen WHERE variante_id = ?) WHERE id = ?', [$item->variante_id, $item->variante_id]);
-
-                DB::table('movimientos_almacen')->insert([
-                    'almacen_id' => $almacenId,
-                    'variante_id' => $item->variante_id,
-                    'tipo' => 'entrada',
-                    'cantidad' => $item->cantidad,
-                    'referencia' => 'Compra Proveedor - Orden '.$compra->numero_orden,
-                    'usuario_id' => $userId,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+                app(\App\Services\Inventario\InventoryService::class)->registrarMovimiento(
+                    varianteId: $item->variante_id,
+                    almacenId: (int) $almacenId,
+                    cantidad: (int) $item->cantidad,
+                    tipo: 'entrada',
+                    motivo: 'Compra Proveedor - Orden '.$compra->numero_orden,
+                    usuarioId: $userId,
+                    referencia: null,
+                    costoUnitario: $item->costo_unitario === null ? null : (float) $item->costo_unitario,
+                    operationKey: 'purchase:'.$id.':'.$item->id
+                );
             }
         });
     }

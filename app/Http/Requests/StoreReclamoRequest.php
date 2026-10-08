@@ -25,8 +25,15 @@ class StoreReclamoRequest extends FormRequest
             'numero_documento' => 'required|string|max:50',
             'telefono' => 'required|string|max:20',
             'email' => 'required|email|max:255',
+            'direccion' => 'required|string|max:500',
+            'menor_edad' => 'boolean',
+            'nombre_apoderado' => 'required_if:menor_edad,true|nullable|string|max:255',
+            'bien_contratado' => 'required|string|in:Producto,Servicio',
+            'monto_reclamado' => 'required|numeric|min:0',
+            'pedido_relacionado' => 'nullable|string|max:255',
             'tipo_reclamo' => 'required|string|in:Reclamo,Queja',
-            'detalle' => 'required|string|max:5000'
+            'detalle' => 'required|string|max:5000',
+            'pedido_consumidor' => 'required|string|max:5000'
         ];
     }
 }

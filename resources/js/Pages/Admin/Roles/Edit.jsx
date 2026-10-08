@@ -27,21 +27,20 @@ export default function Edit({ rol, permisos }) {
     };
 
     const inputStyle = {
-        width: '100%', padding: '14px 16px 14px 44px', borderRadius: '12px', border: '1px solid #E2E8F0',
-        background: '#F8FAFC', color: '#1E293B', fontSize: '15px', outline: 'none', transition: 'all 0.2s',
-        boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
+        width: '100%', padding: '12px 16px 12px 40px', borderRadius: '10px', border: '1px solid #E2E8F0',
+        background: '#F8FAFC', color: '#1E293B', fontSize: '14px', outline: 'none', transition: 'all 0.2s'
     };
     
     const inputFocusStyle = {
-        borderColor: '#004797', boxShadow: '0 0 0 4px rgba(0, 71, 151, 0.1)', backgroundColor: '#ffffff'
+        borderColor: '#004797', backgroundColor: '#ffffff', boxShadow: '0 0 0 3px rgba(0, 71, 151, 0.1)'
     };
 
     const labelStyle = {
-        display: 'block', marginBottom: '8px', fontWeight: 700, fontSize: '13px', color: '#475569', letterSpacing: '0.5px', textTransform: 'uppercase'
+        display: 'block', marginBottom: '8px', fontWeight: 600, fontSize: '13px', color: '#475569'
     };
 
     const iconWrapperStyle = {
-        position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', pointerEvents: 'none', display: 'flex'
+        position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: '#94A3B8', pointerEvents: 'none', display: 'flex'
     };
 
     return (
@@ -52,33 +51,35 @@ export default function Edit({ rol, permisos }) {
                 
                 {/* Header Section */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-                    <div>
-                        <h1 style={{ fontSize: '28px', margin: '0 0 8px 0', fontWeight: 800, color: '#1E293B', letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ background: '#E0F2FE', padding: '10px', borderRadius: '12px', color: '#004797', display: 'flex' }}>
-                                <ShieldAlert size={24} />
-                            </div>
-                            Editar Rol
-                        </h1>
-                        <p style={{ margin: 0, color: '#64748B', fontSize: '15px' }}>
-                            Modificando el rol <strong style={{ color: '#1E293B' }}>{rol.nombre}</strong> y sus niveles de acceso.
-                        </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                        <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: '12px', color: '#004797', display: 'flex', border: '1px solid #E2E8F0' }}>
+                            <ShieldAlert size={24} />
+                        </div>
+                        <div>
+                            <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#1E293B', margin: '0 0 4px 0', letterSpacing: '-0.02em' }}>
+                                Editar Rol
+                            </h1>
+                            <p style={{ margin: 0, color: '#64748B', fontSize: '14px' }}>
+                                Modificando el rol <strong style={{ color: '#1E293B' }}>{rol.nombre}</strong> y sus niveles de acceso.
+                            </p>
+                        </div>
                     </div>
                     
                     <Link 
                         href="/admin/roles" 
                         style={{ 
-                            display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '12px 20px', borderRadius: '12px', 
-                            border: '1px solid #E2E8F0', background: '#ffffff', color: '#475569', fontWeight: 700, fontSize: '14px', 
+                            display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 16px', borderRadius: '10px', 
+                            border: '1px solid #E2E8F0', background: '#ffffff', color: '#475569', fontWeight: 600, fontSize: '13px', 
                             textDecoration: 'none', transition: 'all 0.2s', boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
                         }}
-                        onMouseOver={e => { e.currentTarget.style.background = '#F8FAFC'; e.currentTarget.style.color = '#1E293B'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                        onMouseOver={e => { e.currentTarget.style.background = '#F8FAFC'; e.currentTarget.style.color = '#1E293B'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
                         onMouseOut={e => { e.currentTarget.style.background = '#ffffff'; e.currentTarget.style.color = '#475569'; e.currentTarget.style.transform = 'none'; }}
                     >
-                        <ArrowLeft size={18} /> Volver a Roles
+                        <ArrowLeft size={16} /> Volver a Roles
                     </Link>
                 </div>
 
-                <div style={{ background: '#ffffff', borderRadius: '24px', padding: '32px', boxShadow: '0 10px 30px -10px rgba(0,0,0,0.05)', border: '1px solid #E2E8F0' }}>
+                <div style={{ background: '#ffffff', borderRadius: '20px', padding: '32px', boxShadow: '0 10px 30px -10px rgba(0,0,0,0.05)', border: '1px solid #E2E8F0' }}>
                     <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
                         
                         {/* Información del Rol */}
@@ -141,34 +142,33 @@ export default function Edit({ rol, permisos }) {
                                             key={p.id}
                                             onClick={() => togglePermiso(p.id)}
                                             style={{
-                                                padding: '20px',
-                                                borderRadius: '16px',
-                                                border: `2px solid ${isSelected ? '#004797' : '#E2E8F0'}`,
+                                                padding: '16px',
+                                                borderRadius: '12px',
+                                                border: `1px solid ${isSelected ? '#004797' : '#E2E8F0'}`,
                                                 background: isSelected ? '#F0F9FF' : '#ffffff',
                                                 cursor: 'pointer',
-                                                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                                                transition: 'all 0.2s',
                                                 display: 'flex',
                                                 alignItems: 'flex-start',
-                                                gap: '16px',
-                                                boxShadow: isSelected ? '0 4px 12px rgba(0, 71, 151, 0.15)' : 'none'
+                                                gap: '12px'
                                             }}
-                                            onMouseOver={e => { if(!isSelected) { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'; } }}
+                                            onMouseOver={e => { if(!isSelected) { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.02)'; } }}
                                             onMouseOut={e => { if(!isSelected) { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; } }}
                                         >
                                             <div style={{ 
-                                                width: '24px', height: '24px', borderRadius: '8px', 
-                                                background: isSelected ? '#004797' : '#F1F5F9', 
-                                                border: `2px solid ${isSelected ? '#004797' : '#CBD5E1'}`,
+                                                width: '20px', height: '20px', borderRadius: '6px', 
+                                                background: isSelected ? '#004797' : '#F8FAFC', 
+                                                border: `1px solid ${isSelected ? '#004797' : '#CBD5E1'}`,
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
                                                 transition: 'all 0.2s', marginTop: '2px'
                                             }}>
-                                                <Check size={14} color="#ffffff" style={{ opacity: isSelected ? 1 : 0, transform: isSelected ? 'scale(1)' : 'scale(0.5)', transition: 'all 0.2s' }} />
+                                                <Check size={12} color="#ffffff" style={{ opacity: isSelected ? 1 : 0, transform: isSelected ? 'scale(1)' : 'scale(0.5)', transition: 'all 0.2s' }} />
                                             </div>
                                             <div>
-                                                <div style={{ fontWeight: 800, color: isSelected ? '#0284C7' : '#1E293B', fontSize: '15px', marginBottom: '4px' }}>
+                                                <div style={{ fontWeight: 600, color: isSelected ? '#004797' : '#1E293B', fontSize: '14px', marginBottom: '4px' }}>
                                                     {p.nombre}
                                                 </div>
-                                                <div style={{ fontSize: '13px', color: '#64748B', lineHeight: '1.5' }}>
+                                                <div style={{ fontSize: '12px', color: '#64748B', lineHeight: '1.4' }}>
                                                     {p.descripcion}
                                                 </div>
                                             </div>
@@ -183,9 +183,9 @@ export default function Edit({ rol, permisos }) {
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '10px', paddingTop: '24px', borderTop: '1px solid #E2E8F0' }}>
                             <Link 
                                 href="/admin/roles" 
-                                style={{ padding: '14px 24px', borderRadius: '12px', background: '#F1F5F9', color: '#475569', textDecoration: 'none', fontWeight: 700, fontSize: '15px', transition: 'all 0.2s' }}
-                                onMouseOver={e => { e.currentTarget.style.background = '#E2E8F0'; e.currentTarget.style.color = '#1E293B'; }}
-                                onMouseOut={e => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#475569'; }}
+                                style={{ padding: '10px 20px', borderRadius: '10px', background: '#F8FAFC', color: '#475569', border: '1px solid #E2E8F0', textDecoration: 'none', fontWeight: 600, fontSize: '14px', transition: 'all 0.2s' }}
+                                onMouseOver={e => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#1E293B'; }}
+                                onMouseOut={e => { e.currentTarget.style.background = '#F8FAFC'; e.currentTarget.style.color = '#475569'; }}
                             >
                                 Cancelar
                             </Link>
@@ -196,22 +196,21 @@ export default function Edit({ rol, permisos }) {
                                     background: '#004797',
                                     color: 'white',
                                     border: 'none',
-                                    padding: '14px 32px',
-                                    borderRadius: '12px',
-                                    fontWeight: 800,
-                                    fontSize: '15px',
+                                    padding: '10px 24px',
+                                    borderRadius: '10px',
+                                    fontWeight: 600,
+                                    fontSize: '14px',
                                     cursor: processing ? 'not-allowed' : 'pointer',
                                     opacity: processing ? 0.7 : 1,
-                                    boxShadow: '0 4px 14px rgba(0, 71, 151, 0.3)',
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '8px',
                                     transition: 'all 0.2s'
                                 }}
-                                onMouseOver={e => { if(!processing) { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 71, 151, 0.4)'; } }}
-                                onMouseOut={e => { if(!processing) { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 71, 151, 0.3)'; } }}
+                                onMouseOver={e => { if(!processing) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 71, 151, 0.2)'; } }}
+                                onMouseOut={e => { if(!processing) { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; } }}
                             >
-                                <Save size={18} />
+                                <Save size={16} />
                                 {processing ? 'Guardando...' : 'Guardar Cambios'}
                             </button>
                         </div>

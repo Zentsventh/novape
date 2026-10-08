@@ -72,7 +72,7 @@ export default function PanelCommandPalette({ open, close, user }) {
             "Clientes",
             UserRound,
             "/admin/clientes",
-            "usuarios.gestionar",
+            "ver_usuarios",
           ],
           ["pedidos", "Pedidos", ShoppingBag, "/admin/pedidos", "ver_pedidos"],
         ]) {

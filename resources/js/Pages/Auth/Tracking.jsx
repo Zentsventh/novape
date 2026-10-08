@@ -51,13 +51,13 @@ export default function Tracking({ pedido, trackingData }) {
     }
 
     return (
-        <div className="efe-home" style={{ background: '#f8fafc', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <div className="efe-home" style={{ background: '#f8fafc', minHeight: '100vh', display: 'flex', flexWrap: 'wrap', flexDirection: 'column' }}>
             <Head title={`Rastreo de Pedido ${pedido.codigo}`} />
             <Header cartCount={0} onOpenCart={() => {}} onOpenCategories={() => {}} logoUrl={null} minimal={true} />
             
             <div style={{ maxWidth: '800px', margin: '40px auto', padding: '0 20px', flex: 1, width: '100%' }}>
                 <div style={{ marginBottom: '20px' }}>
-                    <Link href="/perfil?tab=compras" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', textDecoration: 'none', fontWeight: '500', fontSize: '14px' }}>
+                    <Link href="/perfil?tab=compras" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px', color: '#64748b', textDecoration: 'none', fontWeight: '500', fontSize: '14px' }}>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                             <path d="M19 12H5M12 19l-7-7 7-7"/>
                         </svg>
@@ -66,7 +66,7 @@ export default function Tracking({ pedido, trackingData }) {
                 </div>
 
                 <div style={{ background: 'white', borderRadius: '16px', padding: 'clamp(0.75rem, 3vw, 2.5rem)', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '30px', borderBottom: '1px solid #e2e8f0', paddingBottom: '20px' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '30px', borderBottom: '1px solid #e2e8f0', paddingBottom: '20px' }}>
                         <div>
                             <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#0f172a', margin: '0 0 5px 0' }}>Pedido {pedido.codigo}</h1>
                             <p style={{ margin: 0, color: '#64748b', fontSize: '14px' }}>
@@ -89,30 +89,30 @@ export default function Tracking({ pedido, trackingData }) {
                         <div style={{ height: '6px', background: '#e2e8f0', borderRadius: '3px', width: '100%', position: 'absolute', top: '10px' }}></div>
                         <div style={{ height: '6px', background: statusColor, borderRadius: '3px', width: `${progress}%`, position: 'absolute', top: '10px', transition: 'width 1s ease-in-out' }}></div>
                         
-                        <div style={{ display: 'flex', justifyContent: 'space-between', position: 'relative' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: progress >= 10 ? statusColor : '#cbd5e1', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '4px solid white', zIndex: 10 }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', position: 'relative' }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', flexDirection: 'column', alignItems: 'center' }}>
+                                <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: progress >= 10 ? statusColor : '#cbd5e1', color: 'white', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', border: '4px solid white', zIndex: 10 }}>
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                                 </div>
                                 <span style={{ marginTop: '8px', fontSize: '12px', fontWeight: '600', color: progress >= 10 ? '#0f172a' : '#94a3b8' }}>Confirmado</span>
                             </div>
                             
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: progress >= 25 ? statusColor : '#cbd5e1', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '4px solid white', zIndex: 10 }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', flexDirection: 'column', alignItems: 'center' }}>
+                                <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: progress >= 25 ? statusColor : '#cbd5e1', color: 'white', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', border: '4px solid white', zIndex: 10 }}>
                                     {progress >= 25 ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> : null}
                                 </div>
                                 <span style={{ marginTop: '8px', fontSize: '12px', fontWeight: '600', color: progress >= 25 ? '#0f172a' : '#94a3b8' }}>En preparación</span>
                             </div>
                             
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: progress >= 60 ? statusColor : '#cbd5e1', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '4px solid white', zIndex: 10 }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', flexDirection: 'column', alignItems: 'center' }}>
+                                <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: progress >= 60 ? statusColor : '#cbd5e1', color: 'white', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', border: '4px solid white', zIndex: 10 }}>
                                     {progress >= 60 ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> : null}
                                 </div>
                                 <span style={{ marginTop: '8px', fontSize: '12px', fontWeight: '600', color: progress >= 60 ? '#0f172a' : '#94a3b8' }}>En camino</span>
                             </div>
                             
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: progress >= 100 ? statusColor : '#cbd5e1', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '4px solid white', zIndex: 10 }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', flexDirection: 'column', alignItems: 'center' }}>
+                                <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: progress >= 100 ? statusColor : '#cbd5e1', color: 'white', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', border: '4px solid white', zIndex: 10 }}>
                                     {progress >= 100 ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> : null}
                                 </div>
                                 <span style={{ marginTop: '8px', fontSize: '12px', fontWeight: '600', color: progress >= 100 ? '#0f172a' : '#94a3b8' }}>Entregado</span>

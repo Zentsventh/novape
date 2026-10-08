@@ -43,18 +43,18 @@ class WarehouseService
 
     public function deleteWarehouse(int $id): void
     {
-        if (DB::table('movimientos_almacen')->where('almacen_id', $id)->orWhere('almacen_destino_id', $id)->exists()) {
-            throw new \InvalidArgumentException('No se puede eliminar un almacén con movimientos históricos.');
-        }
-        $stock = DB::table('stock_almacen')->where('almacen_id', $id)->sum('cantidad');
-        if ($stock > 0) {
-            throw new \Exception('No puedes eliminar un almacén con stock. Transfiere los productos primero.');
-        }
-
+        // Used warehouses remain addressable by historical records; deletion means
+        // deactivation and never deletes balances or journal entries.
         DB::transaction(function () use ($id) {
-            DB::table('stock_almacen')->where('almacen_id', $id)->delete();
-            DB::table('movimientos_almacen')->where('almacen_id', $id)->delete();
-            DB::table('almacenes')->where('id', $id)->delete();
+            $warehouse = DB::table('almacenes')->where('id', $id)->lockForUpdate()->first();
+            if (! $warehouse) throw new \InvalidArgumentException('El almacén no existe.');
+            if ((int) \App\Models\ConfiguracionSitio::obtener('almacen_ecommerce_id', 1) === $id) {
+                throw new \InvalidArgumentException('Selecciona otro almacén de comercio electrónico antes de desactivar este.');
+            }
+            if (DB::table('stock_almacen')->where('almacen_id', $id)->where('cantidad', '>', 0)->exists()) {
+                throw new \InvalidArgumentException('Transfiere el stock antes de desactivar el almacén.');
+            }
+            DB::table('almacenes')->where('id', $id)->update(['activo' => false, 'updated_at' => now()]);
         });
     }
 
@@ -92,59 +92,26 @@ class WarehouseService
             if (! $variante) {
                 throw new \InvalidArgumentException('La variante no está disponible.');
             }
-            $stockOrigen = DB::table('stock_almacen')
-                ->where('almacen_id', $data['almacen_origen_id'])
-                ->where('variante_id', $data['variante_id'])
-                ->lockForUpdate()
-                ->first();
+            DB::table('almacenes')->whereIn('id', [$data['almacen_origen_id'], $data['almacen_destino_id']])->orderBy('id')->lockForUpdate()->get(['id']);
+            app(\App\Services\Inventario\InventoryService::class)->registrarMovimiento(
+                varianteId: (int) $data['variante_id'],
+                almacenId: (int) $data['almacen_origen_id'],
+                cantidad: -(int) $data['cantidad'],
+                tipo: 'transferencia',
+                motivo: $data['referencia'] ?? 'Transferencia manual',
+                usuarioId: $userId,
+                operationKey: isset($data['operation_key']) ? 'transfer:'.$data['operation_key'].':out' : null
+            );
 
-            if (! $stockOrigen || $stockOrigen->cantidad < $data['cantidad']) {
-                throw new \Exception('Stock insuficiente en el almacén de origen.');
-            }
-
-            StockAvailability::assertRemaining((int) $data['variante_id'], (int) $data['almacen_origen_id'], (int) $stockOrigen->cantidad - (int) $data['cantidad']);
-            DB::table('stock_almacen')->where('id', $stockOrigen->id)->decrement('cantidad', $data['cantidad']);
-
-            $stockDestino = DB::table('stock_almacen')
-                ->where('almacen_id', $data['almacen_destino_id'])
-                ->where('variante_id', $data['variante_id'])
-                ->lockForUpdate()
-                ->first();
-
-            if ($stockDestino) {
-                DB::table('stock_almacen')->where('id', $stockDestino->id)->increment('cantidad', $data['cantidad']);
-            } else {
-                DB::table('stock_almacen')->insert([
-                    'almacen_id' => $data['almacen_destino_id'],
-                    'variante_id' => $data['variante_id'],
-                    'cantidad' => $data['cantidad'],
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
-
-            DB::table('movimientos_almacen')->insert([
-                'almacen_id' => $data['almacen_origen_id'],
-                'variante_id' => $data['variante_id'],
-                'tipo' => 'transferencia',
-                'cantidad' => -$data['cantidad'],
-                'referencia' => $data['referencia'] ?? 'Transferencia manual',
-                'almacen_destino_id' => $data['almacen_destino_id'],
-                'usuario_id' => $userId,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            DB::table('movimientos_almacen')->insert([
-                'almacen_id' => $data['almacen_destino_id'],
-                'variante_id' => $data['variante_id'],
-                'tipo' => 'entrada',
-                'cantidad' => $data['cantidad'],
-                'referencia' => 'Transferencia desde almacén ID: '.$data['almacen_origen_id'].' - '.($data['referencia'] ?? ''),
-                'usuario_id' => $userId,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            app(\App\Services\Inventario\InventoryService::class)->registrarMovimiento(
+                varianteId: (int) $data['variante_id'],
+                almacenId: (int) $data['almacen_destino_id'],
+                cantidad: (int) $data['cantidad'],
+                tipo: 'entrada',
+                motivo: 'Transferencia desde almacén ID: '.$data['almacen_origen_id'].' - '.($data['referencia'] ?? ''),
+                usuarioId: $userId,
+                operationKey: isset($data['operation_key']) ? 'transfer:'.$data['operation_key'].':in' : null
+            );
         });
     }
 }

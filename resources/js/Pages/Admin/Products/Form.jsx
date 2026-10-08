@@ -14,7 +14,7 @@ export default function Form({ producto, marcas, categorias, proveedores, listaE
     const isEditing = !!producto;
     
     const precioActual = producto?.variantes?.[0]?.precio || '';
-    const stockActual = producto?.variantes?.[0]?.stock ?? 10;
+    const stockActual = producto?.variantes?.[0]?.stock_local ?? 0;
     const pesoActual = producto?.variantes?.[0]?.peso ?? 1.0;
     
     let defaultImages = ['', '', ''];
@@ -34,6 +34,11 @@ export default function Form({ producto, marcas, categorias, proveedores, listaE
         activo: producto?.activo ?? true,
         precio: precioActual,
         peso_kg: pesoActual,
+        shipping_length_cm: producto?.variantes?.[0]?.shipping_length_cm || '',
+        shipping_width_cm: producto?.variantes?.[0]?.shipping_width_cm || '',
+        shipping_height_cm: producto?.variantes?.[0]?.shipping_height_cm || '',
+        retiro_tienda: producto ? Boolean(producto.retiro_tienda) : true,
+        envio_domicilio: producto ? Boolean(producto.envio_domicilio) : true,
         stock: stockActual,
         categorias: producto?.categorias?.map(c => c.id) || [],
         imagenes: defaultImages,
@@ -215,8 +220,16 @@ export default function Form({ producto, marcas, categorias, proveedores, listaE
                             />
                             {errors.peso_kg && <div style={{ color: '#3b82f6', fontSize: '12px', marginTop: '4px' }}>{errors.peso_kg}</div>}
                         </div>
+                        {['shipping_length_cm', 'shipping_width_cm', 'shipping_height_cm'].map((key, index) => <label key={key}>
+                            {['Largo de embalaje (cm)', 'Ancho de embalaje (cm)', 'Alto de embalaje (cm)'][index]}
+                            <input type="number" min="0.01" max="1000" step="0.01" value={data[key]} onChange={e => setData(key, e.target.value)} style={{width: '100%', padding: 10}} />
+                            {errors[key] && <span role="alert">{errors[key]}</span>}
+                        </label>)}
+                        <label><input type="checkbox" checked={data.retiro_tienda} onChange={e => setData('retiro_tienda', e.target.checked)} /> Permitir retiro en tienda</label>
+                        <label><input type="checkbox" checked={data.envio_domicilio} onChange={e => setData('envio_domicilio', e.target.checked)} /> Permitir envío a domicilio</label>
+
                         <div>
-                            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: 'var(--admin-text-main)' }}>Stock Actual</label>
+                            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: 'var(--admin-text-main)' }}>Stock del almacén de venta web</label>
                             <input 
                                 type="number" 
                                 value={data.stock} 
@@ -269,7 +282,6 @@ export default function Form({ producto, marcas, categorias, proveedores, listaE
                             rows="4"
                             value={data.garantias} 
                             onChange={e => setData('garantias', e.target.value)}
-                            placeholder="Ej: Condiciones para devoluciones..."
                             style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--admin-border)', background: 'transparent', color: 'var(--admin-text-main)' }} 
                         />
                     </div>
@@ -331,7 +343,6 @@ export default function Form({ producto, marcas, categorias, proveedores, listaE
                                     <div key={index} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                                         <input
                                             type="text"
-                                            placeholder="Nombre (Ej: Peso)"
                                             value={spec.nombre}
                                             onChange={(e) => updateEspecificacion(index, 'nombre', e.target.value)}
                                             style={{ flex: '1', padding: '10px', borderRadius: '8px', border: '1px solid var(--admin-border)', background: 'var(--admin-bg-panel)', color: 'var(--admin-text-main)' }}
@@ -339,7 +350,6 @@ export default function Form({ producto, marcas, categorias, proveedores, listaE
                                         />
                                         <input
                                             type="text"
-                                            placeholder="Valor (Ej: 4.00 kg)"
                                             value={spec.valor}
                                             onChange={(e) => updateEspecificacion(index, 'valor', e.target.value)}
                                             style={{ flex: '2', padding: '10px', borderRadius: '8px', border: '1px solid var(--admin-border)', background: 'transparent', color: 'var(--admin-text-main)' }}
@@ -465,7 +475,7 @@ export default function Form({ producto, marcas, categorias, proveedores, listaE
                             {categoryError && <div className="panel-inline-error" role="alert">{categoryError}</div>}
                             <div>
                                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '13px' }}>Nombre</label>
-                                <input type="text" value={newCatNombre} onChange={e => setNewCatNombre(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }} required placeholder="Ej: Smartphones" />
+                                <input type="text" value={newCatNombre} onChange={e => setNewCatNombre(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }} required />
                             </div>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '13px' }}>Categoría Padre (Opcional)</label>

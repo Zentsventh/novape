@@ -1,12 +1,12 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 
 const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
         opacity: 1,
         transition: {
-            staggerChildren: 0.1
+            staggerChildren: 0
         }
     }
 };
@@ -17,15 +17,16 @@ const itemVariants = {
 };
 
 export function AnimatedList({ children, className = '' }) {
+    const reducedMotion = useReducedMotion();
     return (
         <motion.div
             variants={containerVariants}
-            initial="hidden"
+            initial={false}
             animate="visible"
             className={className}
         >
             {React.Children.map(children, (child) => (
-                <motion.div variants={itemVariants}>
+                <motion.div variants={reducedMotion ? undefined : itemVariants} style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                     {child}
                 </motion.div>
             ))}

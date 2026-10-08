@@ -11,9 +11,12 @@ export default function Form({ promocion, productos }) {
 
     const { data, setData, post, put, processing, errors } = useForm({
         nombre: promocion?.nombre || '',
+        tipo_descuento: promocion?.tipo_descuento || 'porcentaje',
+        valor_descuento: promocion?.valor_descuento || '',
         fecha_inicio: promocion?.fecha_inicio ? promocion.fecha_inicio.split('T')[0] : '',
         fecha_fin: promocion?.fecha_fin ? promocion.fecha_fin.split('T')[0] : '',
         activa: promocion ? promocion.activa : true,
+        combinable_coupon: promocion?.combinable_coupon ?? false,
         productos: isEdit ? promocion.productos.map(p => p.id) : [],
     });
 
@@ -55,6 +58,8 @@ export default function Form({ promocion, productos }) {
 
             <div style={{ background: 'var(--admin-bg-panel)', borderRadius: '12px', padding: '30px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', maxWidth: '800px' }}>
                 <form onSubmit={submit} style={{ display: 'grid', gap: '20px' }}>
+                    <p>Se aplica el mejor precio vigente por producto; las promociones no se suman entre sí.</p>
+                    <label><input type="checkbox" checked={data.combinable_coupon} onChange={e=>setData('combinable_coupon',e.target.checked)} /> Permitir cupones adicionales sobre esta promoción</label>
                     
                     <div>
                         <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: 'var(--admin-text-main)' }}>Nombre de la Promoción *</label>
@@ -66,6 +71,34 @@ export default function Form({ promocion, productos }) {
                             required
                         />
                         {errors.nombre && <div style={{ color: '#3b82f6', fontSize: '12px', marginTop: '4px' }}>{errors.nombre}</div>}
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: 'var(--admin-text-main)' }}>Tipo de Descuento *</label>
+                            <select
+                                value={data.tipo_descuento}
+                                onChange={e => setData('tipo_descuento', e.target.value)}
+                                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--admin-border)', background: 'var(--admin-bg-panel)', color: 'var(--admin-text-main)' }}
+                            >
+                                <option value="porcentaje">Porcentaje (%)</option>
+                                <option value="fijo">Monto Fijo (S/)</option>
+                            </select>
+                            {errors.tipo_descuento && <div style={{ color: '#3b82f6', fontSize: '12px', marginTop: '4px' }}>{errors.tipo_descuento}</div>}
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: 'var(--admin-text-main)' }}>Valor del Descuento *</label>
+                            <input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={data.valor_descuento}
+                                onChange={e => setData('valor_descuento', e.target.value)}
+                                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--admin-border)', background: 'transparent', color: 'var(--admin-text-main)' }}
+                                required
+                            />
+                            {errors.valor_descuento && <div style={{ color: '#3b82f6', fontSize: '12px', marginTop: '4px' }}>{errors.valor_descuento}</div>}
+                        </div>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>

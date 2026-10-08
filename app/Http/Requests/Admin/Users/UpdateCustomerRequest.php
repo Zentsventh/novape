@@ -19,9 +19,9 @@ class UpdateCustomerRequest extends FormRequest
         return [
             'nombres' => 'required|string|max:100',
             'apellidos' => 'required|string|max:100',
-            'email' => 'required|email|unique:usuario,email,' . $id,
+            'email' => 'required|email|max:100|unique:usuario,email,' . $id,
             'dni' => 'nullable|string|max:20|unique:usuario,dni,' . $id,
-            'telefono' => 'nullable|string|max:30',
+            'telefono' => 'nullable|string|max:20',
         ];
     }
 

@@ -66,7 +66,8 @@ class CompraController extends Controller
     public function completar(int $id)
     {
         try {
-            $this->supplyChainService->completePurchaseOrder($id, auth()->id() ?? 1);
+            $adminId = (int) (auth('admin')->id() ?? auth()->id() ?? 1);
+            $this->supplyChainService->completePurchaseOrder($id, $adminId);
             return redirect()->back()->with('success', 'Compra completada. Inventario actualizado exitosamente.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Error al completar la compra: ' . $e->getMessage());

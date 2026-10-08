@@ -91,7 +91,8 @@ class CrmPipelineController extends Controller
     public function storeActivity(StoreDealActivityRequest $request, int $id)
     {
         $deal = CrmDeal::findOrFail($id);
-        $activity = $this->pipelineService->storeActivity($deal, $request->validated(), auth()->id() ?? 1);
+        $adminId = (int) (auth('admin')->id() ?? auth()->id() ?? 1);
+        $activity = $this->pipelineService->storeActivity($deal, $request->validated(), $adminId);
 
         return response()->json([
             'message' => 'Actividad guardada correctamente',

@@ -50,7 +50,7 @@ class HandleInertiaRequests extends Middleware
         $user = $request->is('admin*') ? auth('admin')->user() : $request->user();
 
         $permisos = [];
-        if ($user) {
+        if ($user && $request->is('admin*')) {
             $user->loadMissing('roles');
             $permisos = $user->getAllPermisos()->toArray();
         }
@@ -64,7 +64,9 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $user ? array_merge($user->toArray(), ['permisos' => $permisos]) : null,
+                'user' => $user ? ($request->is('admin*')
+                    ? array_merge($user->toArray(), ['permisos' => $permisos])
+                    : $user->only(['id', 'nombres', 'apellidos', 'email', 'telefono', 'tipo_documento', 'dni', 'has_set_password'])) : null,
             ],
             'cart' => [
                 'items' => array_values($cart),
@@ -76,13 +78,18 @@ class HandleInertiaRequests extends Middleware
                 'isTablet' => $isTablet,
                 'isDesktop' => $isDesktop,
             ],
+            'commercePolicy' => fn () => \App\Services\Storefront\CommercePolicy::summary(),
             'globalConfig' => fn () => Cache::remember('globalConfig', 3600, function () {
                 return [
                     'facebook_url' => ConfiguracionSitio::obtener('facebook_url', 'https://facebook.com/novape'),
                     'instagram_url' => ConfiguracionSitio::obtener('instagram_url', 'https://instagram.com/novape'),
                     'telefono_contacto' => ConfiguracionSitio::obtener('telefono_contacto', '+51 999 888 777'),
                     'email_contacto' => ConfiguracionSitio::obtener('email_contacto', 'contacto@novape.com'),
+                    'contact_hours' => ConfiguracionSitio::obtener('contact_hours', ''),
                     'logo_url' => ConfiguracionSitio::obtener('logo_url'),
+                    'free_shipping_threshold' => \App\Services\Storefront\CommercePolicy::summary()['free_shipping_threshold'],
+                    'free_shipping_enabled' => \App\Services\Storefront\CommercePolicy::summary()['free_shipping_enabled'],
+                    'delivery_coverage' => 'Lima Metropolitana',
                 ];
             }),
             'flash' => [

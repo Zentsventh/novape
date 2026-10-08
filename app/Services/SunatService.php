@@ -25,6 +25,7 @@ class SunatService
      */
     public function emitirComprobante(Pedido $pedido)
     {
+        if ($pedido->getAttribute('seed_batch')) return ['success' => false, 'error' => 'Los pedidos de demostración no se emiten ante el proveedor fiscal.'];
         if (! $this->apiToken || ! $this->apiUrl || $this->apiToken === 'SIMULACION_TOKEN') {
             return ['success' => false, 'error' => 'La facturación electrónica requiere configurar el proveedor. No se emitió ningún comprobante.'];
         }
@@ -57,8 +58,10 @@ class SunatService
         $igvRate = (float) ($snapshot['igv_porcentaje'] ?? $pedido->igv_porcentaje ?? 18);
         $taxFactor = 1 + $igvRate / 100;
         $tipoDoc = $esFactura ? '01' : '03'; // 01=Factura, 03=Boleta
-        $serie = $esFactura ? 'F001' : 'B001';
-        $correlativo = str_pad((string) $pedido->id, 6, '0', STR_PAD_LEFT);
+        $receipt = app(\App\Services\Orders\PaidInvoiceRegistry::class)->register($pedido);
+        if (! $receipt->serie || ! $receipt->numero) return ['success' => false, 'error' => 'Configura una serie activa antes de emitir el comprobante.'];
+        $serie = $receipt->serie;
+        $correlativo = $receipt->numero;
 
         // Construir el Payload formato API Peru
         $payload = [
@@ -79,7 +82,7 @@ class SunatService
             'total_igv' => round($pedido->total - ($pedido->total / $taxFactor), 2),
             'total' => $pedido->total,
             'enviar_automaticamente_a_la_sunat' => true,
-            'enviar_automaticamente_al_cliente' => true,
+            'enviar_automaticamente_al_cliente' => (bool) config('invoicing.notify_email'),
             'items' => [],
         ];
 
@@ -130,6 +133,7 @@ class SunatService
                     $pedido->enlace_xml = $data['data']['enlaces']['xml'] ?? null;
                     $pedido->facturado_sunat = true;
                     $pedido->save();
+                    $receipt->update(['estado_sunat' => 'aceptado', 'emitido_at' => now(), 'ruta_pdf' => null]);
 
                     Log::info("SUNAT EXITO: Comprobante generado $serie-$correlativo");
 

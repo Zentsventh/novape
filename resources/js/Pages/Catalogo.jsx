@@ -1,8 +1,10 @@
+import { cartPost } from '../utils/cartRequest';
 import { useEffect, useMemo, useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import FadeIn from '../Components/Animations/FadeIn';
 import { AnimatedList } from '../Components/Animations/AnimatedList';
 import Header from '../Components/Home/Header';
+import CatalogFilters from '../Components/Home/CatalogFilters';
 import CategoryNavBar from '../Components/Home/CategoryNavBar';
 import CategoryDrawer from '../Components/Home/CategoryDrawer';
 import CartDrawer from '../Components/Home/CartDrawer';
@@ -21,25 +23,14 @@ import '../../css/home/category-nav.css';
 import '../../css/home/category-drawer.css';
 import '../../css/home/catalogo.css';
 import '../../css/home/cart-drawer.css';
-import '../../css/home/recently-viewed.css';
+import '../../css/home/brand-stories.css';
 import '../../css/home/footer.css';
-import RecentlyViewed from '../Components/Home/RecentlyViewed';
+import BrandStories from '../Components/Home/BrandStories';
 
 const formatPrice = (price) =>
     new Intl.NumberFormat('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(
         price
     );
-
-const CategoryFilterBranch = ({ category, selectedId, selectedName, depth = 1 }) => (
-    <div>
-        <Link href={`/catalogo?categoria_id=${category.id}`}
-            className={`catalogo-cat-link catalogo-cat-sub ${String(selectedId) === String(category.id) || selectedName === category.nombre ? 'is-active' : ''}`}
-            style={{ paddingLeft: 12 + depth * 12 }}>
-            {category.nombre}
-        </Link>
-        {category.subcategorias?.map((child) => <CategoryFilterBranch key={child.id} category={child} selectedId={selectedId} selectedName={selectedName} depth={depth + 1} />)}
-    </div>
-);
 
 export default function Catalogo({
     productos = [],
@@ -52,16 +43,22 @@ export default function Catalogo({
     logoUrl,
     lateralBanners = [],
 }) {
-    const { cart, flash } = usePage().props;
-    const { isMobile } = useDeviceContext();
+    const { cart, flash, errors = {} } = usePage().props;
+    const { isMobile, isTablet } = useDeviceContext();
+    const compactFilters = isMobile || isTablet;
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isCatOpen, setIsCatOpen] = useState(false);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [marca, setMarca] = useState(filtros.marca || '');
     const [precioMin, setPrecioMin] = useState(filtros.precio_min || '');
     const [precioMax, setPrecioMax] = useState(filtros.precio_max || '');
-    const [marcaSearch, setMarcaSearch] = useState('');
     const [sort, setSort] = useState(typeof filtros.sort === 'string' ? filtros.sort : 'relevancia');
+    useEffect(() => {
+        setMarca(filtros.marca || '');
+        setPrecioMin(filtros.precio_min ?? '');
+        setPrecioMax(filtros.precio_max ?? '');
+        setSort(typeof filtros.sort === 'string' ? filtros.sort : 'relevancia');
+    }, [filtros.marca, filtros.precio_min, filtros.precio_max, filtros.sort]);
 
     // Animaciones de carrito
     const [addingIds, setAddingIds] = useState({});
@@ -102,12 +99,6 @@ export default function Catalogo({
         return {};
     }, [categoriaActiva, subcategoriaActiva, filtros.categoria_id]);
 
-    const filteredBrands = useMemo(() => {
-        if (!marcaSearch.trim()) return marcasDisponibles;
-        const term = marcaSearch.trim().toLowerCase();
-        return marcasDisponibles.filter((item) => item.nombre.toLowerCase().includes(term));
-    }, [marcaSearch, marcasDisponibles]);
-
     const applyFilters = () => {
         setIsLoadingFilters(true);
         router.get(
@@ -123,6 +114,7 @@ export default function Catalogo({
             {
                 preserveState: true,
                 preserveScroll: true,
+                onSuccess: () => setIsFilterOpen(false),
                 onFinish: () => setIsLoadingFilters(false),
             }
         );
@@ -136,21 +128,23 @@ export default function Catalogo({
         setIsLoadingFilters(true);
         router.get(
             '/catalogo',
-            {},
+            { ...activeCategoryParams, q: filtros.q || undefined },
             {
                 preserveState: false,
                 preserveScroll: true,
+                onSuccess: () => setIsFilterOpen(false),
                 onFinish: () => setIsLoadingFilters(false),
             }
         );
     };
 
-    const handleAddToCart = (product, quantity = 1, e = null) => {
+    const handleAddToCart = (product, quantity = 1, e = null, buyNow = false) => {
         setAddingIds((prev) => ({ ...prev, [product.id]: 'adding' }));
-        router.post(
+        cartPost(
             '/cart/add',
             {
                 producto_id: product.id,
+                variante_id: product.variante_id,
                 cantidad: quantity,
                 precio: product.precio_actual,
             },
@@ -160,9 +154,10 @@ export default function Catalogo({
                     if (e) fireConfetti(e);
                     setAddingIds((prev) => ({ ...prev, [product.id]: 'success' }));
                     setIsQuickViewOpen(false);
+                    if (buyNow) { router.visit('/checkout'); return; }
+                    window.dispatchEvent(new CustomEvent('open-cart'));
                     setTimeout(() => {
                         setAddingIds((prev) => ({ ...prev, [product.id]: null }));
-                        window.dispatchEvent(new CustomEvent('open-cart'));
                     }, 800);
                 },
                 onError: () => {
@@ -178,14 +173,21 @@ export default function Catalogo({
         setIsQuickViewOpen(true);
     };
 
-    const handleQuickViewAddToCart = (product, qty, e) => {
-        handleAddToCart(product, qty, e);
+    const handleQuickViewAddToCart = (product, qty, e, buyNow = false) => {
+        handleAddToCart(product, qty, e, buyNow);
     };
 
     return (
         <div className="efe-catalogo-page">
+            {(errors.precio_min || errors.precio_max) && <p role="alert" style={{ padding: '12px 24px', color: '#991b1b' }}>{errors.precio_min || errors.precio_max}</p>}
             <Head>
-                <title>Catálogo de Productos - NOVAPE</title>
+                <title>
+                    {filtros?.q
+                        ? `Resultados para "${filtros.q}"`
+                        : (subcategoriaActiva || categoriaActiva
+                            ? `${subcategoriaActiva || categoriaActiva} en Oferta`
+                            : 'Catálogo de Productos')}
+                </title>
                 <meta
                     name="description"
                     content="Explora nuestro catálogo completo de productos en NOVAPE. Filtra por categorías, marcas y precios."
@@ -234,251 +236,49 @@ export default function Catalogo({
                 </div>
             </div>
 
-            <RecentlyViewed />
+            {(categoriaActiva || subcategoriaActiva || filtros.categoria_id) && marcasDisponibles?.length > 0 && (
+                <BrandStories marcas={marcasDisponibles.slice(0, 18)} currentMarca={filtros.marca || ''} />
+            )}
 
             <div className="catalogo-layout">
-                {isMobile && isFilterOpen && (
-                    <div
-                        className="efe-search-overlay"
-                        onClick={() => setIsFilterOpen(false)}
-                        style={{ zIndex: 8999 }}
-                    ></div>
-                )}
-                <aside
-                    className={`catalogo-sidebar ${isMobile && isFilterOpen ? 'bottom-sheet-mobile open' : ''} ${isMobile && !isFilterOpen ? 'hide-mobile' : ''}`}
-                    style={
-                        isMobile && isFilterOpen
-                            ? {
-                                  zIndex: 9000,
-                                  background: '#f3f4f6',
-                                  padding: '20px',
-                                  overflowY: 'auto',
-                              }
-                            : {}
-                    }
-                >
-                    {isMobile && isFilterOpen && (
-                        <div
-                            style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                marginBottom: '16px',
-                            }}
-                        >
-                            <h2 style={{ fontSize: '18px', fontWeight: 'bold' }}>Filtros</h2>
-                            <button
-                                onClick={() => setIsFilterOpen(false)}
-                                style={{ background: 'none', border: 'none', padding: '8px' }}
-                            >
-                                <svg
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
-                                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                                </svg>
-                            </button>
-                        </div>
-                    )}
-                    <div className="catalogo-filter-card">
-                        <h3 className="catalogo-filter-title">Categorias</h3>
-                        {categorias.length === 0 ? (
-                            <div className="catalogo-empty">
-                                <p>No hay categorias disponibles.</p>
-                            </div>
-                        ) : (
-                            <div className="catalogo-cat-links">
-                                <Link
-                                    href="/catalogo"
-                                    className={`catalogo-cat-link ${!categoriaActiva && !subcategoriaActiva ? 'is-active' : ''}`}
-                                >
-                                    Todas
-                                </Link>
-                                {categorias.map((cat) => (
-                                    <div key={cat.id}>
-                                        <Link
-                                            href={`/catalogo?categoria_id=${cat.id}`}
-                                            className={`catalogo-cat-link ${categoriaActiva === cat.nombre ? 'is-active' : ''}`}
-                                        >
-                                            {cat.nombre}
-                                        </Link>
-                                        {categoriaActiva === cat.nombre &&
-                                            cat.subcategorias?.map((sub) => (
-                                                <CategoryFilterBranch key={sub.id} category={sub} selectedId={filtros.categoria_id} selectedName={subcategoriaActiva} />
-                                            ))}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="catalogo-filter-card">
-                        <h3 className="catalogo-filter-title">Marcas</h3>
-                        <div className="catalogo-brand-search">
-                            <input
-                                type="text"
-                                placeholder="Buscar marca..."
-                                value={marcaSearch}
-                                onChange={(e) => setMarcaSearch(e.target.value)}
-                                className="catalogo-brand-input"
-                            />
-                        </div>
-                        <div className="catalogo-marca-list">
-                            <label className="catalogo-marca-item efe-custom-radio">
-                                <input
-                                    type="radio"
-                                    name="marca"
-                                    checked={marca === ''}
-                                    onChange={() => setMarca('')}
-                                />
-                                <span className="efe-radio-mark"></span>
-                                <span className="efe-radio-text">Todas las marcas</span>
-                            </label>
-                            {filteredBrands.map((b) => (
-                                <label className="catalogo-marca-item efe-custom-radio" key={b.nombre}>
-                                    <input
-                                        type="radio"
-                                        name="marca"
-                                        checked={marca === b.nombre}
-                                        onChange={() => setMarca(b.nombre)}
-                                    />
-                                    <span className="efe-radio-mark"></span>
-                                    <span className="efe-radio-text">{b.nombre}</span>
-                                </label>
-                            ))}
-                        </div>
-                    </div>
-
-                    {lateralBanners && lateralBanners.length > 0 && (
-                        <div
-                            className="catalogo-lateral-banners"
-                            style={{
-                                marginTop: '24px',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: '16px',
-                            }}
-                        >
-                            {lateralBanners.map((banner) => (
-                                <div
-                                    key={banner.id}
-                                    className="lateral-banner-card"
-                                    style={{
-                                        borderRadius: '12px',
-                                        overflow: 'hidden',
-                                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-                                    }}
-                                >
-                                    {banner.enlace_url ? (
-                                        <a
-                                            href={banner.enlace_url}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                        >
-                                            <img
-                                                src={banner.imagen_url}
-                                                alt={banner.titulo}
-                                                style={{
-                                                    width: '100%',
-                                                    display: 'block',
-                                                    objectFit: 'cover',
-                                                }}
-                                            />
-                                        </a>
-                                    ) : (
-                                        <img
-                                            src={banner.imagen_url}
-                                            alt={banner.titulo}
-                                            style={{
-                                                width: '100%',
-                                                display: 'block',
-                                                objectFit: 'cover',
-                                            }}
-                                        />
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    <div className="catalogo-filter-card">
-                        <h3 className="catalogo-filter-title">Precio</h3>
-                        <div className="catalogo-precio-inputs">
-                            <div className="catalogo-precio-field">
-                                <label>Min</label>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    value={precioMin}
-                                    onChange={(event) => setPrecioMin(event.target.value)}
-                                />
-                            </div>
-                            <div className="catalogo-precio-field">
-                                <label>Max</label>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    value={precioMax}
-                                    onChange={(event) => setPrecioMax(event.target.value)}
-                                />
-                            </div>
-                        </div>
-                        <div className="catalogo-filter-actions">
-                            <button
-                                type="button"
-                                className="catalogo-btn-outline"
-                                onClick={clearFilters}
-                            >
-                                Limpiar
-                            </button>
-                            <button
-                                type="button"
-                                className="catalogo-btn-primary"
-                                onClick={applyFilters}
-                            >
-                                Aplicar
-                            </button>
-                        </div>
-                    </div>
-                </aside>
+                <CatalogFilters
+                    categorias={categorias} marcas={marcasDisponibles || []}
+                    selectedId={filtros.categoria_id} selectedName={subcategoriaActiva || categoriaActiva}
+                    marca={marca} setMarca={setMarca}
+                    precioMin={precioMin} setPrecioMin={setPrecioMin} precioMax={precioMax} setPrecioMax={setPrecioMax}
+                    onApply={applyFilters} onClear={clearFilters} pending={isLoadingFilters}
+                    mobile={compactFilters} open={isFilterOpen} onClose={() => setIsFilterOpen(false)}
+                    totalCount={totalCount} banners={lateralBanners || []} error={errors.precio_min || errors.precio_max}
+                />
 
                 <main className="catalogo-main">
                     <div className="catalogo-top-bar">
-                        {isMobile && (
-                            <button
-                                type="button"
-                                className="catalogo-btn-primary"
-                                onClick={() => setIsFilterOpen(true)}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '8px',
-                                    padding: '8px 16px',
-                                    borderRadius: '8px',
-                                }}
-                            >
-                                <svg
-                                    width="18"
-                                    height="18"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
+                        <div className="catalogo-top-bar-left">
+                            {compactFilters && (
+                                <button
+                                    type="button"
+                                    className="btn-filter-mobile"
+                                    onClick={() => setIsFilterOpen(true)}
                                 >
-                                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-                                </svg>
-                                Filtros
-                            </button>
-                        )}
+                                    <svg
+                                        width="18"
+                                        height="18"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                    >
+                                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                                    </svg>
+                                    Filtros
+                                </button>
+                            )}
+                            <div className="catalogo-results-count">
+                                <strong>{totalCount}</strong> productos encontrados
+                            </div>
+                        </div>
                         <div className="catalogo-sort-container">
                             <label htmlFor="sort-select" className={isMobile ? 'hide-mobile' : ''}>
                                 Ordenar por:
@@ -518,9 +318,6 @@ export default function Catalogo({
                                 <option value="precio_asc">Menor precio</option>
                             </select>
                         </div>
-                        <div className="catalogo-results-count hide-mobile">
-                            {totalCount} resultados
-                        </div>
                     </div>
 
                     {productList.length === 0 && !isLoadingFilters ? (
@@ -555,13 +352,9 @@ export default function Catalogo({
                                           )}
                                           <div
                                               className="catalogo-product-img"
-                                              onClick={() =>
-                                                  router.get(
-                                                      `/producto/${product.slug || product.id}`
-                                                  )
-                                              }
                                               style={{ position: 'relative' }}
                                           >
+                                              <Link className="catalogo-product-link" href={`/producto/${product.slug || product.id}`} aria-label={`Ver ${product.nombre}`}>
                                               {product.imagen ? (
                                                   <img
                                                       src={product.imagen}
@@ -573,6 +366,7 @@ export default function Catalogo({
                                                       <img src={DEFAULT_IMAGE} alt="Producto" />
                                                   </div>
                                               )}
+                                              </Link>
 
                                               <button
                                                   className="catalogo-quick-view-btn"
@@ -599,7 +393,7 @@ export default function Catalogo({
                                                   {product.marca || 'Sin marca'}
                                               </span>
                                               <h3 className="catalogo-product-name">
-                                                  {product.nombre}
+                                                  <Link href={`/producto/${product.slug || product.id}`}>{product.nombre}</Link>
                                               </h3>
                                               <div className="catalogo-product-prices">
                                                   {product.precio_anterior &&
@@ -690,6 +484,20 @@ export default function Catalogo({
                                   ))}
                         </AnimatedList>
                     )}
+                    {productos?.last_page > 1 && (
+                        <nav className="store-pagination" aria-label="Páginas del catálogo">
+                            <p aria-live="polite">Página {productos.current_page} de {productos.last_page}</p>
+                            <div>
+                                {productos.links?.map((link, index) => link.url ? (
+                                    <Link key={index} href={link.url} aria-current={link.active ? 'page' : undefined}
+                                        className={link.active ? 'is-active' : ''} preserveState
+                                        onStart={() => setIsLoadingFilters(true)} onFinish={() => setIsLoadingFilters(false)}>
+                                        {index === 0 ? 'Anterior' : index === productos.links.length - 1 ? 'Siguiente' : link.label}
+                                    </Link>
+                                ) : <span key={index} aria-disabled="true">{index === 0 ? 'Anterior' : index === productos.links.length - 1 ? 'Siguiente' : link.label}</span>)}
+                            </div>
+                        </nav>
+                    )}
                 </main>
             </div>
 
@@ -698,6 +506,7 @@ export default function Catalogo({
             <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} cart={cart} />
 
             <QuickViewModal
+                adding={addingIds[quickViewProduct?.id] === 'adding'}
                 isOpen={isQuickViewOpen}
                 onClose={() => setIsQuickViewOpen(false)}
                 product={quickViewProduct}

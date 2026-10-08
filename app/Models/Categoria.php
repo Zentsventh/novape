@@ -16,6 +16,19 @@ class Categoria extends Model
     {
         parent::boot();
 
+        static::saving(function (self $category) {
+            if (! $category->isDirty('categoria_padre_id')) return;
+            $seen = $category->exists ? [(int) $category->id => true] : [];
+            $parent = $category->categoria_padre_id;
+            while ($parent) {
+                if (isset($seen[(int) $parent])) {
+                    throw \Illuminate\Validation\ValidationException::withMessages(['categoria_padre_id' => 'La categoría no puede formar un ciclo con sus descendientes.']);
+                }
+                $seen[(int) $parent] = true;
+                $parent = self::withTrashed()->whereKey($parent)->value('categoria_padre_id');
+            }
+        });
+
         $clearCache = function () {
             \Illuminate\Support\Facades\Cache::forget('home_category_product_ids_v2');
             \Illuminate\Support\Facades\Cache::forget('home_weekly_product_ids_v2');
@@ -23,6 +36,7 @@ class Categoria extends Model
             \Illuminate\Support\Facades\Cache::forget('home_mejor_semana');
             \Illuminate\Support\Facades\Cache::forget('catalog_categorias_base');
             \Illuminate\Support\Facades\Cache::forget('home_categorias_menu');
+            \Illuminate\Support\Facades\Cache::forget('home_categorias_menu_v3');
         };
 
         static::saved($clearCache);

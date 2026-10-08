@@ -11,6 +11,7 @@ class Comprobante extends Model
     protected $table = 'comprobantes';
 
     protected $fillable = [
+        'fiscal_environment', 'issuer_tax_id',
         'pedido_id',
         'tipo_comprobante',
         'tipo',
@@ -39,6 +40,14 @@ class Comprobante extends Model
         'igv' => 'decimal:2',
         'operaciones_gravadas' => 'decimal:2',
     ];
+
+    protected static function booted(): void
+    {
+        static::saving(function (self $receipt) {
+            $receipt->fiscal_environment ??= config('invoicing.environment', 'sandbox');
+            $receipt->issuer_tax_id ??= (string) config('invoicing.company.ruc', 'unconfigured');
+        });
+    }
 
     public function pedido(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {

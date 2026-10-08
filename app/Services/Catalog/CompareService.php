@@ -17,16 +17,17 @@ class CompareService
         $productos = collect();
         if (count($compareIds) > 0) {
             $productos = Producto::whereIn('id', $compareIds)
-                ->with(['marca', 'imagenes', 'variantes', 'productoEspecificaciones'])
-                ->get()
-                ->map(function ($prod) {
-                    $variante = $prod->variantes->first();
+                ->where('activo', true)
+                ->with(['marca', 'imagenes', 'variantes' => fn ($q) => $q->where('activo', true)->orderBy('precio')->orderBy('id'), 'productoEspecificaciones'])
+                ->get();
+            $display = app(CatalogQueryService::class)->formatProducts($productos)->keyBy('id');
+            $productos = $productos->map(function ($prod) use ($display) {
 
                     return [
                         'id' => $prod->id,
                         'nombre' => $prod->nombre,
                         'marca' => $prod->marca ? $prod->marca->nombre : 'Genérico',
-                        'precio' => $variante ? (float) $variante->precio : 0.0,
+                        'precio' => $display[$prod->id]->precio_actual,
                         'imagen' => $prod->imagenes->first() ? $prod->imagenes->first()->url : null,
                         'descripcion' => $prod->descripcion,
                         'especificaciones' => $prod->productoEspecificaciones->map(function ($pe) {

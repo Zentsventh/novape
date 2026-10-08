@@ -55,3 +55,16 @@ docs/
 *.md
 *.zip
 *.log
+
+# Database dumps contain private customer data
+*.sql
+*.sql.gz
+*.sql.gz.enc
+/tmp/
+
+# Reviewed project documentation
+!/README.md
+!/docs/
+!/docs/AUDITORIA_GENERAL_PANEL_2026-10-08.md
+!/docs/CORRECCIONES_PANEL_2026-10-08.md
+!/docs/AUDITORIA_BASE_DATOS_2026-10-08.md

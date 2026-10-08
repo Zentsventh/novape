@@ -26,19 +26,25 @@ class GoogleAuthController extends Controller
             $googleUser = Socialite::driver('google')->user();
             
             $sessionCart = session()->get('cart', []);
+            $previousSessionId = session()->getId();
             $user = $this->socialAuthService->handleGoogleUser($googleUser, session()->getId(), $sessionCart);
 
-            Auth::login($user, true);
+            if ($user->estado === 'bloqueado') {
+                return redirect('/login')->withErrors(['email' => 'Tu cuenta ha sido bloqueada. Contacta con soporte.']);
+            }
 
-            $intendedUrl = session()->pull('url.intended', '/cliente/ordenes');
+            Auth::login($user, true);
+            app(\App\Services\Cart\CartService::class)->mergeSessionAndDbCart($sessionCart, $user, session()->getId(), $previousSessionId);
+
+            $intendedUrl = session()->pull('url.intended', '/perfil?tab=compras');
             if (\Illuminate\Support\Str::contains($intendedUrl, '/admin')) {
-                $intendedUrl = '/cliente/ordenes';
+                $intendedUrl = '/perfil?tab=compras';
             }
             return redirect()->to($intendedUrl);
             
         } catch (\Exception $e) {
-            \Log::error('Google OAuth Error: ' . $e->getMessage());
-            return redirect('/login')->withErrors(['email' => 'No se pudo iniciar sesión con Google. ' . $e->getMessage()]);
+            \Illuminate\Support\Facades\Log::error('Google OAuth Error: ' . $e->getMessage());
+            return redirect('/login')->withErrors(['email' => 'No se pudo iniciar sesión con Google. Intenta nuevamente.']);
         }
     }
 }

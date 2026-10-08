@@ -20,21 +20,30 @@ class CalculateRfm extends Command
         $this->info('Starting RFM calculation...');
 
         $usuarios = \App\Models\Usuario::with(['pedidos' => function($q) {
-            $q->whereIn('estado', ['completado', 'pagado']);
+            \App\Services\Operations\ReportDataset::apply($q, 'pedido');
+            $q->whereRaw('LOWER(estado) IN (?, ?, ?, ?)', \App\Services\Orders\OrderTransitions::REVENUE_STATES);
         }])->get();
+
+        $posByUser = collect();
+        if (\Illuminate\Support\Facades\Schema::hasColumn('clientes', 'usuario_id')) {
+            $posByUser = \App\Services\Operations\ReportDataset::apply(\Illuminate\Support\Facades\DB::table('ventas_pos as sales')->join('clientes as client', 'client.id', '=', 'sales.cliente_id'), 'ventas_pos', 'sales')
+                ->whereNotNull('client.usuario_id')->selectRaw('client.usuario_id, COUNT(*) as frequency, SUM(sales.total) as amount, MAX(sales.created_at) as last_sale')->groupBy('client.usuario_id')->get()->keyBy('usuario_id');
+        }
 
         $now = now();
         $count = 0;
 
         foreach ($usuarios as $usuario) {
             $pedidos = $usuario->pedidos;
+            $pos = $posByUser->get($usuario->id);
             
-            if ($pedidos->count() === 0) {
+            if ($pedidos->count() === 0 && !$pos) {
                 // If they have no completed orders, they are just "Nuevo" or "Prospecto"
                 $usuario->update([
                     'rfm_score' => null,
                     'ltv' => 0,
                     'total_orders' => 0,
+                    'last_order_date' => null,
                     'segmento' => 'Nuevo'
                 ]);
                 continue;
@@ -42,9 +51,12 @@ class CalculateRfm extends Command
 
             // Calculate Base Metrics
             $lastOrder = $pedidos->sortByDesc('created_at')->first();
-            $recencyDays = $now->diffInDays($lastOrder->created_at);
-            $frequency = $pedidos->count();
-            $monetary = $pedidos->sum('total');
+            $lastDate = $lastOrder?->created_at;
+            if ($pos && (!$lastDate || \Carbon\Carbon::parse($pos->last_sale)->greaterThan($lastDate))) $lastDate = \Carbon\Carbon::parse($pos->last_sale);
+            $recencyDays = max(0, $lastDate->diffInDays($now, false));
+            $frequency = $pedidos->count() + (int) ($pos->frequency ?? 0);
+            $refunded = (float) \Illuminate\Support\Facades\DB::table('refund_requests')->whereIn('pedido_id', $pedidos->pluck('id'))->where('status', 'confirmed')->sum('amount');
+            $monetary = max(0, (float) $pedidos->sum('total') + (float) ($pos->amount ?? 0) - $refunded);
 
             // 1. Recency Score (1-5, 5 is best/most recent)
             // Example: < 30 days = 5, < 90 = 4, < 180 = 3, < 365 = 2, > 365 = 1
@@ -76,7 +88,9 @@ class CalculateRfm extends Command
             // (111 to 555)
             $segmento = 'Regular';
 
-            if ($rScore >= 4 && $fScore >= 4 && $mScore >= 4) {
+            if ($rScore == 5 && $fScore == 5 && $mScore == 5) {
+                $segmento = 'Campeón';
+            } elseif ($rScore >= 4 && $fScore >= 4 && $mScore >= 4) {
                 $segmento = 'VIP'; // Compran mucho, frecuente y reciente
             } elseif ($rScore <= 2 && $fScore >= 4 && $mScore >= 4) {
                 $segmento = 'En Riesgo'; // Eran muy buenos, pero hace tiempo no compran
@@ -84,14 +98,12 @@ class CalculateRfm extends Command
                 $segmento = 'Potencial'; // Compraron recién, pero poco
             } elseif ($rScore <= 2 && $fScore <= 2) {
                 $segmento = 'Perdido'; // Hace mucho no compran y compraban poco
-            } elseif ($rScore == 5 && $fScore == 5 && $mScore == 5) {
-                $segmento = 'Campeón'; // El mejor de todos
             }
 
             $usuario->update([
                 'rfm_score' => $rfmScore,
                 'ltv' => $monetary,
-                'last_order_date' => $lastOrder->created_at,
+                'last_order_date' => $lastDate,
                 'total_orders' => $frequency,
                 'segmento' => $segmento
             ]);

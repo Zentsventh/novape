@@ -8,6 +8,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class RmaRequest extends Model
 {
+    public function getImagesAttribute($value): array
+    {
+        $images = json_decode($value ?? '[]', true) ?: [];
+        return array_map(fn ($image, $index) => str_starts_with($image, 'private:')
+            ? route('rma.evidence', ['rmaId' => $this->id, 'index' => $index]) : $image,
+            $images, array_keys($images));
+    }
     protected $fillable = [
         'usuario_id',
         'pedido_id',
@@ -18,10 +25,12 @@ class RmaRequest extends Model
         'description',
         'images',
         'admin_notes',
+        'request_key', 'guest_email', 'policy_snapshot',
     ];
 
     protected $casts = [
         'images' => 'array',
+        'policy_snapshot' => 'array',
     ];
 
     /** @return BelongsTo<Usuario, $this> */
@@ -30,6 +39,7 @@ class RmaRequest extends Model
         return $this->belongsTo(Usuario::class, 'usuario_id');
     }
 
+    /** @return HasMany<RmaItem, $this> */
     public function items(): HasMany
     {
         return $this->hasMany(RmaItem::class);

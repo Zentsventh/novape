@@ -40,9 +40,12 @@ class AuthController extends Controller
 
     public function register(RegisterRequest $request): RedirectResponse
     {
+        $previousSessionId = $request->session()->getId();
+        $sessionCart = $request->session()->get('cart', []);
         $usuario = $this->authService->registerUser($request->validated());
         
         Auth::login($usuario);
+        $this->cartService->mergeSessionAndDbCart($sessionCart, $usuario, $request->session()->getId(), $previousSessionId);
 
         return redirect()->route('perfil');
     }
@@ -50,6 +53,7 @@ class AuthController extends Controller
     public function login(LoginRequest $request): RedirectResponse
     {
         $credentials = $request->validated();
+        $previousSessionId = $request->session()->getId();
 
         if (Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']], $request->boolean('remember'))) {
             $user = Auth::user();
@@ -66,7 +70,8 @@ class AuthController extends Controller
             $this->cartService->mergeSessionAndDbCart(
                 $request->session()->get('cart', []),
                 $user,
-                session()->getId()
+                session()->getId(),
+                $previousSessionId
             );
 
             $intendedUrl = session()->pull('url.intended', '/');

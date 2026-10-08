@@ -63,17 +63,28 @@ class ExpenseTrackingService
 
     public function createExpense(array $data): Gasto
     {
-        return Gasto::create($data);
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($data) {
+            $expense = Gasto::create($data);
+            \App\Services\Operations\OperationEvents::record('expense.created', 'gastos', $expense->id, ['amount' => $expense->monto, 'business_date' => $expense->fecha_gasto]);
+            return $expense;
+        });
     }
 
     public function updateExpense(Gasto $gasto, array $data): Gasto
     {
-        $gasto->update($data);
-        return $gasto;
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($gasto, $data) {
+            $before = $gasto->monto;
+            $gasto->update($data);
+            \App\Services\Operations\OperationEvents::record('expense.updated', 'gastos', $gasto->id, ['before_amount' => $before, 'after_amount' => $gasto->monto, 'business_date' => $gasto->fecha_gasto]);
+            return $gasto;
+        });
     }
 
     public function deleteExpense(Gasto $gasto): void
     {
-        $gasto->delete();
+        \Illuminate\Support\Facades\DB::transaction(function () use ($gasto) {
+            $gasto->delete();
+            \App\Services\Operations\OperationEvents::record('expense.archived', 'gastos', $gasto->id, ['amount' => $gasto->monto]);
+        });
     }
 }

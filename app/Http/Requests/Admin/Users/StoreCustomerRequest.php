@@ -18,11 +18,11 @@ class StoreCustomerRequest extends FormRequest
         return [
             'nombres' => 'required|string|max:100',
             'apellidos' => 'required|string|max:100',
-            'email' => 'required|email|unique:usuario,email',
+            'email' => 'required|email|max:100|unique:usuario,email',
             'password' => 'required|string|min:6',
             'dni' => 'nullable|string|max:20|unique:usuario,dni',
             'tipo_documento' => 'nullable|string|max:10',
-            'telefono' => 'nullable|string|max:30',
+            'telefono' => 'nullable|string|max:20',
             'telefono_secundario' => 'nullable|string|max:30',
         ];
     }

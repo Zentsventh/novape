@@ -24,8 +24,9 @@ class UpdateProfileRequest extends FormRequest
         return [
             'nombres' => 'required|string|max:100',
             'apellidos' => 'required|string|max:100',
-            'dni' => 'required|string|max:20',
-            'fecha_nacimiento' => 'nullable|date',
+            'tipo_documento' => 'nullable|string|max:20',
+            'dni' => 'nullable|string|max:20',
+            'fecha_nacimiento' => 'nullable|date|before_or_equal:today',
             'telefono' => 'nullable|string|max:15',
             'direccion' => 'nullable|string|max:255',
             'referencia' => 'nullable|string|max:255',

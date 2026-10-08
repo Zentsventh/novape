@@ -95,7 +95,6 @@ export default function Create({ permisos }) {
                                             onFocus={e => Object.assign(e.target.style, inputFocusStyle)}
                                             onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }}
                                             required
-                                            placeholder="ej: soporte, contador, vendedor_externo"
                                         />
                                     </div>
                                     <small style={{ color: '#94A3B8', display: 'flex', alignItems: 'center', gap: '6px', marginTop: '8px', fontSize: '13px' }}>
@@ -115,7 +114,6 @@ export default function Create({ permisos }) {
                                             onFocus={e => Object.assign(e.target.style, inputFocusStyle)}
                                             onBlur={e => { e.target.style.borderColor = '#E2E8F0'; e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.02)'; e.target.style.backgroundColor = '#F8FAFC'; }}
                                             required
-                                            placeholder="ej: Acceso solo a ver reportes financieros"
                                         />
                                     </div>
                                     {errors.descripcion && <div style={{ color: '#EF4444', fontSize: '12px', marginTop: '6px', fontWeight: 600 }}>{errors.descripcion}</div>}

@@ -18,8 +18,8 @@
     --admin-radius-md: 16px;
     
     display: flex;
-    height: 100vh;
-    width: 100vw;
+    height: calc(100vh - 66px); /* Fix for the topbar height */
+    width: 100%;
     background: var(--admin-bg);
     color: var(--admin-text-main);
     font-family: 'Inter', -apple-system, sans-serif;
@@ -222,10 +222,10 @@
     justify-content: center;
     gap: 12px;
     padding: 48px 16px;
-    color: rgba(255,255,255,0.5);
+    color: #9CA3AF;
 }
 .inbox-empty-list svg {
-    opacity: 0.4;
+    opacity: 0.8;
 }
 .inbox-empty-list span {
     font-size: 13px;
@@ -531,26 +531,26 @@
 }
 
 .inbox-message {
-    max-width: 65%;
-    padding: 14px 18px;
-    border-radius: 16px;
+    max-width: 70%;
+    padding: 12px 16px;
+    border-radius: 18px;
     font-size: 14px;
     line-height: 1.5;
     word-wrap: break-word;
     position: relative;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
     transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .inbox-message:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
 }
 .inbox-message.inbound {
     align-self: flex-start;
     background: #ffffff;
-    color: var(--admin-text-main);
+    color: #111827;
     border-bottom-left-radius: 4px;
-    border: 1px solid var(--admin-border);
+    border: 1px solid #E5E7EB;
 }
 .inbox-message.outbound {
     align-self: flex-end;
@@ -558,19 +558,19 @@
     color: #ffffff;
     border-bottom-right-radius: 4px;
     border: none;
-    box-shadow: 0 4px 12px rgba(0, 71, 151, 0.2);
 }
 .inbox-message.outbound.failed {
-    background: var(--admin-error, #dc2626);
+    background: #DC2626;
     opacity: 0.8;
 }
 .inbox-message.internal-note {
     align-self: center;
-    background: var(--admin-warning-bg);
-    border: 1px dashed var(--admin-warning);
-    color: var(--admin-warning);
+    background: #FFFBEB;
+    border: 1px solid #FEF3C7;
+    color: #92400E;
     font-size: 13px;
-    max-width: 80%;
+    max-width: 85%;
+    border-radius: 8px;
     box-shadow: none;
 }
 .inbox-message.internal-note::before {
@@ -581,7 +581,7 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 6px;
-    opacity: 0.8;
+    color: #D97706;
 }
 
 .inbox-message__content {
@@ -670,91 +670,175 @@
     border-color: var(--admin-primary);
 }
 
-/* Input de mensaje */
+/* ─── COMPOSER SAAS PREMIUM (Intercom/Crisp Style) ─── */
 .inbox-chat__input-wrapper {
     position: relative;
-    border-top: 1px solid var(--admin-border);
-    background: var(--admin-surface);
+    background: #F9FAFB;
+    padding: 16px 24px 24px;
+    border-top: 1px solid #E5E7EB;
 }
-.inbox-chat__input {
-    padding: 16px 20px;
-    display: flex;
-    gap: 8px;
-    align-items: flex-end;
-}
-.inbox-chat__input-btn {
-    color: var(--admin-text-muted);
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 8px;
-    border-radius: var(--admin-radius-xs);
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-}
-.inbox-chat__input-btn:hover {
-    color: var(--admin-primary);
-    background: var(--admin-bg);
-}
-.inbox-chat__input textarea {
-    flex: 1;
-    padding: 14px 18px;
+
+.inbox-composer {
+    background: #ffffff;
+    border: 1px solid #D1D5DB;
     border-radius: 12px;
-    border: 1px solid var(--admin-border);
-    background: #ffffff;
-    color: var(--admin-text-main);
-    font-size: 14px;
-    resize: none;
-    outline: none;
-    max-height: 120px;
-    min-height: 52px;
-    font-family: inherit;
-    transition: all 0.2s ease;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.02);
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+    display: flex;
+    flex-direction: column;
 }
-.inbox-chat__input textarea:focus {
+
+.inbox-composer.is-note {
+    background: #FFFBEB;
+    border-color: #FEF3C7;
+}
+
+.inbox-composer.is-note .inbox-composer__tabs {
+    background: #FFFBEB;
+    border-bottom-color: #FEF3C7;
+}
+
+.inbox-composer.is-note .inbox-composer__tab.active {
+    background: #FFFBEB;
+    border-bottom-color: #D97706;
+}
+
+.inbox-composer.is-note .inbox-composer__toolbar {
+    background: #FFFBEB;
+}
+
+.inbox-composer:focus-within {
     border-color: var(--admin-primary);
-    background: #ffffff;
-    box-shadow: 0 0 0 4px rgba(0, 71, 151, 0.1);
+    box-shadow: 0 4px 12px rgba(0,71,151,0.08), 0 0 0 3px rgba(0,71,151,0.1);
 }
-.inbox-chat__input textarea::placeholder {
-    color: var(--admin-text-muted);
+
+.inbox-composer.is-note:focus-within {
+    border-color: #D97706;
+    box-shadow: 0 4px 12px rgba(217,119,6,0.08), 0 0 0 3px rgba(217,119,6,0.1);
 }
-.inbox-chat__input textarea:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+
+.inbox-composer__tabs {
+    display: flex;
+    background: #F9FAFB;
+    border-bottom: 1px solid #E5E7EB;
 }
-.inbox-chat__send-btn {
-    padding: 10px 18px;
-    border-radius: var(--admin-radius-sm);
-    background: var(--admin-primary);
-    color: var(--admin-surface);
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-    transition: all 0.2s ease;
+
+.inbox-composer__tab {
     display: flex;
     align-items: center;
     gap: 6px;
-    white-space: nowrap;
-    box-shadow: 0 4px 12px var(--admin-primary-glow);
-    height: 42px;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6B7280;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-right: 1px solid #E5E7EB;
+    transition: all 0.2s ease;
 }
-.inbox-chat__send-btn:hover:not(:disabled) {
-    transform: translateY(-1px);
-    background: var(--admin-primary-dark);
+
+.inbox-composer__tab:hover {
+    color: #111827;
+    background: #F3F4F6;
 }
-.inbox-chat__send-btn:disabled {
-    background: var(--admin-border);
-    color: var(--admin-text-muted);
-    box-shadow: none;
+
+.inbox-composer__tab.active {
+    background: #ffffff;
+    color: #111827;
+    border-bottom: 2px solid var(--admin-primary);
+    margin-bottom: -1px;
+}
+
+.inbox-composer__tab.note:hover {
+    color: #D97706;
+}
+
+.inbox-composer__form {
+    display: flex;
+    flex-direction: column;
+}
+
+.inbox-composer__form textarea {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    resize: none;
+    font-size: 14px;
+    color: #111827;
+    background: transparent;
+    outline: none;
+    min-height: 72px;
+    max-height: 200px;
+}
+
+.inbox-composer__form textarea::placeholder {
+    color: #9CA3AF;
+}
+
+.inbox-composer__form textarea:disabled {
+    background: #F9FAFB;
     cursor: not-allowed;
-    transform: none;
 }
-.inbox-chat__send-text {
-    display: none;
+
+.inbox-composer__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: #ffffff;
+}
+
+.inbox-composer__tools {
+    display: flex;
+    gap: 4px;
+}
+
+.inbox-composer__tools button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: #6B7280;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.inbox-composer__tools button:hover {
+    background: #F3F4F6;
+    color: #111827;
+}
+
+.inbox-composer__send {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--admin-primary);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.inbox-composer__send:hover:not(:disabled) {
+    background: var(--admin-primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,71,151,0.2);
+}
+
+.inbox-composer__send:disabled {
+    background: #E5E7EB;
+    color: #9CA3AF;
+    cursor: not-allowed;
 }
 
 /* ─── COLUMNA DERECHA (Perfil del contacto) ─── */
@@ -1206,12 +1290,12 @@
 }
 
 /* ==========================================
-   ENTERPRISE MODALS
+   ENTERPRISE MODALS (SaaS Premium Redesign)
    ========================================== */
 .inbox-modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(17, 24, 39, 0.4);
     backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
@@ -1226,15 +1310,15 @@
 }
 
 .inbox-modal {
-    background: var(--admin-card-bg, #1e1f2e);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #ffffff;
+    border: 1px solid #E5E7EB;
     border-radius: 16px;
-    width: 440px;
+    width: 460px;
     max-width: 95vw;
     max-height: 85vh;
     overflow-y: auto;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-    animation: slideInModal 0.25s ease;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    animation: slideInModal 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .inbox-modal--wide {
@@ -1242,19 +1326,20 @@
 }
 
 @keyframes slideInModal {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    from { transform: translateY(20px) scale(0.98); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
 }
 
 .inbox-modal__header {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 16px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    gap: 12px;
+    padding: 20px 24px;
+    border-bottom: 1px solid #E5E7EB;
+    background: #F9FAFB;
     font-weight: 700;
-    font-size: 15px;
-    color: #e0e0e0;
+    font-size: 16px;
+    color: #111827;
 }
 
 .inbox-modal__header span {
@@ -1264,14 +1349,15 @@
 .inbox-modal__header button {
     background: none;
     border: none;
-    color: #8b8fa3;
+    color: #6B7280;
     cursor: pointer;
-    padding: 4px;
-    border-radius: 6px;
-    transition: background 0.15s;
+    padding: 6px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    display: flex;
 }
 
 .inbox-modal__header button:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: #e0e0e0;
+    background: #E5E7EB;
+    color: #111827;
 }

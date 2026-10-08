@@ -194,21 +194,21 @@
         </tbody>
     </table>
 
-    <table class="totals-table">
+    <table class="totals-table" style="width: 100%; border-collapse: collapse; margin-top: 5px;">
         <tr>
-            <td width="50%"></td>
-            <td width="30%" class="text-right">SUB TOTAL</td>
-            <td width="20%" class="text-right">S/ {{ number_format($operacionesGravadas, 2) }}</td>
+            
+            <td style="text-align: left; width: 45%;">SUB TOTAL</td>
+            <td style="text-align: right; width: 55%; white-space: nowrap;">S/&nbsp;{{ number_format($operacionesGravadas, 2) }}</td>
         </tr>
         <tr>
-            <td></td>
-            <td class="text-right">I.G.V ({{ $igvPorcentaje }}%)</td>
-            <td class="text-right">S/ {{ number_format($igvCalculado, 2) }}</td>
+            
+            <td style="text-align: left; width: 45%;">I.G.V ({{ $igvPorcentaje }}%)</td>
+            <td style="text-align: right; width: 55%; white-space: nowrap;">S/&nbsp;{{ number_format($igvCalculado, 2) }}</td>
         </tr>
         <tr class="total-row">
-            <td></td>
-            <td class="text-right">TOTAL</td>
-            <td class="text-right">S/ {{ number_format($total, 2) }}</td>
+            
+            <td style="text-align: left; width: 45%;">TOTAL</td>
+            <td style="text-align: right; width: 55%; white-space: nowrap;">S/&nbsp;{{ number_format($total, 2) }}</td>
         </tr>
     </table>
 

@@ -36,6 +36,7 @@ return [
     ],
 
     'google' => [
+        'maps_key' => env('GOOGLE_MAPS_BROWSER_KEY'),
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT_URI'),
@@ -46,6 +47,14 @@ return [
         'password' => env('NIUBIZ_PASSWORD'),
         'merchant_id' => env('NIUBIZ_MERCHANT_ID'),
         'env' => env('NIUBIZ_ENV', 'sandbox'),
+        // Public sandbox fixture: Niubiz integration manual, section 6.1.
+        'test_card' => [
+            'brand' => 'Visa',
+            'number' => '4551708161768059',
+            'expiry' => '03/28',
+            'cvv' => '111',
+            'source' => 'https://s3-gestor-librerias.s3.amazonaws.com/Plugins/WooCommerce/Manual_Integracion_WooCommerce_v2.0.pdf',
+        ],
     ],
     'apiperu' => [
         'url' => env('API_PERU_URL'),
@@ -69,6 +78,17 @@ return [
     ],
     'shippo' => [
         'key' => env('SHIPPO_API_KEY'),
+        'origin' => [
+            'name' => env('SHIPPO_ORIGIN_NAME', 'Novape'),
+            'street1' => env('SHIPPO_ORIGIN_STREET'),
+            'city' => env('SHIPPO_ORIGIN_CITY', 'Lima'),
+            'state' => env('SHIPPO_ORIGIN_STATE', 'LMA'),
+            'zip' => env('SHIPPO_ORIGIN_ZIP'),
+            'country' => 'PE',
+            'phone' => env('SHIPPO_ORIGIN_PHONE'),
+            'email' => env('SHIPPO_ORIGIN_EMAIL'),
+        ],
+        'carrier_accounts' => array_values(array_filter(array_map('trim', explode(',', env('SHIPPO_CARRIER_ACCOUNTS', ''))))),
     ],
     'gemini' => [
         'key' => env('GEMINI_API_KEY'),

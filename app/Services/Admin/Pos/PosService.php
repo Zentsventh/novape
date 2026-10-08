@@ -243,7 +243,7 @@ class PosService
                 ]);
             }
 
-            foreach ($itemsValidados as $item) {
+            foreach ($itemsValidados as $lineIndex => $item) {
                 DB::table('venta_pos_items')->insert([
                     'venta_pos_id' => $ventaId,
                     'variante_id' => $item['variante_id'],
@@ -257,35 +257,17 @@ class PosService
                     'updated_at' => now(),
                 ]);
 
-                $stockAlmacen = DB::table('stock_almacen')
-                    ->where('almacen_id', $almacenId)
-                    ->where('variante_id', $item['variante_id'])
-                    ->first();
-
-                if ($stockAlmacen) {
-                    DB::table('stock_almacen')->where('id', $stockAlmacen->id)->decrement('cantidad', $item['cantidad']);
-                } else {
-                    DB::table('stock_almacen')->insert([
-                        'almacen_id' => $almacenId,
-                        'variante_id' => $item['variante_id'],
-                        'cantidad' => 0 - $item['cantidad'],
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-                }
-
-                DB::statement('UPDATE variante SET stock = (SELECT COALESCE(SUM(cantidad), 0) FROM stock_almacen WHERE variante_id = ?) WHERE id = ?', [$item['variante_id'], $item['variante_id']]);
-
-                DB::table('movimientos_almacen')->insert([
-                    'almacen_id' => $almacenId,
-                    'variante_id' => $item['variante_id'],
-                    'tipo' => 'salida',
-                    'cantidad' => -$item['cantidad'],
-                    'referencia' => 'Venta POS - '.$codigoTicket,
-                    'usuario_id' => $userId,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+                app(\App\Services\Inventario\InventoryService::class)->registrarMovimiento(
+                    varianteId: $item['variante_id'],
+                    almacenId: $almacenId,
+                    cantidad: -$item['cantidad'],
+                    tipo: 'salida',
+                    motivo: 'Venta POS - '.$codigoTicket,
+                    usuarioId: $userId,
+                    referencia: null,
+                    costoUnitario: $item['costo_unitario'] === null ? null : (float) $item['costo_unitario'],
+                    operationKey: 'pos:'.$ventaId.':'.$lineIndex
+                );
             }
 
             return ['venta_id' => $ventaId, 'codigo_ticket' => $codigoTicket, 'total' => $total];
@@ -314,7 +296,11 @@ class PosService
             return null;
         }
 
-        $clienteRow = DB::table('clientes')->where('numero_documento', $clienteData['numero_documento'])->first();
+        $documentType = strtoupper(trim($clienteData['tipo_documento'] ?? 'DNI'));
+        $documentNumber = strtoupper(trim($clienteData['numero_documento']));
+        $clientUsers = DB::table('usuario')->whereNull('deleted_at')->where('tipo_documento', $documentType)->where('dni', $documentNumber)->pluck('id');
+        $userId = $clientUsers->count() === 1 ? $clientUsers->first() : null;
+        $clienteRow = DB::table('clientes')->where('tipo_documento', $documentType)->where('numero_documento', $documentNumber)->first();
         if ($clienteRow) {
             DB::table('clientes')->where('id', $clienteRow->id)->update([
                 'nombre_razon_social' => $clienteData['nombre_razon_social'] ?? $clienteRow->nombre_razon_social,
@@ -326,8 +312,9 @@ class PosService
         }
 
         return DB::table('clientes')->insertGetId([
-            'tipo_documento' => $clienteData['tipo_documento'] ?? 'DNI',
-            'numero_documento' => $clienteData['numero_documento'],
+            'tipo_documento' => $documentType,
+            'usuario_id' => $userId,
+            'numero_documento' => $documentNumber,
             'nombre_razon_social' => $clienteData['nombre_razon_social'] ?? 'Sin Nombre',
             'direccion' => $clienteData['direccion'] ?? '',
             'created_at' => now(),

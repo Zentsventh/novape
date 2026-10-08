@@ -3,60 +3,14 @@
 namespace App\Observers;
 
 use App\Models\Pedido;
+use App\Services\Orders\OrderLoyaltyService;
 
 class PedidoObserver
 {
-    /**
-     * Handle the Pedido "created" event.
-     */
-    public function created(Pedido $pedido): void
-    {
-        //
-    }
-
     public function updated(Pedido $pedido): void
     {
-        if ($pedido->isDirty('estado') && $pedido->estado === 'completado' && $pedido->usuario_id) {
-            $user = $pedido->usuario;
-            if ($user) {
-                // Earn 1 point per 10 currency units spent
-                $points = (int) floor($pedido->total / 10);
-                
-                if ($points > 0) {
-                    $user->increment('loyalty_points', $points);
-                    
-                    \App\Models\LoyaltyPointsHistory::create([
-                        'usuario_id' => $user->id,
-                        'points' => $points,
-                        'type' => 'earned',
-                        'description' => "Puntos obtenidos por pedido #{$pedido->id}",
-                    ]);
-                }
-            }
+        if ($pedido->wasChanged('estado') && strtolower($pedido->estado) === 'completado') {
+            OrderLoyaltyService::completed($pedido);
         }
-    }
-
-    /**
-     * Handle the Pedido "deleted" event.
-     */
-    public function deleted(Pedido $pedido): void
-    {
-        //
-    }
-
-    /**
-     * Handle the Pedido "restored" event.
-     */
-    public function restored(Pedido $pedido): void
-    {
-        //
-    }
-
-    /**
-     * Handle the Pedido "force deleted" event.
-     */
-    public function forceDeleted(Pedido $pedido): void
-    {
-        //
     }
 }

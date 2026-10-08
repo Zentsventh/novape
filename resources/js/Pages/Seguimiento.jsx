@@ -56,7 +56,7 @@ export default function Seguimiento({ codigo = '', pedido = null, error = null, 
                         </svg>
                     </div>
                     <h1 className="seguimiento-title">Sigue tu pedido</h1>
-                    <p className="seguimiento-subtitle">Ingresa tu documento de identidad o número de pedido y conoce el estado de tu pedido en tiempo real</p>
+                    <p className="seguimiento-subtitle">Ingresa el código de tu pedido para consultar su estado.</p>
                     
                     <form className="seguimiento-form-inline" onSubmit={handleSubmit}>
                         <input
@@ -64,7 +64,7 @@ export default function Seguimiento({ codigo = '', pedido = null, error = null, 
                             type="text"
                             value={trackingCode}
                             onChange={(event) => setTrackingCode(event.target.value)}
-                            placeholder="Documento de Identidad o número de pedido"
+                            placeholder="Código de pedido"
                             className="seguimiento-input-inline"
                         />
                         <button type="submit" className="seguimiento-btn-inline">Buscar</button>
