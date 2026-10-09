@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: write
+
 jobs:
   deployment:
     runs-on: ubuntu-24.04
@@ -48,13 +51,22 @@ jobs:
       - name: Run tests
         run: |
           set -o pipefail
-          php artisan test 2>&1 | tee test_output.log || {
-            echo "### PHPUnit Test Failures" >> $GITHUB_STEP_SUMMARY
-            echo '```text' >> $GITHUB_STEP_SUMMARY
-            tail -n 120 test_output.log >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            exit 1
-          }
+          php artisan test 2>&1 | tee test_output.log
+
+      - name: Report failures to commit
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tail -n 80 test_output.log > failed_summary.txt
+          gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/comments" -F body=@failed_summary.txt || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-output-log
+          path: test_output.log
+
       - run: php vendor/bin/phpstan analyse --memory-limit=1G --no-progress
         env:
           APP_ENV: testing
