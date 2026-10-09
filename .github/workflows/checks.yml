@@ -48,6 +48,8 @@ jobs:
       - run: npm ci
       - run: node --test tests/Frontend/*.test.js
       - run: npm run build
+      - name: Prepare storage directories
+        run: mkdir -p storage/framework/views storage/framework/cache storage/framework/sessions storage/logs bootstrap/cache
       - name: Run tests
         run: |
           set -o pipefail
