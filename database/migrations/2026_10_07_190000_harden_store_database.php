@@ -124,8 +124,8 @@ return new class extends Migration
         // Conditional keys allow many non-primary addresses / closed sessions.
         if (DB::getDriverName() === 'mysql') {
             DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-            DB::statement('ALTER TABLE direccion_usuario ADD COLUMN principal_usuario_id BIGINT GENERATED ALWAYS AS (CASE WHEN principal = 1 THEN usuario_id ELSE NULL END) STORED, ADD UNIQUE KEY address_one_primary (principal_usuario_id)');
-            DB::statement("ALTER TABLE cajas_sesiones ADD COLUMN active_cashier_id BIGINT GENERATED ALWAYS AS (CASE WHEN estado = 'abierta' THEN cajero_id ELSE NULL END) STORED, ADD UNIQUE KEY register_one_open_cashier (active_cashier_id), ADD COLUMN active_register_id BIGINT UNSIGNED GENERATED ALWAYS AS (CASE WHEN estado = 'abierta' THEN caja_id ELSE NULL END) STORED, ADD UNIQUE KEY register_one_open_register (active_register_id)");
+            DB::statement('ALTER TABLE direccion_usuario ADD COLUMN principal_usuario_id BIGINT GENERATED ALWAYS AS (CASE WHEN principal = 1 THEN usuario_id ELSE NULL END) VIRTUAL, ADD UNIQUE KEY address_one_primary (principal_usuario_id)');
+            DB::statement("ALTER TABLE cajas_sesiones ADD COLUMN active_cashier_id BIGINT GENERATED ALWAYS AS (CASE WHEN estado = 'abierta' THEN cajero_id ELSE NULL END) VIRTUAL, ADD UNIQUE KEY register_one_open_cashier (active_cashier_id), ADD COLUMN active_register_id BIGINT UNSIGNED GENERATED ALWAYS AS (CASE WHEN estado = 'abierta' THEN caja_id ELSE NULL END) VIRTUAL, ADD UNIQUE KEY register_one_open_register (active_register_id)");
             DB::statement('SET FOREIGN_KEY_CHECKS=1;');
         } else {
             DB::statement('CREATE UNIQUE INDEX address_one_primary ON direccion_usuario(usuario_id) WHERE principal = 1');
