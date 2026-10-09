@@ -1,0 +1,180 @@
+/* Estilos del carrusel de productos – Diseño Premium */
+
+.efe-section-carousel {
+    position: relative;
+    overflow: hidden;
+    padding: 0 40px;
+}
+
+.efe-carousel-track {
+    display: flex;
+    gap: 16px;
+    padding: 8px 0;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.efe-carousel-track::-webkit-scrollbar {
+    display: none;
+}
+.efe-carousel-track > div {
+    scroll-snap-align: start;
+}
+
+/* Flechas de navegación – semicírculos azules premium */
+.efe-carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 38px;
+    height: 64px;
+    background: #007BFF;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    color: #ffffff;
+    z-index: 5;
+    box-shadow: 0 3px 12px rgba(0, 123, 255, 0.25);
+}
+
+.efe-carousel-arrow svg {
+    stroke-width: 2.5;
+    transition: transform 0.25s ease;
+}
+
+.efe-carousel-arrow--prev {
+    left: 0;
+    border-radius: 0 32px 32px 0;
+    padding-left: 2px;
+    padding-right: 4px;
+}
+
+.efe-carousel-arrow--next {
+    right: 0;
+    border-radius: 32px 0 0 32px;
+    padding-right: 2px;
+    padding-left: 4px;
+}
+
+.efe-carousel-arrow:hover:not(:disabled) {
+    background: #0069d9;
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+    transform: translateY(-50%) scale(1.05);
+}
+
+.efe-carousel-arrow--prev:hover:not(:disabled) svg {
+    transform: translateX(-2px);
+}
+
+.efe-carousel-arrow--next:hover:not(:disabled) svg {
+    transform: translateX(2px);
+}
+
+.efe-carousel-arrow:active:not(:disabled) {
+    transform: translateY(-50%) scale(0.96);
+}
+
+.efe-carousel-arrow:disabled {
+    background: #cbd5e1;
+    opacity: 0.5;
+    cursor: default;
+    box-shadow: none;
+}
+
+/* Indicadores de página – premium dots */
+.efe-carousel-dots {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    padding: 22px 0 4px;
+}
+
+.efe-carousel-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    background-color: #e2e8f0;
+}
+
+.efe-carousel-dot:hover {
+    background-color: #94a3b8;
+}
+
+.efe-carousel-dot.is-active {
+    background-color: #007BFF;
+    width: 28px;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0, 123, 255, 0.3);
+}
+
+@media (max-width: 1023px) {
+    .efe-section-carousel {
+        padding: 0 32px;
+    }
+}
+
+@media (max-width: 768px) {
+    .efe-section-carousel {
+        padding: 0 8px;
+    }
+
+    .efe-carousel-track {
+        gap: 10px;
+    }
+
+    .efe-carousel-arrow {
+        width: 30px;
+        height: 50px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .efe-carousel-arrow svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .efe-carousel-dots {
+        gap: 6px;
+        padding: 16px 0 4px;
+    }
+}
+
+@media (max-width: 480px) {
+    .efe-section-carousel {
+        padding: 0 4px;
+    }
+
+    .efe-carousel-track {
+        gap: 8px;
+    }
+
+    .efe-carousel-arrow {
+        width: 26px;
+        height: 44px;
+    }
+
+    .efe-carousel-arrow svg {
+        width: 14px;
+        height: 14px;
+    }
+}
+
+/* En dispositivos touch, mostrar indicadores más grandes para fácil tap */
+@media (pointer: coarse) {
+    .efe-carousel-dot {
+        width: 10px;
+        height: 10px;
+    }
+
+    .efe-carousel-dot.is-active {
+        width: 32px;
+    }
+}

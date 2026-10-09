@@ -1,0 +1,462 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers;
+
+use App\Events\Omnichannel\ConversationUpdated;
+use App\Events\Omnichannel\NewMessageReceived;
+use App\Http\Requests\Chatbot\ChatbotMessageRequest;
+use App\Jobs\Omnichannel\ProcessWebChatbotMessageJob;
+use App\Models\Omnichannel\OmnichannelContact;
+use App\Models\Omnichannel\OmnichannelConversation;
+use App\Models\Omnichannel\OmnichannelMessage;
+use App\Services\Omnichannel\TicketAssignmentService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+
+class ChatbotController extends Controller
+{
+    public function __construct(
+        private readonly TicketAssignmentService $ticketAssignmentService
+    ) {}
+
+    /**
+     * Enviar un mensaje al chatbot.
+     * Detecta usuario autenticado para vincular automáticamente.
+     */
+    public function message(ChatbotMessageRequest $request): JsonResponse
+    {
+        session()->put('chatbot_active', true);
+        $sessionId = hash_hmac('sha256', session()->getId(), config('app.key'));
+        $messages = $request->input('messages');
+        $authUser = auth()->user();
+
+        // El último mensaje es el del usuario
+        $lastUserMessage = end($messages)['text'] ?? '';
+
+        try {
+            DB::beginTransaction();
+
+            // 1. Obtener o crear contacto (priorizando usuario autenticado)
+            $contact = $this->resolveContact($authUser, $sessionId);
+
+            // 2. Obtener conversación ACTIVA (no cerrada ni resuelta) o crear nueva
+            $conversation = $this->resolveActiveConversation($contact);
+
+            // 3. Guardar el mensaje del usuario entrante si hay un mensaje
+            if ($lastUserMessage) {
+                $inboundMessage = OmnichannelMessage::create([
+                    'conversation_id' => $conversation->id,
+                    'contact_id' => $contact->id,
+                    'channel' => 'web',
+                    'direction' => 'inbound',
+                    'message_type' => 'text',
+                    'content' => $lastUserMessage,
+                    'status' => 'delivered',
+                ]);
+
+                $conversation->update([
+                    'last_message_preview' => mb_substr($lastUserMessage, 0, 50),
+                    'last_message_at' => now(),
+                    'message_count' => DB::raw('message_count + 1'),
+                    'unread_count' => DB::raw('unread_count + 1'),
+                ]);
+
+                // Actualizar última interacción del contacto
+                $contact->update(['last_interaction_at' => now()]);
+
+                try {
+                    broadcast(new NewMessageReceived($inboundMessage))->toOthers();
+                    broadcast(new ConversationUpdated($conversation->refresh()))->toOthers();
+                } catch (\Throwable $broadcastError) {
+                    Log::warning('Omnichannel realtime unavailable in Chatbot; polling will refresh', ['exception' => get_class($broadcastError)]);
+                }
+
+                // Detectar si el visitante se identifica por nombre
+                $this->detectAndUpdateContactName($contact, $lastUserMessage, $conversation);
+            }
+
+            // Persist the inbound message before waiting for the external AI provider.
+            DB::commit();
+
+            // Si el bot no está pausado, procesar en segundo plano usando Jobs
+            if (! $conversation->is_bot_paused) {
+                // AI requests run on a dedicated worker rather than blocking storefront requests.
+                ProcessWebChatbotMessageJob::dispatch(
+                    $conversation->id,
+                    $contact->id,
+                    $messages
+                )->onConnection(config('storefront.queue_connection', 'database'))->onQueue('storefront');
+            }
+
+            return response()->json([
+                'success' => true,
+                'is_bot_paused' => $conversation->is_bot_paused,
+                'conversation_id' => $conversation->id,
+                'processing_in_background' => ! $conversation->is_bot_paused,
+            ]);
+        } catch (\Exception $e) {
+            if (DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
+            Log::error('Error en ChatbotController: '.$e->getMessage()."\n".$e->getTraceAsString());
+
+            return response()->json(['error' => 'No se pudo procesar el mensaje. Intenta de nuevo o solicita un asesor.'], 500);
+        }
+    }
+
+    /**
+     * El cliente solicita hablar con un humano (Handoff).
+     */
+    public function handoff(Request $request): JsonResponse
+    {
+        $sessionId = hash_hmac('sha256', session()->getId(), config('app.key'));
+        $authUser = auth()->user();
+
+        $contact = $this->findContact($authUser, $sessionId);
+        if (! $contact) {
+            return response()->json(['error' => 'Contacto no encontrado'], 404);
+        }
+
+        $conversation = $this->findActiveConversation($contact);
+        if (! $conversation) {
+            return response()->json(['error' => 'Conversación no encontrada'], 404);
+        }
+
+        // Asignar mediante Round-Robin y generar Ticket
+        $this->ticketAssignmentService->handoffToHuman($conversation);
+
+        // Notificar al frontend
+                try {
+                    broadcast(new ConversationUpdated($conversation->refresh()))->toOthers();
+                } catch (\Throwable $e) {}
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Transferido a un asesor humano exitosamente.',
+        ]);
+    }
+
+    /**
+     * Polling para mensajes nuevos (respuestas del agente humano).
+     */
+    public function pollMessages(Request $request): JsonResponse
+    {
+        $sessionId = hash_hmac('sha256', session()->getId(), config('app.key'));
+        $lastMessageId = $request->query('last_message_id', 0);
+        $authUser = auth()->user();
+
+        // Buscar contacto por usuario autenticado o por session_id
+        $contact = $this->findContact($authUser, $sessionId);
+        if (! $contact) {
+            return response()->json(['messages' => []]);
+        }
+
+        $conversation = $this->findActiveConversation($contact);
+        if (! $conversation) {
+            return response()->json([
+                'messages' => [],
+                'conversation_ended' => true,
+            ]);
+        }
+
+        // Obtener nuevos mensajes posteriores al último recibido (excluyendo notas internas)
+        $newMessages = OmnichannelMessage::with('user')
+            ->where('conversation_id', $conversation->id)
+            ->where('is_internal_note', false)
+            ->where('id', '>', $lastMessageId)
+            ->orderBy('id', 'asc')
+            ->get();
+
+        $formattedMessages = $newMessages->map(function ($msg) {
+            $agentName = null;
+            if (! $msg->is_ai_generated && $msg->direction === 'outbound' && $msg->user) {
+                $firstName = explode(' ', $msg->user->nombres ?? '')[0];
+                $lastName = explode(' ', $msg->user->apellidos ?? '')[0];
+                $agentName = trim($firstName.' '.$lastName);
+            }
+
+            return [
+                'id' => $msg->id,
+                'role' => $msg->direction === 'inbound' ? 'user' : 'bot',
+                'text' => $msg->content,
+                'is_human' => ! $msg->is_ai_generated && $msg->direction === 'outbound',
+                'agent_name' => $agentName ?: 'Agente',
+                'time' => $msg->created_at->format('H:i'),
+            ];
+        });
+
+        $conversation->load('assignedUser');
+
+        return response()->json([
+            'messages' => $formattedMessages,
+            'is_bot_paused' => $conversation->is_bot_paused,
+            'agent_name' => $conversation->assignedUser ? trim($conversation->assignedUser->nombres.' '.$conversation->assignedUser->apellidos) : null,
+        ]);
+    }
+
+    /**
+     * Cargar historial completo de la conversación activa del visitante.
+     * Se usa cuando el usuario abre el chat o refresca la página.
+     */
+    public function history(Request $request): JsonResponse
+    {
+        session()->put('chatbot_active', true);
+        $sessionId = hash_hmac('sha256', session()->getId(), config('app.key'));
+        $authUser = auth()->user();
+
+        $contact = $this->findContact($authUser, $sessionId);
+        if (! $contact) {
+            return response()->json(['messages' => [], 'has_active_conversation' => false]);
+        }
+
+        $conversation = $this->findActiveConversation($contact);
+        if (! $conversation) {
+            return response()->json(['messages' => [], 'has_active_conversation' => false]);
+        }
+
+        $messages = OmnichannelMessage::with('user')
+            ->where('conversation_id', $conversation->id)
+            ->where('is_internal_note', false)
+            ->orderBy('id', 'asc')
+            ->get();
+
+        $formattedMessages = $messages->map(function ($msg) {
+            $agentName = null;
+            if (! $msg->is_ai_generated && $msg->direction === 'outbound' && $msg->user) {
+                $firstName = explode(' ', $msg->user->nombres ?? '')[0];
+                $lastName = explode(' ', $msg->user->apellidos ?? '')[0];
+                $agentName = trim($firstName.' '.$lastName);
+            }
+
+            return [
+                'id' => $msg->id,
+                'role' => $msg->direction === 'inbound' ? 'user' : 'bot',
+                'text' => $msg->content,
+                'is_human' => ! $msg->is_ai_generated && $msg->direction === 'outbound',
+                'agent_name' => $agentName ?: 'Agente',
+                'time' => $msg->created_at->format('H:i'),
+            ];
+        });
+
+        $conversation->load('assignedUser');
+
+        return response()->json([
+            'messages' => $formattedMessages,
+            'has_active_conversation' => true,
+            'conversation_id' => $conversation->id,
+            'is_bot_paused' => $conversation->is_bot_paused,
+            'agent_name' => $conversation->assignedUser ? trim($conversation->assignedUser->nombres.' '.$conversation->assignedUser->apellidos) : null,
+        ]);
+    }
+
+    /**
+     * El visitante cierra/finaliza la conversación desde el widget.
+     */
+    public function closeConversation(Request $request): JsonResponse
+    {
+        $sessionId = hash_hmac('sha256', session()->getId(), config('app.key'));
+        $authUser = auth()->user();
+
+        $contact = $this->findContact($authUser, $sessionId);
+        if (! $contact) {
+            return response()->json(['success' => true]); // nada que cerrar
+        }
+
+        $conversation = $this->findActiveConversation($contact);
+        if (! $conversation) {
+            return response()->json(['success' => true]);
+        }
+
+        $conversation->update([
+            'status' => 'closed',
+            'closed_at' => now(),
+            'closed_by' => 'visitor',
+        ]);
+
+        // Nota interna para el CRM
+        OmnichannelMessage::create([
+            'conversation_id' => $conversation->id,
+            'contact_id' => $contact->id,
+            'channel' => 'web',
+            'direction' => 'outbound',
+            'message_type' => 'text',
+            'content' => 'El visitante finalizó la conversación',
+            'is_internal_note' => true,
+            'status' => 'sent',
+        ]);
+
+                try {
+                    broadcast(new ConversationUpdated($conversation->refresh()))->toOthers();
+                } catch (\Throwable $e) {}
+
+        return response()->json(['success' => true]);
+    }
+
+    // ─── MÉTODOS PRIVADOS ──────────────────────────────────────
+
+    /**
+     * Resolver (encontrar o crear) un contacto omnichannel.
+     * Prioriza usuario autenticado para vincular nombre real.
+     */
+    private function resolveContact($authUser, string $sessionId): OmnichannelContact
+    {
+        // Si el usuario está autenticado, buscar por usuario_id primero
+        if ($authUser) {
+            $contact = OmnichannelContact::where('usuario_id', $authUser->id)->first();
+
+            if ($contact) {
+                // Actualizar nombre si cambió y vincular session_id
+                $updates = [];
+                $fullName = trim(($authUser->nombres ?? '').' '.($authUser->apellidos ?? ''));
+                if ($fullName && $contact->name !== $fullName) {
+                    $updates['name'] = $fullName;
+                }
+                if ($authUser->email && $contact->email !== $authUser->email) {
+                    $updates['email'] = $authUser->email;
+                }
+                if ($authUser->telefono && $contact->phone_number !== $authUser->telefono) {
+                    $updates['phone_number'] = $authUser->telefono;
+                }
+                // Vincular el session_id actual en metadata
+                $metadata = $contact->metadata ?? [];
+                $metadata['web_session_id'] = $sessionId;
+                $updates['metadata'] = $metadata;
+
+                $contact->update($updates);
+
+                return $contact;
+            }
+
+            // No tiene contacto aún, pero está autenticado → crear con datos reales
+            $fullName = trim(($authUser->nombres ?? '').' '.($authUser->apellidos ?? ''));
+
+            return OmnichannelContact::create([
+                'name' => $fullName ?: 'Cliente Registrado',
+                'email' => $authUser->email ?? null,
+                'phone_number' => $authUser->telefono ?? null,
+                'usuario_id' => $authUser->id,
+                'metadata' => ['web_session_id' => $sessionId],
+                'first_interaction_at' => now(),
+                'last_interaction_at' => now(),
+            ]);
+        }
+
+        // Usuario NO autenticado: buscar por session_id en metadata
+        $contact = OmnichannelContact::whereNull('usuario_id')->where('metadata->web_session_id', $sessionId)->first();
+        if (! $contact) {
+            $contact = OmnichannelContact::create([
+                'name' => 'Visitante Web',
+                'phone_number' => null,
+                'metadata' => ['web_session_id' => $sessionId],
+                'first_interaction_at' => now(),
+                'last_interaction_at' => now(),
+            ]);
+
+            // Asignar nombre único con el ID del contacto
+            $contact->update(['name' => 'Visitante Web #'.$contact->id]);
+        }
+
+        return $contact;
+    }
+
+    /**
+     * Buscar contacto existente (sin crear).
+     */
+    private function findContact($authUser, string $sessionId): ?OmnichannelContact
+    {
+        if ($authUser) {
+            return OmnichannelContact::where('usuario_id', $authUser->id)->first();
+        }
+
+        return OmnichannelContact::whereNull('usuario_id')->where('metadata->web_session_id', $sessionId)->first();
+    }
+
+    /**
+     * Resolver conversación activa: buscar una que NO esté cerrada ni resuelta.
+     * Si no existe, crear una nueva.
+     */
+    private function resolveActiveConversation(OmnichannelContact $contact): OmnichannelConversation
+    {
+        $conversation = OmnichannelConversation::where('contact_id', $contact->id)
+            ->where('channel', 'web')
+            ->whereNotIn('status', ['resolved', 'closed'])
+            ->latest('updated_at')
+            ->first();
+
+        if (! $conversation) {
+            $conversation = OmnichannelConversation::create([
+                'contact_id' => $contact->id,
+                'channel' => 'web',
+                'status' => 'bot_active',
+                'priority' => 'normal',
+            ]);
+        }
+
+        return $conversation;
+    }
+
+    /**
+     * Buscar conversación activa existente (sin crear nueva).
+     */
+    private function findActiveConversation(OmnichannelContact $contact): ?OmnichannelConversation
+    {
+        return OmnichannelConversation::where('contact_id', $contact->id)
+            ->where('channel', 'web')
+            ->whereNotIn('status', ['resolved', 'closed'])
+            ->latest('updated_at')
+            ->first();
+    }
+
+    /**
+     * Detectar si el visitante se identifica por nombre y actualizar el contacto.
+     * Patrones soportados: "Me llamo X", "Soy X", "Mi nombre es X", etc.
+     */
+    private function detectAndUpdateContactName(
+        OmnichannelContact $contact,
+        string $message,
+        OmnichannelConversation $conversation
+    ): void {
+        // Solo actualizar si el contacto tiene nombre genérico de visitante
+        if (! str_starts_with($contact->name, 'Visitante Web')) {
+            return;
+        }
+
+        $message = trim($message);
+
+        // Patrones comunes para identificarse en español
+        $patterns = [
+            '/^(?:me\s+llamo|soy|mi\s+nombre\s+es)\s+([A-Za-záéíóúñÁÉÍÓÚÑüÜ]{2,}(?:\s+[A-Za-záéíóúñÁÉÍÓÚÑüÜ]{2,})*)/iu',
+            '/^(?:hola[,!]?\s+)?(?:me\s+llamo|soy|mi\s+nombre\s+es)\s+([A-Za-záéíóúñÁÉÍÓÚÑüÜ]{2,}(?:\s+[A-Za-záéíóúñÁÉÍÓÚÑüÜ]{2,})*)/iu',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $message, $matches)) {
+                $detectedName = trim($matches[1]);
+
+                // Validar que no sea una palabra genérica
+                $genericWords = ['cliente', 'usuario', 'visitante', 'nadie', 'yo', 'tu', 'el', 'ella', 'que', 'de'];
+                if (in_array(mb_strtolower($detectedName), $genericWords)) {
+                    return;
+                }
+
+                // Capitalizar cada palabra del nombre
+                $detectedName = mb_convert_case($detectedName, MB_CASE_TITLE, 'UTF-8');
+
+                $contact->update(['name' => $detectedName]);
+
+                // Broadcast la actualización para que el CRM refleje el nuevo nombre
+                        try {
+                    broadcast(new ConversationUpdated($conversation->refresh()))->toOthers();
+                } catch (\Throwable $e) {}
+
+                Log::info("Contacto #{$contact->id} identificado como: {$detectedName}");
+
+                return;
+            }
+        }
+    }
+}

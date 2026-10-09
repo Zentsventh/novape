@@ -1,0 +1,151 @@
+/* Estilos del carrusel principal */
+
+.efe-hero-carousel {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+.efe-hero-track {
+    display: flex;
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.efe-hero-slide {
+    width: 100%;
+    flex-shrink: 0;
+}
+
+.efe-hero-slide > a, .efe-hero-slide picture { display: block; width: 100%; height: 100%; }
+.efe-hero-slide { aspect-ratio: 2367 / 728; }
+.efe-hero-carousel { touch-action: pan-y; }
+.hero-autoplay-toggle { position: absolute; bottom: 12px; right: 16px; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid #ffffff70; color: #fff; background: #10253ca6; cursor: pointer; }
+.efe-hero-carousel button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+@media (max-width: 767px) { .efe-hero-slide { aspect-ratio: 1; } }
+@media (prefers-reduced-motion: reduce) { .efe-hero-track { transition: none; } }
+
+.efe-hero-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+/* Flechas del carrusel – Glassmorphism premium */
+.efe-hero-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 72px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    background-color: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: #ffffff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.efe-hero-arrow svg {
+    width: 20px;
+    height: 20px;
+    stroke: #ffffff;
+    stroke-width: 3;
+}
+
+.efe-hero-arrow:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.efe-hero-arrow:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+.efe-hero-arrow--prev {
+    left: 0;
+    border-radius: 0 36px 36px 0;
+    padding-left: 4px;
+    padding-right: 6px;
+}
+
+.efe-hero-arrow--next {
+    right: 0;
+    border-radius: 36px 0 0 36px;
+    padding-right: 4px;
+    padding-left: 6px;
+}
+
+/* Indicadores del carrusel */
+.efe-hero-dots {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 5;
+}
+
+.efe-hero-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    background-color: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(4px);
+}
+
+.efe-hero-dot.is-active {
+    width: 28px;
+    background-color: white;
+    border-color: white;
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 768px) {
+    .efe-hero-arrow {
+        width: 36px;
+        height: 56px;
+    }
+
+    .efe-hero-arrow svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .efe-hero-dots {
+        bottom: 8px;
+        gap: 6px;
+    }
+
+    .efe-hero-dot {
+        width: 8px;
+        height: 8px;
+    }
+
+    .efe-hero-dot.is-active {
+        width: 22px;
+    }
+}
+
+/* En touch, los dots deben ser más grandes para el pulgar */
+@media (pointer: coarse) {
+    .efe-hero-dot {
+        width: 12px;
+        height: 12px;
+    }
+
+    .efe-hero-dot.is-active {
+        width: 32px;
+    }
+}

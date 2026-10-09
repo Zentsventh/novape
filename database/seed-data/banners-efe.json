@@ -1,0 +1,47 @@
+[
+  {
+    "titulo": "EFE - Televisores y entretenimiento",
+    "categoria": "TV",
+    "fuente_url": "https://www.efe.com.pe/",
+    "desktop_url": "/storage/banners/efe/efe-1-desktop.png",
+    "desktop_source": "https://www.efe.com.pe/media/wysiwyg/efe-slider-b2c-01-video-01_38.png",
+    "mobile_url": "/storage/banners/efe/efe-1-mobile.png",
+    "mobile_source": "https://www.efe.com.pe/media/wysiwyg/efe-slider-b2c-01-video-02_40.png"
+  },
+  {
+    "titulo": "EFE - Electrohogar Coldex",
+    "categoria": "Refrigeración",
+    "fuente_url": "https://www.efe.com.pe/",
+    "desktop_url": "/storage/banners/efe/efe-2-desktop.jpeg",
+    "desktop_source": "https://www.efe.com.pe/media/wysiwyg/efe-slide-13-b2c-coldex-01.jpeg",
+    "mobile_url": "/storage/banners/efe/efe-2-mobile.jpeg",
+    "mobile_source": "https://www.efe.com.pe/media/wysiwyg/efe-slide-13-b2c-coldex-02.jpeg"
+  },
+  {
+    "titulo": "EFE - Intel Gamer Days",
+    "categoria": "Mundo Gamer",
+    "fuente_url": "https://www.efe.com.pe/",
+    "desktop_url": "/storage/banners/efe/efe-3-desktop.jpeg",
+    "desktop_source": "https://www.efe.com.pe/media/wysiwyg/IMG_7161_1.jpeg",
+    "mobile_url": "/storage/banners/efe/efe-3-mobile.jpeg",
+    "mobile_source": "https://www.efe.com.pe/media/wysiwyg/IMG_7162_1.jpeg"
+  },
+  {
+    "titulo": "EFE - Celulares y smartphones",
+    "categoria": "Celulares",
+    "fuente_url": "https://www.efe.com.pe/",
+    "desktop_url": "/storage/banners/efe/efe-4-desktop.png",
+    "desktop_source": "https://www.efe.com.pe/media/wysiwyg/efe-slider-b2c-02-telefonia-01_43.png",
+    "mobile_url": "/storage/banners/efe/efe-4-mobile.png",
+    "mobile_source": "https://www.efe.com.pe/media/wysiwyg/efe-slider-b2c-02-telefonia-02_39.png"
+  },
+  {
+    "titulo": "EFE - Laptops y cómputo",
+    "categoria": "Cómputo",
+    "fuente_url": "https://www.efe.com.pe/",
+    "desktop_url": "/storage/banners/efe/efe-5-desktop.jpg",
+    "desktop_source": "https://www.efe.com.pe/media/wysiwyg/efe-slide-3-b2c-computo-01.jpg",
+    "mobile_url": "/storage/banners/efe/efe-5-mobile.jpg",
+    "mobile_source": "https://www.efe.com.pe/media/wysiwyg/efe-slide-3-b2c-computo-02.jpg"
+  }
+]

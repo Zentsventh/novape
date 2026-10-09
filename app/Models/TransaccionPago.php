@@ -1,0 +1,28 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class TransaccionPago extends Model
+{
+    protected $table = 'transacciones_pago';
+
+    protected $fillable = [
+        'pedido_id',
+        'referencia_pasarela',
+        'pasarela',
+        'monto',
+        'estado',
+        'error_message',
+    ];
+
+    /** @return BelongsTo<Pedido, $this> */
+    public function pedido(): BelongsTo
+    {
+        return $this->belongsTo(Pedido::class, 'pedido_id');
+    }
+}

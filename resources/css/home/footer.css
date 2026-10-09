@@ -1,0 +1,124 @@
+/* Estilos del footer */
+
+.efe-footer {
+    background: #004797;
+    color: rgba(255, 255, 255, 0.9);
+    padding: 60px 30px 30px;
+    margin-top: 40px;
+}
+
+.efe-footer-grid {
+    max-width: 1440px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 32px;
+}
+
+.efe-footer-title {
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    letter-spacing: 0.5px;
+}
+
+.efe-footer-link {
+    display: block;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 14px;
+    text-decoration: none;
+    padding: 8px 0;
+    transition: all 0.3s ease;
+}
+
+.efe-footer-link:hover {
+    color: white;
+    transform: translateX(4px);
+}
+
+.efe-footer-contact {
+    font-size: 14px;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* Redes sociales */
+.efe-footer-socials {
+    display: flex;
+    gap: 12px;
+}
+
+.efe-footer-social {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.efe-footer-social:hover {
+    background: white;
+    color: var(--color-primary);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.efe-footer-divider {
+    max-width: 1440px;
+    margin: 32px auto 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding-top: 20px;
+    text-align: center;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 1023px) {
+    .efe-footer {
+        padding: 48px 24px 30px;
+    }
+
+    .efe-footer-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 28px;
+    }
+}
+
+@media (max-width: 767px) {
+    .efe-footer {
+        padding: 40px 20px 30px;
+    }
+
+    .efe-footer-grid {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+
+    .efe-footer-title {
+        font-size: 14px;
+        margin-bottom: 14px;
+    }
+
+    .efe-footer-link {
+        font-size: 13px;
+        padding: 6px 0;
+    }
+
+    .efe-footer-contact {
+        font-size: 13px;
+    }
+
+    .efe-footer-social {
+        width: 44px;
+        height: 44px;
+    }
+}
