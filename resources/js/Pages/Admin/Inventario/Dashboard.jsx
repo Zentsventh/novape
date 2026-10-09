@@ -4,14 +4,7 @@ import AdminLayout from '../../../Layouts/AdminLayout';
 import RemoteSelect from '../../../Components/Admin/RemoteSelect';
 import {
     Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Tooltip,
-    Legend,
-    BarElement,
-    Filler
+    registerables
 } from 'chart.js';
 import { Bar, Line, Chart } from 'react-chartjs-2';
 import {
@@ -41,7 +34,7 @@ import {
     TrendingDown
 } from 'lucide-react';
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend, BarElement, Filler);
+ChartJS.register(...registerables);
 
 // Device / Category Vector Icon Helper
 function CategoryIcon({ name, className = 'w-6 h-6' }) {
