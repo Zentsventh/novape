@@ -64,7 +64,7 @@ class ChatbotKnowledgeTest extends TestCase
     {
         $path = tempnam(sys_get_temp_dir(), 'knowledge');
         $zip = new ZipArchive;
-        $zip->open($path, ZipArchive::OVERWRITE);
+        $zip->open($path, ZipArchive::CREATE | ZipArchive::OVERWRITE);
         $zip->addFromString('[Content_Types].xml', '<?xml version="1.0"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>');
         $zip->addFromString('word/document.xml', '<?xml version="1.0"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>Garantía de doce meses para refrigeradoras.</w:t></w:r></w:p></w:body></w:document>');
         $zip->close();

@@ -46,7 +46,15 @@ jobs:
       - run: node --test tests/Frontend/*.test.js
       - run: npm run build
       - name: Run tests
-        run: php artisan test --compact
+        run: |
+          set -o pipefail
+          php artisan test 2>&1 | tee test_output.log || {
+            echo "### PHPUnit Test Failures" >> $GITHUB_STEP_SUMMARY
+            echo '```text' >> $GITHUB_STEP_SUMMARY
+            tail -n 120 test_output.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            exit 1
+          }
       - run: php vendor/bin/phpstan analyse --memory-limit=1G --no-progress
         env:
           APP_ENV: testing
