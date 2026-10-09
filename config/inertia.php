@@ -1,6 +1,13 @@
 <?php
 
 return [
+    // Match the actual directory casing on the Linux server and CI runners.
+    'pages' => [
+        'ensure_pages_exist' => false,
+        'paths' => [resource_path('js/Pages')],
+        'extensions' => ['js', 'jsx'],
+    ],
+
     // Large admin responses should not be duplicated by the development recorder.
     // Enable explicitly when investigating an Inertia request locally.
     'devtools' => [
