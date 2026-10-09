@@ -69,6 +69,7 @@ class ProductoImagen extends Model
                     if (str_starts_with($candidate, '/storage/') && basename($candidate) === $filename
                         && $public->exists(ltrim(substr($candidate, 8), '/'))) return $candidate;
                 }
+                return '/images/product-unavailable.svg';
             }
             return $value;
         }

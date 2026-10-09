@@ -100,6 +100,16 @@ class CatalogQueryService
             })->filter(fn($m) => $m['nombre'] !== '')->values();
         });
 
+        // A backup may reference media files that were never included. Retain
+        // their database records, but keep unavailable local slides out of the carousel.
+        if (config('filesystems.default') !== 'azure') {
+            $banners = $banners->filter(function ($banner) {
+                $url = (string) ($banner->imagen_url ?? '');
+                return !str_starts_with($url, '/storage/')
+                    || is_file(storage_path('app/public/'.substr($url, 9)));
+            })->values();
+        }
+
         return [
             'categoriaProductos' => $categoriaProductos,
             'mejorSemana' => $mejorSemana,
