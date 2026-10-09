@@ -1,0 +1,147 @@
+name: Deploy Linux
+
+on:
+  workflow_run:
+    workflows: [Checks]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: novape-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment:
+      name: production
+      url: ${{ vars.DEPLOY_URL }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ vars.DEPLOY_USER }}
+      DEPLOY_PORT: ${{ vars.DEPLOY_PORT || '22' }}
+      DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
+      DEPLOY_URL: ${{ vars.DEPLOY_URL }}
+      DEPLOY_PHP_SERVICE: ${{ vars.DEPLOY_PHP_SERVICE || 'php8.3-fpm' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.DEPLOY_SHA }}
+          persist-credentials: false
+
+      - name: Skip commits superseded on main
+        id: current
+        shell: bash
+        run: |
+          latest="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq '.object.sha')"
+          if [[ "$latest" == "$DEPLOY_SHA" ]]; then
+            echo 'deploy=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'deploy=false' >> "$GITHUB_OUTPUT"
+            echo 'A newer commit exists on main; this deployment is skipped.'
+          fi
+
+      - uses: shivammathur/setup-php@v2
+        if: steps.current.outputs.deploy == 'true'
+        with:
+          php-version: '8.3'
+          extensions: bcmath, curl, dom, fileinfo, gd, intl, mbstring, openssl, pdo_mysql, pdo_sqlite, soap, sqlite3, xml, xmlreader, zip
+          tools: composer:v2
+          coverage: none
+
+      - uses: actions/setup-node@v4
+        if: steps.current.outputs.deploy == 'true'
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Verify manual deployments
+        if: steps.current.outputs.deploy == 'true' && github.event_name == 'workflow_dispatch'
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress
+          cp .env.example .env
+          php artisan key:generate
+          composer validate --strict
+          composer check-platform-reqs
+          php artisan test --compact
+          php vendor/bin/phpstan analyse --memory-limit=1G --no-progress
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+          SESSION_DRIVER: array
+          CACHE_STORE: array
+          MAIL_MAILER: array
+
+      - name: Build production dependencies and frontend
+        if: steps.current.outputs.deploy == 'true'
+        env:
+          VITE_APP_NAME: NOVAPE
+          VITE_REVERB_APP_KEY: ${{ vars.VITE_REVERB_APP_KEY }}
+          VITE_REVERB_HOST: ${{ vars.VITE_REVERB_HOST }}
+          VITE_REVERB_PORT: ${{ vars.VITE_REVERB_PORT }}
+          VITE_REVERB_SCHEME: ${{ vars.VITE_REVERB_SCHEME }}
+        run: |
+          composer install --no-dev --no-scripts --optimize-autoloader --no-interaction --prefer-dist --no-progress
+          npm ci
+          npm run build
+          mkdir -p "$RUNNER_TEMP/novape-release"
+          git archive HEAD | tar -x -C "$RUNNER_TEMP/novape-release"
+          cp -a vendor "$RUNNER_TEMP/novape-release/vendor"
+          cp -a public/build "$RUNNER_TEMP/novape-release/public/build"
+          tar -czf "$RUNNER_TEMP/novape-release.tar.gz" -C "$RUNNER_TEMP/novape-release" .
+
+      - name: Connect to the trusted server and deploy
+        if: steps.current.outputs.deploy == 'true'
+        env:
+          DEPLOY_PRIVATE_KEY: ${{ secrets.DEPLOY_PRIVATE_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        shell: bash
+        run: |
+          [[ "$DEPLOY_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$DEPLOY_HOST" =~ ^[a-zA-Z0-9.-]+$ ]]
+          [[ "$DEPLOY_USER" =~ ^[a-zA-Z0-9_-]+$ ]]
+          [[ "$DEPLOY_PORT" =~ ^[0-9]+$ ]]
+          [[ "$DEPLOY_PATH" =~ ^/[a-zA-Z0-9_/-]+$ && "$DEPLOY_PATH" != / ]]
+          [[ "$DEPLOY_PHP_SERVICE" =~ ^[a-zA-Z0-9@._-]+$ ]]
+          [[ "$DEPLOY_URL" =~ ^https?://[a-zA-Z0-9.:/-]+$ ]]
+          [[ -n "$DEPLOY_PRIVATE_KEY" && -n "$DEPLOY_KNOWN_HOSTS" ]]
+          latest="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq '.object.sha')"
+          if [[ "$latest" != "$DEPLOY_SHA" ]]; then
+            echo 'main changed during the build; skipping this deployment.'
+            exit 0
+          fi
+          ssh_directory="$RUNNER_TEMP/novape-ssh"
+          mkdir -m 700 "$ssh_directory"
+          printf '%s\n' "$DEPLOY_PRIVATE_KEY" > "$ssh_directory/key"
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$ssh_directory/known_hosts"
+          chmod 600 "$ssh_directory/key" "$ssh_directory/known_hosts"
+          printf '%s\n' \
+            'Host novape-deploy' \
+            "  HostName $DEPLOY_HOST" \
+            "  User $DEPLOY_USER" \
+            "  Port $DEPLOY_PORT" \
+            "  IdentityFile $ssh_directory/key" \
+            "  UserKnownHostsFile $ssh_directory/known_hosts" \
+            '  IdentitiesOnly yes' \
+            '  BatchMode yes' \
+            '  StrictHostKeyChecking yes' \
+            '  ConnectTimeout 15' > "$ssh_directory/config"
+          ssh -F "$ssh_directory/config" novape-deploy 'mkdir -p "$HOME/.cache/novape-deploy/uploads"'
+          scp -F "$ssh_directory/config" "$RUNNER_TEMP/novape-release.tar.gz" \
+            "novape-deploy:.cache/novape-deploy/uploads/$DEPLOY_SHA.tar.gz"
+          ssh -F "$ssh_directory/config" novape-deploy \
+            "bash -s -- '$DEPLOY_PATH' '$DEPLOY_SHA' '$DEPLOY_PHP_SERVICE' '$DEPLOY_URL'" \
+            < scripts/ci-deploy.sh

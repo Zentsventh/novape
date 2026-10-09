@@ -5,6 +5,13 @@ on:
   pull_request:
 
 jobs:
+  deployment:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash -n scripts/ci-deploy.sh && bash -n tests/Deployment/deploy.sh
+      - run: bash tests/Deployment/deploy.sh
+
   application:
     runs-on: ubuntu-latest
     strategy:
