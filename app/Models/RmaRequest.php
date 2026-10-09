@@ -10,8 +10,13 @@ class RmaRequest extends Model
 {
     public function getImagesAttribute($value): array
     {
-        $images = json_decode($value ?? '[]', true) ?: [];
-        return array_map(fn ($image, $index) => str_starts_with($image, 'private:')
+        $images = is_array($value) ? $value : json_decode((string) $value, true);
+        if (is_string($images)) {
+            $images = json_decode($images, true);
+        }
+        $images = is_array($images) ? $images : [];
+
+        return array_map(fn ($image, $index) => is_string($image) && str_starts_with($image, 'private:')
             ? route('rma.evidence', ['rmaId' => $this->id, 'index' => $index]) : $image,
             $images, array_keys($images));
     }
