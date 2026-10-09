@@ -84,6 +84,8 @@ jobs:
           SESSION_DRIVER: array
           CACHE_STORE: array
           MAIL_MAILER: array
+          QUEUE_CONNECTION: sync
+          BROADCAST_CONNECTION: log
 
       - name: Build production dependencies and frontend
         if: steps.current.outputs.deploy == 'true'
