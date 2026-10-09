@@ -37,13 +37,6 @@ class AdminAuthController extends Controller
 
             $request->session()->regenerate();
 
-            // Desloguear a este usuario de cualquier otra computadora/sesión activa
-            if (config('session.driver') === 'database') {
-                DB::table(config('session.table', 'sessions'))
-                    ->where('user_id', $user->id)
-                    ->where('id', '!=', $request->session()->getId())
-                    ->delete();
-            }
 
             if ($destination = $this->destination($user)) {
                 return redirect($destination);

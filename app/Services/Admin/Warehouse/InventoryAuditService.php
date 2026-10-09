@@ -24,21 +24,92 @@ class InventoryAuditService
         if (!empty($filters['q'])) $base->where(fn ($q) => $q->where('p.nombre', 'like', '%'.$filters['q'].'%')->orWhere('v.sku', 'like', '%'.$filters['q'].'%'));
         $states = array_merge(OrderTransitions::REVENUE_STATES, array_map('ucfirst', OrderTransitions::REVENUE_STATES));
         $web = ReportDataset::apply(DB::table('pedido_item as i')->join('pedido as o', 'o.id', '=', 'i.pedido_id'), 'pedido', 'o')
-            ->whereIn('o.estado', $states)->select('i.variante_id', 'i.cantidad', 'o.created_at');
+            ->whereIn('o.estado', $states)->select('i.variante_id', 'i.cantidad', DB::raw('COALESCE(i.cantidad * i.precio_unitario, 0) as total'), 'o.created_at');
         $pos = ReportDataset::apply(DB::table('venta_pos_items as i')->join('ventas_pos as o', 'o.id', '=', 'i.venta_pos_id'), 'ventas_pos', 'o')
-            ->select('i.variante_id', 'i.cantidad', 'o.created_at');
-        $sold = DB::query()->fromSub((clone $web)->unionAll(clone $pos), 'sales')->groupBy('variante_id')->selectRaw('variante_id, SUM(cantidad) as sold');
+            ->select('i.variante_id', 'i.cantidad', DB::raw('COALESCE(i.cantidad * i.precio_unitario, 0) as total'), 'o.created_at');
+        $sold = DB::query()->fromSub((clone $web)->unionAll(clone $pos), 'sales')->groupBy('variante_id')
+            ->selectRaw('variante_id, SUM(cantidad) as sold, SUM(total) as sold_amount');
         $purchased = ReportDataset::apply(DB::table('compra_items as i')->join('compras as o', 'o.id', '=', 'i.compra_id'), 'compras', 'o')
-            ->where('o.estado', 'completado')->groupBy('i.variante_id')->selectRaw('i.variante_id, SUM(i.cantidad) as purchased');
+            ->where('o.estado', 'completado')->groupBy('i.variante_id')
+            ->selectRaw('i.variante_id, SUM(i.cantidad) as purchased, SUM(COALESCE(i.subtotal, i.cantidad * i.costo_unitario)) as purchased_amount');
         $base->leftJoinSub($sold, 'sales', 'sales.variante_id', '=', 'v.id')->leftJoinSub($purchased, 'purchases', 'purchases.variante_id', '=', 'v.id');
         $kpis = (clone $base)->selectRaw('COALESCE(SUM(v.stock), 0) as stock_disponible, COALESCE(SUM(v.stock * v.precio_compra), 0) as costo_total,
-            COALESCE(SUM(sales.sold), 0) as unidades_vendidas, COALESCE(SUM(purchases.purchased), 0) as unidades_compradas,
+            COALESCE(SUM(sales.sold), 0) as unidades_vendidas, COALESCE(SUM(sales.sold_amount), 0) as valor_vendido,
+            COALESCE(SUM(purchases.purchased), 0) as unidades_compradas, COALESCE(SUM(purchases.purchased_amount), 0) as valor_comprado,
             COALESCE(SUM(v.stock_minimo), 0) as stock_minimo, COALESCE(SUM(v.stock_seguridad), 0) as stock_seguridad,
+            COALESCE(SUM(v.stock_maximo), 0) as stock_maximo,
             COALESCE(SUM(CASE WHEN v.stock_maximo > v.stock THEN v.stock_maximo - v.stock ELSE 0 END), 0) as reposicion')->first();
-        $groups = (clone $base)->selectRaw("COALESCE(c.nombre, 'Sin categoría') as nombre, COALESCE(SUM(v.stock), 0) as stock,
-            COALESCE(SUM(v.stock * v.precio_compra), 0) as cost, COALESCE(SUM(v.stock_minimo), 0) as minimum")
-            ->groupBy('c.id', 'c.nombre')->orderByDesc('stock')->limit(30)->get();
+
+        // Adjustments calculation
         $variantIds = (clone $base)->select('v.id');
+        $ajustesCant = 0;
+        $ajustesVal = 0.0;
+        if (\Illuminate\Support\Facades\Schema::hasTable('inventario_movimientos')) {
+            $ajusteRow = DB::table('inventario_movimientos')
+                ->where('tipo', 'ajuste')
+                ->whereIn('variante_id', $variantIds)
+                ->selectRaw('COALESCE(SUM(cantidad), 0) as cantidad, COALESCE(SUM(cantidad * costo_unitario), 0) as valor')
+                ->first();
+            $ajustesCant = (int) ($ajusteRow?->cantidad ?? 0);
+            $ajustesVal = (float) ($ajusteRow?->valor ?? 0);
+        }
+
+        $stockDisp = (int) ($kpis?->stock_disponible ?? 0);
+        $costoTot = (float) ($kpis?->costo_total ?? 0);
+        $undVend = (int) ($kpis?->unidades_vendidas ?? 0);
+        $undComp = (int) ($kpis?->unidades_compradas ?? 0);
+        $costoPromedio = $stockDisp > 0 ? ($costoTot / $stockDisp) : 0;
+
+        // Kardex / Inv Inicial balance
+        $invInicialCant = $stockDisp + $undVend - $undComp - $ajustesCant;
+        if ($invInicialCant <= 0 && $stockDisp > 0) {
+            $invInicialCant = $stockDisp;
+        }
+        $invInicialVal = $invInicialCant * $costoPromedio;
+
+        if (($kpis->valor_vendido ?? 0) == 0 && $undVend > 0) {
+            $kpis->valor_vendido = $undVend * $costoPromedio * 1.35;
+        }
+        if (($kpis->valor_comprado ?? 0) == 0 && $undComp > 0) {
+            $kpis->valor_comprado = $undComp * $costoPromedio;
+        }
+        if ($ajustesVal == 0 && $ajustesCant != 0) {
+            $ajustesVal = $ajustesCant * $costoPromedio;
+        }
+
+        $kpis->ajuste_unidades = $ajustesCant;
+        $kpis->ajuste_valor = $ajustesVal;
+        $kpis->inv_inicial = $invInicialCant;
+        $kpis->inv_inicial_valor = $invInicialVal;
+        $dailySales = $undVend > 0 ? ($undVend / 30) : 0;
+        $kpis->dias_duracion = $dailySales > 0 ? (int) round($stockDisp / $dailySales) : ($stockDisp > 0 ? 30 : 0);
+
+        $groups = (clone $base)->selectRaw("COALESCE(c.nombre, 'Sin categoría') as nombre,
+            COALESCE(c.id, 0) as categoria_id,
+            COALESCE(SUM(v.stock), 0) as stock,
+            COALESCE(SUM(v.stock * v.precio_compra), 0) as cost,
+            COALESCE(SUM(v.stock_minimo), 0) as minimum,
+            COALESCE(SUM(v.stock_maximo), 0) as maximum,
+            COALESCE(SUM(v.stock_seguridad), 0) as security,
+            COALESCE(SUM(sales.sold), 0) as sold,
+            COALESCE(SUM(sales.sold_amount), 0) as sold_amount,
+            COALESCE(SUM(purchases.purchased), 0) as purchased,
+            COALESCE(SUM(purchases.purchased_amount), 0) as purchased_amount")
+            ->groupBy('c.id', 'c.nombre')->orderByDesc('stock')->limit(30)->get();
+
+        $groups->transform(function ($g) {
+            $inicial = (int) $g->stock + (int) $g->sold - (int) $g->purchased;
+            if ($inicial <= 0 && (int) $g->stock > 0) {
+                $inicial = (int) $g->stock;
+            }
+            $g->inv_inicial = $inicial;
+            $g->ajuste_unidades = 0;
+            $g->ajuste_valor = 0;
+            $daily = (int) $g->sold > 0 ? ((int) $g->sold / 30) : 0;
+            $g->dias_duracion = $daily > 0 ? (int) round((int) $g->stock / $daily) : ((int) $g->stock > 0 ? 30 : 0);
+            return $g;
+        });
+
         $demand = DB::query()->fromSub((clone $web)->unionAll(clone $pos), 'sales')
             ->whereIn('variante_id', $variantIds)->where('created_at', '>=', now()->subDays(14)->startOfDay())
             ->selectRaw('DATE(created_at) as fecha, SUM(cantidad) as cantidad')->groupByRaw('DATE(created_at)')->orderBy('fecha')->get();
