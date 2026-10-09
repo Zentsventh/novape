@@ -60,6 +60,8 @@ docs/
 *.sql
 *.sql.gz
 *.sql.gz.enc
+/*.tar
+/*.tar.gz
 /tmp/
 
 # Reviewed project documentation

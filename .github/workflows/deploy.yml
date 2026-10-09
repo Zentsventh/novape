@@ -75,6 +75,8 @@ jobs:
           php artisan key:generate
           composer validate --strict
           composer check-platform-reqs
+          npm ci
+          npm run build
           php artisan test --compact
           php vendor/bin/phpstan analyse --memory-limit=1G --no-progress
         env:

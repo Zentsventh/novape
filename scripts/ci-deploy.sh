@@ -45,7 +45,7 @@ rollback() {
     trap - ERR
     set +e
     printf 'Deployment failed. Restoring code from %s\n' "$backup" >&2
-    rsync -a --no-owner --no-group --delete --exclude-from="$exclusions" "$backup/" "$project_dir/"
+    rsync -a --checksum --no-owner --no-group --delete --exclude-from="$exclusions" "$backup/" "$project_dir/"
     clear_bootstrap_cache
     cd "$project_dir"
     php artisan package:discover --ansi
@@ -59,7 +59,7 @@ rollback() {
 trap rollback ERR
 cd "$project_dir"
 php artisan down --retry=15
-rsync -a --no-owner --no-group --delete --exclude-from="$exclusions" "$stage/" "$project_dir/"
+rsync -a --checksum --no-owner --no-group --delete --exclude-from="$exclusions" "$stage/" "$project_dir/"
 clear_bootstrap_cache
 php artisan package:discover --ansi
 php artisan config:cache

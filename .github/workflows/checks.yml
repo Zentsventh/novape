@@ -42,6 +42,8 @@ jobs:
       - run: cp .env.example .env && php artisan key:generate
       - run: composer validate --strict
       - run: composer check-platform-reqs
+      - run: npm ci
+      - run: npm run build
       - run: php artisan test --compact
       - run: php vendor/bin/phpstan analyse --memory-limit=1G --no-progress
         env:
@@ -50,5 +52,3 @@ jobs:
           DB_DATABASE: ':memory:'
           CACHE_STORE: array
           SESSION_DRIVER: array
-      - run: npm ci
-      - run: npm run build
